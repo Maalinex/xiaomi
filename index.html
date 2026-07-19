@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.24</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.25</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.24</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.25</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -6418,6 +6418,7 @@ function bizMenuHTML(){
   // 7️⃣ مدیریت عملکرد
   h+=sec('🎖️ مدیریت عملکرد',
     it('perfdash','🎖️ داشبورد عملکرد',"go('perfdash')",canSee('perfscore')&&canView('perfdash'))
+    +it('aligndash','🧭 همسویی عملکرد ↔ استراتژی/فرآیند',"go('aligndash')",canSee('perfscore')&&canView('aligndash'))
     +it('ctrldash','🎛 داشبرد کنترلی (شاخص‌ها)',"go('ctrldash')",(canSee('invoice')||canSee('product'))&&canView('ctrldash'))
     +ent('perfkpi')+ent('perfscore')+ent('kpival')+ent('ctrlval')+ent('mdef'));
   // 📁 بخش‌های سفارشی که کاربر در این گروه گذاشته
@@ -6555,6 +6556,7 @@ function render(){
     view.type==='portdash'?'🏦 پورتفوی پروژه‌ها':
     view.type==='tokendash'?'🪙 داشبورد توکن':
     view.type==='perfdash'?'🎖️ داشبورد عملکرد':
+    view.type==='aligndash'?'🧭 همسویی عملکرد و استراتژی':
     view.type==='backupdash'?'💾 پشتیبان‌گیری و بازیابی':
     view.type==='agiledash'?'💻 داشبورد Agile':
     view.type==='salesdash'?'🧾 داشبورد فروش':
@@ -6578,7 +6580,7 @@ function render(){
     view.type==='rec'?(E[view.e].ic+' '+(recs[view.id].d.title||E[view.e].n)):
     E[view.e].ic+' '+E[view.e].n;
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',invdash:'invdash',procmap:'procmap',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',ctrldash:'ctrldash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',agiledash:'agiledash'};
+  const VG={me:'me',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',invdash:'invdash',procmap:'procmap',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',ctrldash:'ctrldash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -6617,6 +6619,7 @@ function render(){
     else if(view.type==='portdash')c.innerHTML=portdashHTML();
     else if(view.type==='tokendash')c.innerHTML=tokendashHTML();
     else if(view.type==='perfdash')c.innerHTML=perfdashHTML();
+    else if(view.type==='aligndash')c.innerHTML=aligndashHTML();
     else if(view.type==='backupdash')c.innerHTML=backupdashHTML();
     else if(view.type==='agiledash')c.innerHTML=agiledashHTML();
     else if(view.type==='salesdash')c.innerHTML=salesdashHTML();
@@ -8548,7 +8551,7 @@ function perfdashHTML(){
         <button class="btn gh sm" onclick="view.pfSel=null;render()">✕ بستن</button></div>
       ${e.items.length?`<div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">شاخص</th><th>دسته</th><th>واقعی</th><th>هدف</th><th>تحقق</th><th>وزن</th><th>سهم در امتیاز</th></tr></thead><tbody>
         ${e.items.sort((a,b)=>(b.ach||0)-(a.ach||0)).map(it=>{const contrib=e.wsum>0?Math.round(Math.min(it.ach,120)*it.w/e.wsum):0;return `<tr>
-          <td style="text-align:right">${esc(it.name)}${it.unit?` <span style="color:var(--tx2);font-size:10px">(${esc(it.unit)})</span>`:''}</td>
+          <td style="text-align:right">${esc(it.name)}${it.unit?` <span style="color:var(--tx2);font-size:10px">(${esc(it.unit)})</span>`:''}${it.kp?`<div style="margin-top:2px">${perfKpiLinks(it.kp)}</div>`:''}</td>
           <td>${esc(it.cat||'—')}</td>
           <td>${(it.actual||0).toLocaleString('fa-IR',{maximumFractionDigits:1})}</td>
           <td>${(it.target||0).toLocaleString('fa-IR',{maximumFractionDigits:1})}</td>
@@ -8563,6 +8566,89 @@ function perfdashHTML(){
   return h;
 }
 
+/* ===== 🧭 اتصال دوطرفهٔ عملکرد ↔ استراتژی (BSC) و فرآیندها ===== */
+function perfKpiAch(kpiId,per){ // میانگین درصد تحققِ همهٔ ثبت‌های یک شاخص عملکرد
+  const kp=recs[kpiId];if(!kp)return null;const dir=kp.d.dir||'بیشتر بهتر';
+  const achs=byE('perfscore').filter(s=>relIds(s,'kpi').includes(kpiId)&&(!per||per==='همه'||s.d.ptype===per))
+    .map(s=>perfAch(s.d.actual,s.d.target||kp.d.tdefault,dir)).filter(x=>x!=null);
+  return achs.length?Math.round(achs.reduce((a,b)=>a+Math.min(b,120),0)/achs.length):null;
+}
+function bscPerfKpis(objId){return byE('perfkpi').filter(k=>relIds(k,'bsc').includes(objId));}
+function bscPerfScore(objId,seen){ // امتیاز عملکردیِ رول‌شونده از شاخص‌های عملکردِ متصل + اهداف فرزند
+  seen=seen||new Set();if(seen.has(objId))return null;seen.add(objId);
+  const parts=[];
+  bscPerfKpis(objId).forEach(k=>{const a=perfKpiAch(k.id);if(a!=null)parts.push([a,+k.d.weight>0?+k.d.weight:1]);});
+  const self=recs[objId];if(self)bscKids(self).forEach(kid=>{const s=bscPerfScore(kid.id,seen);if(s!=null)parts.push([s,+kid.d.weight>0?+kid.d.weight:1]);});
+  if(!parts.length)return null;const W=parts.reduce((a,p)=>a+p[1],0);return Math.round(parts.reduce((a,p)=>a+p[0]*p[1],0)/(W||1));
+}
+function procPerfScore(procId){
+  const parts=byE('perfkpi').filter(k=>relIds(k,'process').includes(procId)).map(k=>[perfKpiAch(k.id),+k.d.weight>0?+k.d.weight:1]).filter(p=>p[0]!=null);
+  if(!parts.length)return null;const W=parts.reduce((a,p)=>a+p[1],0);return Math.round(parts.reduce((a,p)=>a+p[0]*p[1],0)/(W||1));
+}
+function perfKpiScorers(kpiId){ // چه کسانی/واحدهایی این شاخص را دارند
+  const names=new Set();
+  byE('perfscore').filter(s=>relIds(s,'kpi').includes(kpiId)).forEach(s=>{
+    ['person','orgu','biz','company'].forEach(k=>relIds(s,k).forEach(id=>{if(recs[id])names.add(recs[id].d.title||'');}));});
+  return [...names].filter(Boolean);
+}
+function perfKpiLinks(kp){ // برچسب‌های همسوییِ یک شاخص عملکرد (هدف استراتژیک/فرآیند)
+  if(!kp)return '';let t='';
+  relIds(kp,'bsc').forEach(id=>{if(recs[id])t+=`<span class="tag" style="cursor:pointer;font-size:9.5px;background:rgba(120,140,255,.14)" onclick="event.stopPropagation();go('rec','bsc','${id}')">🎯 ${esc(recs[id].d.title||'هدف')}</span> `;});
+  relIds(kp,'process').forEach(id=>{if(recs[id])t+=`<span class="tag" style="cursor:pointer;font-size:9.5px;background:rgba(80,200,180,.14)" onclick="event.stopPropagation();go('rec','process','${id}')">🔁 ${esc(recs[id].d.title||'فرآیند')}</span> `;});
+  return t;
+}
+function aligndashHTML(){
+  view.alTab=view.alTab||'strat';
+  const tab=view.alTab;
+  const pc=v=>v==null?'var(--tx2)':v>=90?'#16c784':v>=70?'#9acd32':v>=50?'#f5a623':'#ff3b30';
+  const bar=(v)=>`<div style="height:8px;border-radius:5px;background:var(--bg3);overflow:hidden;min-width:90px"><div style="height:100%;width:${Math.min(100,v||0)}%;background:${pc(v)}"></div></div>`;
+  let h=`<div class="tools"><b style="font-size:13px">🧭 همسویی عملکرد ↔ استراتژی و فرآیند</b><span style="flex:1"></span>
+    <button class="btn gh sm" onclick="go('perfdash')">🎖️ داشبورد عملکرد</button></div>
+  <div style="display:flex;gap:6px;margin-bottom:10px">
+    <button class="btn ${tab==='strat'?'':'gh'} sm" onclick="view.alTab='strat';view.alSel=null;render()">⚖️ نقشهٔ استراتژی (BSC)</button>
+    <button class="btn ${tab==='proc'?'':'gh'} sm" onclick="view.alTab='proc';view.alSel=null;render()">🔁 فرآیندها</button></div>`;
+  if(tab==='strat'){
+    const PERSP=['مالی','مشتری','فرآیندهای داخلی','یادگیری و رشد'];
+    const objs=byE('bsc').filter(x=>x.d.kind!=='استراتژی کلان');
+    if(!objs.length)h+=`<div class="empty">هنوز هدف استراتژیکی در «استراتژی و اهداف (BSC)» تعریف نشده. بعد از تعریف، در فرم «شاخص عملکرد» فیلد «🎯 هدف استراتژیک مرتبط» را وصل کن تا اینجا زنده شود.</div>`;
+    PERSP.forEach(ps=>{const list=objs.filter(o=>o.d.persp===ps);if(!list.length)return;
+      h+=`<div class="sec"><div style="font-weight:800;font-size:13px;margin-bottom:6px">منظر: ${ps}</div>`;
+      list.forEach(o=>{const perf=bscPerfScore(o.id);let overall=0;try{overall=Math.round(bscProg(o));}catch(e){}
+        const kpis=bscPerfKpis(o.id);const on=view.alSel===o.id;
+        h+=`<div style="border:1px solid ${on?'var(--ac)':'var(--line)'};border-radius:10px;padding:9px 11px;margin-bottom:6px;cursor:pointer" onclick="view.alSel=${on?'null':`'${o.id}'`};render()">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <b style="flex:1;font-size:12.5px">🎯 ${esc(o.d.title||'هدف')}</b>
+            <span style="font-size:10.5px;color:var(--tx2)">عملکرد شاخص‌ها</span><b style="color:${pc(perf)};min-width:34px;text-align:center">${perf==null?'—':perf.toLocaleString('fa-IR')+'٪'}</b>${bar(perf)}
+            <span style="font-size:10.5px;color:var(--tx2)">پیشرفت کل</span><b style="color:${pc(overall)};min-width:34px;text-align:center">${overall.toLocaleString('fa-IR')}٪</b>
+            <span style="font-size:10px;color:var(--ac)">${kpis.length.toLocaleString('fa-IR')} شاخص ${kpis.length?'▾':''}</span></div>`;
+        if(on){
+          h+=kpis.length?`<div class="tblwrap" style="margin-top:8px"><table style="font-size:11px"><thead><tr><th style="text-align:right">شاخص عملکرد</th><th>تحقق</th><th>وزن</th><th>مجریان (فرد/واحد)</th><th>فرآیند</th></tr></thead><tbody>
+            ${kpis.map(k=>{const a=perfKpiAch(k.id);const proc=relIds(k,'process').map(id=>recs[id]&&recs[id].d.title).filter(Boolean).join('، ');
+              return `<tr><td style="text-align:right cursor:pointer"><span style="cursor:pointer;color:var(--ac)" onclick="event.stopPropagation();go('rec','perfkpi','${k.id}')">${esc(k.d.title||'—')}</span></td>
+              <td style="text-align:center"><b style="color:${pc(a)}">${a==null?'—':a.toLocaleString('fa-IR')+'٪'}</b></td>
+              <td style="text-align:center">${(+k.d.weight||1).toLocaleString('fa-IR')}</td>
+              <td style="text-align:center">${esc(perfKpiScorers(k.id).slice(0,4).join('، ')||'—')}</td>
+              <td style="text-align:center">${esc(proc||'—')}</td></tr>`;}).join('')}
+            </tbody></table></div>`:'<div style="font-size:11px;color:var(--tx2);margin-top:6px">هنوز شاخص عملکردی به این هدف وصل نشده. در فرم «شاخص عملکرد» فیلد «🎯 هدف استراتژیک» را روی این هدف بگذار.</div>';
+          h+=`<div style="margin-top:6px"><button class="btn gh sm" onclick="event.stopPropagation();go('rec','bsc','${o.id}')">باز کردن هدف</button>
+            <button class="btn gh sm" onclick="event.stopPropagation();openRec('perfkpi',null,{k:'bsc',id:'${o.id}'})">➕ شاخص عملکرد متصل</button></div>`;
+        }
+        h+=`</div>`;});
+      h+=`</div>`;});
+  } else {
+    const procs=byE('process');
+    if(!procs.length)h+=`<div class="empty">فرآیندی در «فرآیندهای کاری (ISO)» تعریف نشده. بعد از تعریف، شاخص‌های عملکرد را با فیلد «🔁 فرآیند مرتبط» به آن وصل کن.</div>`;
+    else{h+=`<div class="sec"><div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">فرآیند</th><th>عملکرد شاخص‌ها</th><th>شاخص‌های متصل</th><th>مالک</th><th></th></tr></thead><tbody>
+      ${procs.map(p=>{const sc=procPerfScore(p.id);const ks=byE('perfkpi').filter(k=>relIds(k,'process').includes(p.id));const own=relIds(p,'owner')[0];
+        return `<tr><td style="text-align:right">🔁 ${esc(p.d.title||'—')}${p.d.code?` <span style="color:var(--tx2);font-size:10px">${esc(p.d.code)}</span>`:''}</td>
+          <td style="text-align:center"><b style="color:${pc(sc)}">${sc==null?'—':sc.toLocaleString('fa-IR')+'٪'}</b></td>
+          <td style="text-align:center">${ks.length?ks.map(k=>esc(k.d.title)).join('، '):'<span style="color:var(--tx2)">—</span>'}</td>
+          <td style="text-align:center">${own&&recs[own]?esc(recs[own].d.title):'—'}</td>
+          <td style="text-align:center"><button class="btn gh sm" style="padding:1px 8px" onclick="go('rec','process','${p.id}')">باز کن</button></td></tr>`;}).join('')}
+      </tbody></table></div><div style="font-size:10.5px;color:var(--tx2);margin-top:6px">«عملکرد شاخص‌ها» = میانگین وزنیِ درصد تحققِ شاخص‌های عملکردی که فیلد «🔁 فرآیند مرتبط»‌شان به این فرآیند وصل است.</div></div>`;}
+  }
+  return h;
+}
 /* ===== 🪙 داشبورد توکن — نمای ناشر │ مالکان │ بانک │ بیمه │ اتصال پروژه ===== */
 function tokendashHTML(){
   const toks=byE('token');
