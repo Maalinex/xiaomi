@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.33</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.34</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.33</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.34</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1435,15 +1435,17 @@ waste:{ic:'🗑',n:'ضایعات کالا',grp:'مدیریت کسب و کار',f
  {k:'date',n:'تاریخ',t:DAT},
  {k:'note',n:'توضیح',t:LNG}],
  cols:['title','kind','product','qty','date'],comp:'wasteBrief'},
-pbudget:{ic:'🎛️',n:'بودجه دوره (خرید/هزینه)',grp:'مدیریت کسب و کار',f:[
- {k:'title',n:'عنوان (مثل: بودجه خرید هفته اول مرداد)',t:TXT},
+pbudget:{ic:'🎛️',n:'بودجه و کنترل بودجه',grp:'مدیریت کسب و کار',f:[
+ {k:'title',n:'عنوان بودجه (مثل: بودجه خرید تابستان، توسعه شعبه)',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
- {k:'kind',n:'نوع بودجه',t:SEL,o:['خرید کالا','هزینه عملیاتی']},
+ {k:'kind',n:'نوع بودجه',t:SEL,o:['خرید کالا','هزینه عملیاتی','بازاریابی و تبلیغات','توسعه کسب‌وکار','سرمایه‌ای (تجهیزات)','مطالبات و وصول','نقدینگی','سایر']},
+ {k:'cats',n:'سرفصل‌های هزینه (برای بودجهٔ هزینه‌ای — خالی = همه)',t:MUL,o:['حقوق و دستمزد','بیمه','پورسانت فروش','آموزش کارکنان','اجاره','پذیرایی','تعمیر و نگهداری','آب و برق','ملزومات و نوشت‌افزار','پست و تلفن','اداری و متفرقه','حمل و انبارداری','وانت و توزیع','تبلیغات و مارکتینگ','هزینه سایت و پلتفرم','گارانتی','هدایا','سفر و ماموریت','ضایعات','بسته‌بندی','کارمزد درگاه/مارکت‌پلیس','نرم‌افزار و اشتراک','استهلاک','مالی (بهره/کارمزد بانکی)']},
  {k:'from',n:'از تاریخ',t:DAT},
  {k:'to',n:'تا تاریخ',t:DAT},
  {k:'amount',n:'مبلغ مصوب (تومان)',t:NUM},
+ {k:'owner',n:'مسئول بودجه',t:REL,r:'hr',s:1},
  {k:'note',n:'توضیح',t:LNG}],
- cols:['title','biz','kind','amount','from','to']},
+ cols:['title','biz','kind','amount','from','to'],comp:'budgetBrief'},
 /* ================= 🏗️ EPCF — طراحی، خرید، اجرا، تامین مالی ================= */
 eproject:{ic:'🏗️',n:'پروژه EPCF',grp:'EPCF',f:[
  {k:'title',n:'نام پروژه',t:TXT},
@@ -5980,6 +5982,57 @@ function plmFallbackHTML(scope){ // بنر راهنما وقتی داده فاک
       <button class="btn gh sm" onclick="go('ctrldash')">🎛 داشبرد کنترلی</button>
       <button class="btn gh sm" onclick="view={type:'list',e:'plmonth'};render()">✏️ مشاهده و ویرایش داده‌ها</button></div></div>`;
 }
+/* ===== 🎛️ بودجه‌بندی و کنترل بودجه ===== */
+function budgetActual(bud){ // مصرفِ واقعیِ بودجه از دادهٔ واقعی
+  const biz=relIds(bud,'biz')[0]||'';const from=ds(bud.d.from)||'',to=ds(bud.d.to)||'';const kind=bud.d.kind;
+  const inP=d=>d&&(!from||d>=from)&&(!to||d<=to);
+  const bz=r=>!biz||relIds(r,'biz').includes(biz)||!relIds(r,'biz').length;
+  if(kind==='خرید کالا'){let t=0;
+    byE('purchase').forEach(x=>{if(x.d._pinv)return;if(!bz(x))return;if(!inP(ds(x.d.date)))return;t+=purchAmt(x);});
+    byE('purchinv').filter(v=>v.d.status!=='باطل').forEach(v=>{if(!bz(v))return;if(!inP(ds(v.d.date)))return;t+=pinvCalc(v).total;});
+    return t;}
+  if(kind==='مطالبات و وصول')return byE('settle').filter(s=>s.d.kind==='دریافت از مشتری'&&bz(s)&&inP(ds(s.d.date))).reduce((a,s)=>a+(+s.d.amount||0),0);
+  const cats=Array.isArray(bud.d.cats)?bud.d.cats:[];
+  const catMatch=c=>{if(!cats.length)return true;c=String(c||'');return cats.some(k=>c.includes(k)||k.includes(c));};
+  return byE('expense').filter(x=>bz(x)&&inP(ds(x.d.date))&&catMatch(x.d.cat)).reduce((a,x)=>a+(+x.d.amount||0),0);
+}
+function budgetStat(bud){const amt=+bud.d.amount||0;const act=budgetActual(bud);const pct=amt>0?Math.round(act/amt*100):0;
+  const collect=bud.d.kind==='مطالبات و وصول'; // برای وصول، بیشتر بهتر است
+  const st=collect?(pct>=100?'ok':pct>=70?'warn':'bad'):(pct<=85?'ok':pct<=100?'warn':'over');
+  return {amt,act,rem:amt-act,pct,st,collect};}
+function budgetBrief(bud){const s=budgetStat(bud);return {label:'مصرف / مصوب',v:money(s.act)+' / '+money(s.amt)+' ('+s.pct.toLocaleString('fa-IR')+'٪)',bad:s.st==='over'||s.st==='bad'};}
+window.budgetBrief=budgetBrief;
+function budgetSectionHTML(biz,compact){
+  const buds=byE('pbudget').filter(x=>!biz||relIds(x,'biz').includes(biz)||!relIds(x,'biz').length)
+    .sort((a,b)=>(ds(b.d.from)||'').localeCompare(ds(a.d.from)||''));
+  const col={ok:'#16c784',warn:'#f5a623',over:'#ff3b30',bad:'#ff3b30'};
+  const stTxt={ok:'✅ سالم',warn:'⚠️ نزدیک سقف',over:'⛔ تجاوز از بودجه',bad:'⚠️ عقب از هدف'};
+  const kicon=k=>({'خرید کالا':'📦','هزینه عملیاتی':'🧾','بازاریابی و تبلیغات':'📣','توسعه کسب‌وکار':'🚀','سرمایه‌ای (تجهیزات)':'🏗️','مطالبات و وصول':'📥','نقدینگی':'💧','سایر':'🎯'})[k]||'🎛️';
+  let head=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b style="flex:1;font-size:13px">🎛️ بودجه و کنترل بودجه</b>
+    ${can('c','pbudget')?`<button class="btn sm" onclick="openRec('pbudget'${biz?`,null,{k:'biz',id:'${biz}'}`:''})">➕ بودجهٔ جدید</button>`:''}</div>`;
+  if(!buds.length)return `<div class="sec">${head}<div class="empty">هنوز بودجه‌ای تعریف نشده. برای خرید، هزینه، بازاریابی، توسعه یا هر هدف دیگری بودجه بساز تا مصرف واقعی‌اش خودکار کنترل شود.</div></div>`;
+  const totA=buds.reduce((s,x)=>s+(+x.d.amount||0),0), totU=buds.reduce((s,x)=>s+budgetActual(x),0);
+  const rows=buds.map(bud=>{const s=budgetStat(bud);const c=col[s.st];const w=Math.min(100,s.pct);
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px">
+        <b style="flex:1">${kicon(bud.d.kind)} ${esc(bud.d.title||bud.d.kind)}</b>
+        <span style="color:var(--tx2);font-size:10.5px">${esc(bud.d.kind||'')} · ${esc(iso2jstr(ds(bud.d.from))||'—')} تا ${esc(iso2jstr(ds(bud.d.to))||'—')}</span>
+        <span style="color:${c};font-weight:800">${stTxt[s.st]}</span></div>
+      <div style="display:flex;font-size:11px;margin:5px 0 3px"><span style="flex:1;color:var(--tx2)">${s.collect?'وصول‌شده':'مصرف‌شده'}: <b style="color:var(--tx)">${money(s.act)}</b> از ${money(s.amt)}</span>
+        <span style="font-weight:800;color:${c}">${s.pct.toLocaleString('fa-IR')}٪</span>
+        <span style="margin-inline-start:10px;color:${s.rem<0?'var(--bad)':'var(--tx2)'}">${s.rem<0?'تجاوز':'مانده'}: ${money(Math.abs(s.rem))}</span></div>
+      <div style="height:9px;border-radius:5px;background:var(--bg3);overflow:hidden"><div style="height:100%;width:${w}%;background:${c}"></div></div>
+      ${can('e','pbudget')?`<div style="text-align:left;margin-top:4px"><button class="btn gh sm" style="padding:1px 8px;font-size:10px" onclick="openRec('pbudget','${bud.id}')">✏️ ویرایش</button></div>`:''}
+    </div>`;}).join('');
+  const overall=totA>0?Math.round(totU/totA*100):0;
+  return `<div class="sec">${head}
+    <div style="display:flex;gap:10px;font-size:12px;margin-bottom:8px;flex-wrap:wrap">
+      <div style="flex:1;min-width:150px;background:var(--bg3);border-radius:8px;padding:8px 10px">کل مصوب: <b>${money(totA)}</b></div>
+      <div style="flex:1;min-width:150px;background:var(--bg3);border-radius:8px;padding:8px 10px">کل مصرف/وصول: <b>${money(totU)}</b> (${overall.toLocaleString('fa-IR')}٪)</div>
+      <div style="flex:1;min-width:150px;background:var(--bg3);border-radius:8px;padding:8px 10px">${buds.filter(x=>budgetStat(x).st==='over').length.toLocaleString('fa-IR')} بودجه در تجاوز</div>
+    </div>${rows}
+    <div style="font-size:10px;color:var(--tx2);margin-top:4px">مصرف واقعی خودکار از داده محاسبه می‌شود: «خرید کالا» از خریدها، «مطالبات و وصول» از دریافت‌ها، و بودجه‌های هزینه‌ای از هزینه‌های ثبت‌شده (فیلترشده با سرفصل‌های انتخابی) در بازهٔ بودجه.</div></div>`;
+}
 function bizkpiHTML(){
   const b=gBiz();
   const sel=bizkpiSel(), wsel=bizWidSel();
@@ -5999,7 +6052,8 @@ function bizkpiHTML(){
   ${_fb}
   ${picker}
   ${cards?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">${cards}</div>`:'<div class="empty">هیچ شاخصی انتخاب نشده — از «⚙️ سفارشی‌سازی» انتخاب کن</div>'}
-  ${widgets?`<div style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">${widgets}</div>`:''}`;
+  ${widgets?`<div style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">${widgets}</div>`:''}
+  <div style="margin-top:12px">${budgetSectionHTML(b)}</div>`;
 }
 /* 📈 گزارش سود و زیان فروش */
 function plCalc(biz,from,to){
@@ -10774,7 +10828,7 @@ function finAddLine(){if(!isAdmin()){alert('فقط ادمین');return;}
   const m=recs[MO]||{id:MO,e:'_opts',d:{}};m.d={...m.d,_plx:[...finExtra(),{k,n,sec}]};m.u=Date.now();m.del=false;put(m);render();}
 window.finAddLine=finAddLine;
 function plToman(v,unit){return unit==='تومان'?v:v/10;} // مبنای اپ: تومان (ریال÷۱۰)
-function plCalc(v){v=v||{};const val=k=>+v[k]||0;const L=finLines();
+function plfinCalc(v){v=v||{};const val=k=>+v[k]||0;const L=finLines();
   let netSales=0,otherInc=0,cogs=0,opex=0,tax=0;
   L.forEach(l=>{const x=val(l.k);if(l.sec==='rev'){if(l.ns)netSales+=x;else otherInc+=x;}else if(l.sec==='cogs')cogs+=x;else if(l.sec==='opex')opex+=x;else if(l.sec==='tax')tax+=x;});
   const totalInc=netSales+otherInc, gross=totalInc-cogs, pbt=gross-opex, net=pbt-tax;
@@ -10782,7 +10836,7 @@ function plCalc(v){v=v||{};const val=k=>+v[k]||0;const L=finLines();
     grossPct:totalInc?gross/totalInc*100:0,netPct:totalInc?net/totalInc*100:0,opexPct:totalInc?opex/totalInc*100:0};
 }
 const FMON=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-function plfinBrief(r){const c=plCalc(r.d.v);const u=r.d.unit||'ریال';return {label:'سود خالص',v:money(plToman(c.net,u))+' · حاشیه '+Math.round(c.netPct).toLocaleString('fa-IR')+'٪',bad:c.net<0};}
+function plfinBrief(r){const c=plfinCalc(r.d.v);const u=r.d.unit||'ریال';return {label:'سود خالص',v:money(plToman(c.net,u))+' · حاشیه '+Math.round(c.netPct).toLocaleString('fa-IR')+'٪',bad:c.net<0};}
 window.plfinBrief=plfinBrief;
 function plfinRecs(biz,jy){return byE('plfin').filter(r=>(!biz||relIds(r,'biz').includes(biz))&&(!jy||+r.d.jy===jy));}
 function plYears(biz){const s=new Set();plfinRecs(biz).forEach(r=>{if(+r.d.jy)s.add(+r.d.jy);});return [...s].sort((a,b)=>a-b);}
@@ -10793,7 +10847,7 @@ function plAgg(biz,jy,jm){ // jm=ماه یا 'کل سال'
   let src=recs2;
   if(jm==='کل سال'&&!recs2.length){src=plfinRecs(biz,jy).filter(r=>r.d.jm==='کل سال');}
   const v={};src.forEach(r=>{const u=r.d.unit||'ریال';const vv=r.d.v||{};finLines().forEach(l=>{v[l.k]=(v[l.k]||0)+plToman(+vv[l.k]||0,u);});});
-  return {v,calc:plCalc(v),n:src.length};
+  return {v,calc:plfinCalc(v),n:src.length};
 }
 /* آبشار سود و زیان — ستون‌های شناور */
 function plWater(c){
@@ -10842,7 +10896,7 @@ function finNew(id){
   go('finform');
 }
 window.finNew=finNew;
-function finSetV(k,val){finDraft.v[k]=val===''?undefined:(+faNum(String(val)).replace(/[,،٬\s]/g,'')||0);document.getElementById('fin_tot').innerHTML=finTotHTML(plCalc(finDraft.v),finDraft.unit);}
+function finSetV(k,val){finDraft.v[k]=val===''?undefined:(+faNum(String(val)).replace(/[,،٬\s]/g,'')||0);document.getElementById('fin_tot').innerHTML=finTotHTML(plfinCalc(finDraft.v),finDraft.unit);}
 window.finSetV=finSetV;
 function finTotHTML(c,u){const row=(l,v,b,strong)=>`<div style="display:flex;padding:3px 0;${strong?'border-top:1px solid var(--line);font-weight:800':''}"><span style="flex:1;color:var(--tx2)">${l}</span><b style="color:${b?'var(--bad)':'var(--tx)'}">${money(plToman(v,u))}</b></div>`;
   return row('فروش خالص',c.netSales)+row('جمع کل درآمد',c.totalInc)+row('بهای تمام‌شده',c.cogs,true)+row('سود ناخالص ('+Math.round(c.grossPct).toLocaleString('fa-IR')+'٪)',c.gross,c.gross<0,true)+row('جمع هزینه‌ها',c.opex,true)+row('سود قبل مالیات',c.pbt,c.pbt<0,true)+row('مالیات',c.tax,true)+row('سود خالص ('+Math.round(c.netPct).toLocaleString('fa-IR')+'٪)',c.net,c.net<0,true);}
@@ -10871,10 +10925,10 @@ function finFormHTML(){
     <div><label ${lbl}>کسب‌وکار</label><select onchange="finDraft.biz=this.value"><option value="">—</option>${byE('business').map(x=>`<option value="${x.id}" ${x.id===d.biz?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></div>
     <div><label ${lbl}>سال شمسی</label><input inputmode="numeric" dir="ltr" value="${d.jy||''}" oninput="finDraft.jy=this.value" placeholder="1404"></div>
     <div><label ${lbl}>دوره</label><select onchange="finDraft.jm=this.value">${['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند','کل سال'].map(m=>`<option ${m===d.jm?'selected':''}>${m}</option>`).join('')}</select></div>
-    <div><label ${lbl}>واحد مبالغ</label><select onchange="finDraft.unit=this.value;document.getElementById('fin_tot').innerHTML=finTotHTML(plCalc(finDraft.v),this.value)"><option ${d.unit==='ریال'?'selected':''}>ریال</option><option ${d.unit==='تومان'?'selected':''}>تومان</option></select></div>
+    <div><label ${lbl}>واحد مبالغ</label><select onchange="finDraft.unit=this.value;document.getElementById('fin_tot').innerHTML=finTotHTML(plfinCalc(finDraft.v),this.value)"><option ${d.unit==='ریال'?'selected':''}>ریال</option><option ${d.unit==='تومان'?'selected':''}>تومان</option></select></div>
   </div>
   <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px"><div style="flex:2;min-width:280px">${body}</div>
-  <div style="flex:1;min-width:220px;position:sticky;top:0"><div style="font-weight:800;font-size:12.5px;margin:12px 0 6px">📊 محاسبهٔ زنده</div><div id="fin_tot" style="background:var(--bg3);border-radius:10px;padding:12px">${finTotHTML(plCalc(d.v),d.unit)}</div></div></div>
+  <div style="flex:1;min-width:220px;position:sticky;top:0"><div style="font-weight:800;font-size:12.5px;margin:12px 0 6px">📊 محاسبهٔ زنده</div><div id="fin_tot" style="background:var(--bg3);border-radius:10px;padding:12px">${finTotHTML(plfinCalc(d.v),d.unit)}</div></div></div>
   </div>`;
 }
 /* ===== کنترل مغایرت با سیستم (فروش) ===== */
