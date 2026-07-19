@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.13</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.14</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.13</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.14</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -4435,26 +4435,123 @@ function tgtNodeHTML(t,depth,seen){
   kids.forEach(k=>{h+=tgtNodeHTML(k,depth+1,seen);});
   return h;
 }
+/* ===== 🎯 داشبرد پایش تارگت‌ها — گیج‌های خودرویی + آبشاری چندسطحی ===== */
+const TG_SCOPES=[['','همه سطوح','🎯'],['هلدینگ','هلدینگ','🏦'],['شرکت','شرکت','🏢'],['کسب‌وکار','کسب‌وکار','🧢'],['واحد/تیم','واحد / تیم','🧩'],['فرد','فرد (فروشنده)','👤']];
+function tgScopeIcon(t){const s=t.d.scope;const f=TG_SCOPES.find(x=>x[0]===s);return f?f[2]:'🎯';}
+/* درصد تحقق یک نود: اگر هدف خودش تعریف شده از خودش، وگرنه از تجمیع آبشاری زیرمجموعه‌ها */
+function tgNodeStat(t){
+  const p=targetProgress(t);
+  let pa=p.pa,pq=p.pq,amount=p.amount,qty=p.qty,ta=+t.d.tamount||0,tq=+t.d.tqty||0,src='self';
+  const kids=targetChildren(t);
+  if(pa==null&&pq==null&&kids.length){const g=targetAgg(t);amount=g.amount;qty=g.qty;ta=g.tamount;tq=g.tqty;
+    pa=ta>0?Math.round(amount/ta*100):null;pq=tq>0?Math.round(qty/tq*100):null;src='agg';}
+  const arr=[pa,pq].filter(x=>x!=null);const ov=arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length):null;
+  return {pa,pq,ov,amount,qty,ta,tq,count:p.count,kids:kids.length,src};
+}
+function tgPeriodMatch(t,per){return !per||per==='همه'||t.d.ptype===per;}
+function tgBizOk(t){const b=gBiz();if(!b)return true;return relIds(t,'biz').includes(b)||relIds(t,'biz').length===0||targetChildren(t).some(k=>relIds(k,'biz').includes(b));}
 function targetdashHTML(){
   const ts=byE('saletarget');
   const bizzes=byE('business');
-  
-  const list=ts.filter(t=>!gBiz()||relIds(t,'biz').includes(gBiz())||targetChildren(t).length||relIds(t,'biz').length===0);
-  // ریشه‌های آبشار: تارگت‌هایی که والدشان در فهرست نیست
+  const metric=view.tgMetric||'combined'; // amount | qty | combined
+  const per=view.tgPer||'همه';
+  const lvl=view.tgLevel||'';
+  view.tgPath=view.tgPath||[];
+  // گیج خودرویی (بازسازی الگوی داشبرد کنترلی)
+  const gcol=p=>p==null?'var(--tx2)':p>=70?'#16c784':p>=40?'#f5a623':'#ff3b30';
+  const CX=95,CY=92,R1=70;
+  const pt=(a,r)=>[CX+r*Math.cos(Math.PI*(1-a/100)),CY-r*Math.sin(Math.PI*(1-a/100))];
+  const arc=(a1,a2,r,col,w)=>{const [x1,y1]=pt(a1,r),[x2,y2]=pt(a2,r);
+    return `<path d="M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${r} ${r} 0 ${a2-a1>50?1:0} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}" fill="none" stroke="${col}" stroke-width="${w||13}"/>`;};
+  const ticks=()=>{let t='';for(let a=0;a<=100;a+=5){const maj=a%25===0;
+    const [x1,y1]=pt(a,R1-9),[x2,y2]=pt(a,maj?R1-20:R1-15);
+    t+=`<line x1=${x1.toFixed(1)} y1=${y1.toFixed(1)} x2=${x2.toFixed(1)} y2=${y2.toFixed(1)} stroke="var(--tx2)" stroke-width="${maj?2.2:1}" opacity="${maj?.95:.55}"/>`;
+    if(maj){const [tx,ty]=pt(a,R1-30);t+=`<text x=${tx.toFixed(1)} y=${(ty+3.5).toFixed(1)} text-anchor=middle font-size=8.5 fill="var(--tx2)" font-weight="700">${a}</text>`;}}return t;};
+  const gaugeSvg=p=>{const ang=p==null?0:Math.max(0,Math.min(100,p));
+    const [tipX,tipY]=pt(ang,R1-13);
+    const [bL,bLy]=pt(ang>7?ang-7:ang+93,11),[bR,bRy]=pt(ang<93?ang+7:ang-93,11);
+    const [tailX,tailY]=pt(ang>=50?ang-50:ang+50,14);
+    return `<svg width=190 height=108 viewBox="0 0 190 108">
+      ${arc(0,100,R1,'color-mix(in srgb,var(--tx2) 18%,transparent)',13)}
+      ${arc(0,39,R1,'#ff3b30')}${arc(41,69,R1,'#f5a623')}${arc(71,100,R1,'#16c784')}
+      ${ticks()}
+      ${p!=null?`<polygon points="${tipX.toFixed(1)},${tipY.toFixed(1)} ${bL.toFixed(1)},${bLy.toFixed(1)} ${bR.toFixed(1)},${bRy.toFixed(1)}" fill="${gcol(p)}" stroke="rgba(0,0,0,.25)" stroke-width=".6"/><line x1=${CX} y1=${CY} x2=${tailX.toFixed(1)} y2=${tailY.toFixed(1)} stroke="${gcol(p)}" stroke-width="3" stroke-linecap="round"/>`:''}
+      <circle cx=${CX} cy=${CY} r=7 fill="${gcol(p)}" stroke="var(--cd)" stroke-width="2.5"/>
+      <text x=${CX} y=${CY-24} text-anchor=middle font-size=20 font-weight=900 fill="${gcol(p)}">${p==null?'—':Math.round(p).toLocaleString('fa-IR')}</text>
+    </svg>`;};
+  const tgGauge=t=>{const s=tgNodeStat(t);
+    const pct=metric==='amount'?s.pa:metric==='qty'?s.pq:s.ov;
+    const click=`view.tgPath=[...(view.tgPath||[]),'${t.id}'];render()`;
+    const drill=s.kids?`<div style="font-size:9.5px;color:var(--ac);margin-top:2px">▼ ${s.kids.toLocaleString('fa-IR')} زیرمجموعه — کلیک کن</div>`:'<div style="font-size:9.5px;color:var(--tx2);margin-top:2px">برگ (بدون زیرمجموعه)</div>';
+    const sub=metric==='qty'
+      ?`${(s.qty||0).toLocaleString('fa-IR')} / ${(s.tq||0).toLocaleString('fa-IR')} عدد`
+      :metric==='amount'?`${money(s.amount)} / ${money(s.ta)}`
+      :`مبلغی ${s.pa==null?'—':s.pa.toLocaleString('fa-IR')+'٪'} · تعدادی ${s.pq==null?'—':s.pq.toLocaleString('fa-IR')+'٪'}`;
+    return `<div onclick="${s.kids?click:''};event.stopPropagation()" style="cursor:${s.kids?'pointer':'default'};width:206px;text-align:center;background:var(--cd);border:1px solid var(--bd);border-radius:16px;padding:10px 6px 9px;box-shadow:0 2px 10px rgba(0,0,0,.12)">
+      ${gaugeSvg(pct)}
+      <div style="font-size:12.5px;font-weight:800;line-height:1.6">${tgScopeIcon(t)} ${esc(t.d.title||'تارگت')}</div>
+      <div style="font-size:10.5px;color:var(--tx2);margin-top:1px">${tgtScopeLabel(t)} · ${esc(t.d.ptype||'—')}${s.src==='agg'?' · <span style="color:var(--ac)">تجمیعی</span>':''}</div>
+      <div style="font-size:11px;color:var(--tx2);margin-top:2px">${sub}</div>
+      <div style="display:flex;gap:5px;justify-content:center;margin-top:5px">
+        <button class="btn gh sm" style="padding:2px 8px;font-size:10px" onclick="event.stopPropagation();go('rec','saletarget','${t.id}')">جزئیات</button></div>
+      ${drill}</div>`;};
+  // ناوبری آبشاری بر اساس والد/فرزند
   const idset=new Set(ts.map(x=>x.id));
-  const roots=ts.filter(t=>{const pr=relIds(t,'parent')[0];return !pr||!idset.has(pr);})
-    .filter(t=>!gBiz()||relIds(t,'biz').includes(gBiz())||relIds(t,'biz').length===0);
-  // هشدارها
+  let crumb=[['🎯 پایش تارگت‌ها',-1]],curNode=null;
+  view.tgPath.forEach((id,i)=>{if(recs[id]&&!recs[id].del){curNode=recs[id];crumb.push([esc(recs[id].d.title||'تارگت'),i]);}});
+  let nodes;
+  if(curNode){nodes=targetChildren(curNode);}
+  else{nodes=ts.filter(t=>{const pr=relIds(t,'parent')[0];return !pr||!idset.has(pr);});}
+  // فیلترها: سطح، دوره، کسب‌وکار
+  nodes=nodes.filter(t=>(!lvl||t.d.scope===lvl)&&tgPeriodMatch(t,per)&&tgBizOk(t));
+  // خلاصهٔ بالای صفحه (بر اساس نودهای فعلی)
+  let sumA=0,sumTA=0,sumQ=0,sumTQ=0,done=0,risk=0;
+  nodes.forEach(t=>{const s=tgNodeStat(t);sumA+=s.amount;sumTA+=s.ta;sumQ+=s.qty;sumTQ+=s.tq;
+    if(s.ov!=null&&s.ov>=100)done++;const pc=targetPace(t);if(pc!=null&&pc>0.5&&s.ov!=null&&s.ov<pc*100-10)risk++;});
+  const totPa=sumTA>0?Math.round(sumA/sumTA*100):null,totPq=sumTQ>0?Math.round(sumQ/sumTQ*100):null;
+  const totOv=[totPa,totPq].filter(x=>x!=null);const grand=totOv.length?Math.round(totOv.reduce((a,b)=>a+b,0)/totOv.length):null;
+  const grandPct=metric==='amount'?totPa:metric==='qty'?totPq:grand;
+  const chip=(v,c,active,lbl)=>`<button class="btn ${active?'':'gh'} sm" onclick="${c};render()" style="${active?'':'opacity:.75'}">${lbl}</button>`;
   const alerts=targetAlerts();
-  const alertBox=alerts.length?`<div style="margin-bottom:10px">${alerts.map(a=>`<div class="sec" style="border:1px solid ${a.kind==='done'?'var(--ok)':'var(--warn)'};padding:9px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
-    <span style="flex:1">${esc(a.msg)}</span>
-    <button class="btn gh sm" onclick="go('rec','saletarget','${a.t.id}')">مشاهده</button></div>`).join('')}</div>`:'';
-  const seen=new Set();
-  const cards=roots.length?roots.map(t=>tgtNodeHTML(t,0,seen)).join(''):'<div class="empty">هنوز تارگتی تعریف نشده است.</div>';
-  return `<div class="tools"><label style="margin:0">کسب‌وکار:</label>
-    <select onchange="setGBiz(this.value)" style="max-width:220px"><option value="">همه</option>${bizzes.map(b=>`<option value="${b.id}" ${b.id===gBiz()?'selected':''}>${esc(b.d.title)}</option>`).join('')}</select>
-    <span style="flex:1"></span>${can('c','saletarget')?`<button class="btn sm" onclick="openRec('saletarget')">🎯 تارگت جدید</button>`:''}</div>
-  ${alertBox}${cards}`;
+  const alertBox=alerts.length?`<div style="margin:8px 0">${alerts.slice(0,4).map(a=>`<div class="sec" style="border:1px solid ${a.kind==='done'?'var(--ok)':'var(--warn)'};padding:8px 11px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+    <span style="flex:1;font-size:12.5px">${esc(a.msg)}</span>
+    <button class="btn gh sm" onclick="go('rec','saletarget','${a.t.id}')">مشاهده</button></div>`).join('')}${alerts.length>4?`<div style="font-size:11px;color:var(--tx2);text-align:center">و ${(alerts.length-4).toLocaleString('fa-IR')} هشدار دیگر…</div>`:''}</div>`:'';
+  let h=`<div class="sec"><h3>🎯 پایش تارگت‌ها <span style="flex:1"></span>
+    <select class="inp sm" style="width:auto" onchange="setGBiz(this.value)"><option value="">همه کسب‌وکارها</option>${bizzes.map(b=>`<option value="${b.id}" ${b.id===gBiz()?'selected':''}>${esc(b.d.title)}</option>`).join('')}</select>
+    ${can('c','saletarget')?`<button class="btn sm" onclick="openRec('saletarget')">🎯 تارگت جدید</button>`:''}</h3>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+      <span style="font-size:11px;color:var(--tx2)">شاخص:</span>
+      ${chip(0,"view.tgMetric='combined'",metric==='combined','ترکیبی')}
+      ${chip(0,"view.tgMetric='amount'",metric==='amount','💰 مبلغی')}
+      ${chip(0,"view.tgMetric='qty'",metric==='qty','📦 تعدادی')}
+      <span style="width:10px"></span><span style="font-size:11px;color:var(--tx2)">دوره:</span>
+      <select class="inp sm" style="width:auto" onchange="view.tgPer=this.value;render()">${['همه','روزانه','هفتگی','ماهانه','فصلی','سالانه'].map(x=>`<option ${x===per?'selected':''}>${x}</option>`).join('')}</select>
+      <span style="width:6px"></span><span style="font-size:11px;color:var(--tx2)">سطح:</span>
+      <select class="inp sm" style="width:auto" onchange="view.tgLevel=this.value;view.tgPath=[];render()">${TG_SCOPES.map(x=>`<option value="${x[0]}" ${x[0]===lvl?'selected':''}>${x[2]} ${x[1]}</option>`).join('')}</select>
+    </div>
+    <div style="font-size:11.5px;margin-bottom:6px">${crumb.map(([n,i],j)=>`<span style="cursor:pointer;color:${j===crumb.length-1?'var(--tx)':'var(--ac)'};font-weight:${j===crumb.length-1?'800':'400'}" onclick="view.tgPath=(view.tgPath||[]).slice(0,${i+1});render()">${n}</span>`).join(' <span style="opacity:.5">◄</span> ')}</div>`;
+  // نوار خلاصه
+  if(nodes.length){h+=`<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin-bottom:6px">
+    <div style="flex:1;min-width:170px;background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:10px 12px">
+      <div style="font-size:11px;color:var(--tx2)">تحقق کلی (${metric==='amount'?'مبلغی':metric==='qty'?'تعدادی':'ترکیبی'})</div>
+      <div style="font-size:26px;font-weight:900;color:${gcol(grandPct)}">${grandPct==null?'—':grandPct.toLocaleString('fa-IR')+'٪'}</div>
+      <div style="font-size:11px;color:var(--tx2)">${money(sumA)} از ${money(sumTA)}</div></div>
+    <div style="flex:1;min-width:150px;background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:10px 12px">
+      <div style="font-size:11px;color:var(--tx2)">تعدادی</div>
+      <div style="font-size:20px;font-weight:800">${(sumQ||0).toLocaleString('fa-IR')} <span style="font-size:12px;color:var(--tx2)">/ ${(sumTQ||0).toLocaleString('fa-IR')}</span></div>
+      <div style="font-size:11px;color:${totPq==null?'var(--tx2)':gcol(totPq)}">${totPq==null?'—':totPq.toLocaleString('fa-IR')+'٪ تعدادی'}</div></div>
+    <div style="flex:1;min-width:150px;background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:10px 12px">
+      <div style="font-size:11px;color:var(--tx2)">وضعیت ${nodes.length.toLocaleString('fa-IR')} تارگت این سطح</div>
+      <div style="font-size:15px;font-weight:800;margin-top:4px"><span style="color:#16c784">✓ ${done.toLocaleString('fa-IR')} محقق</span> · <span style="color:#ff3b30">⚠️ ${risk.toLocaleString('fa-IR')} عقب</span></div>
+      <div style="font-size:11px;color:var(--tx2)">${(nodes.length-done-risk).toLocaleString('fa-IR')} در مسیر</div></div>
+  </div>`;}
+  h+=alertBox;
+  if(!ts.length){h+='<div class="empty">هنوز تارگتی تعریف نشده است — «🎯 تارگت جدید» را بزن. برای آبشار، تارگت زیرمجموعه را با «تارگت والد» به تارگت بالادست وصل کن.</div>';}
+  else if(!nodes.length){h+=`<div class="empty">در این سطح/فیلتر تارگتی نیست.${curNode?' این تارگت زیرمجموعه‌ای ندارد.':''}</div>`;}
+  else{h+=`<div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:4px">${nodes.map(tgGauge).join('')}</div>
+    <div style="font-size:10.5px;color:var(--tx2);margin-top:12px;text-align:center">عقربه = درصد تحقق نسبت به هدف │ سبز ≥۷۰ زرد ۴۰–۷۰ قرمز <۴۰ │ کارت‌های دارای زیرمجموعه کلیک‌پذیرند و به‌صورت آبشاری باز می‌شوند │ سطح والد به‌صورت تجمیعی از زیرمجموعه‌ها محاسبه می‌شود</div>`;}
+  h+=`</div>`;
+  return h;
 }
 /* سازنده‌ی فاکتور — چند ردیفه، مثل دستیار سند */
 let invDraft=null;
@@ -6181,7 +6278,6 @@ function bizMenuHTML(){
   h+=sec('💼 مدیریت فروش',
     it('smdash','📈 داشبورد فروش',"go('smdash')",canSee('invoice')&&canView('smdash'))
     +it('invnew','🧾 صدور فاکتور فروش',"invDraft=null;go('invnew')",canSee('invoice')&&can('c','invoice')&&canView('invnew'))
-    +it('salesdash','📊 داشبورد فروش (کلاسیک)',"go('salesdash')",canSee('invoice')&&canView('salesdash'))
     +it('plreport','💰 سود و زیان فروش',"go('plreport')",canSee('invoice')&&canView('plreport'))
     +it('targetdash','🎯 پایش تارگت فروش',"go('targetdash')",canSee('saletarget')&&canView('targetdash'))
     +ent('invoice')+ent('sale')+ent('saletarget'));
