@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.01</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.02</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.01</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.02</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -580,7 +580,7 @@ bizcontract:{ic:'🏁',n:'قراردادهای تجاری',grp:'سازمان',f:
  {k:'party',n:'طرف قرارداد',t:REL,r:'crm'},
  {k:'project',n:'پروژه مرتبط',t:REL,r:'project'}],
  cols:['title','status','amount','us','party']},
-bank:{ic:'🏦',n:'حساب‌های بانکی',grp:'حسابداری',f:[
+bank:{ic:'🏦',n:'حساب‌های بانکی',grp:'سازمان',f:[
  {k:'title',n:'عنوان حساب',t:TXT},{k:'bank',n:'نام بانک',t:TXT},
  {k:'no',n:'شماره حساب',t:TXT},{k:'iban',n:'شماره شبا',t:TXT},
  {k:'kind',n:'نوع حساب',t:SEL,o:['جاری','کوتاه‌مدت','بلندمدت']},
@@ -596,7 +596,7 @@ tx:{ic:'💳',n:'تراکنش‌های مالی',sub:1,grp:'حسابداری',f:
  {k:'project',n:'پروژه مرتبط',t:REL,r:'project',s:1},
  {k:'budget',n:'بودجه مرتبط',t:REL,r:'budget',s:1}],
  cols:['title','kind','cat','amount','date','company']},
-budget:{ic:'💹',n:'بودجه‌ها',grp:'حسابداری',f:[
+budget:{ic:'💹',n:'بودجه‌ها',grp:'سازمان',f:[
  {k:'title',n:'عنوان بودجه',t:TXT},
  {k:'cat',n:'دسته',t:SEL,o:['فروش','خرید','حقوق','اجاره','خدمات','حق الزحمه','سایر']},
  {k:'year',n:'سال',t:SEL,o:['1404','1405','1406','1407']},
@@ -610,7 +610,7 @@ leave:{ic:'⛳',n:'مرخصی‌ها',grp:'سازمان',f:[
  {k:'range',n:'بازه',t:DAT},
  {k:'person',n:'فرد مرتبط',t:REL,r:'hr',s:1}],
  cols:['title','kind','status','range','person']},
-risk:{ic:'🤨',n:'مدیریت ریسک',grp:'حاکمیت',f:[
+risk:{ic:'🤨',n:'مدیریت ریسک',grp:'سازمان',f:[
  {k:'title',n:'عنوان ریسک',t:TXT},
  {k:'area',n:'حوزه',t:SEL,o:['بازار','رگولاتوری','فنی','نقدشوندگی','امنیت','نوسان نرخ ارز','ذینفعان']},
  {k:'prob',n:'احتمال وقوع',t:SEL,o:['قطعی','محتمل','ممکن','بعید','نادر']},
@@ -620,7 +620,7 @@ risk:{ic:'🤨',n:'مدیریت ریسک',grp:'حاکمیت',f:[
  {k:'company',n:'شرکت مرتبط',t:REL,r:'company'},
  {k:'business',n:'کسب‌وکار مرتبط',t:REL,r:'business'}],
  cols:['title','area','prob','impact','owner'],comp:'riskScore'},
-idea:{ic:'💡',n:'بانک ایده‌ها',grp:'حاکمیت',f:[
+idea:{ic:'💡',n:'بانک ایده‌ها',grp:'سازمان',f:[
  {k:'title',n:'عنوان ایده',t:TXT},{k:'desc',n:'شرح ایده',t:LNG},
  {k:'status',n:'وضعیت ارزیابی',t:SEL,o:['💭 خام','🔍 در حال ارزیابی','✅ تأیید شده','🚀 تبدیل به پروژه','❌ رد شده']},
  {k:'prio',n:'اولویت',t:SEL,o:PRIO},
@@ -1707,7 +1707,7 @@ aretro:{ic:'🔄',n:'رتروسپکتیو (اقدامات بهبود)',grp:'تو
  {k:'status',n:'وضعیت',t:SEL,o:['ثبت شد','در حال انجام','انجام شد']}],
  cols:['title','asprint','kind','owner','status']},
 };
-const GROUPS=['سازمان','مدیریت کسب و کار','حسابداری','فرآیندها (ISO)','EPCF','استراتژی و تعالی','حاکمیت'];
+const GROUPS=['سازمان','مدیریت کسب و کار','فرآیندها (ISO)','استراتژی و تعالی','حاکمیت'];
 const GROWTH=['growth','habit','win','plan','asset','area','note','book','booknote','course','reminder'];
 /* ================= 🧩 ساختار سفارشی: فیلدها و بخش‌های قابل تعریف توسط ادمین ================= */
 const E_BASE=JSON.parse(JSON.stringify(E)); // اسکیمای پایه — سفارشی‌ها موقع اجرا رویش سوار می‌شوند
@@ -5994,7 +5994,7 @@ function qkAttachDomain(d,e){
 function qkCommit(d,e){
   qkAttachDomain(d,e);
   const id=uid();const rec={id,e,d:Object.assign({_by:myEmail()},d),u:Date.now(),c:Date.now()};
-  put(rec);try{opsAutoPost(rec);}catch(err){}try{epcfAutoPost(rec);}catch(err){}
+  put(rec);
   qlog.unshift({ic:QOPS.find(o=>o.k===qd.op).ic,t:d.title,v:rec.d._amt||0,id,e});qlog=qlog.slice(0,20);
   return rec;
 }
@@ -10442,8 +10442,7 @@ function saveRec(){
   cur.u=Date.now();delete cur._new;
   const _saved=cur;
   put(cur);closeModal();
-  try{epcfAutoPost(_saved);}catch(e){} // 🏗️ اتصال خودکار حسابداری پروژه EPCF
-  try{opsAutoPost(_saved);}catch(e){} // 💼 سند خودکار عملیات عمومی (فاکتور/هزینه/دریافت‌وپرداخت)
+  // اتصال خودکار حسابداری در این بیلد غیرفعال است
 }
 /* 🗑 حذف گروهی — همه رکوردهای فیلترشده‌ی فعلیِ لیست را یکجا حذف می‌کند */
 function bulkDel(e){
