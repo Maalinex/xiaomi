@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.11</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.12</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.11</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.12</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -514,8 +514,18 @@ customer:{ic:'🛍️',n:'مشتریان کسب‌وکار',grp:'مدیریت ک
  {k:'address',n:'آدرس',t:LNG},
  {k:'city',n:'شهر',t:TXT},
  {k:'segment',n:'دسته‌بندی مشتری',t:SEL,o:['وفادار','معمولی','عمده (کلی)','تازه‌وارد','VIP','غیرفعال']},
+ {k:'gender',n:'جنسیت',t:SEL,o:['آقا','خانم','نامشخص']},
+ {k:'province',n:'استان',t:SEL,o:['آذربایجان شرقی','آذربایجان غربی','اردبیل','اصفهان','البرز','ایلام','بوشهر','تهران','چهارمحال و بختیاری','خراسان جنوبی','خراسان رضوی','خراسان شمالی','خوزستان','زنجان','سمنان','سیستان و بلوچستان','فارس','قزوین','قم','کردستان','کرمان','کرمانشاه','کهگیلویه و بویراحمد','گلستان','گیلان','لرستان','مازندران','مرکزی','هرمزگان','همدان','یزد']},
  {k:'balance',n:'مانده حساب (+ طلب / − بدهی)',t:NUM},
  {k:'lastbuy',n:'آخرین خرید',t:DAT},
+ {k:'returns',n:'تعداد کالای مرجوعی',t:NUM},
+ {k:'returnAmt',n:'مبلغ مرجوعی (تومان)',t:NUM},
+ {k:'inactiveReason',n:'علت عدم خرید (برای مشتری غیرفعال)',t:SEL,o:['قیمت بالا','کیفیت','رفتن به رقیب','خدمات پس از فروش','نیاز نداشت','دور بودن','نامشخص']},
+ {k:'satBuy',n:'رضایت از خرید (۰ تا ۱۰۰)',t:NUM},
+ {k:'satResp',n:'رضایت از پاسخگویی (۰ تا ۱۰۰)',t:NUM},
+ {k:'satSupport',n:'رضایت از پشتیبانی (۰ تا ۱۰۰)',t:NUM},
+ {k:'satShip',n:'رضایت از حمل و نقل (۰ تا ۱۰۰)',t:NUM},
+ {k:'satProduct',n:'رضایت از کارایی محصول (۰ تا ۱۰۰)',t:NUM},
  {k:'company',n:'شرکت مجری',t:REL,r:'company',s:1},
  {k:'note',n:'یادداشت',t:LNG}],
  cols:['title','code','mobile','city','segment'],comp:'custBrief'},
@@ -2503,7 +2513,7 @@ function modAutopostHTML(){
 }
 function drawModcfg(){if(view&&view.type==='modcfg')document.getElementById('content').innerHTML=modcfgHTML();}
 window.openModcfg=openModcfg;window.toggleModule=toggleModule;window.saveBrand=saveBrand;
-const VIEW_GRP={bizkpi:'مدیریت کسب و کار',bizdash:'مدیریت کسب و کار',ceodash:'مدیریت کسب و کار',ctrldash:'مدیریت کسب و کار',quickadd:'مدیریت کسب و کار',whdash:'مدیریت کسب و کار',pfdash:'مدیریت کسب و کار',salesdash:'مدیریت کسب و کار',invnew:'مدیریت کسب و کار',pinvnew:'مدیریت کسب و کار',targetdash:'مدیریت کسب و کار',settlenew:'مدیریت کسب و کار',arapdash:'مدیریت کسب و کار',cashdash:'مدیریت کسب و کار',plreport:'مدیریت کسب و کار',
+const VIEW_GRP={bizkpi:'مدیریت کسب و کار',bizdash:'مدیریت کسب و کار',ceodash:'مدیریت کسب و کار',ctrldash:'مدیریت کسب و کار',quickadd:'مدیریت کسب و کار',whdash:'مدیریت کسب و کار',custdash:'مدیریت کسب و کار',pfdash:'مدیریت کسب و کار',salesdash:'مدیریت کسب و کار',invnew:'مدیریت کسب و کار',pinvnew:'مدیریت کسب و کار',targetdash:'مدیریت کسب و کار',settlenew:'مدیریت کسب و کار',arapdash:'مدیریت کسب و کار',cashdash:'مدیریت کسب و کار',plreport:'مدیریت کسب و کار',
  gldash:'حسابداری',glnew:'حسابداری',chqdash:'حسابداری',
  findash:'مالی تخصصی (IFRS)',invdash:'سرمایه‌گذاری و ثروت',procmap:'فرآیندها (ISO)',
  epcfdash:'EPCF',portdash:'EPCF',perfdash:'EPCF',cdash:'ساخت و ساز',tokendash:'توکن‌سازی',agiledash:'توسعه نرم‌افزار',
@@ -6162,7 +6172,9 @@ function bizMenuHTML(){
     it('whdash','📦 داشبورد انبار',"go('whdash')",canSee('product')&&canView('whdash'))
     +ent('product')+ent('waste')+ent('channel'));
   // 3️⃣ مدیریت مشتریان
-  h+=sec('🛍️ مدیریت مشتریان',ent('customer'));
+  h+=sec('🛍️ مدیریت مشتریان',
+    it('custdash','🛍️ داشبورد مشتریان',"go('custdash')",canSee('customer')&&canView('custdash'))
+    +ent('customer'));
   // 4️⃣ مدیریت فروش
   h+=sec('💼 مدیریت فروش',
     it('invnew','🧾 صدور فاکتور فروش',"invDraft=null;go('invnew')",canSee('invoice')&&can('c','invoice')&&canView('invnew'))
@@ -6306,6 +6318,7 @@ function render(){
     view.type==='mbuilder'?'🧩 ساختارساز شاخص‌ها':
     view.type==='mydash'?'📐 داشبردساز من':
     view.type==='whdash'?'📦 داشبورد انبار':
+    view.type==='custdash'?'🛍️ داشبورد مشتریان':
     view.type==='quickadd'?'⚡ مرکز ثبت سریع':
     view.type==='pfdash'?'🔄 تسویه درگاه‌ها و پلتفرم‌ها':
     view.type==='epcfdash'?'🎛️ داشبورد EPCF':
@@ -6336,7 +6349,7 @@ function render(){
     view.type==='rec'?(E[view.e].ic+' '+(recs[view.id].d.title||E[view.e].n)):
     E[view.e].ic+' '+E[view.e].n;
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',invdash:'invdash',procmap:'procmap',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',ctrldash:'ctrldash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pfdash:'pfdash',epcfdash:'epcfdash',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',agiledash:'agiledash'};
+  const VG={me:'me',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',invdash:'invdash',procmap:'procmap',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',ctrldash:'ctrldash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',custdash:'custdash',pfdash:'pfdash',epcfdash:'epcfdash',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',agiledash:'agiledash'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -6364,6 +6377,7 @@ function render(){
     else if(view.type==='mbuilder')c.innerHTML=mbuilderHTML();
     else if(view.type==='mydash')c.innerHTML=mydashHTML();
     else if(view.type==='whdash')c.innerHTML=whdashHTML();
+    else if(view.type==='custdash')c.innerHTML=custdashHTML();
     else if(view.type==='quickadd')c.innerHTML=quickaddHTML();
     else if(view.type==='pfdash')c.innerHTML=pfdashHTML();
     else if(view.type==='epcfdash')c.innerHTML=epcfdashHTML();
@@ -6761,6 +6775,123 @@ function ctrldashHTML(){
   return h;
 }
 
+/* ===== 🛍️ داشبورد جامع مشتریان ===== */
+function custRefDate(biz){let mx='';byE('invoice').forEach(v=>{if(v.d.kind==='پیش‌فاکتور'||v.d.status==='باطل')return;if(biz&&!relIds(v,'biz').includes(biz))return;const d=ds(v.d.date);if(d&&d>mx)mx=d;});return mx||today();}
+function custStats(biz){
+  // خرید هر مشتری از فاکتورها
+  const byC={};
+  byE('invoice').forEach(v=>{if(v.d.kind==='پیش‌فاکتور'||v.d.status==='باطل')return;if(biz&&!relIds(v,'biz').includes(biz))return;
+    const cid=relIds(v,'customer')[0];if(!cid)return;const g=byC[cid]||(byC[cid]={total:0,orders:0,qty:0,disc:0,first:'',last:''});
+    const c=invCalc(v);g.total+=c.total;g.orders++;g.disc+=(+v.d.disc||0);
+    invLinesOf(v.id).forEach(l=>{g.qty+=(+l.d.qty||0);});
+    const d=ds(v.d.date);if(d){if(!g.first||d<g.first)g.first=d;if(d>g.last)g.last=d;}});
+  return byE('customer').filter(c=>!biz||relIds(c,'biz').includes(biz)).map(c=>{
+    const s=byC[c.id]||{total:0,orders:0,qty:0,disc:0,first:'',last:''};
+    return {c,...s,first:s.first||ds(c.d.lastbuy)||'',last:s.last||ds(c.d.lastbuy)||''};});
+}
+function custActiveSeries(biz,mode,metric){ // metric: 'cust'|'qty'|'amount'
+  const MN=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
+  const nowJ=g2j(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
+  let bounds=[]; // [fromIso,toIso,label]
+  const mkm=(y,m)=>{const f=_jgIso(y,m,1);const nx=m===12?_jgIso(y+1,1,1):_jgIso(y,m+1,1);return [f,_isoAdd(nx,-1),MN[m-1]+' '+String(y).slice(2)];};
+  if(mode==='m'){let y=nowJ[0],m=nowJ[1];for(let i=0;i<12;i++){bounds.unshift(mkm(y,m));m--;if(m<1){m=12;y--;}}}
+  else if(mode==='q'){let y=nowJ[0],q=Math.ceil(nowJ[1]/3);for(let i=0;i<8;i++){const sm=(q-1)*3+1;const f=_jgIso(y,sm,1);const em=q*3;const nx=em===12?_jgIso(y+1,1,1):_jgIso(y,em+1,1);bounds.unshift([f,_isoAdd(nx,-1),'فصل'+q+' '+String(y).slice(2)]);q--;if(q<1){q=4;y--;}}}
+  else {let y=nowJ[0];for(let i=0;i<5;i++){bounds.unshift([_jgIso(y,1,1),_jgIso(y,12,29),_faY(y)]);y--;}}
+  const invs=byE('invoice').filter(v=>v.d.kind!=='پیش‌فاکتور'&&v.d.status!=='باطل'&&(!biz||relIds(v,'biz').includes(biz)));
+  return bounds.map(([f,t,lab])=>{const set=new Set();let qty=0,amt=0;
+    invs.forEach(v=>{const d=ds(v.d.date);if(!d||d<f||d>t)return;const cid=relIds(v,'customer')[0];if(cid)set.add(cid);
+      amt+=invCalc(v).total;invLinesOf(v.id).forEach(l=>qty+=(+l.d.qty||0));});
+    return {l:lab,v:metric==='qty'?qty:metric==='amount'?amt:set.size};});
+}
+function custdashHTML(){
+  const bizzes=byE('business');const b=gBiz();
+  const st=custStats(b);
+  const ref=custRefDate(b);
+  const N=st.length;
+  const buyers=st.filter(x=>x.orders>0);
+  const repeat=st.filter(x=>x.orders>=2);
+  const withDisc=st.filter(x=>x.disc>0);
+  const totDisc=st.reduce((a,x)=>a+x.disc,0);
+  const returned=st.filter(x=>(+x.c.d.returns||0)>0||(+x.c.d.returnAmt||0)>0);
+  const inactive=buyers.filter(x=>x.last&&x.last<_isoAdd(ref,-180));
+  const money2=abbrN;
+  // رضایت
+  const satKeys=[['satBuy','خرید'],['satResp','پاسخگویی'],['satSupport','پشتیبانی'],['satShip','حمل و نقل'],['satProduct','کارایی محصول']];
+  const satAvg=k=>{const v=st.map(x=>+x.c.d[k]).filter(x=>!isNaN(x)&&x>0);return v.length?v.reduce((a,y)=>a+y,0)/v.length:null;};
+  const satAll=(()=>{const vs=satKeys.map(([k])=>satAvg(k)).filter(x=>x!=null);return vs.length?vs.reduce((a,y)=>a+y,0)/vs.length:null;})();
+  view.cdMode=view.cdMode||'m';view.cdMetric=view.cdMetric||'cust';
+  const card=(t,v,bad,sub)=>`<div class="sec" style="text-align:center;padding:13px 10px"><div style="font-size:11px;color:var(--tx2)">${t}</div><div style="font-size:18px;font-weight:800;margin-top:4px;color:${bad?'var(--bad)':'var(--tx)'}">${v}</div>${sub?`<div style="font-size:10px;color:var(--tx2);margin-top:3px">${sub}</div>`:''}</div>`;
+  const kcard=(key,t,v,bad,sub)=>{const on=view.cdCard===key;return `<div class="sec" style="text-align:center;padding:13px 10px;cursor:pointer;${on?'border:1px solid var(--ac)':''}" onclick="view.cdCard=${on?'null':`'${key}'`};view.cdQ='';view.cdProv='';render()">
+    <div style="font-size:11px;color:var(--tx2)">${t} ▾</div><div style="font-size:18px;font-weight:800;margin-top:4px;color:${bad?'var(--bad)':'var(--tx)'}">${v}</div>${sub?`<div style="font-size:10px;color:var(--tx2);margin-top:3px">${sub}</div>`:''}</div>`;};
+  let h=`<div class="tools"><b style="font-size:13px">🛍️ داشبورد مشتریان${b&&recs[b]?' — '+esc(recs[b].d.title):' (همه)'}</b>
+    <span style="flex:1"></span><select onchange="setGBiz(this.value)" style="max-width:180px"><option value="">همه کسب‌وکارها</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></div>`;
+  if(!N)return h+`<div class="empty">هنوز مشتری‌ای ثبت نشده — از «مدیریت مشتریان ← مشتریان کسب‌وکار» اضافه کن؛ شاخص‌ها از فاکتورهای فروش و پروفایل مشتری محاسبه می‌شوند.</div>`;
+  // 📈 نمودار مشتریان فعال ماهانه
+  const pts=custActiveSeries(b,view.cdMode,view.cdMetric);
+  const MODES=[['m','ماهیانه'],['q','فصلی'],['y','سالانه']];
+  const METS=[['cust','تعداد مشتری'],['qty','تعداد کالا'],['amount','مبلغ کل']];
+  h+=`<div class="sec"><h3>📈 مشتریان فعال در دوره <span style="flex:1"></span>
+    ${MODES.map(([k,n])=>`<button class="btn ${k===view.cdMode?'':'gh'} sm" onclick="view.cdMode='${k}';render()">${n}</button>`).join('')}
+    <span style="width:10px"></span>${METS.map(([k,n])=>`<button class="btn ${k===view.cdMetric?'':'gh'} sm" onclick="view.cdMetric='${k}';render()">${n}</button>`).join('')}</h3>
+    ${whAreaSVG(pts)}
+    <div style="font-size:10.5px;color:var(--tx2);margin-top:4px">${view.cdMetric==='cust'?'تعداد مشتریان یکتای دارای خرید':view.cdMetric==='qty'?'تعداد کل کالای فروخته‌شده':'مبلغ کل فروش'} در هر دوره</div></div>`;
+  // کارت‌ها
+  const topN=buyers.slice().sort((a,b2)=>b2.total-a.total);
+  h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">
+    ${kcard('count','👥 تعداد مشتریان',N.toLocaleString('fa-IR'),false,buyers.length.toLocaleString('fa-IR')+' دارای خرید')}
+    ${kcard('top','🏆 مشتریان برتر',topN.length?money2(topN[0].total):'—',false,'بیشترین خرید')}
+    ${kcard('gender','🚻 به تفکیک جنسیت',(()=>{const g={};st.forEach(x=>{const k=x.c.d.gender||'نامشخص';g[k]=(g[k]||0)+1;});return Object.keys(g).length+' گروه';})(),false,'کلیک=تفکیک')}
+    ${kcard('prov','🗺 به تفکیک استان',(()=>{const g={};st.forEach(x=>{if(x.c.d.province)g[x.c.d.province]=1;});return Object.keys(g).length+' استان';})(),false,'آبشاری تا شهر')}
+    ${kcard('disc','🎁 دریافت‌کنندگان تخفیف',withDisc.length.toLocaleString('fa-IR')+' نفر',false,'مبلغ کل: '+money2(totDisc))}
+    ${kcard('repeat','🔁 خرید تکراری',repeat.length.toLocaleString('fa-IR')+' نفر',false,'۲ خرید یا بیشتر')}
+    ${kcard('new','🆕 مشتریان جدید',(()=>{const win=view.cdMode;return buyers.filter(x=>x.first).length.toLocaleString('fa-IR');})(),false,'بر اساس اولین خرید')}
+    ${kcard('inactive','😴 غیرفعال بیش از ۶ ماه',inactive.length.toLocaleString('fa-IR')+' نفر',inactive.length>0,'آخرین خرید > ۱۸۰ روز')}
+    ${kcard('returns','↩️ مشتریان مرجوعی',returned.length.toLocaleString('fa-IR')+' نفر',returned.length>0,'کالای مرجوع‌شده')}
+    ${kcard('sat','😊 رضایت مشتریان',satAll==null?'—':Math.round(satAll)+'٪',satAll!=null&&satAll<60,'کلیک=زیرشاخه‌ها')}
+  </div>`;
+  // جزئیات آبشاری
+  const K=view.cdCard;
+  const cn=x=>esc(x.c.d.title||'—');
+  const q=(view.cdQ||'').trim().toLowerCase();
+  const searchBox=`<input data-search="cdq" value="${esc(view.cdQ||'')}" placeholder="🔍 جستجوی مشتری…" oninput="view.cdQ=this.value;clearTimeout(window._cdT);window._cdT=setTimeout(render,200)" style="margin-bottom:8px;width:100%;max-width:320px">`;
+  const filt=arr=>q?arr.filter(x=>(x.c.d.title||'').toLowerCase().includes(q)||(x.c.d.mobile||'').includes(q)):arr;
+  const tbl=(title,rowsD,cols,withSearch)=>`<div class="sec"><h3>${title}</h3>${withSearch&&rowsD.length>8?searchBox:''}${rowsD.length?`<div class="tblwrap" style="max-height:360px;overflow:auto"><table><thead><tr>${cols.map(c=>`<th style="${c[2]||''}">${c[0]}</th>`).join('')}</tr></thead><tbody>${rowsD.slice(0,300).map(x=>`<tr style="cursor:pointer" onclick="closeModal&&closeModal();go('rec','customer','${x.c.id}')">${cols.map(c=>`<td style="${c[2]||''}">${c[1](x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>${rowsD.length>300?'<div style="font-size:11px;color:var(--tx2)">… '+(rowsD.length-300).toLocaleString('fa-IR')+' مورد دیگر</div>':''}`:'<div class="empty" style="padding:14px">موردی نیست</div>'}</div>`;
+  if(K==='count')h+=tbl('👥 همه مشتریان',filt(st.slice().sort((a,b2)=>b2.total-a.total)),
+    [['مشتری',cn,'text-align:right'],['موبایل',x=>esc(x.c.d.mobile||'—')],['شهر',x=>esc(x.c.d.city||'—')],['خرید کل',x=>money(x.total)],['تعداد خرید',x=>x.orders.toLocaleString('fa-IR')]],true);
+  else if(K==='top')h+=tbl('🏆 مشتریان برتر (بیشترین خرید)',filt(topN),
+    [['#',(x)=>String(topN.indexOf(x)+1)],['مشتری',cn,'text-align:right'],['خرید کل',x=>`<b>${money(x.total)}</b>`],['تعداد خرید',x=>x.orders.toLocaleString('fa-IR')],['میانگین هر خرید',x=>x.orders?money(Math.round(x.total/x.orders)):'—']],true);
+  else if(K==='repeat')h+=tbl('🔁 مشتریان با خرید تکراری (بیشترین اول)',filt(repeat.slice().sort((a,b2)=>b2.total-a.total)),
+    [['مشتری',cn,'text-align:right'],['تعداد خرید',x=>`<b>${x.orders.toLocaleString('fa-IR')}</b>`],['خرید کل',x=>money(x.total)],['آخرین خرید',x=>x.last?esc(iso2jstr(x.last)):'—']],true);
+  else if(K==='disc')h+=tbl('🎁 مشتریان دریافت‌کننده تخفیف',filt(withDisc.slice().sort((a,b2)=>b2.disc-a.disc)),
+    [['مشتری',cn,'text-align:right'],['مبلغ تخفیف',x=>`<b style="color:var(--bad)">${money(x.disc)}</b>`],['خرید کل',x=>money(x.total)],['٪ تخفیف',x=>x.total+x.disc>0?(x.disc/(x.total+x.disc)*100).toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪':'—']],true);
+  else if(K==='returns')h+=tbl('↩️ مشتریانی که کالا مرجوع کرده‌اند',filt(returned.slice().sort((a,b2)=>(+b2.c.d.returnAmt||0)-(+a.c.d.returnAmt||0))),
+    [['مشتری',cn,'text-align:right'],['تعداد مرجوعی',x=>(+x.c.d.returns||0).toLocaleString('fa-IR')],['مبلغ مرجوعی',x=>money(+x.c.d.returnAmt||0)],['خرید کل',x=>money(x.total)]],true);
+  else if(K==='inactive')h+=tbl('😴 مشتریان غیرفعال بیش از ۶ ماه',filt(inactive.slice().sort((a,b2)=>(a.last||'').localeCompare(b2.last||''))),
+    [['مشتری',cn,'text-align:right'],['شهر/استان',x=>esc((x.c.d.city||'—')+(x.c.d.province?' / '+x.c.d.province:''))],['آخرین خرید',x=>x.last?esc(iso2jstr(x.last)):'—'],['علت',x=>esc(x.c.d.inactiveReason||'ثبت نشده')],['خرید کل',x=>money(x.total)]],true);
+  else if(K==='gender'){const g={};st.forEach(x=>{const k=x.c.d.gender||'نامشخص';g[k]=(g[k]||0)+1;});const tot=N||1;
+    h+=`<div class="sec"><h3>🚻 مشتریان به تفکیک جنسیت</h3><div class="tblwrap"><table><tbody>${Object.entries(g).sort((a,b2)=>b2[1]-a[1]).map(([k,v])=>`<tr><td style="text-align:right">${esc(k)}</td><td>${v.toLocaleString('fa-IR')}</td><td><div style="height:12px;background:var(--ac);border-radius:4px;width:${(v/tot*100).toFixed(0)}%;min-width:8px"></div></td><td>${(v/tot*100).toLocaleString('fa-IR',{maximumFractionDigits:1})}٪</td></tr>`).join('')}</tbody></table></div></div>`;}
+  else if(K==='new'){const MN=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];const g={};
+    buyers.forEach(x=>{if(!x.first)return;const p=x.first.split('-').map(Number);const j=g2j(p[0],p[1],p[2]);let key;
+      if(view.cdMode==='y')key=_faY(j[0]);else if(view.cdMode==='q')key='فصل'+Math.ceil(j[1]/3)+' '+j[0];else key=MN[j[1]-1]+' '+j[0];
+      g[key]=(g[key]||0)+1;});
+    const ent2=Object.entries(g);
+    h+=`<div class="sec"><h3>🆕 مشتریان جدید (بر اساس اولین خرید) — ${view.cdMode==='y'?'سالانه':view.cdMode==='q'?'فصلی':'ماهانه'}</h3><div class="tblwrap"><table><thead><tr><th>دوره</th><th>مشتری جدید</th></tr></thead><tbody>${ent2.length?ent2.map(([k,v])=>`<tr><td style="text-align:right">${esc(k)}</td><td><b>${v.toLocaleString('fa-IR')}</b></td></tr>`).join(''):'<tr><td colspan=2 style="color:var(--tx2)">داده‌ای نیست</td></tr>'}</tbody></table></div><div style="font-size:10.5px;color:var(--tx2);margin-top:6px">دوره را با دکمه‌های بالای نمودار (ماهانه/فصلی/سالانه) عوض کن</div></div>`;}
+  else if(K==='prov'){
+    const gp={};st.forEach(x=>{const pv=x.c.d.province||'نامشخص';(gp[pv]||(gp[pv]={n:0,cities:{}}));gp[pv].n++;const ci=x.c.d.city||'نامشخص';gp[pv].cities[ci]=(gp[pv].cities[ci]||0)+1;});
+    const provs=Object.entries(gp).sort((a,b2)=>b2[1].n-a[1].n);
+    h+=`<div class="sec"><h3>🗺 مشتریان به تفکیک استان ${view.cdProv?'← '+esc(view.cdProv):''}</h3>`;
+    if(!view.cdProv){h+=`<div class="tblwrap"><table><tbody>${provs.map(([k,o])=>`<tr style="cursor:pointer" onclick="view.cdProv='${k.replace(/'/g,"\\'")}';render()"><td style="text-align:right">🗺 ${esc(k)}</td><td>${o.n.toLocaleString('fa-IR')} مشتری</td><td style="color:var(--ac)">شهرها ▾</td></tr>`).join('')}</tbody></table></div>`;}
+    else{const o=gp[view.cdProv]||{cities:{}};h+=`<div style="margin-bottom:8px"><button class="btn gh sm" onclick="view.cdProv='';render()">→ بازگشت به استان‌ها</button></div>
+      <div class="tblwrap"><table><thead><tr><th>شهر</th><th>تعداد مشتری</th></tr></thead><tbody>${Object.entries(o.cities).sort((a,b2)=>b2[1]-a[1]).map(([c,v])=>`<tr><td style="text-align:right">${esc(c)}</td><td>${v.toLocaleString('fa-IR')}</td></tr>`).join('')}</tbody></table></div>`;}
+    h+=`</div>`;}
+  else if(K==='sat'){
+    h+=`<div class="sec"><h3>😊 رضایت مشتریان — زیرشاخه‌ها</h3><div class="tblwrap"><table><thead><tr><th>حوزه</th><th>میانگین رضایت</th><th></th></tr></thead><tbody>
+      ${satKeys.map(([k,n])=>{const a=satAvg(k);const col=a==null?'var(--tx2)':a>=75?'var(--ok)':a>=50?'#f5a623':'var(--bad)';
+        return `<tr><td style="text-align:right">${esc(n)}</td><td style="color:${col};font-weight:800">${a==null?'ثبت نشده':Math.round(a)+'٪'}</td><td><div style="height:12px;background:${col};border-radius:4px;width:${a==null?0:Math.round(a)}%;min-width:2px"></div></td></tr>`;}).join('')}
+      <tr style="font-weight:800;background:rgba(255,255,255,.03)"><td style="text-align:right">میانگین کل</td><td>${satAll==null?'—':Math.round(satAll)+'٪'}</td><td></td></tr>
+    </tbody></table></div><div style="font-size:10.5px;color:var(--tx2);margin-top:6px">رضایت‌ها را در پروفایل هر مشتری (فیلدهای رضایت ۰ تا ۱۰۰) ثبت کن.</div></div>`;}
+  return h;
+}
 /* ===== 📦 داشبورد جامع انبار ===== */
 function whUnitCost(p){const f=fifoCalc(p);return f.avg||p.d.buy||0;}
 function whRefDate(biz){ // تاریخ مرجع = جدیدترین رویداد داده (خرید/فروش) — نه ساعت سرور
