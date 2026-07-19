@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.08</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.09</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.08</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.09</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1341,6 +1341,17 @@ widdef:{ic:'🧱',n:'ویجت داشبرد',grp:'مدیریت کسب و کار',
  {k:'size',n:'اندازه',t:SEL,o:['کوچک','متوسط','بزرگ']},
  {k:'ord',n:'ترتیب (عدد کوچکتر جلوتر)',t:NUM}],
  cols:['title','dash','wtype','src']},
+waste:{ic:'🗑',n:'ضایعات کالا',grp:'مدیریت کسب و کار',f:[
+ {k:'title',n:'شرح (مثل: خرابی ۵ گوشی در انبار)',t:TXT},
+ {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
+ {k:'kind',n:'نوع رویداد',t:SEL,o:['ثبت ضایعات (خروج از انبار)','فروش/بازیافت ضایعات']},
+ {k:'product',n:'کالا',t:REL,r:'product',s:1},
+ {k:'qty',n:'تعداد',t:NUM},
+ {k:'recover',n:'مبلغ فروش/بازیافت (تومان) — فقط برای نوع فروش',t:NUM},
+ {k:'reason',n:'علت',t:SEL,o:['خرابی/آسیب فیزیکی','شکستگی','آب‌دیدگی','انقضا','افت کیفیت','سرقت/مفقودی','سایر']},
+ {k:'date',n:'تاریخ',t:DAT},
+ {k:'note',n:'توضیح',t:LNG}],
+ cols:['title','kind','product','qty','date'],comp:'wasteBrief'},
 pbudget:{ic:'🎛️',n:'بودجه دوره (خرید/هزینه)',grp:'مدیریت کسب و کار',f:[
  {k:'title',n:'عنوان (مثل: بودجه خرید هفته اول مرداد)',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
@@ -1987,6 +1998,7 @@ function _patchCaches(old,rec){
   }
   const e=rec.e,eo=old&&old.e,hit=x=>e===x||eo===x;
   if(hit('sale')){_prodSaleIdx=null;_fifoCache=null;_ceoLineCache=null;_ceoDayCache=null;}
+  if(hit('waste')){_prodWasteIdx=null;_fifoCache=null;}
   if(hit('purchase')){_prodPurchIdx=null;_fifoCache=null;}
   if(hit('invoice')||hit('invline')){_invLineIdx=null;_ceoLineCache=null;_ceoDayCache=null;}
   if(hit('purchinv')||hit('purchline')){_pinvLineIdx=null;}
@@ -1995,7 +2007,7 @@ function _patchCaches(old,rec){
 let _scoping=false;
 /* 🐎 ایندکس رکوردها بر اساس نوع — یک‌بار ساخته می‌شود و در هر رندر تازه می‌شود (سرعت روی داده‌ی حجیم) */
 let _byRaw=null;
-function invalidateByE(){_byRaw=null;_invLineIdx=null;_pinvLineIdx=null;_prodSaleIdx=null;_prodPurchIdx=null;_ceoLineCache=null;_fifoCache=null;_ceoDayCache=null;}
+function invalidateByE(){_byRaw=null;_invLineIdx=null;_pinvLineIdx=null;_prodSaleIdx=null;_prodPurchIdx=null;_prodWasteIdx=null;_ceoLineCache=null;_fifoCache=null;_ceoDayCache=null;}
 let _fifoCache=null,_ceoDayCache=null;
 /* 🐎 ایندکس فروش/خرید به تفکیک کالا — رفع O(n²) در stockNow/fifoCalc روی داده حجیم */
 let _prodSaleIdx=null,_prodPurchIdx=null,_ceoLineCache=null;
@@ -2007,6 +2019,12 @@ function purchasesOf(pid){
   if(!_prodPurchIdx){_prodPurchIdx={};byE('purchase').forEach(x=>{const p=relIds(x,'product')[0];if(p)(_prodPurchIdx[p]||(_prodPurchIdx[p]=[])).push(x);});}
   return _prodPurchIdx[pid]||[];
 }
+let _prodWasteIdx=null;
+function wasteOf(pid){ // فقط «ثبت ضایعات (خروج)» — خروج از انبار
+  if(!_prodWasteIdx){_prodWasteIdx={};byE('waste').forEach(x=>{if((x.d.kind||'').indexOf('ثبت ضایعات')<0)return;const p=relIds(x,'product')[0];if(p)(_prodWasteIdx[p]||(_prodWasteIdx[p]=[])).push(x);});}
+  return _prodWasteIdx[pid]||[];
+}
+function wasteQtyOf(pid){return wasteOf(pid).reduce((a,x)=>a+(+x.d.qty||0),0);}
 function _rebuildByRaw(){_byRaw={};for(const id in recs){const r=recs[id];if(!r||r.del||!r.e)continue;if(!r.d||typeof r.d!=='object')r.d={};(_byRaw[r.e]||(_byRaw[r.e]=[])).push(r);}}
 function byE(e){
   if(!_byRaw)_rebuildByRaw();
@@ -2334,7 +2352,7 @@ const MODULES=[
  {id:'M12',n:'سرمایه‌گذاری و ثروت',ents:['valuation','feasproj','position'],views:['invdash']},
  {id:'M13',n:'فرآیندها (ISO)',ents:['process','procstep'],views:['procmap']},
  {id:'M14',n:'استراتژی و تعالی',ents:['bsc','measure','efqm'],views:['bscmap','bsccanvas']},
- {id:'M07',n:'فروش و فاکتور',ents:['invoice','invline','saletarget','settle','expense','pbudget','plmonth','gateway','pfsettle','kpival','ctrlval','mdef','mval','dashdef','widdef'],views:['salesdash','invnew','targetdash','settlenew','arapdash','cashdash','plreport','ceodash','ctrldash','mbuilder','mydash','pfdash']},
+ {id:'M07',n:'فروش و فاکتور',ents:['invoice','invline','saletarget','settle','expense','pbudget','plmonth','gateway','pfsettle','kpival','ctrlval','mdef','mval','dashdef','widdef','waste'],views:['salesdash','invnew','targetdash','settlenew','arapdash','cashdash','plreport','ceodash','ctrldash','mbuilder','mydash','pfdash']},
  {id:'M15',n:'کسب‌وکار ویژه (کالا / فروش)',ents:['product','sale','purchase','channel','purchinv','purchline'],views:['bizdash','pinvnew']},
  {id:'M17',n:'EPCF (طراحی│خرید│اجرا│تامین مالی)',ents:['eproject','ewbs','edoc','emr','econtract','eprog','esite','ehse','eclaim','einv','efin'],views:['epcfdash','portdash','perfdash']},
  {id:'M18',n:'ساخت و ساز (پروژه ساختمانی)',ents:['cblock','cboq','csub','csubinv','cmat','cquote','clabor','cmach','cpetty'],views:['cdash']},
@@ -3382,10 +3400,10 @@ function saleTotal(s){const a=saleAmt(s);const open=s.d.kind==='اعتباری'&
     v:money(a)+(pr!=null?' │ '+money(pr):''),bad:open||(pr!=null&&pr<0)};}
 function purchTotal(s){const a=purchAmt(s);const open=s.d.kind==='اعتباری'&&!s.d.settled;
   return{label:'مبلغ کل'+(open?' │ تسویه نشده':''),v:money(a),bad:open};}
-function stockNow(p){ // تعدادی: اول دوره + خرید − فروش (ایندکس‌شده)
+function stockNow(p){ // تعدادی: اول دوره + خرید − فروش − ضایعات
   const bought=purchasesOf(p.id).reduce((a,x)=>a+(x.d.qty||0),0);
   const sold=salesOf(p.id).reduce((a,x)=>a+(x.d.qty||0),0);
-  return (p.d.stock0||0)+bought-sold;
+  return (p.d.stock0||0)+bought-sold-wasteQtyOf(p.id);
 }
 /* --- موتور FIFO: ارزش انبار و بهای تمام‌شده/سود بر اساس لایه‌های خرید --- */
 function fifoCalc(p){
@@ -3419,10 +3437,17 @@ function _fifoCalcRaw(p){
       const pr=(s.d.qty||0)*(s.d.price||0)-(s.d.extra||0)-cost;
       bySale[s.id]=pr; profit+=pr;
     });
+  // 🗑 مصرف لایه‌ها بابت ضایعات (خروج از انبار) — پس از فروش‌ها
+  let wasteCost=0,wasteQ=0;
+  wasteOf(p.id).slice().sort((a,b)=>dkey(a).localeCompare(dkey(b))).forEach(w=>{
+    let need=+w.d.qty||0;wasteQ+=need;
+    while(need>0&&layers.length){const L=layers[0],take=Math.min(need,L.q);wasteCost+=take*L.c;L.q-=take;need-=take;if(L.q<=0)layers.shift();else lastCost=L.c;}
+    if(need>0)wasteCost+=need*lastCost;
+  });
   const value=layers.reduce((a,L)=>a+L.q*L.c,0);
   const qty=layers.reduce((a,L)=>a+L.q,0)-0;
   const oldestDate=layers.length?layers[0].d:''; // تاریخ قدیمی‌ترین جنسِ باقی‌مانده در انبار
-  return {value,profit,cogs,shortage,layerQty:qty,avg:qty>0?value/qty:lastCost,bySale,layers:layers.map(L=>({q:L.q,c:L.c,d:L.d})),oldestDate};
+  return {value,profit,cogs,shortage,layerQty:qty,avg:qty>0?value/qty:lastCost,bySale,layers:layers.map(L=>({q:L.q,c:L.c,d:L.d})),oldestDate,wasteCost,wasteQ};
 }
 function productProfit(p){return fifoCalc(p).profit;} // سود تحقق‌یافته FIFO
 function stockValue(p){return fifoCalc(p).value;}     // ارزش انبار FIFO
@@ -3433,6 +3458,12 @@ function productStat(p){
     bad:(p.d.minstock!=null&&st<p.d.minstock)||f.shortage>0};
 }
 window.saleTotal=saleTotal;window.purchTotal=purchTotal;window.productStat=productStat;
+function wasteBrief(r){const pid=relIds(r,'product')[0];const p=pid&&recs[pid];const q=+r.d.qty||0;
+  const isSale=(r.d.kind||'').indexOf('فروش')>=0;
+  if(isSale)return {label:'بازیافت',v:'💵 '+money(+r.d.recover||0)+(p?' ('+esc(p.d.title)+')':''),bad:false};
+  const cost=p?q*(+p.d.buy||0):0;
+  return {label:'تعداد │ ضرر (خرید)',v:q.toLocaleString('fa-IR')+' عدد │ '+money(cost)+(p?' — '+esc(p.d.title):''),bad:true};}
+window.wasteBrief=wasteBrief;
 /* ===== 🧾 موتور فاکتور فروش (M07) ===== */
 let _invLineIdx=null;
 function invLinesOf(invId){
@@ -5468,6 +5499,14 @@ function mydTplApply(k){
     invalidateByE();try{put(recs[id]);}catch(e){}});
   view.mdTpl=0;render();}
 window.mydTplApply=mydTplApply;
+function wasteNew(kind){
+  if(!can('c','waste')){alert('اجازه ثبت ندارید');return;}
+  const d={kind:kind==='sale'?'فروش/بازیافت ضایعات':'ثبت ضایعات (خروج از انبار)',date:{s:today()}};
+  if(gBiz())d.biz=[gBiz()];
+  openRec('waste',null,null);
+  if(cur){cur.d=Object.assign(cur.d,d);drawModal();}
+}
+window.wasteNew=wasteNew;
 window.mydNewDash=mydNewDash;window.mydNewWid=mydNewWid;window.mydEditWid=mydEditWid;window.mydSet=mydSet;window.mydSaveWid=mydSaveWid;window.mydFxAdd=mydFxAdd;
 window.mydRenDash=mydRenDash;window.mydGrpDash=mydGrpDash;window.mydDelDash=mydDelDash;window.mydMove=mydMove;window.mydSize=mydSize;window.mydHide=mydHide;
 
@@ -6114,7 +6153,7 @@ function bizMenuHTML(){
   // 2️⃣ مدیریت انبار
   h+=sec('📦 مدیریت انبار',
     it('whdash','📦 داشبورد انبار',"go('whdash')",canSee('product')&&canView('whdash'))
-    +ent('product')+ent('channel'));
+    +ent('product')+ent('waste')+ent('channel'));
   // 3️⃣ مدیریت مشتریان
   h+=sec('🛍️ مدیریت مشتریان',ent('customer'));
   // 4️⃣ مدیریت فروش
@@ -6718,7 +6757,7 @@ function whRows(biz){
     const f=fifoCalc(p);const st=stockNow(p);
     const sales=salesOf(p.id);
     let last='';sales.forEach(x=>{const d=ds(x.d.date);if(d&&d>last)last=d;});
-    const win=90;
+    const win=60;
     const soldWin=sales.filter(x=>{const d=ds(x.d.date);return d&&d>=_isoAdd(ref,-win);}).reduce((a,x)=>a+(+x.d.qty||0),0);
     const sold365=sales.filter(x=>{const d=ds(x.d.date);return d&&d>=_isoAdd(ref,-365);}).reduce((a,x)=>a+(+x.d.qty||0),0);
     const avgDaily=soldWin/win;
@@ -6831,6 +6870,15 @@ function whdashHTML(){
   const nowJ=g2j(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
   const waste=whExpSum(b,['ضایعات'],'','');
   const storeCost=whExpSum(b,['حمل و انبارداری','انبار','بسته‌بندی','وانت'],'','');
+  // 🗑 ضایعات کالا — تعدادی و ریالی، به قیمت خرید و قیمت فروش، خالص پس از بازیافت
+  const wByProd={};
+  byE('waste').forEach(w=>{if(b&&!relIds(w,'biz').includes(b))return;const pid=relIds(w,'product')[0];if(!pid)return;
+    const p=recs[pid];if(!p)return;const g=wByProd[pid]||(wByProd[pid]={p,qty:0,cost:0,sell:0,recover:0});
+    if((w.d.kind||'').indexOf('فروش')>=0){g.recover+=(+w.d.recover||0);}
+    else{const q=+w.d.qty||0;g.qty+=q;g.cost+=q*(+p.d.buy||0);g.sell+=q*(+p.d.sell||0);}});
+  const wArr=Object.values(wByProd).filter(x=>x.qty>0||x.recover>0);
+  const wTot={qty:0,cost:0,sell:0,recover:0};wArr.forEach(x=>{wTot.qty+=x.qty;wTot.cost+=x.cost;wTot.sell+=x.sell;wTot.recover+=x.recover;});
+  const wNet=wTot.cost-wTot.recover; // ضرر خالص (به بهای خرید) پس از بازیافت
   // فروش کل برای نسبت‌ها
   let saleYr=0;byE('invoice').forEach(v=>{if(v.d.kind==='پیش‌فاکتور'||v.d.status==='باطل')return;if(b&&!relIds(v,'biz').includes(b))return;saleYr+=invCalc(v).total;});
   byE('sale').forEach(x=>{if(x.d._inv)return;if(b&&!relIds(x,'biz').includes(b))return;saleYr+=saleAmt(x);});
@@ -6841,7 +6889,9 @@ function whdashHTML(){
   const pn=x=>esc(x.p.d.title||'—');
   let h=`<div class="tools"><b style="font-size:13px">📦 داشبورد انبار${b&&recs[b]?' — '+esc(recs[b].d.title):' (همه)'}</b>
     <span style="flex:1"></span>
-    <select onchange="setGBiz(this.value)" style="max-width:180px"><option value="">همه کسب‌وکارها</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></div>`;
+    <select onchange="setGBiz(this.value)" style="max-width:180px"><option value="">همه کسب‌وکارها</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select>
+    <button class="btn gh sm" onclick="wasteNew('out')">🗑 ثبت ضایعات</button>
+    <button class="btn gh sm" onclick="wasteNew('sale')">💵 فروش ضایعات</button></div>`;
   if(!rows.length){return h+`<div class="empty">هنوز کالایی در «مدیریت انبار ← کالا و خدمات» ثبت نشده — بعد از افزودن کالا و ثبت خرید/فروش، همه شاخص‌ها اینجا محاسبه می‌شوند.</div>`;}
   // نمودار ارزش انبار
   h+=`<div class="sec"><h3>📈 روند ارزش انبار <span style="flex:1"></span>
@@ -6853,14 +6903,36 @@ function whdashHTML(){
     ${card('💰 ارزش کل انبار (FIFO)',money(totVal))}
     ${card('📦 تعداد کل واحد',totQty.toLocaleString('fa-IR'),false,items.toLocaleString('fa-IR')+' قلم دارای موجودی')}
     ${card('🔄 نرخ گردش موجودی',turn.toLocaleString('fa-IR',{maximumFractionDigits:2})+'× در سال',turn<1&&totVal>0,'بهای فروش سالانه ÷ ارزش انبار')}
-    ${card('⏳ روز پوشش موجودی (تعدادی)',dio==null?'—':Math.round(dio).toLocaleString('fa-IR')+' روز',dio!=null&&dio>180,'موجودی تعدادی هر کالا ÷ میانگین فروش روزانه تعدادی (۹۰ روز اخیر)<br>میانگین وزنی همه کالاها'+(noSaleN?' │ '+noSaleN.toLocaleString('fa-IR')+' کالای بدون فروش اخیر (بی‌نهایت)':''))}
+    ${card('⏳ روز پوشش موجودی (تعدادی)',dio==null?'—':Math.round(dio).toLocaleString('fa-IR')+' روز',dio!=null&&dio>180,noSaleN?noSaleN.toLocaleString('fa-IR')+' کالای بدون فروش اخیر':'')}
     ${card('⚠️ زیر حداقل موجودی',low.length.toLocaleString('fa-IR')+' قلم',low.length>0,'نیازمند خرید')}
     ${card('🧊 موجودی راکد (>۶۰ روز ماندگاری)',money(deadVal),deadVal>0,deadPct.toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪ کل انبار │ '+dead.length.toLocaleString('fa-IR')+' قلم')}
     ${card('⛔ کسری (Stockout)',shortage.length.toLocaleString('fa-IR')+' قلم',shortage.length>0,'فروش بیش از موجودی')}
-    ${card('🗑 ضایعات (کل)',money(waste),waste>0,saleYr>0?(waste/saleYr*100).toLocaleString('fa-IR',{maximumFractionDigits:2})+'٪ فروش':'')}
+    <div class="sec" style="text-align:center;padding:13px 10px;cursor:pointer;${view.whWasteOpen?'border:1px solid var(--ac)':''}" onclick="view.whWasteOpen=!view.whWasteOpen;render()">
+      <div style="font-size:11px;color:var(--tx2)">🗑 ضرر خالص ضایعات کالا ▾</div>
+      <div style="font-size:18px;font-weight:800;margin-top:4px;color:${wNet>0?'var(--bad)':'var(--tx)'}">${money(wNet)}</div>
+      <div style="font-size:10px;color:var(--tx2);margin-top:3px">به قیمت خرید ${abbrN(wTot.cost)} │ به قیمت فروش ${abbrN(wTot.sell)}${wTot.recover?' │ بازیافت '+abbrN(wTot.recover):''}<br>${wTot.qty.toLocaleString('fa-IR')} عدد ضایع │ برای جزئیات کلیک کن</div></div>
     ${card('🏬 هزینه انبارداری (کل)',money(storeCost),false,saleYr>0?(storeCost/saleYr*100).toLocaleString('fa-IR',{maximumFractionDigits:2})+'٪ فروش':'')}
     ${card('💵 بهای تمام‌شده فروش‌رفته',money(totCogs))}
   </div>`;
+  // 🗑 جزئیات آبشاری ضایعات به تفکیک کالا (با کلیک روی کارت باز می‌شود)
+  if(view.whWasteOpen){
+    h+=`<div class="sec" style="border:1px solid var(--ac)"><h3>🗑 ضایعات به تفکیک کالا <span style="flex:1"></span>
+      <button class="btn gh sm" onclick="wasteNew('out')">＋ ثبت ضایعات</button>
+      <button class="btn gh sm" onclick="wasteNew('sale')">＋ فروش ضایعات</button>
+      <button class="btn gh sm" onclick="view.whWasteOpen=false;render()">✕ بستن</button></h3>`;
+    if(!wArr.length)h+=`<div class="empty">هنوز ضایعاتی ثبت نشده — با «🗑 ثبت ضایعات» یک خرابی/آسیب کالا را وارد کن.</div>`;
+    else{
+      h+=`<div class="tblwrap"><table><thead><tr><th style="text-align:right">کالا</th><th>تعداد ضایع</th><th>ضرر به قیمت خرید</th><th>ضرر به قیمت فروش</th><th>بازیافت (فروش ضایعات)</th><th>ضرر خالص</th></tr></thead><tbody>
+        ${wArr.sort((a,b)=>(b.cost-b.recover)-(a.cost-a.recover)).map(x=>{const net=x.cost-x.recover;
+          return `<tr style="cursor:pointer" onclick="setGBiz('${b||''}');view={type:'list',e:'waste'};render()"><td style="text-align:right">${esc(x.p.d.title||'—')}</td>
+            <td>${x.qty.toLocaleString('fa-IR')}</td><td>${money(x.cost)}</td><td>${money(x.sell)}</td>
+            <td style="color:var(--ok)">${x.recover?money(x.recover):'—'}</td>
+            <td style="font-weight:800;color:${net>0?'var(--bad)':'var(--ok)'}">${money(net)}</td></tr>`;}).join('')}
+        <tr style="font-weight:800;background:rgba(255,255,255,.03)"><td style="text-align:right">جمع</td><td>${wTot.qty.toLocaleString('fa-IR')}</td><td>${money(wTot.cost)}</td><td>${money(wTot.sell)}</td><td style="color:var(--ok)">${money(wTot.recover)}</td><td style="color:${wNet>0?'var(--bad)':'var(--ok)'}">${money(wNet)}</td></tr>
+      </tbody></table></div>
+      <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">ضرر خالص = ضرر به قیمت خرید − مبلغ فروش ضایعات. روی هر ردیف بزن تا رکوردهای ضایعات آن باز شود.</div>`;}
+    h+=`</div>`;
+  }
   // 🕰 تفکیک ارزش انبار بر اساس مدت ماندگاری (aging)
   const agTot=aging.reduce((a,x)=>a+x.val,0)||1;
   h+=`<div class="sec"><h3>🕰 ماندگاری موجودی — ارزش بر اساس مدت خواب جنس در انبار <span style="flex:1"></span><span style="font-size:10.5px;color:var(--tx2)">تاریخ مرجع: ${esc(iso2jstr(refD))}</span></h3>
@@ -6874,13 +6946,13 @@ function whdashHTML(){
   // ⏳ نزدیک‌ترین اقلام به اتمام (کمترین روز پوشش تعدادی)
   const coverList=rows.filter(x=>x.st>0&&x.avgDaily>0).sort((a,b)=>a.cover-b.cover);
   h+=tbl('⏳ نزدیک‌ترین اقلام به اتمام (کمترین روز پوشش)',coverList.slice(0,20),
-    [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['فروش روزانه (میانگین)',x=>x.avgDaily.toLocaleString('fa-IR',{maximumFractionDigits:2})],['روز پوشش',x=>`<b style="color:${x.cover<7?'var(--bad)':x.cover<21?'#f5a623':'var(--tx)'}">${x.cover>=999?'∞':Math.round(x.cover).toLocaleString('fa-IR')}</b>`]]);
+    [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['فروش روزانه (۶۰روز)',x=>x.avgDaily.toLocaleString('fa-IR',{maximumFractionDigits:2})],['روز پوشش',x=>`<b style="color:${x.cover<7?'var(--bad)':x.cover<21?'#f5a623':'var(--tx)'}">${x.cover>=999?'∞':Math.round(x.cover).toLocaleString('fa-IR')}</b>`]]);
   h+=tbl('⚠️ اقلام زیر حداقل موجودی (اولویت خرید)',low.sort((a,b)=>a.cover-b.cover),
     [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['حداقل',x=>(x.p.d.minstock||0).toLocaleString('fa-IR')],['فروش روزانه',x=>x.avgDaily.toLocaleString('fa-IR',{maximumFractionDigits:2})],['روز پوشش',x=>`<b style="color:var(--bad)">${x.cover>=999?'∞':Math.round(x.cover).toLocaleString('fa-IR')}</b>`]]);
   h+=tbl('🧊 موجودی راکد (بیش از ۶۰ روز ماندگاری)',dead.sort((a,b)=>b.ageDays-a.ageDays).slice(0,20),
     [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['ارزش خوابیده',x=>money(x.val)],['مدت ماندگاری',x=>`<b style="color:var(--bad)">${x.ageDays.toLocaleString('fa-IR')} روز</b>`],['آخرین فروش',x=>x.last?esc(iso2jstr(x.last)):'هرگز']]);
   h+=tbl('💎 بیشترین ارزش انبار',rows.filter(x=>x.st>0).sort((a,b)=>b.val-a.val).slice(0,20),
-    [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['بهای واحد',x=>money(x.avg)],['ارزش',x=>money(x.val)],['فروش ۹۰روز',x=>x.sold90.toLocaleString('fa-IR')],['روز پوشش',x=>x.avgDaily>0?(x.cover>=999?'∞':Math.round(x.cover).toLocaleString('fa-IR')):'∞']]);
+    [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['بهای واحد',x=>money(x.avg)],['ارزش',x=>money(x.val)],['فروش ۶۰روز',x=>x.sold90.toLocaleString('fa-IR')],['روز پوشش',x=>x.avgDaily>0?(x.cover>=999?'∞':Math.round(x.cover).toLocaleString('fa-IR')):'∞']]);
   return h;
 }
 function ceodashHTML(){
