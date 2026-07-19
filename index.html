@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.16</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.17</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.16</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.17</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -4590,22 +4590,22 @@ function tgBreakdownHTML(t){
   const bd=tgBreakdown(t);
   const tbl=(title,ic,rows,head)=>{
     const top=rows.slice(0,15);
-    if(!top.length)return `<div style="flex:1;min-width:225px"><div style="font-weight:800;font-size:12.5px;margin-bottom:5px">${ic} ${title}</div><div class="empty" style="padding:12px">داده‌ای نیست</div></div>`;
-    return `<div style="flex:1;min-width:225px">
-      <div style="font-weight:800;font-size:12.5px;margin-bottom:5px">${ic} ${title}</div>
-      <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">${head}</th><th>تعداد</th><th>مبلغ</th></tr></thead><tbody>
+    const tot=rows.reduce((a,r)=>({q:a.q+(r.qty||0),a:a.a+(r.amount||0)}),{q:0,a:0});
+    if(!top.length)return `<div style="margin-bottom:12px"><div style="font-weight:800;font-size:12.5px;margin-bottom:5px">${ic} ${title}</div><div class="empty" style="padding:12px">داده‌ای نیست</div></div>`;
+    return `<div style="margin-bottom:14px">
+      <div style="font-weight:800;font-size:12.5px;margin-bottom:5px">${ic} ${title} <span style="font-weight:400;color:var(--tx2);font-size:11px">(${rows.length.toLocaleString('fa-IR')} مورد)</span></div>
+      <div class="tblwrap"><table style="font-size:12px;width:100%"><thead><tr><th style="text-align:right">${head}</th><th style="width:110px">تعداد</th><th style="width:150px">مبلغ</th></tr></thead><tbody>
       ${top.map(r=>`<tr><td style="text-align:right">${esc(r.name)}</td><td style="text-align:center">${(r.qty||0).toLocaleString('fa-IR')}</td><td style="white-space:nowrap">${money(r.amount)}</td></tr>`).join('')}
+      <tr style="border-top:2px solid var(--line);font-weight:800"><td style="text-align:right">جمع</td><td style="text-align:center">${tot.q.toLocaleString('fa-IR')}</td><td style="white-space:nowrap">${money(tot.a)}</td></tr>
       </tbody></table></div></div>`;
   };
   return `<div class="sec" style="margin-top:12px;border:1px solid var(--ac)">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
       <b style="flex:1">🔍 تفکیک فروشِ «${esc(t.d.title||'')}» <span style="font-weight:400;color:var(--tx2);font-size:11px">(${tgtScopeLabel(t)} · ${esc(t.d.ptype||'')} · ${esc(iso2jstr(ds(t.d.from))||'—')} تا ${esc(iso2jstr(ds(t.d.to))||'—')})</span></b>
       <button class="btn gh sm" onclick="view.tgSel='';render()">✕ بستن</button></div>
-    <div style="display:flex;flex-wrap:wrap;gap:16px">
-      ${tbl('بر حسب کالا','📦',bd.byProduct,'کالا / خدمت')}
-      ${tbl('بر حسب مشتری','👥',bd.byCustomer,'مشتری')}
-      ${tbl('بر حسب فروشنده','🧑‍💼',bd.bySeller,'فروشنده')}
-    </div></div>`;
+    ${tbl('بر حسب کالا','📦',bd.byProduct,'کالا / خدمت')}
+    ${tbl('بر حسب مشتری','👥',bd.byCustomer,'مشتری')}
+    ${tbl('بر حسب فروشنده','🧑‍💼',bd.bySeller,'فروشنده')}</div>`;
 }
 /* سازنده‌ی فاکتور — چند ردیفه، مثل دستیار سند */
 let invDraft=null;
