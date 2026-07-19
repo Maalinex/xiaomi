@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.19</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.20</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.19</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.20</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -536,6 +536,11 @@ crm:{ic:'🧑‍🤝‍🧑',n:'CRM | ذینفعان',grp:'سازمان',f:[
  {k:'imp',n:'اهمیت رابطه',t:SEL,o:['بسیار مهم','مهم','معمولی','غیرفعال']},
  {k:'phone',n:'تلفن سازمان',t:TXT},{k:'email',n:'ایمیل سازمان',t:TXT},
  {k:'last',n:'آخرین تماس',t:DAT},{k:'next',n:'پیگیری بعدی',t:DAT},
+ {k:'scountry',n:'🌍 کشور (برای تأمین‌کننده)',t:TXT},
+ {k:'climit',n:'💳 حد اعتبار می‌دهد (تومان)',t:NUM},
+ {k:'payterm',n:'⏳ مهلت پرداخت (روز)',t:NUM},
+ {k:'ontime',n:'🚚 تحویل به‌موقع (٪ ۰ تا ۱۰۰)',t:NUM},
+ {k:'squality',n:'⭐ کیفیت کالا/خدمت (۱ تا ۵)',t:NUM},
  {k:'note',n:'یادداشت',t:LNG},
  {k:'company',n:'شرکت طرف رابطه',t:REL,r:'company'},
  {k:'projects',n:'پروژه‌های مرتبط',t:REL,r:'project'}],
@@ -756,6 +761,7 @@ product:{ic:'📦',n:'کالا و خدمات',grp:'مدیریت کسب و کار
  {k:'stock0',n:'موجودی اولیه',t:NUM},
  {k:'minstock',n:'حداقل موجودی (هشدار)',t:NUM},
  {k:'lead',n:'⏱ زمان تدارک/واردات (روز)',t:NUM},
+ {k:'dref',n:'🏠 قیمت مرجع خرید داخلی واحد (تومان) — برای مقایسه با واردات',t:NUM},
  {k:'sku',n:'کد SKU (شناسه یکتای مدل/رنگ/نسخه)',t:TXT},
  {k:'model',n:'مدل',t:TXT},
  {k:'color',n:'رنگ',t:TXT},
@@ -6372,8 +6378,9 @@ function bizMenuHTML(){
   // 5️⃣ مدیریت خرید
   h+=sec('🚚 مدیریت خرید',
     it('pudash','🚚 داشبورد مدیریت خرید',"go('pudash')",canSee('purchase')&&canView('pudash'))
+    +it('supscore','🏭 اطلاعات و امتیاز تأمین‌کنندگان',"view={type:'pudash',puCard:'supplier'};render()",canSee('purchase')&&canView('pudash'))
     +it('pinvnew','🧾 ثبت فاکتور خرید',"pinvDraft=null;go('pinvnew')",canSee('purchinv')&&can('c','purchinv')&&canView('pinvnew'))
-    +ent('purchinv')+ent('purchase'));
+    +ent('purchinv')+ent('purchase')+ent('crm'));
   // 6️⃣ مدیریت مالی
   h+=sec('💵 مدیریت مالی',
     it('settlenew','💵 دریافت / پرداخت',"settleDraft=null;go('settlenew')",canSee('settle')&&can('c','settle')&&canView('settlenew'))
@@ -7355,6 +7362,38 @@ function puValueSeries(b){ // مبلغ خرید ماهانه (تومان) — ۱
   const JM=['','فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
   return keys.map(k=>({l:JM[k%100]+' '+_faY(Math.floor(k/100)%100),v:by[k]}));
 }
+/* امتیازدهی تأمین‌کنندگان: قیمت مناسب + تحویل به‌موقع + حد اعتبار */
+function puSupScore(b){
+  const inB=x=>!b||relIds(x,'biz').includes(b)||!relIds(x,'biz').length;
+  const landed=x=>puUnitToman(x)+((+x.d.extra||0)/(+x.d.qty||1));
+  // میانگین بازارِ بهای واحدِ هر کالا (وزنی بر تعداد) از همهٔ تأمین‌کنندگان
+  const mkt={};
+  byE('purchase').filter(inB).forEach(x=>{const pid=relIds(x,'product')[0];if(!pid)return;const q=+x.d.qty||0;if(q<=0)return;
+    const g=mkt[pid]||(mkt[pid]={sumQ:0,sumC:0});g.sumQ+=q;g.sumC+=landed(x)*q;});
+  Object.values(mkt).forEach(g=>g.avg=g.sumQ>0?g.sumC/g.sumQ:0);
+  const sup={};
+  byE('purchase').filter(inB).forEach(x=>{const sid=relIds(x,'supplier')[0]||'';const pid=relIds(x,'product')[0];const q=+x.d.qty||0;
+    const g=sup[sid]||(sup[sid]={sid,spend:0,n:0,open:0,edgeW:0,edgeQ:0,prods:new Set()});
+    g.spend+=purchAmt(x);g.n++;if(x.d.kind==='اعتباری'&&!x.d.settled)g.open+=purchAmt(x);
+    if(pid&&q>0&&mkt[pid]&&mkt[pid].avg>0){g.prods.add(pid);const edge=(mkt[pid].avg-landed(x))/mkt[pid].avg;g.edgeW+=edge*q;g.edgeQ+=q;}});
+  const clamp=(v,a,c)=>Math.max(a,Math.min(c,v));
+  return Object.values(sup).map(g=>{
+    const c=g.sid&&recs[g.sid]?recs[g.sid]:null;
+    const name=c?(c.d.title||'—'):'نامشخص';
+    const priceEdge=g.edgeQ>0?(g.edgeW/g.edgeQ)*100:null; // +٪ = ارزان‌تر از میانگین بازار
+    const ontime=c&&c.d.ontime!=null&&c.d.ontime!==''?+c.d.ontime:null;
+    const payterm=c?+c.d.payterm||0:0;
+    const climit=c?+c.d.climit||0:0;
+    const quality=c&&c.d.squality?+c.d.squality:null;
+    const priceScore=priceEdge==null?50:clamp(50+priceEdge*2.2,0,100);
+    const otScore=ontime==null?60:clamp(ontime,0,100);
+    const credScore=clamp((payterm/60)*70 + (climit>0?30:0),0,100);
+    const qBonus=quality?(quality-3)*3:0;
+    const score=Math.round(clamp(priceScore*0.4+otScore*0.35+credScore*0.25+qBonus,0,100));
+    return {sid:g.sid,name,spend:g.spend,n:g.n,open:g.open,prods:g.prods.size,priceEdge,ontime,payterm,climit,quality,score,
+      credLeft:climit>0?Math.max(0,climit-g.open):null};
+  }).sort((a,b)=>b.score-a.score);
+}
 function pudashHTML(){
   const bizzes=byE('business');
   const b=gBiz();
@@ -7390,6 +7429,7 @@ function pudashHTML(){
   // تامین‌کننده
   const bySup={};purs.filter(e=>e.d&&e.d>=y0).forEach(e=>{const g=bySup[e.sup]||(bySup[e.sup]={amt:0,n:0,open:0});g.amt+=e.amt;g.n++;if(e.kind==='اعتباری'&&!e.settled)g.open+=e.amt;});
   const supArr=Object.entries(bySup).map(([k,v])=>({sup:k,name:k&&recs[k]?recs[k].d.title:'نامشخص',...v})).sort((a,b)=>b.amt-a.amt);
+  const supScore=puSupScore(b);const bestSup=supScore[0]||null;
   // کیفیت خرید: میانگین حاشیهٔ سود اقلامی که موجودی/خرید دارند
   const marginArr=rows.filter(r=>(+r.p.d.sell||0)>0&&r.cost>0).map(r=>(( +r.p.d.sell - r.cost)/ +r.p.d.sell)*100);
   const avgMargin=marginArr.length?Math.round(marginArr.reduce((a,x)=>a+x,0)/marginArr.length):null;
@@ -7413,6 +7453,7 @@ function pudashHTML(){
   if(foreignSpend>0)rec.push(['💱','ریسک ارزی',Math.round(foreignSpend/(spend365||1)*100).toLocaleString('fa-IR')+'٪ خرید سالانه ارزی است؛ نوسان نرخ ارز سود خرید را می‌تواند ببلعد — نرخ تسعیر را به‌روز نگه‌دار و در دوره‌های آرامش ارز خرید کن.']);
   if(belowMargin.length)rec.push(['⚠️','حاشیهٔ سود پایین',belowMargin.length.toLocaleString('fa-IR')+' قلم حاشیهٔ سودشان زیر هدف است؛ یا قیمت خرید را چانه بزن یا قیمت فروش را بازبینی کن.']);
   if(credSpend>cashSpend&&openCredit>0)rec.push(['🧮','نقدی یا اعتباری','سهم خرید اعتباری بالاست؛ اگر تخفیف نقدی تأمین‌کننده از هزینهٔ پول تو بیشتر است، نقدی بخر — وگرنه اعتبار، نقدینگی‌ات را حفظ می‌کند.']);
+  if(bestSup&&supScore.length>1)rec.push(['🏭','بهترین تأمین‌کننده','«'+bestSup.name+'» با امتیاز '+bestSup.score.toLocaleString('fa-IR')+' بالاترین ترکیب قیمت/تحویل به‌موقع/اعتبار را دارد؛ سهم خرید از او را بیشتر کن و تأمین‌کنندگان ضعیف‌تر را بازبینی کن.']);
   if(!rec.length)rec.push(['✅','وضعیت مطلوب','در حال حاضر هشدار خرید بحرانی‌ای نیست؛ روند را پایش کن.']);
   // پنل جزئیات آبشاری
   let detail='';const K=view.puCard;
@@ -7424,9 +7465,33 @@ function pudashHTML(){
   else if(K==='season')detail=tbl([['کالا',pn,'right'],['تقاضای ۹۰روز پیش‌رو (پارسال)',r=>r.seasonal.toLocaleString('fa-IR')],['موجودی',r=>r.st.toLocaleString('fa-IR')],['کسری فصلی',r=>`<b style="color:var(--ac)">${r.seasonalNeed.toLocaleString('fa-IR')}</b>`],['تدارک',r=>r.lead.toLocaleString('fa-IR')+'ر'],['اقدام',r=>r.lead>=45?'زودتر بخر':'به‌موقع بخر']],seasonItems.slice(0,25))+`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">مبنا: فروش همین بازهٔ ۹۰روزه در سال گذشته. اگر تدارک طولانی است، خرید را جلو بینداز و مرحله‌ای انجام بده.</div>`;
   else if(K==='deadprice')detail=tbl([['کالا',pn,'right'],['موجودی',r=>r.st.toLocaleString('fa-IR')],['بهای تمام‌شده (سربه‌سر)',r=>money(r.cost)],['آخرین قیمت فروش',r=>money(+r.p.d.sell||0)],['قیمت پیشنهادی (بی‌ضرر)',r=>{const floor=Math.round(r.cost*1.03);return `<b style="color:${(+r.p.d.sell||0)<r.cost?'var(--bad)':'var(--ok)'}">${money(floor)}</b>`;}],['ارزش آزادشونده',r=>money(r.val)]],deadPrice.sort((a,b)=>b.val-a.val).slice(0,25))+`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">قیمت پیشنهادی = بهای تمام‌شده + ۳٪ (حداقل بی‌ضرر). اگر آخرین قیمت فروش زیر بهای تمام‌شده است (قرمز)، فروش با آن قیمت زیان‌ده است.</div>`;
   else if(K==='cur')detail=tbl([['ارز',e=>esc(e.cur),'right'],['تعداد خرید',e=>e.n.toLocaleString('fa-IR')],['مبلغ (معادل تومان)',e=>money(e.amt)],['سهم',e=>Math.round(e.amt/(spend365||1)*100).toLocaleString('fa-IR')+'٪']],curArr)+`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">نرخ‌های تسعیر فعلی: ${['دلار','یورو','درهم'].map(u=>u+' '+(curRate(u)?curRate(u).toLocaleString('fa-IR'):'—')).join(' · ')} — <a onclick="setFxCur('دلار')" style="color:var(--ac);cursor:pointer">💱 دلار</a> · <a onclick="setFxCur('یورو')" style="color:var(--ac);cursor:pointer">یورو</a> · <a onclick="setFxCur('درهم')" style="color:var(--ac);cursor:pointer">درهم</a></div>`;
-  else if(K==='origin')detail=`<div style="display:flex;gap:14px;flex-wrap:wrap"><div style="flex:1;min-width:200px"><b>🌍 خارجی</b> · ${money(foreignSpend)} (${Math.round(foreignSpend/(spend365||1)*100).toLocaleString('fa-IR')}٪)</div><div style="flex:1;min-width:200px"><b>🏠 داخلی</b> · ${money(domSpend)} (${Math.round(domSpend/(spend365||1)*100).toLocaleString('fa-IR')}٪)</div></div><div style="font-size:11px;color:var(--tx2);margin-top:8px">حاشیهٔ سود میانگین اقلام: ${avgMargin!=null?avgMargin.toLocaleString('fa-IR')+'٪':'—'}. برای مقایسهٔ دقیقِ «خارجی به‌صرفه بود یا داخلی»، قیمت خرید داخلیِ همان کالا را به‌عنوان مرجع در توضیحات ثبت کن؛ سیستم بهای تمام‌شدهٔ خارجی (با تسعیر و حمل/گمرک) را برایت نگه می‌دارد.</div>`;
+  else if(K==='origin'){
+    // مقایسهٔ خودکار واردات با مرجع داخلی
+    const impRows=rows.filter(r=>purchasesOf(r.p.id).some(x=>x.d.origin==='خارجی')&&(+r.p.d.dref||0)>0).map(r=>{
+      const dref=+r.p.d.dref||0;const saveU=dref-r.cost;const savePct=dref>0?saveU/dref*100:0;
+      return {r,dref,saveU,savePct};});
+    const win=impRows.filter(x=>x.saveU>0),lose=impRows.filter(x=>x.saveU<0);
+    detail=`<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px"><div style="flex:1;min-width:200px"><b>🌍 خارجی</b> · ${money(foreignSpend)} (${Math.round(foreignSpend/(spend365||1)*100).toLocaleString('fa-IR')}٪)</div><div style="flex:1;min-width:200px"><b>🏠 داخلی</b> · ${money(domSpend)} (${Math.round(domSpend/(spend365||1)*100).toLocaleString('fa-IR')}٪)</div></div>`;
+    detail+=`<div style="font-weight:800;font-size:12.5px;margin:8px 0 4px">📊 واردات در برابر خرید داخلی (بر پایهٔ «قیمت مرجع داخلی» کالا)</div>`;
+    detail+=tbl([['کالا',x=>esc(x.r.p.d.title||'—'),'right'],['بهای تمام‌شدهٔ وارداتی (با تسعیر+حمل)',x=>money(x.r.cost)],['قیمت مرجع داخلی',x=>money(x.dref)],['صرفه‌جویی واحد',x=>`<b style="color:${x.saveU>=0?'var(--ok)':'var(--bad)'}">${x.saveU>=0?'−':'+'}${money(Math.abs(x.saveU))}</b>`],['نتیجه',x=>x.saveU>=0?`<span style="color:var(--ok)">واردات ${Math.round(x.savePct).toLocaleString('fa-IR')}٪ ارزان‌تر ✓</span>`:`<span style="color:var(--bad)">داخلی بهتر بود</span>`]],impRows.sort((a,b)=>a.savePct-b.savePct));
+    detail+=`<div style="font-size:11px;color:var(--tx2);margin-top:6px">${impRows.length?`جمع‌بندی: در ${win.length.toLocaleString('fa-IR')} قلم واردات به‌صرفه بوده و در ${lose.length.toLocaleString('fa-IR')} قلم خرید داخلی بهتر بود.`:'برای این مقایسه، در فرم کالا فیلد «🏠 قیمت مرجع خرید داخلی» را پر کن و منشأ خرید را «خارجی» بگذار؛ سیستم بهای تمام‌شدهٔ وارداتی (با تسعیر ارز و حمل/گمرک) را خودکار با آن مقایسه می‌کند.'}</div>`;
+    detail+=`<div style="font-size:11px;color:var(--tx2);margin-top:4px">حاشیهٔ سود میانگین اقلام: ${avgMargin!=null?avgMargin.toLocaleString('fa-IR')+'٪':'—'}</div>`;
+  }
   else if(K==='cashcredit')detail=`<div style="display:flex;gap:14px;flex-wrap:wrap"><div style="flex:1;min-width:180px"><b>💵 نقدی (۳۶۵روز)</b><div style="font-size:16px;font-weight:800">${money(cashSpend)}</div></div><div style="flex:1;min-width:180px"><b>💳 اعتباری (۳۶۵روز)</b><div style="font-size:16px;font-weight:800">${money(credSpend)}</div><div style="font-size:11px;color:var(--tx2)">تسویه‌نشده: ${money(openCredit)}</div></div></div><div style="font-size:11px;color:var(--tx2);margin-top:8px">قاعدهٔ تصمیم: اگر «تخفیف نقدیِ تأمین‌کننده ٪» بیشتر از «هزینهٔ فرصت پول تو در همان مدت» است ⇦ نقدی بخر؛ در غیر این صورت اعتباری بخر تا نقدینگی برای اقلام حیاتی/فصلی آزاد بماند.</div>`;
-  else if(K==='supplier')detail=tbl([['تأمین‌کننده',s=>esc(s.name),'right'],['تعداد خرید',s=>s.n.toLocaleString('fa-IR')],['مبلغ',s=>money(s.amt)],['بدهی باز',s=>s.open>0?`<b style="color:var(--bad)">${money(s.open)}</b>`:'—'],['سهم',s=>Math.round(s.amt/(spend365||1)*100).toLocaleString('fa-IR')+'٪']],supArr.slice(0,20));
+  else if(K==='supplier'){
+    const sc=b=>b>=75?'var(--ok)':b>=50?'#f5a623':'var(--bad)';
+    const pe=x=>x==null?'—':(x>=0?'<span style="color:var(--ok)">'+Math.round(x).toLocaleString('fa-IR')+'٪ ارزان‌تر</span>':'<span style="color:var(--bad)">'+Math.round(-x).toLocaleString('fa-IR')+'٪ گران‌تر</span>');
+    detail=tbl([
+      ['🏆 تأمین‌کننده',s=>esc(s.name),'right'],
+      ['امتیاز کل',s=>`<b style="color:${sc(s.score)};font-size:14px">${s.score.toLocaleString('fa-IR')}</b>`],
+      ['قیمت',s=>pe(s.priceEdge)],
+      ['تحویل به‌موقع',s=>s.ontime==null?'—':`<b style="color:${sc(s.ontime)}">${s.ontime.toLocaleString('fa-IR')}٪</b>`],
+      ['حد اعتبار',s=>s.climit>0?money(s.climit)+(s.payterm?` · ${s.payterm.toLocaleString('fa-IR')}ر`:''):'—'],
+      ['کیفیت',s=>s.quality?('⭐'+s.quality.toLocaleString('fa-IR')):'—'],
+      ['خرید (۳۶۵ر)',s=>money(s.spend)],
+      ['بدهی باز',s=>s.open>0?`<b style="color:var(--bad)">${money(s.open)}</b>`:'—']
+    ],supScore.slice(0,20))+`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">امتیاز کل = ۴۰٪ قیمت (نسبت به میانگین بازارِ همان کالا) + ۳۵٪ تحویل به‌موقع + ۲۵٪ حد اعتبار/مهلت پرداخت + جایزهٔ کیفیت. فیلدهای «تحویل به‌موقع/حد اعتبار/کیفیت/مهلت پرداخت» را در پروفایل تأمین‌کننده (CRM) پر کن تا امتیاز دقیق شود. «قیمت» خودکار از دادهٔ خریدها محاسبه می‌شود.</div>`;
+  }
   else if(K==='quality')detail=tbl([['کالا',pn,'right'],['بهای تمام‌شده',r=>money(r.cost)],['قیمت فروش',r=>money(+r.p.d.sell||0)],['حاشیهٔ سود',r=>{const m=(+r.p.d.sell||0)>0?Math.round((( +r.p.d.sell - r.cost)/ +r.p.d.sell)*100):null;const tgt=+r.p.d.minmargin||15;return m==null?'—':`<b style="color:${m<tgt?'var(--bad)':'var(--ok)'}">${m.toLocaleString('fa-IR')}٪</b>`;}],['هدف',r=>(+r.p.d.minmargin||15).toLocaleString('fa-IR')+'٪']],rows.filter(r=>(+r.p.d.sell||0)>0&&r.cost>0).sort((a,b)=>(( +a.p.d.sell-a.cost)/+a.p.d.sell)-(( +b.p.d.sell-b.cost)/+b.p.d.sell)).slice(0,25));
   const pts=puValueSeries(b);
   let h=`<div class="tools"><b style="font-size:13px">🚚 داشبورد مدیریت خرید و تأمین${b&&recs[b]?' — '+esc(recs[b].d.title):' (همه)'}</b>
@@ -7447,7 +7512,7 @@ function pudashHTML(){
     ${kcard('cur','💱 اکسپوژر ارزی',curArr.length?money(foreignSpend):'—',false,curArr.length.toLocaleString('fa-IR')+' ارز')}
     ${kcard('origin','🌍 خارجی / داخلی',Math.round(foreignSpend/(spend365||1)*100).toLocaleString('fa-IR')+'٪ خارجی',false,money(foreignSpend)+' خارجی')}
     ${kcard('cashcredit','💳 نقدی / اعتباری',Math.round(credSpend/((cashSpend+credSpend)||1)*100).toLocaleString('fa-IR')+'٪ اعتباری',false,money(cashSpend)+' نقدی')}
-    ${kcard('supplier','🏭 تأمین‌کنندگان',supArr.length.toLocaleString('fa-IR'),false,supArr[0]?esc(supArr[0].name):'')}
+    ${kcard('supplier','🏭 بهترین تأمین‌کننده',bestSup?esc(bestSup.name):'—',false,bestSup?('امتیاز '+bestSup.score.toLocaleString('fa-IR')+' · '+supScore.length.toLocaleString('fa-IR')+' تأمین‌کننده'):'')}
     ${kcard('quality','✅ کیفیت خرید (حاشیهٔ سود)',avgMargin!=null?avgMargin.toLocaleString('fa-IR')+'٪':'—',avgMargin!=null&&avgMargin<15,belowMargin.length?belowMargin.length.toLocaleString('fa-IR')+' قلم زیر هدف':'')}
   </div>`;
   if(detail)h+=`<div class="sec" style="margin-bottom:10px;border:1px solid var(--ac)"><div style="display:flex;margin-bottom:6px"><b style="flex:1">جزئیات</b><button class="btn gh sm" onclick="view.puCard=null;render()">✕ بستن</button></div>${detail}</div>`;
