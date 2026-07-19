@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.30</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.31</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.30</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.31</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -910,10 +910,33 @@ settle:{ic:'📂',n:'آرشیو دریافت/پرداخت‌ها',grp:'مدیر�
  {k:'purchinv',n:'بابت فاکتور خرید (اختیاری)',t:REL,r:'purchinv',s:1},
  {k:'amount',n:'مبلغ (تومان)',t:NUM},
  {k:'method',n:'روش',t:SEL,o:['نقد','کارت','انتقال بانکی','چک']},
+ {k:'account',n:'🏦 صندوق/حساب',t:REL,r:'account',s:1},
  {k:'date',n:'تاریخ',t:DAT},
  {k:'acode',n:'کد حسابداری (اختیاری)',t:REL,r:'acct',s:1},
  {k:'note',n:'توضیح',t:LNG}],
  cols:['title','kind','amount','date'],comp:'settleBrief'},
+account:{ic:'🏦',n:'صندوق و حساب بانکی',grp:'مدیریت کسب و کار',f:[
+ {k:'title',n:'نام حساب / صندوق',t:TXT},
+ {k:'kind',n:'نوع',t:SEL,o:['صندوق نقدی','حساب بانکی','کیف پول / درگاه','حساب ارزی']},
+ {k:'cur',n:'ارز',t:SEL,o:['تومان','ریال','دلار','یورو','درهم']},
+ {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
+ {k:'bank',n:'نام بانک',t:TXT},
+ {k:'accno',n:'شماره حساب / کارت',t:TXT},
+ {k:'open',n:'موجودی اولیه (به ارز حساب)',t:NUM},
+ {k:'opendate',n:'تاریخ موجودی اولیه',t:DAT},
+ {k:'note',n:'توضیح',t:LNG}],
+ cols:['title','kind','cur','bank'],comp:'acctBrief'},
+acctx:{ic:'💸',n:'تراکنش صندوق/بانک',grp:'مدیریت کسب و کار',f:[
+ {k:'title',n:'شرح',t:TXT},
+ {k:'account',n:'🏦 حساب',t:REL,r:'account',s:1},
+ {k:'kind',n:'نوع تراکنش',t:SEL,o:['واریز / درآمد','برداشت / هزینه','انتقال به حساب دیگر','خرید ارز','فروش ارز','واریز اولیه / سرمایه','اصلاح موجودی']},
+ {k:'amount',n:'مبلغ (به ارز حساب)',t:NUM},
+ {k:'toaccount',n:'حساب مقصد (برای انتقال)',t:REL,r:'account',s:1},
+ {k:'rate',n:'نرخ تسعیر (تومان به ازای هر واحد ارز)',t:NUM},
+ {k:'cat',n:'دستهٔ درآمد/هزینه',t:TXT},
+ {k:'date',n:'تاریخ',t:DAT},
+ {k:'note',n:'توضیح',t:LNG}],
+ cols:['title','account','kind','amount','date'],comp:'acctxBrief'},
 /* ---------- مالی تخصصی (IFRS) ---------- */
 finis:{ic:'📈',n:'صورت سود و زیان (IFRS)',grp:'مالی تخصصی (IFRS)',f:[
  {k:'title',n:'عنوان (مثل: سود و زیان ۱۴۰۴)',t:TXT},
@@ -4105,7 +4128,7 @@ function settlePost(id,silent){
 window.settlePost=settlePost;
 /* فرم سریع دریافت/پرداخت */
 let settleDraft=null;
-function settleNewDraft(k){settleDraft={kind:k||'دریافت از مشتری',biz:'',customer:'',supplier:'',invoice:'',purchinv:'',amount:'',method:'نقد',vdate:today(),note:''};}
+function settleNewDraft(k){settleDraft={kind:k||'دریافت از مشتری',biz:'',customer:'',supplier:'',invoice:'',purchinv:'',amount:'',method:'نقد',account:'',vdate:today(),note:''};}
 function settleSetHead(k,v){settleDraft[k]=v;render();}
 function settleSave(){
   const amt=+settleDraft.amount||0;if(amt<=0){alert('مبلغ معتبر لازم است.');return;}
@@ -4117,7 +4140,7 @@ function settleSave(){
   put({id,e:'settle',d:{title:settleDraft.note||((pay?'پرداخت به ':'دریافت از ')+(partyName||'—')),kind:settleDraft.kind,
     biz:settleDraft.biz?[settleDraft.biz]:[],customer:settleDraft.customer?[settleDraft.customer]:[],supplier:settleDraft.supplier?[settleDraft.supplier]:[],
     invoice:settleDraft.invoice?[settleDraft.invoice]:[],purchinv:settleDraft.purchinv?[settleDraft.purchinv]:[],
-    amount:amt,method:settleDraft.method,date:{s:settleDraft.vdate},note:settleDraft.note},u:Date.now()});
+    amount:amt,method:settleDraft.method,account:settleDraft.account?[settleDraft.account]:[],date:{s:settleDraft.vdate},note:settleDraft.note},u:Date.now()});
   settlePost(id,true);
   settleDraft=null;go('rec','settle',id);
 }
@@ -4148,6 +4171,7 @@ function settlenewHTML(){
       ${openInv}
       <div><label ${lbl}>مبلغ (تومان)</label><input inputmode="numeric" value="${settleDraft.amount||''}" oninput="settleDraft.amount=this.value" placeholder="۰"></div>
       <div><label ${lbl}>روش</label><select onchange="settleDraft.method=this.value">${['نقد','کارت','انتقال بانکی','چک'].map(m=>`<option ${m===settleDraft.method?'selected':''}>${m}</option>`).join('')}</select></div>
+      <div><label ${lbl}>🏦 صندوق/حساب مقصد</label><select onchange="settleDraft.account=this.value">${(()=>{const acc=byE('account').filter(a=>!settleDraft.biz||relIds(a,'biz').includes(settleDraft.biz)||!relIds(a,'biz').length);return `<option value="">— (فقط طلب/بدهی)</option>`+acc.map(a=>`<option value="${a.id}" ${a.id===settleDraft.account?'selected':''}>${esc(a.d.title)} (${a.d.cur||'تومان'})</option>`).join('');})()}</select></div>
       <div><label ${lbl}>تاریخ</label><input value="${esc(settleDraft.vdate||'')}" oninput="settleDraft.vdate=this.value" placeholder="۱۴۰۴/۰۴/۲۵"></div>
     </div>
     <div style="margin-top:10px"><label ${lbl}>توضیح</label><input value="${esc(settleDraft.note||'')}" oninput="settleDraft.note=this.value" placeholder="اختیاری"></div>
@@ -4272,6 +4296,99 @@ function cashFlows(biz,ch){
     out.push({d:ds(x.d.date)||'',in:0,out:a,desc:'خرید سریع نقدی '+(x.d.title||''),e:'purchase',ref:x.id});});
   out.sort((a,b)=>{const ka=dnorm(a.d)||'',kb=dnorm(b.d)||'';return ka<kb?-1:ka>kb?1:0;});
   return out;
+}
+/* ===== 🏦 صندوق و بانک — چند‌حسابی، ریالی و ارزی، با سود تسعیر ===== */
+function acctCurFactor(cur){if(!cur||cur==='تومان')return 1;if(cur==='ریال')return 0.1;return curRate(cur)||0;}
+function acctSign(kind){if(['واریز / درآمد','خرید ارز','واریز اولیه / سرمایه','اصلاح موجودی'].includes(kind))return 1;
+  if(['برداشت / هزینه','فروش ارز','انتقال به حساب دیگر'].includes(kind))return -1;return 0;}
+function acctTxsOf(accId){ // همهٔ تراکنش‌های مؤثر بر یک حساب (acctx + settle + انتقال ورودی)
+  const rows=[];const a=recs[accId];if(!a)return rows;
+  if(+a.d.open)rows.push({d:ds(a.d.opendate)||'',u:0,desc:'موجودی اولیه',amt:+a.d.open,e:'account',ref:accId});
+  byE('acctx').forEach(t=>{
+    if(relIds(t,'account')[0]===accId)rows.push({d:ds(t.d.date)||'',u:t.u,desc:(t.d.title||t.d.kind),amt:acctSign(t.d.kind)*(+t.d.amount||0),e:'acctx',ref:t.id,kind:t.d.kind,rate:+t.d.rate||0});
+    if(t.d.kind==='انتقال به حساب دیگر'&&relIds(t,'toaccount')[0]===accId)rows.push({d:ds(t.d.date)||'',u:t.u,desc:'انتقال ورودی از '+((relIds(t,'account')[0]&&recs[relIds(t,'account')[0]])?recs[relIds(t,'account')[0]].d.title:'—'),amt:+t.d.amount||0,e:'acctx',ref:t.id});
+  });
+  byE('settle').forEach(s=>{if(relIds(s,'account')[0]!==accId)return;const inn=s.d.kind==='دریافت از مشتری';
+    rows.push({d:ds(s.d.date)||'',u:s.u,desc:(inn?'دریافت':'پرداخت')+(s.d.title?' — '+s.d.title:''),amt:(inn?1:-1)*(+s.d.amount||0),e:'settle',ref:s.id});});
+  rows.sort((a,b)=>{const ka=dnorm(a.d)||'',kb=dnorm(b.d)||'';if(ka!==kb)return ka<kb?-1:1;return (a.u||0)-(b.u||0);});
+  let bal=0;rows.forEach(r=>{bal+=r.amt;r.bal=bal;});return rows;
+}
+function bankBal(accId){const r=acctTxsOf(accId);return r.length?r[r.length-1].bal:(+recs[accId]?.d.open||0);}
+function acctAvgRate(accId){const a=recs[accId];if(!a)return 0;let u=0,t=0;
+  byE('acctx').filter(x=>relIds(x,'account')[0]===accId&&x.d.kind==='خرید ارز').forEach(x=>{const q=+x.d.amount||0,r=+x.d.rate||curRate(a.d.cur);u+=q;t+=q*r;});
+  if(+a.d.open){u+=+a.d.open;t+=(+a.d.open)*curRate(a.d.cur);} // موجودی اولیه به نرخ روز به‌عنوان بهای تمام‌شده
+  return u>0?t/u:curRate(a.d.cur);}
+function acctToman(accId){const a=recs[accId];if(!a)return 0;const bal=bankBal(accId);const cur=a.d.cur||'تومان';
+  if(cur==='تومان')return bal;if(cur==='ریال')return bal/10;return bal*(curRate(cur)||acctAvgRate(accId));}
+function acctFX(accId){const a=recs[accId];if(!a)return null;const cur=a.d.cur;if(cur==='تومان'||cur==='ریال')return null;
+  let realized=0;const avg=acctAvgRate(accId);
+  byE('acctx').filter(x=>relIds(x,'account')[0]===accId&&x.d.kind==='فروش ارز').sort((p,q)=>(ds(p.d.date)||'').localeCompare(ds(q.d.date)||'')).forEach(x=>{const q=+x.d.amount||0,r=+x.d.rate||curRate(cur);realized+=q*(r-avg);});
+  const bal=bankBal(accId);const curR=curRate(cur)||avg;const unreal=bal*(curR-avg);
+  return {avg,curR,realized,unreal,bal};}
+function acctBrief(a){const cur=a.d.cur||'تومان';const bal=bankBal(a.id);const tm=acctToman(a.id);
+  return {label:'موجودی',v:bal.toLocaleString('fa-IR')+' '+cur+(cur!=='تومان'?' ≈ '+money(tm):''),bad:bal<0};}
+window.acctBrief=acctBrief;
+function acctxBrief(t){const s=acctSign(t.d.kind);return {label:t.d.kind,v:(s<0?'−':'+')+(+t.d.amount||0).toLocaleString('fa-IR'),bad:s<0};}
+window.acctxBrief=acctxBrief;
+function acctTemplate(){loadXLSX().then(()=>{const rows=[['نام حساب / صندوق','نوع','ارز','نام بانک','شماره حساب / کارت','موجودی اولیه (به ارز حساب)','تاریخ موجودی اولیه'],
+  ['صندوق فروشگاه','صندوق نقدی','تومان','','','50000000','1404/01/01'],['حساب ملت','حساب بانکی','تومان','ملت','6037...','120000000','1404/01/01'],['حساب دلاری','حساب ارزی','دلار','','','2000','1404/01/01']];
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:24},{wch:16},{wch:10},{wch:14},{wch:20},{wch:22},{wch:16}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'حساب‌ها');XLSX.writeFile(wb,'قالب-صندوق-بانک.xlsx');});}
+window.acctTemplate=acctTemplate;
+function acctxTemplate(){loadXLSX().then(()=>{const rows=[['شرح','حساب','نوع تراکنش','مبلغ (به ارز حساب)','حساب مقصد (برای انتقال)','نرخ تسعیر','دستهٔ درآمد/هزینه','تاریخ'],
+  ['واریز فروش نقدی','صندوق فروشگاه','واریز / درآمد','8000000','','','فروش','1404/04/25'],['خرید ۱۰۰۰ دلار','حساب دلاری','خرید ارز','1000','','60000','ارز','1404/04/26']];
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:24},{wch:18},{wch:18},{wch:20},{wch:20},{wch:14},{wch:16},{wch:14}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'تراکنش‌ها');XLSX.writeFile(wb,'قالب-تراکنش-صندوق.xlsx');});}
+window.acctxTemplate=acctxTemplate;
+function bankdashHTML(){
+  const b=gBiz();const bizzes=byE('business');
+  const accs=byE('account').filter(a=>!b||relIds(a,'biz').includes(b)||!relIds(a,'biz').length);
+  const totToman=accs.reduce((s,a)=>s+acctToman(a.id),0);
+  const fxAccts=accs.filter(a=>['دلار','یورو','درهم'].includes(a.d.cur));
+  let fxReal=0,fxUnreal=0;fxAccts.forEach(a=>{const f=acctFX(a.id);if(f){fxReal+=f.realized;fxUnreal+=f.unreal;}});
+  const kicon=k=>k==='صندوق نقدی'?'💵':k==='حساب بانکی'?'🏦':k==='حساب ارزی'?'💱':'👛';
+  const card=(t,v,bad,sub)=>`<div class="sec" style="text-align:center;padding:12px 8px"><div style="font-size:11px;color:var(--tx2)">${t}</div><div style="font-size:17px;font-weight:800;margin-top:3px;color:${bad?'var(--bad)':'var(--tx)'}">${v}</div>${sub?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">${sub}</div>`:''}</div>`;
+  let h=`<div class="tools"><b style="font-size:13px">🏦 صندوق و بانک</b><span style="flex:1"></span>
+    <select class="inp sm" style="width:auto" onchange="setGBiz(this.value)"><option value="">همه کسب‌وکارها</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select>
+    ${can('c','account')?`<button class="btn gh sm" onclick="acctTemplate()">📄 قالب حساب</button><button class="btn gh sm" onclick="impOpen('account')">📥 اکسل حساب</button><button class="btn sm" onclick="openRec('account')">➕ حساب جدید</button>`:''}
+    ${can('c','acctx')?`<button class="btn sm" onclick="openRec('acctx')">💸 تراکنش</button>`:''}</div>`;
+  if(!accs.length){h+=`<div class="empty">هنوز صندوق/حسابی تعریف نشده. «➕ حساب جدید» را بزن یا «📥 اکسل حساب» را وارد کن. برای هر صندوق نقدی یا حساب بانکی (ریالی یا ارزی) یک حساب بساز.</div>`;return h;}
+  h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-bottom:6px">
+    ${card('💰 موجودی کل (تومان)',money(totToman),totToman<0)}
+    ${card('🏦 تعداد حساب',accs.length.toLocaleString('fa-IR'),false,fxAccts.length?fxAccts.length.toLocaleString('fa-IR')+' حساب ارزی':'')}
+    ${fxAccts.length?card('💱 سود تسعیر محقق‌شده',money(fxReal),fxReal<0,'از خرید/فروش ارز'):''}
+    ${fxAccts.length?card('📊 سود/زیان تسعیر بالقوه',money(fxUnreal),fxUnreal<0,'ارزیابی به نرخ روز'):''}
+  </div>`;
+  // کارت هر حساب (آبشاری)
+  h+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:6px">`;
+  accs.forEach(a=>{const cur=a.d.cur||'تومان';const bal=bankBal(a.id);const tm=acctToman(a.id);const on=view.bkSel===a.id;const fx=acctFX(a.id);
+    h+=`<div onclick="view.bkSel=${on?'null':`'${a.id}'`};render()" style="cursor:pointer;background:var(--cd);border:1px solid ${on?'var(--ac)':'var(--bd)'};border-radius:14px;padding:12px;box-shadow:0 3px 10px rgba(0,0,0,.1)">
+      <div style="display:flex;align-items:center;gap:7px"><span style="font-size:18px">${kicon(a.d.kind)}</span><b style="flex:1;font-size:12.5px">${esc(a.d.title||'حساب')}</b>${cur!=='تومان'?`<span class="tag" style="font-size:9px">${cur}</span>`:''}</div>
+      ${a.d.bank?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">${esc(a.d.bank)}${a.d.accno?' · '+esc(a.d.accno):''}</div>`:''}
+      <div style="font-size:19px;font-weight:900;margin-top:6px;color:${bal<0?'var(--bad)':'var(--tx)'}">${bal.toLocaleString('fa-IR')} <span style="font-size:11px;color:var(--tx2)">${cur}</span></div>
+      ${cur!=='تومان'?`<div style="font-size:11px;color:var(--tx2)">≈ ${money(tm)}</div>`:''}
+      ${fx?`<div style="font-size:10px;margin-top:3px;color:${fx.unreal>=0?'#16c784':'#ff3b30'}">تسعیر بالقوه: ${money(fx.unreal)} · میانگین خرید ${Math.round(fx.avg).toLocaleString('fa-IR')}</div>`:''}
+      <div style="font-size:9.5px;color:var(--ac);margin-top:4px">${on?'▾ بستن گردش':'◂ کلیک = گردش حساب'}</div></div>`;});
+  h+=`</div>`;
+  // گردش حسابِ انتخابی
+  if(view.bkSel&&recs[view.bkSel]){const a=recs[view.bkSel];const cur=a.d.cur||'تومان';const rows=acctTxsOf(a.id);
+    h+=`<div class="sec" style="border:1px solid var(--ac)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+      <b style="flex:1">🏦 گردش حساب: ${esc(a.d.title||'')} <span style="font-weight:400;color:var(--tx2);font-size:11px">(${cur})</span></b>
+      <button class="btn gh sm" onclick="openRec('account','${a.id}')">✏️ ویرایش حساب</button>
+      <button class="btn gh sm" onclick="view.bkSel=null;render()">✕ بستن</button></div>
+      <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">تاریخ</th><th style="text-align:right">شرح</th><th>واریز</th><th>برداشت</th><th>مانده</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr ${r.e!=='account'?`onclick="go('rec','${r.e}','${r.ref}')" style="cursor:pointer"`:''}><td style="text-align:right">${esc(iso2jstr(r.d)||'—')}</td><td style="text-align:right">${esc(r.desc)}</td><td style="text-align:center;color:var(--ok)">${r.amt>0?r.amt.toLocaleString('fa-IR'):'—'}</td><td style="text-align:center;color:var(--bad)">${r.amt<0?(-r.amt).toLocaleString('fa-IR'):'—'}</td><td style="text-align:center;font-weight:700;color:${r.bal<0?'var(--bad)':'var(--tx)'}">${r.bal.toLocaleString('fa-IR')}</td></tr>`).join('')||`<tr><td colspan="5" style="text-align:center;color:var(--tx2);padding:12px">گردشی نیست</td></tr>`}
+      </tbody></table></div>${acctFX(a.id)?`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">💱 میانگین نرخ خرید: ${Math.round(acctFX(a.id).avg).toLocaleString('fa-IR')} · نرخ روز: ${Math.round(acctFX(a.id).curR).toLocaleString('fa-IR')} · سود تسعیر محقق‌شده: ${money(acctFX(a.id).realized)} · بالقوه: ${money(acctFX(a.id).unreal)}</div>`:''}</div>`;}
+  // گزارش دوره‌ای: خالص جریان هر حساب در بازه
+  const per=view.bkPer||'همه';const ref=whRefDate(b);
+  const from=per==='ماه'?_isoAdd(ref,-30):per==='فصل'?_isoAdd(ref,-90):per==='سال'?_isoAdd(ref,-365):'';
+  h+=`<div class="sec"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px"><b style="flex:1">📅 گزارش دوره‌ای جریان نقد</b>
+    ${['همه','ماه','فصل','سال'].map(p=>`<button class="btn ${per===p?'':'gh'} sm" onclick="view.bkPer='${p}';render()">${p==='همه'?'کل دوره':p==='ماه'?'۳۰ روز':p==='فصل'?'۹۰ روز':'۱ سال'}</button>`).join('')}</div>
+    <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">حساب</th><th>ارز</th><th>واریز دوره</th><th>برداشت دوره</th><th>خالص دوره</th><th>مانده فعلی</th></tr></thead><tbody>
+    ${accs.map(a=>{const rows=acctTxsOf(a.id).filter(r=>!from||(r.d&&r.d>=from));const inn=rows.filter(r=>r.amt>0).reduce((s,r)=>s+r.amt,0),out=rows.filter(r=>r.amt<0).reduce((s,r)=>s-r.amt,0);const net=inn-out;
+      return `<tr><td style="text-align:right">${kicon(a.d.kind)} ${esc(a.d.title||'')}</td><td style="text-align:center">${a.d.cur||'تومان'}</td><td style="text-align:center;color:var(--ok)">${inn?inn.toLocaleString('fa-IR'):'—'}</td><td style="text-align:center;color:var(--bad)">${out?out.toLocaleString('fa-IR'):'—'}</td><td style="text-align:center;font-weight:700;color:${net<0?'var(--bad)':'var(--ok)'}">${net.toLocaleString('fa-IR')}</td><td style="text-align:center;font-weight:800">${bankBal(a.id).toLocaleString('fa-IR')}</td></tr>`;}).join('')}
+    </tbody></table></div><div style="font-size:10.5px;color:var(--tx2);margin-top:6px">دریافت/پرداختِ ثبت‌شده در «طلب و بدهی» اگر «صندوق/حساب»‌شان انتخاب شده باشد، اینجا هم مانده را کم/زیاد می‌کنند و به‌صورت خودکار به طلب/بدهی وصل‌اند.</div></div>`;
+  return h;
 }
 function cashdashHTML(){
   const bizzes=byE('business');
@@ -6489,9 +6606,10 @@ function bizMenuHTML(){
   h+=sec('💵 مدیریت مالی',
     it('pldash','💰 داشبورد مالی (سود و زیان)',"go('pldash')",canSee('plfin')&&canView('pldash'))
     +it('arapdash','💵 طلب، بدهی و دریافت/پرداخت',"go('arapdash')",canSee('settle')&&canView('arapdash'))
-    +it('cashdash','💰 دفتر صندوق/بانک',"go('cashdash')",canSee('settle')&&canView('cashdash'))
+    +it('bankdash','🏦 صندوق و بانک',"go('bankdash')",canSee('account')&&canView('bankdash'))
+    +it('cashdash','💰 دفتر روزشمار نقد',"go('cashdash')",canSee('settle')&&canView('cashdash'))
     +it('pfdash','🔄 تسویه درگاه‌ها/پلتفرم‌ها',"go('pfdash')",canSee('pfsettle')&&canView('pfdash'))
-    +ent('plfin')+ent('settle')+ent('expense')+ent('pbudget')+ent('gateway')+ent('pfsettle')+ent('plmonth'));
+    +ent('plfin')+ent('account')+ent('acctx')+ent('settle')+ent('expense')+ent('pbudget')+ent('gateway')+ent('pfsettle')+ent('plmonth'));
   // 7️⃣ مدیریت عملکرد
   h+=sec('🎖️ مدیریت عملکرد',
     it('perfdash','🎖️ داشبورد عملکرد',"go('perfdash')",canSee('perfscore')&&canView('perfdash'))
@@ -6648,6 +6766,7 @@ function render(){
     view.type==='targetdash'?'🎯 پایش تارگت فروش':
     view.type==='findash'?'💼 داشبورد مالی تخصصی':
     view.type==='pldash'?'💰 داشبورد مدیریت مالی':
+    view.type==='bankdash'?'🏦 صندوق و بانک':
     view.type==='finform'?'💰 ورود سود و زیان':
     view.type==='invdash'?'💎 داشبورد سرمایه‌گذاری':
     view.type==='gldash'?'📒 دفتر کل و صورت‌های مالی':
@@ -6659,7 +6778,7 @@ function render(){
     view.type==='rec'?(E[view.e].ic+' '+(recs[view.id].d.title||E[view.e].n)):
     E[view.e].ic+' '+E[view.e].n;
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',finform:'finform',invdash:'invdash',procmap:'procmap',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',ctrldash:'ctrldash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash'};
+  const VG={me:'me',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',invdash:'invdash',procmap:'procmap',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',ctrldash:'ctrldash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -6678,6 +6797,7 @@ function render(){
     else if(view.type==='bsccanvas')c.innerHTML=bsccanvasHTML();
     else if(view.type==='findash')c.innerHTML=findashHTML();
     else if(view.type==='pldash')c.innerHTML=pldashHTML();
+    else if(view.type==='bankdash')c.innerHTML=bankdashHTML();
     else if(view.type==='finform')c.innerHTML=finFormHTML();
     else if(view.type==='invdash')c.innerHTML=invdashHTML();
     else if(view.type==='procmap')c.innerHTML=procmapHTML();
