@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.26</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.28</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.26</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.28</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -4034,13 +4034,15 @@ window.postPurch=postPurch;
 function settleBrief(s){const pay=s.d.kind==='پرداخت به تامین‌کننده';
   return {label:pay?'پرداخت':'دریافت',v:money(s.d.amount||0),bad:pay};}
 window.settleBrief=settleBrief;
-function custReceivable(cid){ // مانده‌ی طلب از مشتری (+ یعنی از ما طلبکارند/ما طلبکاریم؟ اینجا: طلب ما از مشتری)
+function custReceivable(cid){ // طلب ما از مشتری — از فاکتورهای فروش + فروش‌های سریع اعتباری
   let due=0;byE('invoice').filter(v=>v.d.kind!=='پیش‌فاکتور'&&v.d.status!=='باطل'&&relIds(v,'customer').includes(cid)).forEach(v=>{due+=invCalc(v).due;});
+  byE('sale').filter(x=>!x.d._inv&&x.d.kind==='اعتباری'&&!x.d.settled&&relIds(x,'customer').includes(cid)).forEach(x=>{due+=saleAmt(x);});
   let free=0;byE('settle').filter(s=>s.d.kind==='دریافت از مشتری'&&relIds(s,'customer').includes(cid)&&!relIds(s,'invoice').length).forEach(s=>{free+=s.d.amount||0;});
   return due-free;
 }
-function suppPayable(sid){ // مانده‌ی بدهی ما به تامین‌کننده
+function suppPayable(sid){ // بدهی ما به تامین‌کننده — از فاکتورهای خرید + خریدهای سریع اعتباری
   let due=0;byE('purchinv').filter(v=>v.d.status!=='باطل'&&relIds(v,'supplier').includes(sid)).forEach(v=>{due+=pinvCalc(v).due;});
+  byE('purchase').filter(x=>!x.d._pinv&&x.d.kind==='اعتباری'&&!x.d.settled&&relIds(x,'supplier').includes(sid)).forEach(x=>{due+=purchAmt(x);});
   let free=0;byE('settle').filter(s=>s.d.kind==='پرداخت به تامین‌کننده'&&relIds(s,'supplier').includes(sid)&&!relIds(s,'purchinv').length).forEach(s=>{free+=s.d.amount||0;});
   return due-free;
 }
@@ -4223,6 +4225,11 @@ function cashFlows(biz,ch){
     const linked=byE('settle').filter(s=>relIds(s,'purchinv').includes(v.id)).reduce((a,s)=>a+(s.d.amount||0),0);
     const init=Math.max(0,(v.d.paid||0)-linked);if(init<=0)return;
     out.push({d:ds(v.d.date)||'',in:0,out:init,desc:'پرداخت همراه خرید '+(v.d.title||''),e:'purchinv',ref:v.id});});
+  // 🛒 فروش/خرید سریعِ نقدی → جریان نقد روزانه
+  byE('sale').forEach(x=>{if(x.d._inv||x.d.kind==='اعتباری')return;if(biz&&!relIds(x,'biz').includes(biz))return;if(!cashMethodOk('نقد',ch))return;const a=saleAmt(x);if(a<=0)return;
+    out.push({d:ds(x.d.date)||'',in:a,out:0,desc:'فروش سریع نقدی '+(x.d.title||''),e:'sale',ref:x.id});});
+  byE('purchase').forEach(x=>{if(x.d._pinv||x.d.kind==='اعتباری')return;if(biz&&!relIds(x,'biz').includes(biz))return;if(!cashMethodOk('نقد',ch))return;const a=purchAmt(x);if(a<=0)return;
+    out.push({d:ds(x.d.date)||'',in:0,out:a,desc:'خرید سریع نقدی '+(x.d.title||''),e:'purchase',ref:x.id});});
   out.sort((a,b)=>{const ka=dnorm(a.d)||'',kb=dnorm(b.d)||'';return ka<kb?-1:ka>kb?1:0;});
   return out;
 }
@@ -4244,7 +4251,7 @@ function cashdashHTML(){
       <option value="cash" ${view.cfCh==='cash'?'selected':''}>💵 نقد (صندوق)</option>
       <option value="bank" ${view.cfCh==='bank'?'selected':''}>🏦 بانک (کارت/انتقال/چک)</option>
     </select>
-    <span style="flex:1"></span>${can('c','settle')?`<button class="btn sm" onclick="settleDraft=null;go('settlenew')">💵 دریافت/پرداخت</button>`:''}</div>
+    <span style="flex:1"></span>${can('c','settle')?`<button class="btn gh sm" onclick="settleTemplate()">📄 قالب</button><button class="btn gh sm" onclick="impOpen('settle')">📥 ورود اکسل</button><button class="btn sm" onclick="settleDraft=null;go('settlenew')">💵 دریافت/پرداخت</button>`:''}</div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:4px">
     ${card('💰 کل ورودی',money(totIn))}
     ${card('💸 کل خروجی',money(totOut),true)}
@@ -4289,13 +4296,15 @@ function arapdashHTML(){
     </tbody></table></div></div>`:'';
   return `<div class="tools"><label style="margin:0">کسب‌وکار:</label>
     <select onchange="setGBiz(this.value)" style="max-width:220px"><option value="">همه</option>${bizzes.map(b=>`<option value="${b.id}" ${b.id===gBiz()?'selected':''}>${esc(b.d.title)}</option>`).join('')}</select>
-    <span style="flex:1"></span>${can('c','settle')?`<button class="btn sm" onclick="settleDraft=null;go('settlenew')">💵 دریافت/پرداخت جدید</button>`:''}</div>
+    <span style="flex:1"></span>${can('c','settle')?`<button class="btn gh sm" onclick="settleTemplate()">📄 قالب</button><button class="btn gh sm" onclick="impOpen('settle')">📥 ورود اکسل</button><button class="btn sm" onclick="settleDraft=null;go('settlenew')">💵 دریافت/پرداخت جدید</button>`:''}</div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:4px">
     ${card('📥 کل طلب از مشتریان',money(totAR),false)}
     ${card('📤 کل بدهی به تامین‌کنندگان',money(totAP),true)}
+    ${card('⚖️ خالص وضعیت (طلب − بدهی)',money(totAR-totAP),totAR-totAP<0)}
     ${card('💰 دریافت‌های ثبت‌شده',money(inCash))}
     ${card('💸 پرداخت‌های ثبت‌شده',money(outCash))}
   </div>
+  <div style="font-size:11px;color:var(--tx2);margin-bottom:8px">📌 طلب از فاکتورهای فروش و فروش‌های سریعِ اعتباریِ تسویه‌نشده می‌آید؛ بدهی از فاکتورهای خرید و خریدهای سریعِ اعتباری. با ثبت «دریافت/پرداخت» (دستی یا اکسل) مانده‌ها خودکار به‌روز می‌شود.</div>
   ${tbl(arRows,r=>({id:r.c.id,n:r.c.d.title||'—'}),'📥 مانده طلب از مشتریان','دریافت از مشتری')}
   ${tbl(apRows,r=>({id:r.s.id,n:r.s.d.title||'—'}),'📤 مانده بدهی به تامین‌کنندگان','پرداخت به تامین‌کننده')}
   ${!arRows.length&&!apRows.length?'<div class="empty">همه‌ی حساب‌ها تسویه است 🎉</div>':''}`;
@@ -10675,6 +10684,14 @@ function appSalesYear(biz,jy){let s=0;
   byE('sale').filter(x=>!x.d._inv).forEach(x=>{if(biz&&!relIds(x,'biz').includes(biz))return;const d=ds(x.d.date);if(!d)return;const p=d.split('-').map(Number);if(g2j(p[0],p[1],p[2])[0]===jy)s+=saleAmt(x);});
   return s;}
 function appPurchYear(biz,jy){let s=0;byE('purchase').forEach(x=>{if(biz&&!relIds(x,'biz').includes(biz))return;const d=ds(x.d.date);if(!d)return;const p=d.split('-').map(Number);if(g2j(p[0],p[1],p[2])[0]===jy)s+=purchAmt(x);});return s;}
+/* بهای تمام‌شدهٔ دقیقِ کالای فروش‌رفتهٔ سیستم در یک سال (FIFO: اول‌دوره+خرید−آخردوره، به تفکیک فروش) */
+function appCogsYear(biz,jy){let cogs=0,rev=0,qty=0;
+  byE('product').filter(p=>!p.d.sub&&(!biz||relIds(p,'biz').includes(biz))).forEach(p=>{
+    const f=fifoCalc(p);
+    salesOf(p.id).forEach(s=>{const d=ds(s.d.date);if(!d)return;const pp=d.split('-').map(Number);if(g2j(pp[0],pp[1],pp[2])[0]!==jy)return;
+      if(f.bySale[s.id]==null)return;
+      const r=(+s.d.qty||0)*(+s.d.price||0)-(+s.d.extra||0);rev+=r;qty+=(+s.d.qty||0);cogs+=r-f.bySale[s.id];});});
+  return {cogs,rev,qty};}
 /* ===== ورود اکسل سود و زیان (فرمت ترانهاده: ردیف=خط، ستون=ماه) ===== */
 function finImportFile(inp){const f=inp.files&&inp.files[0];if(!f)return;const biz=document.getElementById('fin_imp_biz').value;
   loadXLSX().then(()=>{const rd=new FileReader();rd.onload=()=>{try{
@@ -10704,6 +10721,12 @@ function finParseWB(wb,biz){const L=finLines();const nmap={};L.forEach(l=>nmap[_
       else put({id:uid(),e:'plfin',d:{title:jy+' '+mon,biz:biz?[biz]:[],jy,jm:mon,unit:'ریال',v},u:Date.now()});
       recCount++;});});
   return {recs:recCount,sheets,miss:[...miss]};}
+function settleTemplate(){loadXLSX().then(()=>{const rows=[['شرح','نوع','کسب‌وکار','مشتری','تامین‌کننده','مبلغ (تومان)','روش','تاریخ'],
+  ['نمونه: دریافت بابت فاکتور ۱۰۱','دریافت از مشتری','','نام مشتری','','5000000','کارت','1404/04/25'],
+  ['نمونه: پرداخت به تامین‌کننده','پرداخت به تامین‌کننده','','','نام تامین‌کننده','8000000','انتقال بانکی','1404/04/26']];
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:30},{wch:20},{wch:16},{wch:18},{wch:18},{wch:16},{wch:14},{wch:14}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'دریافت-پرداخت');XLSX.writeFile(wb,'قالب-دریافت-پرداخت.xlsx');});}
+window.settleTemplate=settleTemplate;
 function finTemplate(){loadXLSX().then(()=>{const rows=[['عنوان',...FMON,'کل سال']];
   finLines().forEach(l=>rows.push([l.n,...FMON.map(()=>''),'']));
   const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:34},...FMON.map(()=>({wch:13})),{wch:14}];
@@ -10763,15 +10786,22 @@ function pldashHTML(){
   </div>`;
   // آبشار
   h+=`<div class="sec"><div style="font-weight:800;margin-bottom:4px">💧 آبشار سود و زیان — ${yr} ${mode==='month'?mon:'(کل سال)'}</div>${plWater(c)}</div>`;
-  // مغایرت‌سنجی با سیستم (سالانه)
-  const appSale=appSalesYear(b,yr);const plSale=A.v.s_sales||0;const dv=plSale?Math.round((appSale-plSale)/plSale*100):null;
-  const appPur=appPurchYear(b,yr);
-  h+=`<div class="sec" style="border:1px solid ${dv!=null&&Math.abs(dv)>5?'var(--warn)':'var(--ok)'}"><div style="font-weight:800;margin-bottom:6px">🔍 کنترل مغایرت با سیستم (سال ${yr})</div>
-    <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">قلم</th><th>سود و زیان (تومان)</th><th>سیستم فروش/خرید (تومان)</th><th>مغایرت</th></tr></thead><tbody>
-      <tr><td style="text-align:right">فروش (ناخالص)</td><td style="text-align:center">${money(plSale)}</td><td style="text-align:center">${money(appSale)}</td><td style="text-align:center">${dv==null?'—':`<b style="color:${Math.abs(dv)>5?'#ff3b30':'#16c784'}">${dv>=0?'+':''}${dv.toLocaleString('fa-IR')}٪</b>`}</td></tr>
-      <tr><td style="text-align:right">بهای تمام‌شده / خرید سیستم</td><td style="text-align:center">${money(c.cogs)}</td><td style="text-align:center">${money(appPur)}</td><td style="text-align:center"><span style="color:var(--tx2);font-size:10px">مرجع کنترلی</span></td></tr>
+  // 🔍 مغایرت‌سنجی دقیق سالانه با سیستم (فروش خالص، بهای تمام‌شدهٔ FIFO، سود ناخالص)
+  const sysSale=appSalesYear(b,yr);const plNet=c.netSales;
+  const cg=appCogsYear(b,yr);const sysCogs=cg.cogs;const plCogs=c.cogs;
+  const sysGross=sysSale-sysCogs;const plGross=c.gross;
+  const vpct=(sys,pl)=>pl?Math.round((sys-pl)/Math.abs(pl)*100):null;
+  const dSale=vpct(sysSale,plNet), dCogs=vpct(sysCogs,plCogs), dGross=vpct(sysGross,plGross);
+  const noPur=sysCogs<=0; // اگر خرید تراکنشی وارد نشده باشد بهای تمام‌شده سیستم صفر است
+  const vcell=(d,warnAbove)=>d==null?'<span style="color:var(--tx2)">—</span>':`<b style="color:${Math.abs(d)>warnAbove?'#ff3b30':'#16c784'}">${d>=0?'+':''}${d.toLocaleString('fa-IR')}٪</b>`;
+  const worst=Math.max(Math.abs(dSale||0),noPur?0:Math.abs(dCogs||0));
+  h+=`<div class="sec" style="border:1px solid ${worst>5?'var(--warn)':'var(--ok)'}"><div style="font-weight:800;margin-bottom:6px">🔍 کنترل مغایرت دقیق با سیستم — سال ${yr}</div>
+    <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">قلم</th><th>سود و زیان (تومان)</th><th>سیستم عملیاتی (تومان)</th><th>مغایرت</th><th>وضعیت</th></tr></thead><tbody>
+      <tr><td style="text-align:right">فروش خالص</td><td style="text-align:center">${money(plNet)}</td><td style="text-align:center">${money(sysSale)}</td><td style="text-align:center">${vcell(dSale,5)}</td><td style="text-align:center">${dSale==null?'—':Math.abs(dSale)<=5?'✅ هم‌خوان':'⚠️ بررسی'}</td></tr>
+      <tr><td style="text-align:right">بهای تمام‌شدهٔ کالای فروش‌رفته (FIFO)</td><td style="text-align:center">${money(plCogs)}</td><td style="text-align:center">${noPur?'<span style="color:var(--tx2)">داده خرید ناکافی</span>':money(sysCogs)}</td><td style="text-align:center">${noPur?'—':vcell(dCogs,5)}</td><td style="text-align:center">${noPur?'—':(Math.abs(dCogs)<=5?'✅ هم‌خوان':'⚠️ بررسی')}</td></tr>
+      <tr style="font-weight:800"><td style="text-align:right">سود ناخالص</td><td style="text-align:center">${money(plGross)}</td><td style="text-align:center">${noPur?'—':money(sysGross)}</td><td style="text-align:center">${noPur?'—':vcell(dGross,8)}</td><td style="text-align:center">${noPur?'—':(Math.abs(dGross)<=8?'✅ هم‌خوان':'⚠️ بررسی')}</td></tr>
     </tbody></table></div>
-    <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">اگر مغایرت فروش زیر ۵٪ باشد، داده‌های سیستم و حسابداری هم‌خوان‌اند. مغایرت زیاد یعنی فاکتور/فروشی در سیستم ثبت یا حذف نشده — همین‌جا کنترلش کن. (بهای تمام‌شده با «خرید ثبت‌شدهٔ سیستم» مقایسهٔ تقریبی است؛ برابری کامل نیاز به لحاظ تغییر موجودی دارد.)</div></div>`;
+    <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">«بهای تمام‌شدهٔ سیستم» با موتور FIFO محاسبه می‌شود: اول‌دورهٔ انبار + خریدهای همان سال − موجودی پایان دوره، به تفکیک هر فاکتور فروش. برای مقایسهٔ دقیق، خرید و فروش تراکنشی همان سال باید در سیستم ثبت شده باشد. مغایرت زیر ۵٪ (فروش/بها) یعنی دادهٔ عملیاتی و حسابداری هم‌خوان‌اند؛ مغایرت بالا یعنی فاکتور خرید/فروشی جا افتاده یا اضافه ثبت شده — همین‌جا کنترلش کن.${noPur?' <b style="color:var(--warn)">اکنون خرید تراکنشیِ کافی برای این سال ثبت نشده، پس بهای تمام‌شده قابل مقایسه نیست.</b>':''}</div></div>`;
   // ساختار هزینه (آبشاری)
   const opexLines=finLines().filter(l=>l.sec==='opex').map(l=>({l,v:plToman(A.v[l.k]||0,'تومان')})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
   const opexTot=opexLines.reduce((a,x)=>a+x.v,0)||1;
@@ -10785,7 +10815,8 @@ function pldashHTML(){
     h+=`<div class="sec"><div style="font-weight:800;margin-bottom:6px">📈 روند ماهانهٔ ${yr}</div>${plMultiLine([{name:'جمع درآمد',color:'#3b82f6',pts:mAgg.map(x=>x.totalInc)},{name:'سود ناخالص',color:'#16c784',pts:mAgg.map(x=>x.gross)},{name:'سود خالص',color:'#f5a623',pts:mAgg.map(x=>x.net)}],FMON.map(m=>m.slice(0,3)))}</div>`;}
   // توصیه‌های مالی
   const rec=[];
-  if(dv!=null&&Math.abs(dv)>5)rec.push(['🔴','مغایرت فروش','فروشِ سیستم و حسابداری '+Math.abs(dv).toLocaleString('fa-IR')+'٪ اختلاف دارد؛ فاکتورهای ثبت‌نشده یا اضافی را پیدا و اصلاح کن.']);
+  if(dSale!=null&&Math.abs(dSale)>5)rec.push(['🔴','مغایرت فروش','فروشِ سیستم و حسابداری '+Math.abs(dSale).toLocaleString('fa-IR')+'٪ اختلاف دارد؛ فاکتورهای ثبت‌نشده یا اضافی را پیدا و اصلاح کن.']);
+  if(!noPur&&dCogs!=null&&Math.abs(dCogs)>5)rec.push(['🟠','مغایرت بهای تمام‌شده','بهای تمام‌شدهٔ سیستم (FIFO) و حسابداری '+Math.abs(dCogs).toLocaleString('fa-IR')+'٪ اختلاف دارد؛ خرید/موجودی ثبت‌شده را با انبار تطبیق بده.']);
   if(c.netPct<3)rec.push(['⚠️','حاشیهٔ سود نازک','سود خالص فقط '+c.netPct.toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪ درآمد است؛ روی قیمت‌گذاری و کنترل هزینه‌های بزرگ تمرکز کن.']);
   if(opexLines[0]&&opexLines[0].v/opexTot>0.3)rec.push(['🧾','تمرکز هزینه','«'+opexLines[0].l.n+'» به‌تنهایی '+Math.round(opexLines[0].v/opexTot*100).toLocaleString('fa-IR')+'٪ هزینه‌های عملیاتی است؛ بزرگ‌ترین اهرم صرفه‌جویی همین‌جاست.']);
   const gg=grow(c.gross,pcalc.gross),sg=grow(c.totalInc,pcalc.totalInc);
