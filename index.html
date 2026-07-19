@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.22</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.23</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.22</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.23</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2526,7 +2526,7 @@ function modAutopostHTML(){
 }
 function drawModcfg(){if(view&&view.type==='modcfg')document.getElementById('content').innerHTML=modcfgHTML();}
 window.openModcfg=openModcfg;window.toggleModule=toggleModule;window.saveBrand=saveBrand;
-const VIEW_GRP={bizkpi:'مدیریت کسب و کار',bizdash:'مدیریت کسب و کار',ceodash:'مدیریت کسب و کار',ctrldash:'مدیریت کسب و کار',quickadd:'مدیریت کسب و کار',whdash:'مدیریت کسب و کار',pudash:'مدیریت کسب و کار',custdash:'مدیریت کسب و کار',smdash:'مدیریت کسب و کار',pfdash:'مدیریت کسب و کار',salesdash:'مدیریت کسب و کار',invnew:'مدیریت کسب و کار',pinvnew:'مدیریت کسب و کار',targetdash:'مدیریت کسب و کار',settlenew:'مدیریت کسب و کار',arapdash:'مدیریت کسب و کار',cashdash:'مدیریت کسب و کار',plreport:'مدیریت کسب و کار',
+const VIEW_GRP={bizkpi:'مدیریت کسب و کار',bizdash:'مدیریت کسب و کار',ceodash:'مدیریت کسب و کار',ctrldash:'مدیریت کسب و کار',quickadd:'مدیریت کسب و کار',whdash:'مدیریت کسب و کار',pudash:'مدیریت کسب و کار',supdash:'مدیریت کسب و کار',custdash:'مدیریت کسب و کار',smdash:'مدیریت کسب و کار',pfdash:'مدیریت کسب و کار',salesdash:'مدیریت کسب و کار',invnew:'مدیریت کسب و کار',pinvnew:'مدیریت کسب و کار',targetdash:'مدیریت کسب و کار',settlenew:'مدیریت کسب و کار',arapdash:'مدیریت کسب و کار',cashdash:'مدیریت کسب و کار',plreport:'مدیریت کسب و کار',
  gldash:'حسابداری',glnew:'حسابداری',chqdash:'حسابداری',
  findash:'مالی تخصصی (IFRS)',invdash:'سرمایه‌گذاری و ثروت',procmap:'فرآیندها (ISO)',
  epcfdash:'EPCF',portdash:'EPCF',perfdash:'EPCF',cdash:'ساخت و ساز',tokendash:'توکن‌سازی',agiledash:'توسعه نرم‌افزار',
@@ -6378,7 +6378,7 @@ function bizMenuHTML(){
   // 5️⃣ مدیریت خرید
   h+=sec('🚚 مدیریت خرید',
     it('pudash','🚚 داشبورد مدیریت خرید',"go('pudash')",canSee('purchase')&&canView('pudash'))
-    +it('supscore','🏭 تأمین‌کنندگان (اطلاعات و امتیاز)',"goSuppliers()",canSee('purchase')&&canView('pudash'))
+    +it('supdash','🏭 تأمین‌کنندگان (اطلاعات و امتیاز)',"go('supdash')",canSee('crm')&&canView('supdash'))
     +it('pinvnew','🧾 ثبت فاکتور خرید',"pinvDraft=null;go('pinvnew')",canSee('purchinv')&&can('c','purchinv')&&canView('pinvnew'))
     +ent('purchinv')+ent('purchase'));
   // 6️⃣ مدیریت مالی
@@ -6464,7 +6464,7 @@ function go(type,e,id,flt){
   document.getElementById('content').scrollTop=0;render();
 }
 function goBack(){if(hist.length){view=hist.pop();render();}else go('dash');}
-function goSuppliers(){go('pudash');view.puCard='supplier';render();}
+function goSuppliers(){go('supdash');}
 function newSupplier(){if(!can('c','crm')){alert('دسترسی ندارید');return;}cur={id:uid(),e:'crm',d:{rel:'تامین‌کننده'},u:0,_new:true};drawModal();}
 window.goSuppliers=goSuppliers;window.newSupplier=newSupplier;
 function render(){
@@ -6517,6 +6517,7 @@ function render(){
     view.type==='mydash'?'📐 داشبردساز من':
     view.type==='whdash'?'📦 داشبورد انبار':
     view.type==='pudash'?'🚚 داشبورد مدیریت خرید':
+    view.type==='supdash'?'🏭 مدیریت تأمین‌کنندگان':
     view.type==='custdash'?'🛍️ داشبورد مشتریان':
     view.type==='smdash'?'💼 داشبورد مدیریت فروش':
     view.type==='quickadd'?'⚡ مرکز ثبت سریع':
@@ -6549,7 +6550,7 @@ function render(){
     view.type==='rec'?(E[view.e].ic+' '+(recs[view.id].d.title||E[view.e].n)):
     E[view.e].ic+' '+E[view.e].n;
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',invdash:'invdash',procmap:'procmap',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',ctrldash:'ctrldash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',agiledash:'agiledash'};
+  const VG={me:'me',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',invdash:'invdash',procmap:'procmap',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',ctrldash:'ctrldash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',agiledash:'agiledash'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -6578,6 +6579,7 @@ function render(){
     else if(view.type==='mydash')c.innerHTML=mydashHTML();
     else if(view.type==='whdash')c.innerHTML=whdashHTML();
     else if(view.type==='pudash')c.innerHTML=pudashHTML();
+    else if(view.type==='supdash')c.innerHTML=supdashHTML();
     else if(view.type==='custdash')c.innerHTML=custdashHTML();
     else if(view.type==='smdash')c.innerHTML=smdashHTML();
     else if(view.type==='quickadd')c.innerHTML=quickaddHTML();
@@ -7398,6 +7400,47 @@ function puSupScore(b){
     return {sid:g.sid,name,spend:g.spend,n:g.n,open:g.open,prods:g.prods.size,priceEdge,ontime,payterm,climit,quality,score,
       credLeft:climit>0?Math.max(0,climit-g.open):null};
   }).sort((a,b)=>b.score-a.score);
+}
+/* ===== 🏭 صفحهٔ اختصاصی تأمین‌کنندگان (ورود دستی + اکسل + امتیازدهی) ===== */
+function supdashHTML(){
+  const b=gBiz();const bizzes=byE('business');
+  const list=puSupScore(b);
+  const scored=list.filter(s=>s.n>0);
+  const avg=scored.length?Math.round(scored.reduce((a,s)=>a+s.score,0)/scored.length):null;
+  const best=list[0]||null;
+  const sc=v=>v>=75?'var(--ok)':v>=50?'#f5a623':'var(--bad)';
+  const pe=x=>x==null?'<span style="color:var(--tx2)">—</span>':(x>=0?'<span style="color:var(--ok)">'+Math.round(x).toLocaleString('fa-IR')+'٪ ارزان‌تر</span>':'<span style="color:var(--bad)">'+Math.round(-x).toLocaleString('fa-IR')+'٪ گران‌تر</span>');
+  const edit=s=>s.sid?`openRec('crm','${s.sid}')`:'';
+  const card=(t,v,sub)=>`<div class="sec" style="text-align:center;padding:13px 10px"><div style="font-size:11px;color:var(--tx2)">${t}</div><div style="font-size:18px;font-weight:800;margin-top:4px">${v}</div>${sub?`<div style="font-size:10px;color:var(--tx2);margin-top:3px">${sub}</div>`:''}</div>`;
+  let h=`<div class="tools"><b style="font-size:13px">🏭 مدیریت تأمین‌کنندگان</b><span style="flex:1"></span>
+    <select class="inp sm" style="width:auto" onchange="setGBiz(this.value)"><option value="">همه کسب‌وکارها</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select>
+    ${can('c','crm')?`<button class="btn sm" onclick="newSupplier()">➕ تأمین‌کننده جدید</button>`:''}
+    ${can('c','crm')?`<button class="btn gh sm" onclick="impOpen('crm')">📥 ورود از اکسل</button>`:''}
+    <button class="btn gh sm" onclick="go('pudash')">🚚 داشبورد خرید</button></div>`;
+  h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-bottom:10px">
+    ${card('تعداد تأمین‌کننده',list.length.toLocaleString('fa-IR'))}
+    ${card('🏆 بهترین',best?esc(best.name):'—',best?('امتیاز '+best.score.toLocaleString('fa-IR')):'')}
+    ${card('میانگین امتیاز',avg!=null?avg.toLocaleString('fa-IR'):'—',scored.length?scored.length.toLocaleString('fa-IR')+' تأمین‌کنندهٔ فعال':'هنوز خریدی ثبت نشده')}
+  </div>`;
+  const rows=list.map(s=>`<tr style="cursor:pointer" onclick="${edit(s)}">
+    <td style="text-align:right"><b style="color:var(--ac)">${esc(s.name)}</b>${s.sid&&recs[s.sid]&&recs[s.sid].d.scountry?` <span style="color:var(--tx2);font-size:10px">${esc(recs[s.sid].d.scountry)}</span>`:''}</td>
+    <td style="text-align:center"><b style="color:${sc(s.score)};font-size:14px">${s.score.toLocaleString('fa-IR')}</b></td>
+    <td style="text-align:center">${pe(s.priceEdge)}</td>
+    <td style="text-align:center">${s.ontime==null?'<span style="color:var(--tx2)">—</span>':`<b style="color:${sc(s.ontime)}">${s.ontime.toLocaleString('fa-IR')}٪</b>`}</td>
+    <td style="text-align:center">${s.climit>0?money(s.climit)+(s.payterm?`<br><span style="font-size:10px;color:var(--tx2)">${s.payterm.toLocaleString('fa-IR')} روز</span>`:''):'<span style="color:var(--tx2)">—</span>'}</td>
+    <td style="text-align:center">${s.quality?('⭐'+s.quality.toLocaleString('fa-IR')):'<span style="color:var(--tx2)">—</span>'}</td>
+    <td style="text-align:center;white-space:nowrap">${money(s.spend)}</td>
+    <td style="text-align:center">${s.open>0?`<b style="color:var(--bad)">${money(s.open)}</b>`:'—'}</td>
+    <td style="text-align:center">${s.sid?`<button class="btn gh sm" style="padding:1px 8px" onclick="event.stopPropagation();${edit(s)}">✏️</button>`:''}</td></tr>`).join('');
+  h+=`<div class="sec"><div class="tblwrap"><table style="font-size:12px">
+    <thead><tr><th style="text-align:right">🏭 تأمین‌کننده</th><th>امتیاز کل</th><th>قیمت</th><th>تحویل به‌موقع</th><th>حد اعتبار / مهلت</th><th>کیفیت</th><th>خرید (۳۶۵ر)</th><th>بدهی باز</th><th></th></tr></thead>
+    <tbody>${rows||`<tr><td colspan="9" style="text-align:center;color:var(--tx2);padding:16px">هنوز تأمین‌کننده‌ای ثبت نشده — «➕ تأمین‌کننده جدید» یا «📥 ورود از اکسل».</td></tr>`}</tbody></table></div>
+    <div style="font-size:10.5px;color:var(--tx2);margin-top:8px">امتیاز کل (۰–۱۰۰) = ۴۰٪ قیمت (نسبت به میانگین بازارِ همان کالا، خودکار از خریدها) + ۳۵٪ تحویل به‌موقع + ۲۵٪ حد اعتبار/مهلت پرداخت + جایزهٔ کیفیت. روی هر ردیف بزن تا ویرایش کنی.</div></div>`;
+  h+=`<div class="sec" style="border:1px dashed var(--line)"><div style="font-weight:800;font-size:12.5px;margin-bottom:5px">📥 راهنمای ورود اکسل تأمین‌کنندگان</div>
+    <div style="font-size:11.5px;color:var(--tx2);line-height:1.9">فایل اکسل/CSV با این ستون‌ها بساز (سطر اول = عنوان ستون‌ها). سیستم خودکار تشخیص می‌دهد:<br>
+    <b>نام</b> · <b>نوع رابطه</b> (بنویس «تامین‌کننده») · <b>🌍 کشور (برای تأمین‌کننده)</b> · <b>💳 حد اعتبار می‌دهد (تومان)</b> · <b>⏳ مهلت پرداخت (روز)</b> · <b>🚚 تحویل به‌موقع (٪ ۰ تا ۱۰۰)</b> · <b>⭐ کیفیت کالا/خدمت (۱ تا ۵)</b> · تلفن سازمان · ایمیل سازمان<br>
+    شاخصِ «قیمت» را وارد نکن؛ خودکار از دادهٔ خریدها محاسبه می‌شود.</div></div>`;
+  return h;
 }
 function pudashHTML(){
   const bizzes=byE('business');
