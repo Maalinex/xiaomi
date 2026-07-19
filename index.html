@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.09</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.10</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.09</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.10</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -6251,6 +6251,10 @@ function go(type,e,id,flt){
 }
 function goBack(){if(hist.length){view=hist.pop();render();}else go('dash');}
 function render(){
+  let _foc=null;try{const a=document.activeElement;
+    if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')&&a.closest('#content')){
+      _foc={id:a.id||'',dk:a.getAttribute('data-k')||'',ds:a.getAttribute('data-search')||'',ss:a.selectionStart,se:a.selectionEnd};}
+  }catch(e){}
   _domCache={}; // کش محدوده داده در هر رندر تازه می‌شود
   // 🐎 کش‌ها بین رندرها زنده می‌مانند؛ فقط put/pull/realtime آن‌ها را نامعتبر می‌کنند
   try{migrateChain();}catch(e){} // تبدیل رکوردهای قدیمی استراتژی/هدف به BSC
@@ -6385,8 +6389,17 @@ function render(){
   try{if(view.type!=='targetdash'&&view.type!=='modcfg'){const tb=targetBannerHTML();if(tb)c.insertAdjacentHTML('afterbegin',tb);}}catch(e){} // بنر هشدار تارگت
   try{if(view.type!=='chqdash'&&view.type!=='modcfg'){const cb=chqBoardBanner();if(cb)c.insertAdjacentHTML('afterbegin',cb);}}catch(e){} // بنر چک سررسیدگذشته
   try{applySecLayout();}catch(e){} // چیدمان سفارشی المان‌های صفحه
+  try{if(_foc){let el=null;
+    if(_foc.id)el=document.getElementById(_foc.id);
+    if(!el&&_foc.ds)el=document.querySelector('#content [data-search="'+_foc.ds+'"]');
+    if(!el&&_foc.dk)el=document.querySelector('#content [data-k="'+CSS.escape(_foc.dk)+'"]');
+    if(el&&el.closest('#content')){el.focus();try{if(_foc.ss!=null&&el.setSelectionRange)el.setSelectionRange(_foc.ss,_foc.se);}catch(e){}}}
+  }catch(e){}
   whoami();
 }
+let _searchT=null;
+function listSearch(v){view.q=v;view.page=0;clearTimeout(_searchT);_searchT=setTimeout(render,200);}
+window.listSearch=listSearch;
 function tagCls(v){
   if(['Done','انجام شد','فعال','شاغل','طبق برنامه','✅ تأیید شده','در حال اجراء','رشد','استحقاقی','دریافت'].includes(v))return 'g';
   if(['In progress','در حال اجرا','در حال مذاکره','🔍 در حال ارزیابی','تاخیر دارد','مرخصی بلندمدت','بالا','محتمل'].includes(v))return v==='تاخیر دارد'?'y':'b';
@@ -6884,6 +6897,11 @@ function whdashHTML(){
   byE('sale').forEach(x=>{if(x.d._inv)return;if(b&&!relIds(x,'biz').includes(b))return;saleYr+=saleAmt(x);});
   byE('plmonth').forEach(r=>{if(b&&!relIds(r,'biz').includes(b))return;saleYr+=(+r.d.rev||0)-Math.abs(+r.d.ret||0)-Math.abs(+r.d.disc||0);});
   const card=(t,v,bad,sub)=>`<div class="sec" style="text-align:center;padding:13px 10px"><div style="font-size:11px;color:var(--tx2)">${t}</div><div style="font-size:18px;font-weight:800;margin-top:4px;color:${bad?'var(--bad)':'var(--tx)'}">${v}</div>${sub?`<div style="font-size:10px;color:var(--tx2);margin-top:3px">${sub}</div>`:''}</div>`;
+  const kcard=(key,t,v,bad,sub)=>{const on=view.whCard===key;
+    return `<div class="sec" style="text-align:center;padding:13px 10px;cursor:pointer;${on?'border:1px solid var(--ac)':''}" onclick="view.whCard=${on?'null':`'${key}'`};render()">
+      <div style="font-size:11px;color:var(--tx2)">${t} ▾</div>
+      <div style="font-size:18px;font-weight:800;margin-top:4px;color:${bad?'var(--bad)':'var(--tx)'}">${v}</div>
+      ${sub?`<div style="font-size:10px;color:var(--tx2);margin-top:3px">${sub}</div>`:''}</div>`;};
   const pts=whValueSeries(b,view.whMode);
   const MODES=[['d','روزانه'],['w','هفتگی'],['m','ماهیانه'],['q','فصلی'],['y','سالانه']];
   const pn=x=>esc(x.p.d.title||'—');
@@ -6900,19 +6918,19 @@ function whdashHTML(){
     <div style="font-size:10.5px;color:var(--tx2);margin-top:4px">ارزش انبار = موجودی هر لحظه × بهای واحد (FIFO) — برای هر دوره تا پایان همان بازه محاسبه می‌شود</div></div>`;
   // کارت‌های شاخص
   h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">
-    ${card('💰 ارزش کل انبار (FIFO)',money(totVal))}
-    ${card('📦 تعداد کل واحد',totQty.toLocaleString('fa-IR'),false,items.toLocaleString('fa-IR')+' قلم دارای موجودی')}
-    ${card('🔄 نرخ گردش موجودی',turn.toLocaleString('fa-IR',{maximumFractionDigits:2})+'× در سال',turn<1&&totVal>0,'بهای فروش سالانه ÷ ارزش انبار')}
-    ${card('⏳ روز پوشش موجودی (تعدادی)',dio==null?'—':Math.round(dio).toLocaleString('fa-IR')+' روز',dio!=null&&dio>180,noSaleN?noSaleN.toLocaleString('fa-IR')+' کالای بدون فروش اخیر':'')}
-    ${card('⚠️ زیر حداقل موجودی',low.length.toLocaleString('fa-IR')+' قلم',low.length>0,'نیازمند خرید')}
-    ${card('🧊 موجودی راکد (>۶۰ روز ماندگاری)',money(deadVal),deadVal>0,deadPct.toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪ کل انبار │ '+dead.length.toLocaleString('fa-IR')+' قلم')}
-    ${card('⛔ کسری (Stockout)',shortage.length.toLocaleString('fa-IR')+' قلم',shortage.length>0,'فروش بیش از موجودی')}
+    ${kcard('val','💰 ارزش کل انبار (FIFO)',money(totVal))}
+    ${kcard('qty','📦 تعداد کل واحد',totQty.toLocaleString('fa-IR'),false,items.toLocaleString('fa-IR')+' قلم دارای موجودی')}
+    ${kcard('turn','🔄 نرخ گردش موجودی',turn.toLocaleString('fa-IR',{maximumFractionDigits:2})+'× در سال',turn<1&&totVal>0,'بهای فروش سالانه ÷ ارزش انبار')}
+    ${kcard('cover','⏳ روز پوشش موجودی (تعدادی)',dio==null?'—':Math.round(dio).toLocaleString('fa-IR')+' روز',dio!=null&&dio>180,noSaleN?noSaleN.toLocaleString('fa-IR')+' کالای بدون فروش اخیر':'')}
+    ${kcard('low','⚠️ زیر حداقل موجودی',low.length.toLocaleString('fa-IR')+' قلم',low.length>0,'نیازمند خرید')}
+    ${kcard('dead','🧊 موجودی راکد (>۶۰ روز)',money(deadVal),deadVal>0,deadPct.toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪ کل انبار │ '+dead.length.toLocaleString('fa-IR')+' قلم')}
+    ${kcard('shortage','⛔ کسری (Stockout)',shortage.length.toLocaleString('fa-IR')+' قلم',shortage.length>0,'فروش بیش از موجودی')}
     <div class="sec" style="text-align:center;padding:13px 10px;cursor:pointer;${view.whWasteOpen?'border:1px solid var(--ac)':''}" onclick="view.whWasteOpen=!view.whWasteOpen;render()">
       <div style="font-size:11px;color:var(--tx2)">🗑 ضرر خالص ضایعات کالا ▾</div>
       <div style="font-size:18px;font-weight:800;margin-top:4px;color:${wNet>0?'var(--bad)':'var(--tx)'}">${money(wNet)}</div>
       <div style="font-size:10px;color:var(--tx2);margin-top:3px">به قیمت خرید ${abbrN(wTot.cost)} │ به قیمت فروش ${abbrN(wTot.sell)}${wTot.recover?' │ بازیافت '+abbrN(wTot.recover):''}<br>${wTot.qty.toLocaleString('fa-IR')} عدد ضایع │ برای جزئیات کلیک کن</div></div>
-    ${card('🏬 هزینه انبارداری (کل)',money(storeCost),false,saleYr>0?(storeCost/saleYr*100).toLocaleString('fa-IR',{maximumFractionDigits:2})+'٪ فروش':'')}
-    ${card('💵 بهای تمام‌شده فروش‌رفته',money(totCogs))}
+    ${kcard('store','🏬 هزینه انبارداری (کل)',money(storeCost),false,saleYr>0?(storeCost/saleYr*100).toLocaleString('fa-IR',{maximumFractionDigits:2})+'٪ فروش':'')}
+    ${kcard('cogs','💵 بهای تمام‌شده فروش‌رفته',money(totCogs))}
   </div>`;
   // 🗑 جزئیات آبشاری ضایعات به تفکیک کالا (با کلیک روی کارت باز می‌شود)
   if(view.whWasteOpen){
@@ -6943,16 +6961,28 @@ function whdashHTML(){
     <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">سن هر جنس = فاصله تاریخ ورودش به انبار (لایه FIFO) تا تاریخ مرجع (جدیدترین رویداد داده). هرچه به سمت راست‌تر، سرمایه بیشتر خوابیده.</div></div>`;
   // جدول‌ها
   const tbl=(title,list,cols)=>`<div class="sec"><h3>${title}</h3>${list.length?`<div class="tblwrap" style="max-height:300px;overflow:auto"><table><thead><tr>${cols.map(c=>`<th style="${c[2]||''}">${c[0]}</th>`).join('')}</tr></thead><tbody>${list.map(x=>`<tr>${cols.map(c=>`<td style="${c[2]||''}">${c[1](x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`:'<div class="empty" style="padding:14px">موردی نیست ✅</div>'}</div>`;
-  // ⏳ نزدیک‌ترین اقلام به اتمام (کمترین روز پوشش تعدادی)
+  // 🔽 جزئیات آبشاری کارت انتخاب‌شده (کلیک روی هر کارت این جدول را باز می‌کند)
   const coverList=rows.filter(x=>x.st>0&&x.avgDaily>0).sort((a,b)=>a.cover-b.cover);
-  h+=tbl('⏳ نزدیک‌ترین اقلام به اتمام (کمترین روز پوشش)',coverList.slice(0,20),
+  const K=view.whCard;
+  if(K==='val')h+=tbl('💎 ارزش انبار به تفکیک کالا (بیشترین اول)',rows.filter(x=>x.st>0).sort((a,b)=>b.val-a.val).slice(0,50),
+    [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['بهای واحد',x=>money(x.avg)],['ارزش',x=>money(x.val)],['٪ انبار',x=>totVal>0?(x.val/totVal*100).toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪':'—']]);
+  else if(K==='qty')h+=tbl('📦 تعداد موجودی به تفکیک کالا',rows.filter(x=>x.st>0).sort((a,b)=>b.st-a.st).slice(0,50),
+    [['کالا',pn,'text-align:right'],['تعداد موجودی',x=>x.st.toLocaleString('fa-IR')],['ارزش',x=>money(x.val)],['روز پوشش',x=>x.avgDaily>0?(x.cover>=999?'∞':Math.round(x.cover).toLocaleString('fa-IR')):'∞']]);
+  else if(K==='turn')h+=tbl('🔄 گردش موجودی به تفکیک کالا (فروش ۱۲ماه ÷ ارزش)',rows.filter(x=>x.st>0).slice().sort((a,b)=>((a.sold365*a.cost)/(a.val||1))-((b.sold365*b.cost)/(b.val||1))).slice(0,50),
+    [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['فروش ۱۲ماه',x=>x.sold365.toLocaleString('fa-IR')],['نرخ گردش',x=>`<b style="color:${x.val>0&&(x.sold365*x.cost)/x.val<1?'var(--bad)':'var(--tx)'}">${x.val>0?((x.sold365*x.cost)/x.val).toLocaleString('fa-IR',{maximumFractionDigits:2})+'×':'—'}</b>`]]);
+  else if(K==='cover')h+=tbl('⏳ نزدیک‌ترین اقلام به اتمام (کمترین روز پوشش)',coverList.slice(0,50),
     [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['فروش روزانه (۶۰روز)',x=>x.avgDaily.toLocaleString('fa-IR',{maximumFractionDigits:2})],['روز پوشش',x=>`<b style="color:${x.cover<7?'var(--bad)':x.cover<21?'#f5a623':'var(--tx)'}">${x.cover>=999?'∞':Math.round(x.cover).toLocaleString('fa-IR')}</b>`]]);
-  h+=tbl('⚠️ اقلام زیر حداقل موجودی (اولویت خرید)',low.sort((a,b)=>a.cover-b.cover),
+  else if(K==='low')h+=tbl('⚠️ اقلام زیر حداقل موجودی (اولویت خرید)',low.slice().sort((a,b)=>a.cover-b.cover),
     [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['حداقل',x=>(x.p.d.minstock||0).toLocaleString('fa-IR')],['فروش روزانه',x=>x.avgDaily.toLocaleString('fa-IR',{maximumFractionDigits:2})],['روز پوشش',x=>`<b style="color:var(--bad)">${x.cover>=999?'∞':Math.round(x.cover).toLocaleString('fa-IR')}</b>`]]);
-  h+=tbl('🧊 موجودی راکد (بیش از ۶۰ روز ماندگاری)',dead.sort((a,b)=>b.ageDays-a.ageDays).slice(0,20),
+  else if(K==='dead')h+=tbl('🧊 موجودی راکد (بیش از ۶۰ روز ماندگاری)',dead.slice().sort((a,b)=>b.ageDays-a.ageDays).slice(0,50),
     [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['ارزش خوابیده',x=>money(x.val)],['مدت ماندگاری',x=>`<b style="color:var(--bad)">${x.ageDays.toLocaleString('fa-IR')} روز</b>`],['آخرین فروش',x=>x.last?esc(iso2jstr(x.last)):'هرگز']]);
-  h+=tbl('💎 بیشترین ارزش انبار',rows.filter(x=>x.st>0).sort((a,b)=>b.val-a.val).slice(0,20),
-    [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['بهای واحد',x=>money(x.avg)],['ارزش',x=>money(x.val)],['فروش ۶۰روز',x=>x.sold90.toLocaleString('fa-IR')],['روز پوشش',x=>x.avgDaily>0?(x.cover>=999?'∞':Math.round(x.cover).toLocaleString('fa-IR')):'∞']]);
+  else if(K==='shortage')h+=tbl('⛔ اقلام دارای کسری (فروش بیش از موجودی)',shortage.slice().sort((a,b)=>b.shortage-a.shortage),
+    [['کالا',pn,'text-align:right'],['موجودی فعلی',x=>x.st.toLocaleString('fa-IR')],['کسری (تعداد)',x=>`<b style="color:var(--bad)">${x.shortage.toLocaleString('fa-IR')}</b>`]]);
+  else if(K==='store'){const rec=byE('expense').filter(x=>{if(b&&relIds(x,'biz').length&&!relIds(x,'biz').includes(b))return false;const c=String(x.d.cat||'');return ['حمل و انبارداری','انبار','بسته‌بندی','وانت'].some(k=>c.includes(k));}).sort((a,b2)=>(ds(b2.d.date)||'').localeCompare(ds(a.d.date)||''));
+    h+=tbl('🏬 رکوردهای هزینه انبارداری',rec.slice(0,50),
+      [['شرح',x=>esc(x.d.title||'—'),'text-align:right'],['سرفصل',x=>esc(x.d.cat||'—')],['مبلغ',x=>money(+x.d.amount||0)],['تاریخ',x=>x.d.date?esc(iso2jstr(ds(x.d.date))):'—']]);}
+  else if(K==='cogs')h+=tbl('💵 بهای تمام‌شده فروش‌رفته به تفکیک کالا',rows.filter(x=>x.cogs>0).sort((a,b)=>b.cogs-a.cogs).slice(0,50),
+    [['کالا',pn,'text-align:right'],['بهای تمام‌شده',x=>money(x.cogs)],['سود تحقق‌یافته',x=>`<span style="color:${x.profit<0?'var(--bad)':'var(--ok)'}">${money(x.profit)}</span>`]]);
   return h;
 }
 function ceodashHTML(){
@@ -8239,7 +8269,7 @@ function listHTML(e){
     ${can('c',e)?`<button class="btn" onclick="openRec('${e}')">＋ افزودن</button>`:''}
     ${can('c',e)?`<button class="btn gh sm" onclick="impOpen('${e}')" title="ورود گروهی داده از فایل اکسل یا CSV">📥 ورود از اکسل</button>`:''}
     ${can('d',e)&&rows.length?`<button class="btn bad sm" onclick="bulkDel('${e}')" title="حذف همه رکوردهایی که الان در لیست (با فیلتر/جستجوی فعلی) می‌بینید">🗑 حذف گروهی</button>`:''}
-    <input placeholder="🔍 جستجو در همه فیلدها…" value="${esc(q)}" oninput="view.q=this.value;view.page=0;render()">
+    <input data-search="listq" placeholder="🔍 جستجو در همه فیلدها…" value="${esc(q)}" oninput="listSearch(this.value)">
     <span style="color:var(--tx2);font-size:12px">${rows.length.toLocaleString('fa-IR')} مورد</span></div>
   <div class="tools" style="margin-top:-4px">
     <label style="font-size:11px;color:var(--tx2);margin:0">↕ مرتب‌سازی:</label>
