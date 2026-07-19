@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.15</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.16</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.15</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.16</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -800,8 +800,8 @@ invoice:{ic:'🧾',n:'فاکتور و پیش‌فاکتور',grp:'مدیریت �
  {k:'title',n:'شماره / شرح فاکتور',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'customer',n:'مشتری',t:REL,r:'customer',s:1},
- {k:'seller',n:'فروشنده',t:REL,r:'hr',s:1},
- {k:'orgu',n:'واحد فروش (برای تارگت)',t:REL,r:'orgunit',s:1},
+ {k:'seller',n:'👤 فروشنده / فرد (تارگت و عملکرد)',t:REL,r:'hr',s:1},
+ {k:'orgu',n:'🧩 واحد / تیم (تارگت و عملکرد)',t:REL,r:'orgunit',s:1},
  {k:'kind',n:'نوع سند',t:SEL,o:['فاکتور فروش','پیش‌فاکتور']},
  {k:'status',n:'وضعیت',t:SEL,o:['پیش‌نویس','صادر شده','تسویه شده','باطل']},
  {k:'date',n:'تاریخ صدور',t:DAT},
@@ -4474,16 +4474,14 @@ function targetdashHTML(){
     if(maj){const [tx,ty]=pt(a,R1-TH-12);t+=`<text x=${tx.toFixed(1)} y=${(ty+3).toFixed(1)} text-anchor=middle font-size=8 fill="var(--tx2)" font-weight="700">${a.toLocaleString('fa-IR')}</text>`;}}return t;};
   const gaugeSvg=p=>{const ang=p==null?0:Math.max(0,Math.min(100,p));const c=band(p);
     const [tipX,tipY]=pt(ang,R1-6);
-    const [bL,bLy]=pt(ang>6?ang-6:ang+94,10),[bR,bRy]=pt(ang<94?ang+6:ang-94,10);
-    const [tailX,tailY]=pt(ang>=50?ang-50:ang+50,15);
+    const [bL,bLy]=pt(ang>6?ang-6:ang+94,9),[bR,bRy]=pt(ang<94?ang+6:ang-94,9);
     return `<svg width=200 height=120 viewBox="0 0 200 120" style="filter:drop-shadow(0 4px 6px rgba(0,0,0,.18))">
       ${arc(0,100,R1,'rgba(130,140,155,.22)',TH+3,true)}
       ${specArc()}
       ${arc(3,97,R1+TH/2-2.6,'rgba(255,255,255,.4)',2.4,true)}
       ${ticks()}
       ${p!=null?`<g style="filter:drop-shadow(0 2px 2px rgba(0,0,0,.3))">
-         <polygon points="${tipX.toFixed(1)},${tipY.toFixed(1)} ${bL.toFixed(1)},${bLy.toFixed(1)} ${bR.toFixed(1)},${bRy.toFixed(1)}" fill="${c}"/>
-         <line x1=${CX} y1=${CY} x2=${tailX.toFixed(1)} y2=${tailY.toFixed(1)} stroke="${c}" stroke-width="3.4" stroke-linecap="round"/></g>`:''}
+         <polygon points="${tipX.toFixed(1)},${tipY.toFixed(1)} ${bL.toFixed(1)},${bLy.toFixed(1)} ${bR.toFixed(1)},${bRy.toFixed(1)}" fill="${c}"/></g>`:''}
       <circle cx=${CX} cy=${CY} r=8.5 fill="${c}"/>
       <circle cx=${CX} cy=${CY} r=8.5 fill="none" stroke="rgba(255,255,255,.65)" stroke-width="1.6"/>
       <circle cx=${(CX-2.6).toFixed(1)} cy=${(CY-2.6).toFixed(1)} r=2.5 fill="rgba(255,255,255,.75)"/>
@@ -4491,21 +4489,23 @@ function targetdashHTML(){
   const tgGauge=t=>{const s=tgNodeStat(t);
     const pct=metric==='amount'?s.pa:metric==='qty'?s.pq:s.ov;
     const c=band(pct);
-    const click=`view.tgPath=[...(view.tgPath||[]),'${t.id}'];render()`;
-    const drill=s.kids?`<div style="font-size:9.5px;color:var(--ac);margin-top:3px">▼ ${s.kids.toLocaleString('fa-IR')} زیرمجموعه — کلیک کن</div>`:'<div style="font-size:9.5px;color:var(--tx2);margin-top:3px">برگ (بدون زیرمجموعه)</div>';
+    const sel=view.tgSel===t.id;
+    const cascadeBtn=s.kids?`<button class="btn gh sm" style="padding:2px 9px;font-size:10px" onclick="event.stopPropagation();view.tgSel='';view.tgPath=[...(view.tgPath||[]),'${t.id}'];render()">▼ زیرمجموعه‌ها (${s.kids.toLocaleString('fa-IR')})</button>`:'';
     const sub=metric==='qty'
       ?`${(s.qty||0).toLocaleString('fa-IR')} / ${(s.tq||0).toLocaleString('fa-IR')} عدد`
       :metric==='amount'?`${money(s.amount)} / ${money(s.ta)}`
       :`مبلغی ${s.pa==null?'—':s.pa.toLocaleString('fa-IR')+'٪'} · تعدادی ${s.pq==null?'—':s.pq.toLocaleString('fa-IR')+'٪'}`;
-    return `<div onclick="${s.kids?click:''};event.stopPropagation()" style="cursor:${s.kids?'pointer':'default'};width:214px;text-align:center;position:relative;overflow:hidden;background:var(--cd);border:1px solid var(--bd);border-radius:18px;padding:12px 8px 11px;box-shadow:0 6px 16px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.10)">
+    return `<div onclick="view.tgSel='${sel?'':t.id}';render()" style="cursor:pointer;width:214px;text-align:center;position:relative;overflow:hidden;background:var(--cd);border:1px solid ${sel?'var(--ac)':'var(--bd)'};${sel?'outline:2px solid var(--ac);outline-offset:-1px;':''}border-radius:18px;padding:12px 8px 11px;box-shadow:0 6px 16px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.10)">
       <div style="position:absolute;inset:0 0 auto 0;height:44%;background:linear-gradient(180deg,rgba(255,255,255,.10),transparent);pointer-events:none"></div>
       ${gaugeSvg(pct)}
       <div style="margin-top:-10px;margin-bottom:4px"><span style="display:inline-block;padding:2px 13px;border-radius:20px;font-size:15px;font-weight:800;color:${c};background:color-mix(in srgb,${c} 15%,transparent);border:1px solid color-mix(in srgb,${c} 35%,transparent)">${pct==null?'—':pct.toLocaleString('fa-IR')+'٪'}</span></div>
       <div style="font-size:12.5px;font-weight:800;line-height:1.55">${tgScopeIcon(t)} ${esc(t.d.title||'تارگت')}</div>
       <div style="font-size:10.5px;color:var(--tx2);margin-top:1px">${tgtScopeLabel(t)} · ${esc(t.d.ptype||'—')}${s.src==='agg'?' · <span style="color:var(--ac)">تجمیعی</span>':''}</div>
       <div style="font-size:11px;color:var(--tx2);margin-top:2px">${sub}</div>
-      <div style="margin-top:6px"><button class="btn gh sm" style="padding:2px 10px;font-size:10px" onclick="event.stopPropagation();go('rec','saletarget','${t.id}')">جزئیات</button></div>
-      ${drill}</div>`;};
+      <div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:6px">
+        ${cascadeBtn}
+        <button class="btn gh sm" style="padding:2px 9px;font-size:10px" onclick="event.stopPropagation();go('rec','saletarget','${t.id}')">✏️ ویرایش</button></div>
+      <div style="font-size:9.5px;color:var(--ac);margin-top:3px">${sel?'▲ بستن تفکیک':'🔍 کلیک = تفکیک فروش (کالا/مشتری/فروشنده)'}</div></div>`;};
   // ناوبری آبشاری بر اساس والد/فرزند
   const idset=new Set(ts.map(x=>x.id));
   let crumb=[['🎯 پایش تارگت‌ها',-1]],curNode=null;
@@ -4559,10 +4559,53 @@ function targetdashHTML(){
   h+=alertBox;
   if(!ts.length){h+='<div class="empty">هنوز تارگتی تعریف نشده است — «🎯 تارگت جدید» را بزن. برای آبشار، تارگت زیرمجموعه را با «تارگت والد» به تارگت بالادست وصل کن.</div>';}
   else if(!nodes.length){h+=`<div class="empty">در این سطح/فیلتر تارگتی نیست.${curNode?' این تارگت زیرمجموعه‌ای ندارد.':''}</div>`;}
-  else{h+=`<div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:4px">${nodes.map(tgGauge).join('')}</div>
-    <div style="font-size:10.5px;color:var(--tx2);margin-top:12px;text-align:center">عقربه = درصد تحقق نسبت به هدف │ سبز ≥۷۰ زرد ۴۰–۷۰ قرمز <۴۰ │ کارت‌های دارای زیرمجموعه کلیک‌پذیرند و به‌صورت آبشاری باز می‌شوند │ سطح والد به‌صورت تجمیعی از زیرمجموعه‌ها محاسبه می‌شود</div>`;}
+  else{h+=`<div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:4px">${nodes.map(tgGauge).join('')}</div>`;
+    if(view.tgSel&&recs[view.tgSel]&&!recs[view.tgSel].del){h+=tgBreakdownHTML(recs[view.tgSel]);}
+    h+=`<div style="font-size:10.5px;color:var(--tx2);margin-top:12px;text-align:center">عقربه = درصد تحقق نسبت به هدف │ سبز ≥۹۱ زرد ۶۱–۹۰ قرمز <۶۰ │ روی هر گیج بزن تا تفکیک فروش (کالا/مشتری/فروشنده) را ببینی │ دکمهٔ «▼ زیرمجموعه‌ها» برای مشاهدهٔ آبشاری سطوح پایین‌تر │ سطح والد به‌صورت تجمیعی از زیرمجموعه‌ها محاسبه می‌شود</div>`;}
   h+=`</div>`;
   return h;
+}
+/* 🔍 تفکیک فروشِ یک تارگت: بر حسب کالا (تعدادی+مبلغی)، مشتری، فروشنده */
+function tgBreakdown(t){
+  const invs=targetInvoices(t);
+  const P={},C={},S={};
+  const add=(m,k,name,q,a)=>{k=k||'—';const o=m[k]||(m[k]={name:name||'—',qty:0,amount:0});o.qty+=q;o.amount+=a;};
+  invs.forEach(v=>{
+    const cust=relIds(v,'customer')[0], sel=relIds(v,'seller')[0];
+    let vq=0,va=0;
+    invLinesOf(v.id).forEach(l=>{const q=+l.d.qty||0,a=Math.max(0,q*(+l.d.price||0)-(+l.d.ldisc||0));
+      const pid=relIds(l,'product')[0];add(P,pid||('t:'+(l.d.title||'—')),pid?nameOf(pid):(l.d.title||'—'),q,a);vq+=q;va+=a;});
+    add(C,cust,cust?nameOf(cust):'بدون مشتری',vq,va);
+    add(S,sel,sel?nameOf(sel):'بدون فروشنده',vq,va);
+  });
+  const from=dnorm(t.d.from),to=dnorm(t.d.to);
+  byE('sale').filter(x=>!x.d._inv).forEach(x=>{if(!tgtMatch(x,t))return;const d=dnorm(x.d.date);if(from&&(!d||d<from))return;if(to&&(!d||d>to))return;
+    const q=+x.d.qty||0,a=saleAmt(x),pid=relIds(x,'product')[0],cid=relIds(x,'customer')[0],sid=relIds(x,'seller')[0];
+    add(P,pid||('t:'+(x.d.title||'—')),pid?nameOf(pid):(x.d.title||'—'),q,a);
+    add(C,cid,cid?nameOf(cid):'بدون مشتری',q,a);add(S,sid,sid?nameOf(sid):'بدون فروشنده',q,a);});
+  const arr=m=>Object.values(m).sort((a,b)=>b.amount-a.amount);
+  return {byProduct:arr(P),byCustomer:arr(C),bySeller:arr(S)};
+}
+function tgBreakdownHTML(t){
+  const bd=tgBreakdown(t);
+  const tbl=(title,ic,rows,head)=>{
+    const top=rows.slice(0,15);
+    if(!top.length)return `<div style="flex:1;min-width:225px"><div style="font-weight:800;font-size:12.5px;margin-bottom:5px">${ic} ${title}</div><div class="empty" style="padding:12px">داده‌ای نیست</div></div>`;
+    return `<div style="flex:1;min-width:225px">
+      <div style="font-weight:800;font-size:12.5px;margin-bottom:5px">${ic} ${title}</div>
+      <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">${head}</th><th>تعداد</th><th>مبلغ</th></tr></thead><tbody>
+      ${top.map(r=>`<tr><td style="text-align:right">${esc(r.name)}</td><td style="text-align:center">${(r.qty||0).toLocaleString('fa-IR')}</td><td style="white-space:nowrap">${money(r.amount)}</td></tr>`).join('')}
+      </tbody></table></div></div>`;
+  };
+  return `<div class="sec" style="margin-top:12px;border:1px solid var(--ac)">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+      <b style="flex:1">🔍 تفکیک فروشِ «${esc(t.d.title||'')}» <span style="font-weight:400;color:var(--tx2);font-size:11px">(${tgtScopeLabel(t)} · ${esc(t.d.ptype||'')} · ${esc(iso2jstr(ds(t.d.from))||'—')} تا ${esc(iso2jstr(ds(t.d.to))||'—')})</span></b>
+      <button class="btn gh sm" onclick="view.tgSel='';render()">✕ بستن</button></div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px">
+      ${tbl('بر حسب کالا','📦',bd.byProduct,'کالا / خدمت')}
+      ${tbl('بر حسب مشتری','👥',bd.byCustomer,'مشتری')}
+      ${tbl('بر حسب فروشنده','🧑‍💼',bd.bySeller,'فروشنده')}
+    </div></div>`;
 }
 /* سازنده‌ی فاکتور — چند ردیفه، مثل دستیار سند */
 let invDraft=null;
@@ -4630,9 +4673,9 @@ function invnewHTML(){
     <div><label ${lbl}>مشتری 🔍</label><input list="dl_invcust" value="${esc(custName)}" placeholder="بنویس تا جستجو شود…" onchange="invPickCust(this.value)">
       <datalist id="dl_invcust">${custs.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>
       <datalist id="dl_invprod">${prods.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist></div>
-    <div><label ${lbl}>فروشنده (برای تارگت)</label><select onchange="invSetHead('seller',this.value)"><option value="">—</option>${sellers.map(x=>{const u=orguOf(x);return `<option value="${x.id}" ${x.id===invDraft.seller?'selected':''}>${esc(x.d.title)}${u?' · '+esc(u):''}</option>`;}).join('')}</select>
-      ${invDraft.seller&&recs[invDraft.seller]?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">واحد فروشنده: ${esc(orguOf(recs[invDraft.seller])||'—')}</div>`:''}</div>
-    <div><label ${lbl}>واحد فروش (برای تارگت)</label><select onchange="invSetHead('orgu',this.value)"><option value="">— (خودکار از فروشنده)</option>${byE('orgunit').map(u=>`<option value="${u.id}" ${u.id===invDraft.orgu?'selected':''}>${esc(u.d.title)}</option>`).join('')}</select></div>
+    <div><label ${lbl}>👤 فروشنده / فرد <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('seller',this.value)"><option value="">—</option>${sellers.map(x=>{const u=orguOf(x);return `<option value="${x.id}" ${x.id===invDraft.seller?'selected':''}>${esc(x.d.title)}${u?' · '+esc(u):''}</option>`;}).join('')}</select>
+      ${invDraft.seller&&recs[invDraft.seller]?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">واحد/تیم فرد: ${esc(orguOf(recs[invDraft.seller])||'—')}</div>`:''}</div>
+    <div><label ${lbl}>🧩 واحد / تیم <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('orgu',this.value)"><option value="">— (خودکار از فرد)</option>${byE('orgunit').map(u=>`<option value="${u.id}" ${u.id===invDraft.orgu?'selected':''}>${esc(u.d.title)}</option>`).join('')}</select></div>
     <div><label ${lbl}>شماره/شرح</label><input value="${esc(invDraft.desc)}" oninput="invDraft.desc=this.value" placeholder="خودکار"></div>
     <div><label ${lbl}>تاریخ صدور</label><input value="${esc(invDraft.vdate||'')}" oninput="invDraft.vdate=this.value" placeholder="۱۴۰۴/۰۴/۲۵"></div>
     <div><label ${lbl}>سررسید</label><input value="${esc(invDraft.due||'')}" oninput="invDraft.due=this.value" placeholder="اختیاری"></div>
