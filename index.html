@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.28</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.29</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.28</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.29</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -4133,6 +4133,10 @@ function custLedger(cid){
     const initPaid=Math.max(0,(v.d.paid||0)-linked);
     if(initPaid>0)rows.push({d,u:(v.u||0)+1,desc:'پرداخت همراه فاکتور',debit:0,credit:initPaid,e:'invoice',ref:v.id});
   });
+  byE('sale').filter(x=>!x.d._inv&&x.d.kind==='اعتباری'&&relIds(x,'customer').includes(cid)).forEach(x=>{
+    rows.push({d:ds(x.d.date)||'',u:x.u,desc:'فروش سریع (اعتباری) '+(x.d.title||''),debit:saleAmt(x),credit:0,e:'sale',ref:x.id});
+    if(x.d.settled)rows.push({d:ds(x.d.date)||'',u:(x.u||0)+1,desc:'تسویهٔ فروش سریع',debit:0,credit:saleAmt(x),e:'sale',ref:x.id});
+  });
   byE('settle').filter(s=>s.d.kind==='دریافت از مشتری'&&relIds(s,'customer').includes(cid)).forEach(s=>{
     rows.push({d:ds(s.d.date)||'',u:s.u,desc:'دریافت'+(s.d.method?' ('+s.d.method+')':'')+(relIds(s,'invoice').length?' بابت فاکتور':' (علی‌الحساب)'),debit:0,credit:s.d.amount||0,e:'settle',ref:s.id});
   });
@@ -4148,6 +4152,10 @@ function suppLedger(sid){
     const linked=byE('settle').filter(s=>relIds(s,'purchinv').includes(v.id)).reduce((a,s)=>a+(s.d.amount||0),0);
     const initPaid=Math.max(0,(v.d.paid||0)-linked);
     if(initPaid>0)rows.push({d,u:(v.u||0)+1,desc:'پرداخت همراه فاکتور',debit:0,credit:initPaid,e:'purchinv',ref:v.id});
+  });
+  byE('purchase').filter(x=>!x.d._pinv&&x.d.kind==='اعتباری'&&relIds(x,'supplier').includes(sid)).forEach(x=>{
+    rows.push({d:ds(x.d.date)||'',u:x.u,desc:'خرید سریع (اعتباری) '+(x.d.title||''),debit:purchAmt(x),credit:0,e:'purchase',ref:x.id});
+    if(x.d.settled)rows.push({d:ds(x.d.date)||'',u:(x.u||0)+1,desc:'تسویهٔ خرید سریع',debit:0,credit:purchAmt(x),e:'purchase',ref:x.id});
   });
   byE('settle').filter(s=>s.d.kind==='پرداخت به تامین‌کننده'&&relIds(s,'supplier').includes(sid)).forEach(s=>{
     rows.push({d:ds(s.d.date)||'',u:s.u,desc:'پرداخت'+(s.d.method?' ('+s.d.method+')':'')+(relIds(s,'purchinv').length?' بابت فاکتور':' (علی‌الحساب)'),debit:0,credit:s.d.amount||0,e:'settle',ref:s.id});
@@ -4274,40 +4282,55 @@ function cashdashHTML(){
   return h;
 }
 /* گزارش مانده طلب و بدهی */
+/* 💰 مرکز یکپارچهٔ طلب/بدهی و دریافت/پرداخت — آبشاری */
 function arapdashHTML(){
-  const bizzes=byE('business');
-  
-  const custs=byE('customer').filter(c=>!gBiz()||relIds(c,'biz').includes(gBiz()));
+  const bizzes=byE('business');const b=gBiz();
+  const custs=byE('customer').filter(c=>!b||relIds(c,'biz').includes(b));
   const supp=byE('crm').filter(x=>['تامین‌کننده','پیمانکار','شریک تجاری'].includes(x.d.rel));
-  const arRows=custs.map(c=>({c,bal:custReceivable(c.id)})).filter(x=>Math.abs(x.bal)>=1).sort((a,b)=>b.bal-a.bal);
-  const apRows=supp.map(s=>({s,bal:suppPayable(s.id)})).filter(x=>Math.abs(x.bal)>=1).sort((a,b)=>b.bal-a.bal);
+  const arRows=custs.map(c=>({id:c.id,n:c.d.title||'—',bal:custReceivable(c.id)})).filter(x=>Math.abs(x.bal)>=1).sort((a,b)=>b.bal-a.bal);
+  const apRows=supp.map(s=>({id:s.id,n:s.d.title||'—',bal:suppPayable(s.id)})).filter(x=>Math.abs(x.bal)>=1).sort((a,b)=>b.bal-a.bal);
   const totAR=arRows.reduce((a,x)=>a+x.bal,0), totAP=apRows.reduce((a,x)=>a+x.bal,0);
-  // جریان نقد از دریافت/پرداخت‌ها
-  const setl=byE('settle');
+  const setl=byE('settle').filter(s=>!b||relIds(s,'biz').includes(b));
   const inCash=setl.filter(s=>s.d.kind==='دریافت از مشتری').reduce((a,s)=>a+(s.d.amount||0),0);
   const outCash=setl.filter(s=>s.d.kind==='پرداخت به تامین‌کننده').reduce((a,s)=>a+(s.d.amount||0),0);
-  const card=(t,v,bad)=>`<div class="sec" style="text-align:center"><div style="font-size:11px;color:var(--tx2)">${t}</div><div style="font-size:18px;font-weight:800;margin-top:4px;color:${bad?'var(--bad)':'var(--tx)'}">${v}</div></div>`;
-  const tbl=(rows,nameOf2,label,cls)=>rows.length?`<div class="sec"><h3>${label} <span class="c">${rows.length.toLocaleString('fa-IR')}</span></h3>
-    <div class="tblwrap"><table><thead><tr><th>طرف</th><th>مانده (تومان)</th><th></th></tr></thead><tbody>
-    ${rows.map(r=>{const id=nameOf2(r).id,nm=nameOf2(r).n,bal=r.bal;const neg=bal<0;
-      return `<tr><td style="text-align:right">${esc(nm)}</td><td style="color:${neg?'var(--ok)':'var(--bad)'};font-weight:700">${money(bal)}${neg?' (بستانکار)':''}</td>
-        <td style="white-space:nowrap"><button class="btn gh sm" onclick="openStmt('${cls==='دریافت از مشتری'?'cust':'supp'}','${id}')">📄 کارت</button>
-        <button class="btn gh sm" onclick="settleDraft=null;settleNewDraft('${cls}');settleDraft.${cls==='دریافت از مشتری'?'customer':'supplier'}='${id}';go('settlenew')">💵 تسویه</button></td></tr>`;}).join('')}
-    </tbody></table></div></div>`:'';
-  return `<div class="tools"><label style="margin:0">کسب‌وکار:</label>
-    <select onchange="setGBiz(this.value)" style="max-width:220px"><option value="">همه</option>${bizzes.map(b=>`<option value="${b.id}" ${b.id===gBiz()?'selected':''}>${esc(b.d.title)}</option>`).join('')}</select>
-    <span style="flex:1"></span>${can('c','settle')?`<button class="btn gh sm" onclick="settleTemplate()">📄 قالب</button><button class="btn gh sm" onclick="impOpen('settle')">📥 ورود اکسل</button><button class="btn sm" onclick="settleDraft=null;go('settlenew')">💵 دریافت/پرداخت جدید</button>`:''}</div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:4px">
-    ${card('📥 کل طلب از مشتریان',money(totAR),false)}
-    ${card('📤 کل بدهی به تامین‌کنندگان',money(totAP),true)}
-    ${card('⚖️ خالص وضعیت (طلب − بدهی)',money(totAR-totAP),totAR-totAP<0)}
-    ${card('💰 دریافت‌های ثبت‌شده',money(inCash))}
-    ${card('💸 پرداخت‌های ثبت‌شده',money(outCash))}
+  const card=(t,v,bad,strong)=>`<div class="sec" style="text-align:center;padding:12px 8px;${strong?'border:1px solid var(--ac)':''}"><div style="font-size:11px;color:var(--tx2)">${t}</div><div style="font-size:17px;font-weight:800;margin-top:3px;color:${bad?'var(--bad)':'var(--tx)'}">${v}</div></div>`;
+  // ردیفِ آبشاری: کلیک → کارت حساب (ledger) همان‌جا باز می‌شود
+  const drill=(kind,x)=>{const sel=view.arSel===kind+':'+x.id;const cust=kind==='cust';
+    const settleJs=`settleDraft=null;settleNewDraft('${cust?'دریافت از مشتری':'پرداخت به تامین‌کننده'}');settleDraft.${cust?'customer':'supplier'}='${x.id}';go('settlenew')`;
+    let h=`<div style="border:1px solid ${sel?'var(--ac)':'var(--line)'};border-radius:9px;margin-bottom:5px;overflow:hidden">
+      <div onclick="view.arSel='${sel?'':kind+':'+x.id}';render()" style="display:flex;align-items:center;gap:8px;padding:9px 11px;cursor:pointer;${sel?'background:color-mix(in srgb,var(--ac) 8%,transparent)':''}">
+        <b style="flex:1;font-size:12.5px">${cust?'👤':'🏭'} ${esc(x.n)}</b>
+        <span style="font-weight:800;color:${x.bal<0?'var(--ok)':cust?'var(--bad)':'var(--warn)'}">${money(Math.abs(x.bal))}${x.bal<0?' (بستانکار)':''}</span>
+        <button class="btn gh sm" style="padding:2px 8px" onclick="event.stopPropagation();${settleJs}">💵 ${cust?'دریافت':'پرداخت'}</button>
+        <button class="btn gh sm" style="padding:2px 8px" onclick="event.stopPropagation();openStmt('${cust?'cust':'supp'}','${x.id}')">📄 کارت</button>
+        <span style="color:var(--ac);font-size:15px;width:14px;text-align:center">${sel?'▾':'◂'}</span></div>`;
+    if(sel){const rows=cust?custLedger(x.id):suppLedger(x.id);
+      h+=`<div style="padding:2px 10px 10px"><div class="tblwrap"><table style="font-size:11px"><thead><tr><th style="text-align:right">تاریخ</th><th style="text-align:right">شرح</th><th>بدهکار</th><th>بستانکار</th><th>مانده</th></tr></thead><tbody>
+        ${rows.map(r=>`<tr onclick="go('rec','${r.e}','${r.ref}')" style="cursor:pointer"><td style="text-align:right">${esc(iso2jstr(r.d)||'—')}</td><td style="text-align:right">${esc(r.desc)}</td><td style="text-align:center">${r.debit?fmtN(r.debit):'—'}</td><td style="text-align:center">${r.credit?fmtN(r.credit):'—'}</td><td style="text-align:center;font-weight:700;color:${r.bal>0?'var(--bad)':r.bal<0?'var(--ok)':'var(--tx)'}">${fmtN(Math.abs(r.bal))}${r.bal<0?'−':''}</td></tr>`).join('')||`<tr><td colspan="5" style="text-align:center;color:var(--tx2)">گردشی نیست</td></tr>`}
+        </tbody></table></div></div>`;}
+    return h+`</div>`;};
+  const recent=setl.slice().sort((a,s)=>((ds(s.d.date)||'')).localeCompare(ds(a.d.date)||'')).slice(0,8);
+  return `<div class="tools"><b style="font-size:13px">💰 طلب، بدهی و دریافت/پرداخت</b><span style="flex:1"></span>
+    <select class="inp sm" style="width:auto" onchange="setGBiz(this.value)"><option value="">همه کسب‌وکارها</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select>
+    ${can('c','settle')?`<button class="btn gh sm" onclick="settleTemplate()">📄 قالب</button><button class="btn gh sm" onclick="impOpen('settle')">📥 ورود اکسل</button><button class="btn sm" onclick="settleDraft=null;go('settlenew')">💵 ثبت دریافت/پرداخت</button>`:''}</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;margin-bottom:6px">
+    ${card('📥 کل طلب از مشتریان',money(totAR))}
+    ${card('📤 کل بدهی به تأمین‌کنندگان',money(totAP),true)}
+    ${card('⚖️ خالص وضعیت',money(totAR-totAP),totAR-totAP<0,true)}
+    ${card('💰 مجموع دریافت‌ها',money(inCash))}
+    ${card('💸 مجموع پرداخت‌ها',money(outCash),true)}
   </div>
-  <div style="font-size:11px;color:var(--tx2);margin-bottom:8px">📌 طلب از فاکتورهای فروش و فروش‌های سریعِ اعتباریِ تسویه‌نشده می‌آید؛ بدهی از فاکتورهای خرید و خریدهای سریعِ اعتباری. با ثبت «دریافت/پرداخت» (دستی یا اکسل) مانده‌ها خودکار به‌روز می‌شود.</div>
-  ${tbl(arRows,r=>({id:r.c.id,n:r.c.d.title||'—'}),'📥 مانده طلب از مشتریان','دریافت از مشتری')}
-  ${tbl(apRows,r=>({id:r.s.id,n:r.s.d.title||'—'}),'📤 مانده بدهی به تامین‌کنندگان','پرداخت به تامین‌کننده')}
-  ${!arRows.length&&!apRows.length?'<div class="empty">همه‌ی حساب‌ها تسویه است 🎉</div>':''}`;
+  <div style="font-size:11px;color:var(--tx2);margin-bottom:10px">📌 طلب‌ها از «فاکتور فروش» و «فروش سریع اعتباری» و بدهی‌ها از «فاکتور خرید» و «خرید سریع اعتباری» خوانده می‌شوند. روی هر طرف‌حساب بزن تا ریز اسناد و گردش (آبشاری) باز شود؛ «💵» برای ثبت دریافت/پرداخت و به‌روزرسانی خودکار مانده.</div>
+  <div style="display:flex;gap:14px;flex-wrap:wrap">
+    <div style="flex:1;min-width:300px"><div style="font-weight:800;font-size:13px;margin-bottom:6px">📥 طلب از مشتریان (از فروش) <span style="color:var(--tx2);font-weight:400">${arRows.length.toLocaleString('fa-IR')}</span></div>
+      ${arRows.length?arRows.map(x=>drill('cust',x)).join(''):'<div class="empty" style="padding:14px">طلبی نیست — یا فاکتور/فروش اعتباری ثبت نشده، یا همه تسویه شده.</div>'}</div>
+    <div style="flex:1;min-width:300px"><div style="font-weight:800;font-size:13px;margin-bottom:6px">📤 بدهی به تأمین‌کنندگان (از خرید) <span style="color:var(--tx2);font-weight:400">${apRows.length.toLocaleString('fa-IR')}</span></div>
+      ${apRows.length?apRows.map(x=>drill('supp',x)).join(''):'<div class="empty" style="padding:14px">بدهی‌ای نیست — یا فاکتور/خرید اعتباری ثبت نشده، یا همه تسویه شده.</div>'}</div>
+  </div>
+  ${recent.length?`<div class="sec" style="margin-top:12px"><div style="font-weight:800;margin-bottom:6px">🧾 آخرین دریافت/پرداخت‌ها</div>
+    <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">تاریخ</th><th style="text-align:right">شرح</th><th>نوع</th><th>طرف</th><th>روش</th><th>مبلغ</th></tr></thead><tbody>
+    ${recent.map(s=>{const cust=s.d.kind==='دریافت از مشتری';const pid=relIds(s,cust?'customer':'supplier')[0];return `<tr onclick="go('rec','settle','${s.id}')" style="cursor:pointer"><td style="text-align:right">${esc(iso2jstr(ds(s.d.date))||'—')}</td><td style="text-align:right">${esc(s.d.title||'—')}</td><td style="text-align:center">${cust?'📥 دریافت':'📤 پرداخت'}</td><td style="text-align:center">${pid&&recs[pid]?esc(recs[pid].d.title):'—'}</td><td style="text-align:center">${esc(s.d.method||'—')}</td><td style="text-align:center;font-weight:700;color:${cust?'var(--ok)':'var(--bad)'}">${money(s.d.amount||0)}</td></tr>`;}).join('')}
+    </tbody></table></div></div>`:''}`;
 }
 function pinvPickSupp(name){
   name=(name||'').trim();
@@ -6429,8 +6452,7 @@ function bizMenuHTML(){
   // 6️⃣ مدیریت مالی
   h+=sec('💵 مدیریت مالی',
     it('pldash','💰 داشبورد مالی (سود و زیان)',"go('pldash')",canSee('plfin')&&canView('pldash'))
-    +it('settlenew','💵 دریافت / پرداخت',"settleDraft=null;go('settlenew')",canSee('settle')&&can('c','settle')&&canView('settlenew'))
-    +it('arapdash','📊 مانده طلب و بدهی',"go('arapdash')",canSee('settle')&&canView('arapdash'))
+    +it('arapdash','💵 طلب، بدهی و دریافت/پرداخت',"go('arapdash')",canSee('settle')&&canView('arapdash'))
     +it('cashdash','💰 دفتر صندوق/بانک',"go('cashdash')",canSee('settle')&&canView('cashdash'))
     +it('pfdash','🔄 تسویه درگاه‌ها/پلتفرم‌ها',"go('pfdash')",canSee('pfsettle')&&canView('pfdash'))
     +ent('plfin')+ent('settle')+ent('expense')+ent('pbudget')+ent('gateway')+ent('pfsettle')+ent('plmonth'));
