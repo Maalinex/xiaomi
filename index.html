@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.20</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.21</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.20</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.21</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -7442,19 +7442,21 @@ function pudashHTML(){
       ${sub?`<div style="font-size:10px;color:var(--tx2);margin-top:3px">${sub}</div>`:''}</div>`;};
   const pn=r=>esc(r.p.d.title||'—');
   const tbl=(cols,data)=>`<div class="tblwrap"><table style="font-size:11.5px"><thead><tr>${cols.map(c=>`<th style="text-align:${c[2]||'center'}">${c[0]}</th>`).join('')}</tr></thead><tbody>${data.map(r=>`<tr>${cols.map(c=>`<td style="text-align:${c[2]||'center'};white-space:nowrap">${c[1](r)}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${cols.length}" style="text-align:center;color:var(--tx2);padding:12px">موردی نیست</td></tr>`}</tbody></table></div>`;
-  // 🧠 توصیه‌های مدیریتی
+  // 🧠 توصیه‌های مدیریتی — هر توصیه با ذکر نام دقیق اقلام و کلیک‌پذیر (باز کردن فهرست)
   const rec=[];
-  if(urgent.length)rec.push(['🔴','فوری',urgent.length.toLocaleString('fa-IR')+' قلم ناموجود ولی پرفروش‌اند؛ همین حالا سفارش بده: '+urgent.slice(0,3).map(pn).join('، ')]);
-  if(toBuy.length)rec.push(['🟠','خرید این هفته',toBuy.length.toLocaleString('fa-IR')+' قلم به نقطهٔ سفارش رسیده‌اند؛ اولویت با کم‌پوشش‌ترین‌ها: '+toBuy.slice(0,3).map(pn).join('، ')]);
-  if(seasonItems.length)rec.push(['🌊','آمادگی فصلی',seasonItems.length.toLocaleString('fa-IR')+' قلم در ۹۰ روز آینده (بر پایهٔ پارسال) پرتقاضا می‌شوند و تدارکشان طولانی است؛ زودتر و مرحله‌ای بخر تا نقدینگی یکجا قفل نشود: '+seasonItems.slice(0,3).map(pn).join('، ')]);
-  if(excess.length)rec.push(['🧊','از خرید خودداری کن',excess.length.toLocaleString('fa-IR')+' قلم مازاد/راکدند ('+money(excessVal)+'). تا مصرف نشوند دوباره نخر؛ نقدینگی‌ات را آزاد کن.']);
-  if(deadPrice.length)rec.push(['🏷','قیمت‌گذاری راکد','برای '+deadPrice.length.toLocaleString('fa-IR')+' قلم راکد، حداقل به بهای تمام‌شده بفروش تا ضرر نکنی؛ جدول «قیمت‌گذاری راکد» را ببین.']);
-  if(openCredit>0)rec.push(['💳','بدهی خرید','بدهی خرید تسویه‌نشده '+money(openCredit)+' است'+(dueSoonAmt>0?(' و '+money(dueSoonAmt)+' آن ظرف ۳۰ روز سررسید می‌شود'):'')+'؛ نقدینگی را برای سررسیدها آماده کن.']);
-  if(foreignSpend>0)rec.push(['💱','ریسک ارزی',Math.round(foreignSpend/(spend365||1)*100).toLocaleString('fa-IR')+'٪ خرید سالانه ارزی است؛ نوسان نرخ ارز سود خرید را می‌تواند ببلعد — نرخ تسعیر را به‌روز نگه‌دار و در دوره‌های آرامش ارز خرید کن.']);
-  if(belowMargin.length)rec.push(['⚠️','حاشیهٔ سود پایین',belowMargin.length.toLocaleString('fa-IR')+' قلم حاشیهٔ سودشان زیر هدف است؛ یا قیمت خرید را چانه بزن یا قیمت فروش را بازبینی کن.']);
-  if(credSpend>cashSpend&&openCredit>0)rec.push(['🧮','نقدی یا اعتباری','سهم خرید اعتباری بالاست؛ اگر تخفیف نقدی تأمین‌کننده از هزینهٔ پول تو بیشتر است، نقدی بخر — وگرنه اعتبار، نقدینگی‌ات را حفظ می‌کند.']);
-  if(bestSup&&supScore.length>1)rec.push(['🏭','بهترین تأمین‌کننده','«'+bestSup.name+'» با امتیاز '+bestSup.score.toLocaleString('fa-IR')+' بالاترین ترکیب قیمت/تحویل به‌موقع/اعتبار را دارد؛ سهم خرید از او را بیشتر کن و تأمین‌کنندگان ضعیف‌تر را بازبینی کن.']);
-  if(!rec.length)rec.push(['✅','وضعیت مطلوب','در حال حاضر هشدار خرید بحرانی‌ای نیست؛ روند را پایش کن.']);
+  const nm=(arr,extra)=>arr.slice(0,4).map(r=>esc(r.p.d.title||'—')+(extra?' ('+extra(r)+')':'')).join('، ')+(arr.length>4?` و ${(arr.length-4).toLocaleString('fa-IR')} قلم دیگر`:'');
+  if(urgent.length)rec.push(['🔴','فوریِ سفارش',urgent.length.toLocaleString('fa-IR')+' قلم ناموجود ولی پرفروش‌اند؛ همین حالا سفارش بده — '+nm(urgent,r=>'پیشنهاد '+r.buyQ.toLocaleString('fa-IR')+' عدد'),'buy']);
+  const buyOnly=toBuy.filter(r=>r.act!=='urgent');
+  if(buyOnly.length)rec.push(['🟠','خرید این هفته',buyOnly.length.toLocaleString('fa-IR')+' قلم به نقطهٔ سفارش رسیده‌اند — '+nm(buyOnly,r=>'پوشش '+Math.round(r.cover).toLocaleString('fa-IR')+'ر ← بخر '+r.buyQ.toLocaleString('fa-IR')),'buy']);
+  if(seasonItems.length)rec.push(['🌊','آمادگی فصلی',seasonItems.length.toLocaleString('fa-IR')+' قلم در ۹۰ روز پیش‌رو (بر پایهٔ پارسال) پرتقاضا می‌شوند و تدارکشان طولانی است؛ زودتر و مرحله‌ای بخر — '+nm(seasonItems,r=>'کسری '+r.seasonalNeed.toLocaleString('fa-IR')),'season']);
+  if(excess.length)rec.push(['🧊','این‌ها را نخر',excess.length.toLocaleString('fa-IR')+' قلم مازاد/راکدند ('+money(excessVal)+' سرمایهٔ خوابیده) — دوباره سفارش نده: '+nm(excess,r=>money(r.val)),'excess']);
+  if(deadPrice.length)rec.push(['🏷','قیمت‌گذاری راکد',deadPrice.length.toLocaleString('fa-IR')+' قلم راکد؛ حداقل قیمت بی‌ضرر (بهای تمام‌شده) — '+nm(deadPrice,r=>'کف '+money(Math.round(r.cost*1.03))),'deadprice']);
+  if(openCredit>0)rec.push(['💳','بدهی خرید',(dueSoonAmt>0?money(dueSoonAmt)+' از بدهی خرید ظرف ۳۰ روز سررسید می‌شود (از کل '+money(openCredit)+')؛ نقدینگی را آماده کن':'بدهی خرید تسویه‌نشده '+money(openCredit)+'؛ سررسیدها را پایش کن'),'credit']);
+  if(belowMargin.length)rec.push(['⚠️','حاشیهٔ سود پایین',belowMargin.length.toLocaleString('fa-IR')+' قلم حاشیهٔ سودشان زیر هدف است؛ قیمت خرید را چانه بزن یا قیمت فروش را بازبینی کن — '+nm(belowMargin,r=>{const m=Math.round((( +r.p.d.sell - r.cost)/ +r.p.d.sell)*100);return m.toLocaleString('fa-IR')+'٪';}),'quality']);
+  if(foreignSpend>0)rec.push(['💱','ریسک ارزی',Math.round(foreignSpend/(spend365||1)*100).toLocaleString('fa-IR')+'٪ خرید سالانه ارزی است ('+money(foreignSpend)+')؛ نوسان نرخ ارز سود را می‌بلعد — نرخ تسعیر را به‌روز نگه‌دار و در آرامش ارز بخر','origin']);
+  if(credSpend>cashSpend&&openCredit>0)rec.push(['🧮','نقدی یا اعتباری','سهم خرید اعتباری '+Math.round(credSpend/((cashSpend+credSpend)||1)*100).toLocaleString('fa-IR')+'٪ است؛ اگر تخفیف نقدی تأمین‌کننده از هزینهٔ پول تو بیشتر است نقدی بخر، وگرنه اعتبار نقدینگی را حفظ می‌کند','cashcredit']);
+  if(bestSup&&supScore.length>1)rec.push(['🏭','بهترین تأمین‌کننده','«'+esc(bestSup.name)+'» با امتیاز '+bestSup.score.toLocaleString('fa-IR')+' بالاترین ترکیب قیمت/تحویل/اعتبار را دارد'+(supScore[supScore.length-1]&&supScore.length>1?'؛ ضعیف‌ترین: «'+esc(supScore[supScore.length-1].name)+'» ('+supScore[supScore.length-1].score.toLocaleString('fa-IR')+')':'')+' — سهم خرید را بازتوزیع کن','supplier']);
+  if(!rec.length)rec.push(['✅','وضعیت مطلوب','در حال حاضر هشدار خرید بحرانی‌ای نیست؛ روند را پایش کن.','']);
   // پنل جزئیات آبشاری
   let detail='';const K=view.puCard;
   if(K==='spend')detail=tbl([['کالا',pn,'right'],['آخرین خرید',r=>r.lastBuy?money(r.lastBuy.price)+(r.lastBuy.cur!=='تومان'?' ('+r.lastBuy.cur+')':''):'—'],['تاریخ',r=>r.lastBuy?esc(iso2jstr(r.lastBuy.date)):'—'],['بهای تمام‌شده',r=>money(r.cost)],['موجودی',r=>r.st.toLocaleString('fa-IR')]],rows.filter(r=>r.lastBuy).sort((a,b)=>(b.lastBuy.date||'').localeCompare(a.lastBuy.date||'')).slice(0,20));
@@ -7499,8 +7501,12 @@ function pudashHTML(){
     <select class="inp sm" style="width:auto" onchange="setGBiz(this.value)"><option value="">همه کسب‌وکارها</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select>
     <button class="btn sm" onclick="pinvDraft=null;go('pinvnew')">🧾 ثبت فاکتور خرید</button></div>`;
   // 🧠 توصیه‌های مدیریتی
-  h+=`<div class="sec" style="border:1px solid var(--ac);margin-bottom:10px"><div style="font-weight:800;margin-bottom:6px">🧠 توصیه‌های مدیر خرید</div>
-    ${rec.map(r=>`<div style="display:flex;gap:8px;align-items:flex-start;margin:5px 0;font-size:12.5px"><span style="font-size:15px">${r[0]}</span><span><b>${r[1]}:</b> ${r[2]}</span></div>`).join('')}</div>`;
+  h+=`<div class="sec" style="border:1px solid var(--ac);margin-bottom:10px"><div style="font-weight:800;margin-bottom:6px">🧠 توصیه‌های مدیر خرید <span style="font-weight:400;color:var(--tx2);font-size:11px">— روی هر توصیه بزن تا فهرست دقیق باز شود</span></div>
+    ${rec.map(r=>{const k=r[3],on=k&&view.puCard===k;
+      return `<div ${k?`onclick="view.puCard=${on?'null':`'${k}'`};render()" style="cursor:pointer;`:'style="'}display:flex;gap:8px;align-items:flex-start;margin:4px 0;padding:7px 9px;border-radius:9px;font-size:12.5px;background:${on?'color-mix(in srgb,var(--ac) 12%,transparent)':'var(--bg)'};border:1px solid ${on?'var(--ac)':'transparent'}">
+        <span style="font-size:15px">${r[0]}</span>
+        <span style="flex:1"><b>${r[1]}:</b> ${r[2]}</span>
+        ${k?`<span style="color:var(--ac);font-size:11px;white-space:nowrap;align-self:center">${on?'▲ بستن':'مشاهده ◀'}</span>`:''}</div>`;}).join('')}</div>`;
   // کارت‌ها
   h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-bottom:6px">
     ${kcard('spend','💰 خرید کل (۳۶۵روز)',money(spend365),false,grow!=null?(grow>=0?'▲ ':'▼ ')+Math.abs(grow).toLocaleString('fa-IR')+'٪ نسبت به دورهٔ قبل':'')}
