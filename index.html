@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.21</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.22</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.21</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.22</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -6378,9 +6378,9 @@ function bizMenuHTML(){
   // 5️⃣ مدیریت خرید
   h+=sec('🚚 مدیریت خرید',
     it('pudash','🚚 داشبورد مدیریت خرید',"go('pudash')",canSee('purchase')&&canView('pudash'))
-    +it('supscore','🏭 اطلاعات و امتیاز تأمین‌کنندگان',"view={type:'pudash',puCard:'supplier'};render()",canSee('purchase')&&canView('pudash'))
+    +it('supscore','🏭 تأمین‌کنندگان (اطلاعات و امتیاز)',"goSuppliers()",canSee('purchase')&&canView('pudash'))
     +it('pinvnew','🧾 ثبت فاکتور خرید',"pinvDraft=null;go('pinvnew')",canSee('purchinv')&&can('c','purchinv')&&canView('pinvnew'))
-    +ent('purchinv')+ent('purchase')+ent('crm'));
+    +ent('purchinv')+ent('purchase'));
   // 6️⃣ مدیریت مالی
   h+=sec('💵 مدیریت مالی',
     it('settlenew','💵 دریافت / پرداخت',"settleDraft=null;go('settlenew')",canSee('settle')&&can('c','settle')&&canView('settlenew'))
@@ -6464,6 +6464,9 @@ function go(type,e,id,flt){
   document.getElementById('content').scrollTop=0;render();
 }
 function goBack(){if(hist.length){view=hist.pop();render();}else go('dash');}
+function goSuppliers(){go('pudash');view.puCard='supplier';render();}
+function newSupplier(){if(!can('c','crm')){alert('دسترسی ندارید');return;}cur={id:uid(),e:'crm',d:{rel:'تامین‌کننده'},u:0,_new:true};drawModal();}
+window.goSuppliers=goSuppliers;window.newSupplier=newSupplier;
 function render(){
   let _foc=null;try{const a=document.activeElement;
     if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')&&a.closest('#content')){
@@ -7376,6 +7379,8 @@ function puSupScore(b){
     const g=sup[sid]||(sup[sid]={sid,spend:0,n:0,open:0,edgeW:0,edgeQ:0,prods:new Set()});
     g.spend+=purchAmt(x);g.n++;if(x.d.kind==='اعتباری'&&!x.d.settled)g.open+=purchAmt(x);
     if(pid&&q>0&&mkt[pid]&&mkt[pid].avg>0){g.prods.add(pid);const edge=(mkt[pid].avg-landed(x))/mkt[pid].avg;g.edgeW+=edge*q;g.edgeQ+=q;}});
+  // همهٔ تأمین‌کنندگانِ ثبت‌شده (CRM) را هم بیاور، حتی اگر هنوز خریدی ازشان نشده
+  byE('crm').filter(c=>c.d.rel==='تامین‌کننده').forEach(c=>{if(!sup[c.id])sup[c.id]={sid:c.id,spend:0,n:0,open:0,edgeW:0,edgeQ:0,prods:new Set()};});
   const clamp=(v,a,c)=>Math.max(a,Math.min(c,v));
   return Object.values(sup).map(g=>{
     const c=g.sid&&recs[g.sid]?recs[g.sid]:null;
@@ -7483,16 +7488,21 @@ function pudashHTML(){
   else if(K==='supplier'){
     const sc=b=>b>=75?'var(--ok)':b>=50?'#f5a623':'var(--bad)';
     const pe=x=>x==null?'—':(x>=0?'<span style="color:var(--ok)">'+Math.round(x).toLocaleString('fa-IR')+'٪ ارزان‌تر</span>':'<span style="color:var(--bad)">'+Math.round(-x).toLocaleString('fa-IR')+'٪ گران‌تر</span>');
-    detail=tbl([
-      ['🏆 تأمین‌کننده',s=>esc(s.name),'right'],
+    const edit=s=>s.sid?`openRec('crm','${s.sid}')`:'';
+    detail=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+      <span style="font-size:11px;color:var(--tx2);flex:1">روی هر ردیف بزن تا اطلاعات تأمین‌کننده را ویرایش کنی</span>
+      ${can('c','crm')?`<button class="btn sm" onclick="newSupplier()">➕ تأمین‌کننده جدید</button>`:''}</div>`;
+    detail+=tbl([
+      ['🏆 تأمین‌کننده',s=>`<span style="cursor:pointer;color:var(--ac)" onclick="${edit(s)}">${esc(s.name)}</span>`,'right'],
       ['امتیاز کل',s=>`<b style="color:${sc(s.score)};font-size:14px">${s.score.toLocaleString('fa-IR')}</b>`],
       ['قیمت',s=>pe(s.priceEdge)],
       ['تحویل به‌موقع',s=>s.ontime==null?'—':`<b style="color:${sc(s.ontime)}">${s.ontime.toLocaleString('fa-IR')}٪</b>`],
       ['حد اعتبار',s=>s.climit>0?money(s.climit)+(s.payterm?` · ${s.payterm.toLocaleString('fa-IR')}ر`:''):'—'],
       ['کیفیت',s=>s.quality?('⭐'+s.quality.toLocaleString('fa-IR')):'—'],
       ['خرید (۳۶۵ر)',s=>money(s.spend)],
-      ['بدهی باز',s=>s.open>0?`<b style="color:var(--bad)">${money(s.open)}</b>`:'—']
-    ],supScore.slice(0,20))+`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">امتیاز کل = ۴۰٪ قیمت (نسبت به میانگین بازارِ همان کالا) + ۳۵٪ تحویل به‌موقع + ۲۵٪ حد اعتبار/مهلت پرداخت + جایزهٔ کیفیت. فیلدهای «تحویل به‌موقع/حد اعتبار/کیفیت/مهلت پرداخت» را در پروفایل تأمین‌کننده (CRM) پر کن تا امتیاز دقیق شود. «قیمت» خودکار از دادهٔ خریدها محاسبه می‌شود.</div>`;
+      ['بدهی باز',s=>s.open>0?`<b style="color:var(--bad)">${money(s.open)}</b>`:'—'],
+      ['',s=>s.sid?`<button class="btn gh sm" style="padding:1px 8px" onclick="${edit(s)}">✏️</button>`:'']
+    ],supScore.slice(0,30))+`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">امتیاز کل = ۴۰٪ قیمت (نسبت به میانگین بازارِ همان کالا) + ۳۵٪ تحویل به‌موقع + ۲۵٪ حد اعتبار/مهلت پرداخت + جایزهٔ کیفیت. فیلدهای «تحویل به‌موقع/حد اعتبار/کیفیت/مهلت پرداخت» را با ویرایش تأمین‌کننده پر کن تا امتیاز دقیق شود. «قیمت» خودکار از دادهٔ خریدها محاسبه می‌شود.</div>`;
   }
   else if(K==='quality')detail=tbl([['کالا',pn,'right'],['بهای تمام‌شده',r=>money(r.cost)],['قیمت فروش',r=>money(+r.p.d.sell||0)],['حاشیهٔ سود',r=>{const m=(+r.p.d.sell||0)>0?Math.round((( +r.p.d.sell - r.cost)/ +r.p.d.sell)*100):null;const tgt=+r.p.d.minmargin||15;return m==null?'—':`<b style="color:${m<tgt?'var(--bad)':'var(--ok)'}">${m.toLocaleString('fa-IR')}٪</b>`;}],['هدف',r=>(+r.p.d.minmargin||15).toLocaleString('fa-IR')+'٪']],rows.filter(r=>(+r.p.d.sell||0)>0&&r.cost>0).sort((a,b)=>(( +a.p.d.sell-a.cost)/+a.p.d.sell)-(( +b.p.d.sell-b.cost)/+b.p.d.sell)).slice(0,25));
   const pts=puValueSeries(b);
@@ -7510,7 +7520,7 @@ function pudashHTML(){
   // کارت‌ها
   h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-bottom:6px">
     ${kcard('spend','💰 خرید کل (۳۶۵روز)',money(spend365),false,grow!=null?(grow>=0?'▲ ':'▼ ')+Math.abs(grow).toLocaleString('fa-IR')+'٪ نسبت به دورهٔ قبل':'')}
-    ${kcard('credit','💵 نقدینگی قفل‌شده (بدهی خرید)',money(openCredit),openCredit>0,dueSoonAmt>0?money(dueSoonAmt)+' سررسید ۳۰روز آینده':'')}
+    ${kcard('credit','💵 نقدینگی مورد نیاز (پرداخت بدهی خرید)',money(openCredit),openCredit>0,dueSoonAmt>0?money(dueSoonAmt)+' سررسید ۳۰روز آینده':'')}
     ${kcard('buy','⏰ اقلام نیازمند خرید',toBuy.length.toLocaleString('fa-IR')+' قلم',toBuy.length>0,urgent.length?urgent.length.toLocaleString('fa-IR')+' فوری':'')}
     ${kcard('excess','🧊 موجودی مازاد/راکد',money(excessVal),excessVal>0,totVal>0?Math.round(excessVal/totVal*100).toLocaleString('fa-IR')+'٪ ارزش انبار':'')}
     ${kcard('season','🌊 آمادگی فصلی',seasonItems.length.toLocaleString('fa-IR')+' قلم',false,'بر پایهٔ فروش پارسال')}
