@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.25</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.26</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.25</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.26</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1328,6 +1328,15 @@ plmonth:{ic:'📜',n:'سود و زیان ماهانه (عملکرد واقعی)'
  {k:'exoth',n:'سایر هزینه‌ها',t:NUM},
  {k:'tax',n:'مالیات (معمولاً در اسفند)',t:NUM}],
  cols:['title','biz','jy','jm','rev','cogs'],comp:'plmonthBrief'},
+plfin:{ic:'💰',n:'سود و زیان تفصیلی (از حسابداری)',grp:'مدیریت کسب و کار',f:[
+ {k:'title',n:'عنوان',t:TXT},
+ {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
+ {k:'company',n:'شرکت',t:REL,r:'company',s:1},
+ {k:'jy',n:'سال شمسی',t:NUM},
+ {k:'jm',n:'دوره',t:SEL,o:['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند','کل سال']},
+ {k:'unit',n:'واحد مبالغ',t:SEL,o:['ریال','تومان']},
+ {k:'note',n:'توضیح',t:LNG}],
+ cols:['title','biz','jy','jm'],comp:'plfinBrief'},
 kpival:{ic:'🎯',n:'ثبت KPI فروش (دوره‌ای)',grp:'مدیریت کسب و کار',f:[
  {k:'title',n:'عنوان (مثل: 1404 مهر - علی - فروش خالص)',t:TXT},
  {k:'scope',n:'سطح',t:SEL,o:['فرد','تیم','واحد','کسب‌وکار','شرکت','هلدینگ']},
@@ -6410,11 +6419,12 @@ function bizMenuHTML(){
     +ent('purchinv')+ent('purchase'));
   // 6️⃣ مدیریت مالی
   h+=sec('💵 مدیریت مالی',
-    it('settlenew','💵 دریافت / پرداخت',"settleDraft=null;go('settlenew')",canSee('settle')&&can('c','settle')&&canView('settlenew'))
+    it('pldash','💰 داشبورد مالی (سود و زیان)',"go('pldash')",canSee('plfin')&&canView('pldash'))
+    +it('settlenew','💵 دریافت / پرداخت',"settleDraft=null;go('settlenew')",canSee('settle')&&can('c','settle')&&canView('settlenew'))
     +it('arapdash','📊 مانده طلب و بدهی',"go('arapdash')",canSee('settle')&&canView('arapdash'))
     +it('cashdash','💰 دفتر صندوق/بانک',"go('cashdash')",canSee('settle')&&canView('cashdash'))
     +it('pfdash','🔄 تسویه درگاه‌ها/پلتفرم‌ها',"go('pfdash')",canSee('pfsettle')&&canView('pfdash'))
-    +ent('settle')+ent('expense')+ent('pbudget')+ent('gateway')+ent('pfsettle')+ent('plmonth'));
+    +ent('plfin')+ent('settle')+ent('expense')+ent('pbudget')+ent('gateway')+ent('pfsettle')+ent('plmonth'));
   // 7️⃣ مدیریت عملکرد
   h+=sec('🎖️ مدیریت عملکرد',
     it('perfdash','🎖️ داشبورد عملکرد',"go('perfdash')",canSee('perfscore')&&canView('perfdash'))
@@ -6570,6 +6580,8 @@ function render(){
     view.type==='stmt'?'📄 کارت حساب':
     view.type==='targetdash'?'🎯 پایش تارگت فروش':
     view.type==='findash'?'💼 داشبورد مالی تخصصی':
+    view.type==='pldash'?'💰 داشبورد مدیریت مالی':
+    view.type==='finform'?'💰 ورود سود و زیان':
     view.type==='invdash'?'💎 داشبورد سرمایه‌گذاری':
     view.type==='gldash'?'📒 دفتر کل و صورت‌های مالی':
     view.type==='glnew'?'🖊️ ثبت سند حسابداری':
@@ -6580,7 +6592,7 @@ function render(){
     view.type==='rec'?(E[view.e].ic+' '+(recs[view.id].d.title||E[view.e].n)):
     E[view.e].ic+' '+E[view.e].n;
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',invdash:'invdash',procmap:'procmap',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',ctrldash:'ctrldash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash'};
+  const VG={me:'me',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',finform:'finform',invdash:'invdash',procmap:'procmap',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',ctrldash:'ctrldash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -6598,6 +6610,8 @@ function render(){
     else if(view.type==='bscmap')c.innerHTML=bscmapHTML();
     else if(view.type==='bsccanvas')c.innerHTML=bsccanvasHTML();
     else if(view.type==='findash')c.innerHTML=findashHTML();
+    else if(view.type==='pldash')c.innerHTML=pldashHTML();
+    else if(view.type==='finform')c.innerHTML=finFormHTML();
     else if(view.type==='invdash')c.innerHTML=invdashHTML();
     else if(view.type==='procmap')c.innerHTML=procmapHTML();
     else if(view.type==='gldash')c.innerHTML=gldashHTML();
@@ -10496,6 +10510,293 @@ function invdashHTML(){
     </div>`;
   }
   if(!vals.length&&!feas.length&&!poss.length)h+=`<div class="empty">با دکمه‌های بالا اولین ارزش‌گذاری، طرح توجیهی یا دارایی سبد را ثبت کنید</div>`;
+  return h;
+}
+/* ===== 💰 مدیریت مالی — سود و زیان تفصیلی (ماهانه/سالانه) ===== */
+const PL_LINES=[
+ {k:'s_sales',n:'فروش',sec:'rev',ns:1},
+ {k:'s_ret',n:'برگشت از فروش',sec:'rev',ns:1},
+ {k:'s_discinv',n:'تخفیف فاکتور فروش',sec:'rev',ns:1},
+ {k:'i_ship',n:'سایر درآمدهای حمل و تخفیف',sec:'rev'},
+ {k:'i_dep',n:'سود سپرده',sec:'rev'},
+ {k:'i_cdsale',n:'تخفیفات نقدی فروش',sec:'rev'},
+ {k:'i_cdbuy',n:'تخفیفات نقدی خرید',sec:'rev'},
+ {k:'i_fx',n:'سود تسعیر ارز',sec:'rev'},
+ {k:'c_goods',n:'بهای تمام‌شده کالای فروش رفته داخلی',sec:'cogs'},
+ {k:'c_serv',n:'بهای تمام‌شده خدمات',sec:'cogs'},
+ {k:'e_salary',n:'حقوق پایه',sec:'opex'},
+ {k:'e_bonus',n:'عیدی و پاداش',sec:'opex'},
+ {k:'e_senv',n:'سنوات',sec:'opex'},
+ {k:'e_insemp',n:'بیمه سهم کارفرما',sec:'opex'},
+ {k:'e_insun',n:'بیمه بیکاری',sec:'opex'},
+ {k:'e_inssup',n:'بیمه تکمیلی',sec:'opex'},
+ {k:'e_comm',n:'پورسانت',sec:'opex'},
+ {k:'e_van',n:'هزینه وانت احمد گل',sec:'opex'},
+ {k:'e_transp',n:'ایاب و ذهاب',sec:'opex'},
+ {k:'e_othemp',n:'سایر هزینه‌های کارکنان',sec:'opex'},
+ {k:'e_host',n:'هزینه پذیرایی',sec:'opex'},
+ {k:'e_maint',n:'تعمیر و نگهداری',sec:'opex'},
+ {k:'e_util',n:'هزینه آب و برق مصرفی',sec:'opex'},
+ {k:'e_supp',n:'هزینه ملزومات و نوشت‌افزار',sec:'opex'},
+ {k:'e_post',n:'هزینه پست و تلفن',sec:'opex'},
+ {k:'e_rent',n:'هزینه اجاره محل',sec:'opex'},
+ {k:'e_waste',n:'هزینه ضایعات',sec:'opex'},
+ {k:'e_dep',n:'هزینه استهلاک',sec:'opex'},
+ {k:'e_warr',n:'هزینه گارانتی',sec:'opex'},
+ {k:'e_site',n:'هزینه سایت',sec:'opex'},
+ {k:'e_travel',n:'سفر و ماموریت',sec:'opex'},
+ {k:'e_ads',n:'تبلیغات و بازاریابی',sec:'opex'},
+ {k:'e_logi',n:'هزینه‌های حمل و انبارداری',sec:'opex'},
+ {k:'e_gift',n:'هزینه هدایا',sec:'opex'},
+ {k:'e_loan',n:'هزینه سود و کارمزد وام‌ها',sec:'opex'},
+ {k:'e_bank',n:'کارمزد بانکی',sec:'opex'},
+ {k:'e_penal',n:'هزینه جریمه دیرکرد وام‌ها',sec:'opex'},
+ {k:'e_round',n:'هزینه تخفیف و رندینگ حساب',sec:'opex'},
+ {k:'e_admin',n:'هزینه‌های اداری',sec:'opex'},
+ {k:'e_train',n:'هزینه آموزش کارکنان',sec:'opex'},
+ {k:'t_tax',n:'مالیات',sec:'tax'}
+];
+function _fnorm(s){return String(s==null?'':s).replace(/[يﻱ]/g,'ی').replace(/[كﮐ]/g,'ک').replace(/[‌\s]/g,'').replace(/ة/g,'ه').trim();}
+function finExtra(){const m=recs[MO];return (m&&!m.del&&Array.isArray(m.d._plx)&&m.d._plx)||[];}
+function finLines(){return PL_LINES.concat(finExtra());}
+function finAddLine(){if(!isAdmin()){alert('فقط ادمین');return;}
+  const n=prompt('نام فیلد جدید (درآمد یا هزینه):');if(!n)return;
+  const t=prompt('نوع؟ بنویس: درآمد / هزینه / بهای‌تمام‌شده','هزینه');const sec=t&&t.indexOf('درآمد')>=0?'rev':t&&t.indexOf('بها')>=0?'cogs':'opex';
+  const k='x_'+Date.now().toString(36);
+  const m=recs[MO]||{id:MO,e:'_opts',d:{}};m.d={...m.d,_plx:[...finExtra(),{k,n,sec}]};m.u=Date.now();m.del=false;put(m);render();}
+window.finAddLine=finAddLine;
+function plToman(v,unit){return unit==='تومان'?v:v/10;} // مبنای اپ: تومان (ریال÷۱۰)
+function plCalc(v){v=v||{};const val=k=>+v[k]||0;const L=finLines();
+  let netSales=0,otherInc=0,cogs=0,opex=0,tax=0;
+  L.forEach(l=>{const x=val(l.k);if(l.sec==='rev'){if(l.ns)netSales+=x;else otherInc+=x;}else if(l.sec==='cogs')cogs+=x;else if(l.sec==='opex')opex+=x;else if(l.sec==='tax')tax+=x;});
+  const totalInc=netSales+otherInc, gross=totalInc-cogs, pbt=gross-opex, net=pbt-tax;
+  return {netSales,otherInc,totalInc,cogs,gross,opex,pbt,tax,net,
+    grossPct:totalInc?gross/totalInc*100:0,netPct:totalInc?net/totalInc*100:0,opexPct:totalInc?opex/totalInc*100:0};
+}
+const FMON=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+function plfinBrief(r){const c=plCalc(r.d.v);const u=r.d.unit||'ریال';return {label:'سود خالص',v:money(plToman(c.net,u))+' · حاشیه '+Math.round(c.netPct).toLocaleString('fa-IR')+'٪',bad:c.net<0};}
+window.plfinBrief=plfinBrief;
+function plfinRecs(biz,jy){return byE('plfin').filter(r=>(!biz||relIds(r,'biz').includes(biz))&&(!jy||+r.d.jy===jy));}
+function plYears(biz){const s=new Set();plfinRecs(biz).forEach(r=>{if(+r.d.jy)s.add(+r.d.jy);});return [...s].sort((a,b)=>a-b);}
+/* تجمیع مبالغِ خطوط برای یک بازه (ماه خاص یا کل سال) — همه به تومان */
+function plAgg(biz,jy,jm){ // jm=ماه یا 'کل سال'
+  const recs2=plfinRecs(biz,jy).filter(r=>jm==='کل سال'?(r.d.jm!=='کل سال'):(r.d.jm===jm));
+  // اگر «کل سال»‌ای دستی ثبت شده و ماهی نیست، از همان استفاده کن
+  let src=recs2;
+  if(jm==='کل سال'&&!recs2.length){src=plfinRecs(biz,jy).filter(r=>r.d.jm==='کل سال');}
+  const v={};src.forEach(r=>{const u=r.d.unit||'ریال';const vv=r.d.v||{};finLines().forEach(l=>{v[l.k]=(v[l.k]||0)+plToman(+vv[l.k]||0,u);});});
+  return {v,calc:plCalc(v),n:src.length};
+}
+/* آبشار سود و زیان — ستون‌های شناور */
+function plWater(c){
+  const S=[
+    ['فروش خالص',c.netSales,'#3b82f6',0],
+    ['+ سایر درآمد',c.otherInc,'#16c784',c.netSales],
+    ['جمع درآمد',c.totalInc,'#2563eb',0,'tot'],
+    ['− بهای تمام‌شده',-c.cogs,'#ff9f0a',c.totalInc],
+    ['سود ناخالص',c.gross,'#16c784',0,'tot'],
+    ['− هزینه‌ها',-c.opex,'#ff6a45',c.gross],
+    ['سود قبل مالیات',c.pbt,c.pbt>=0?'#16c784':'#ff3b30',0,'tot'],
+    ['− مالیات',-c.tax,'#ff3b30',c.pbt],
+    ['سود خالص',c.net,c.net>=0?'#16c784':'#ff3b30',0,'tot']
+  ];
+  const vals=S.map(s=>s[4]==='tot'?s[1]:s[3]+s[1]).concat(S.map(s=>s[3]));
+  const mx=Math.max(...S.map(s=>Math.max(s[3]||0,(s[3]||0)+s[1],s[1])),1);
+  const W=860,H=250,pb=54,pt=14,pl=8,pr=8,iw=W-pl-pr,ih=H-pt-pb,bw=iw/S.length*0.62,gap=iw/S.length;
+  const Y=v=>pt+ih-(v/mx)*ih;
+  let bars='';
+  S.forEach((s,i)=>{const x=pl+i*gap+(gap-bw)/2;const isTot=s[4]==='tot';
+    const top=isTot?s[1]:(s[1]>=0?s[3]+s[1]:s[3]);const bot=isTot?0:(s[1]>=0?s[3]:s[3]+s[1]);
+    const yTop=Y(Math.max(top,bot)),yBot=Y(Math.min(top,bot));
+    bars+=`<rect x="${x.toFixed(1)}" y="${yTop.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,yBot-yTop).toFixed(1)}" rx="3" fill="${s[2]}" opacity="${isTot?1:.85}"/>`;
+    bars+=`<text x="${(x+bw/2).toFixed(1)}" y="${(yTop-4).toFixed(1)}" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--tx)">${abbrN(s[1])}</text>`;
+    bars+=`<text x="${(x+bw/2).toFixed(1)}" y="${(H-pb+16).toFixed(1)}" text-anchor="middle" font-size="9" fill="var(--tx2)">${esc(s[0])}</text>`;
+  });
+  return `<svg width="100%" viewBox="0 0 ${W} ${H}" style="max-height:270px"><line x1="${pl}" y1="${Y(0)}" x2="${W-pr}" y2="${Y(0)}" stroke="var(--line)"/>${bars}</svg>`;
+}
+/* نمودار خطی مالی چنددوره‌ای */
+function plMultiLine(series,labels){ // series=[{name,color,pts:[..]}]
+  if(!labels.length)return '<div class="empty">داده‌ای نیست</div>';
+  const W=860,H=230,pl=54,pr=14,pt=14,pb=40,iw=W-pl-pr,ih=H-pt-pb;
+  const all=series.flatMap(s=>s.pts);const mx=Math.max(...all,1),mn=Math.min(...all,0);const rng=(mx-mn)||1;
+  const X=i=>pl+(labels.length<=1?iw/2:i*iw/(labels.length-1));const Y=v=>pt+ih-((v-mn)/rng)*ih;
+  const grid=[0,.25,.5,.75,1].map(f=>{const yy=pt+ih-f*ih;return `<line x1="${pl}" y1="${yy.toFixed(1)}" x2="${W-pr}" y2="${yy.toFixed(1)}" stroke="var(--line)" opacity=".5"/><text x="${pl-6}" y="${(yy+3).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--tx2)">${abbrN(mn+f*rng)}</text>`;}).join('');
+  const lines=series.map(s=>{const pl2=s.pts.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');return `<polyline points="${pl2}" fill="none" stroke="${s.color}" stroke-width="2.3" stroke-linejoin="round"/>${s.pts.map((v,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="2.6" fill="${s.color}"><title>${esc(s.name)} ${esc(labels[i])}: ${money(v)}</title></circle>`).join('')}`;}).join('');
+  const xlab=labels.map((l,i)=>`<text x="${X(i).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="8.5" fill="var(--tx2)">${esc(l)}</text>`).join('');
+  const leg=series.map(s=>`<span style="font-size:10.5px;color:var(--tx2);margin-inline-end:10px"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${s.color}"></span> ${esc(s.name)}</span>`).join('');
+  return `<div style="margin-bottom:4px">${leg}</div><svg width="100%" viewBox="0 0 ${W} ${H}" style="max-height:250px">${grid}${lines}${xlab}</svg>`;
+}
+/* ===== فرم دستی ماهانه ===== */
+let finDraft=null;
+function finNew(id){
+  if(id&&recs[id]){const r=recs[id];finDraft={id:r.id,biz:relIds(r,'biz')[0]||gBiz()||'',jy:+r.d.jy||'',jm:r.d.jm||'فروردین',unit:r.d.unit||'ریال',v:{...(r.d.v||{})},note:r.d.note||''};}
+  else finDraft={id:null,biz:gBiz()||'',jy:'',jm:'فروردین',unit:'ریال',v:{},note:''};
+  go('finform');
+}
+window.finNew=finNew;
+function finSetV(k,val){finDraft.v[k]=val===''?undefined:(+faNum(String(val)).replace(/[,،٬\s]/g,'')||0);document.getElementById('fin_tot').innerHTML=finTotHTML(plCalc(finDraft.v),finDraft.unit);}
+window.finSetV=finSetV;
+function finTotHTML(c,u){const row=(l,v,b,strong)=>`<div style="display:flex;padding:3px 0;${strong?'border-top:1px solid var(--line);font-weight:800':''}"><span style="flex:1;color:var(--tx2)">${l}</span><b style="color:${b?'var(--bad)':'var(--tx)'}">${money(plToman(v,u))}</b></div>`;
+  return row('فروش خالص',c.netSales)+row('جمع کل درآمد',c.totalInc)+row('بهای تمام‌شده',c.cogs,true)+row('سود ناخالص ('+Math.round(c.grossPct).toLocaleString('fa-IR')+'٪)',c.gross,c.gross<0,true)+row('جمع هزینه‌ها',c.opex,true)+row('سود قبل مالیات',c.pbt,c.pbt<0,true)+row('مالیات',c.tax,true)+row('سود خالص ('+Math.round(c.netPct).toLocaleString('fa-IR')+'٪)',c.net,c.net<0,true);}
+function finSave(){if(!finDraft.jy){alert('سال را وارد کن');return;}
+  const clean={};Object.entries(finDraft.v).forEach(([k,x])=>{if(x!=null&&x!=='')clean[k]=+x;});
+  const d={title:finDraft.jy+' '+finDraft.jm,biz:finDraft.biz?[finDraft.biz]:[],jy:+finDraft.jy,jm:finDraft.jm,unit:finDraft.unit,v:clean,note:finDraft.note};
+  if(finDraft.id&&recs[finDraft.id]){const r=recs[finDraft.id];r.d={...r.d,...d};r.u=Date.now();put(r);}
+  else put({id:uid(),e:'plfin',d,u:Date.now()});
+  finDraft=null;go('pldash');
+}
+window.finSave=finSave;
+function finFormHTML(){
+  if(!finDraft)finNew();
+  const d=finDraft,lbl='style="font-size:11px;color:var(--tx2)"';
+  const secName={rev:'💵 درآمدها',cogs:'📦 بهای تمام‌شده',opex:'🧾 هزینه‌های عملیاتی',tax:'🏛 مالیات'};
+  const L=finLines();
+  let body='';['rev','cogs','opex','tax'].forEach(sec=>{const ls=L.filter(l=>l.sec===sec);if(!ls.length)return;
+    body+=`<div style="font-weight:800;font-size:12.5px;margin:12px 0 6px;color:var(--ac)">${secName[sec]}</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:7px">`;
+    ls.forEach(l=>{body+=`<div><label ${lbl}>${esc(l.n)}</label><input inputmode="numeric" dir="ltr" value="${d.v[l.k]!=null?d.v[l.k]:''}" oninput="finSetV('${l.k}',this.value)" placeholder="۰"></div>`;});
+    body+=`</div>`;});
+  return `<div class="tools"><b style="font-size:13px">💰 ورود دستی سود و زیان</b><span style="flex:1"></span>
+    <button class="btn gh sm" onclick="finAddLine()">➕ فیلد جدید</button>
+    <button class="btn gh sm" onclick="finDraft=null;go('pldash')">انصراف</button>
+    <button class="btn sm" onclick="finSave()">💾 ذخیره</button></div>
+  <div class="sec"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
+    <div><label ${lbl}>کسب‌وکار</label><select onchange="finDraft.biz=this.value"><option value="">—</option>${byE('business').map(x=>`<option value="${x.id}" ${x.id===d.biz?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></div>
+    <div><label ${lbl}>سال شمسی</label><input inputmode="numeric" dir="ltr" value="${d.jy||''}" oninput="finDraft.jy=this.value" placeholder="1404"></div>
+    <div><label ${lbl}>دوره</label><select onchange="finDraft.jm=this.value">${['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند','کل سال'].map(m=>`<option ${m===d.jm?'selected':''}>${m}</option>`).join('')}</select></div>
+    <div><label ${lbl}>واحد مبالغ</label><select onchange="finDraft.unit=this.value;document.getElementById('fin_tot').innerHTML=finTotHTML(plCalc(finDraft.v),this.value)"><option ${d.unit==='ریال'?'selected':''}>ریال</option><option ${d.unit==='تومان'?'selected':''}>تومان</option></select></div>
+  </div>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px"><div style="flex:2;min-width:280px">${body}</div>
+  <div style="flex:1;min-width:220px;position:sticky;top:0"><div style="font-weight:800;font-size:12.5px;margin:12px 0 6px">📊 محاسبهٔ زنده</div><div id="fin_tot" style="background:var(--bg3);border-radius:10px;padding:12px">${finTotHTML(plCalc(d.v),d.unit)}</div></div></div>
+  </div>`;
+}
+/* ===== کنترل مغایرت با سیستم (فروش) ===== */
+function appSalesYear(biz,jy){let s=0;
+  byE('invoice').forEach(v=>{if(v.d.kind==='پیش‌فاکتور'||v.d.status==='باطل')return;if(biz&&!relIds(v,'biz').includes(biz))return;const d=ds(v.d.date);if(!d)return;const p=d.split('-').map(Number);if(g2j(p[0],p[1],p[2])[0]===jy)s+=invCalc(v).total;});
+  byE('sale').filter(x=>!x.d._inv).forEach(x=>{if(biz&&!relIds(x,'biz').includes(biz))return;const d=ds(x.d.date);if(!d)return;const p=d.split('-').map(Number);if(g2j(p[0],p[1],p[2])[0]===jy)s+=saleAmt(x);});
+  return s;}
+function appPurchYear(biz,jy){let s=0;byE('purchase').forEach(x=>{if(biz&&!relIds(x,'biz').includes(biz))return;const d=ds(x.d.date);if(!d)return;const p=d.split('-').map(Number);if(g2j(p[0],p[1],p[2])[0]===jy)s+=purchAmt(x);});return s;}
+/* ===== ورود اکسل سود و زیان (فرمت ترانهاده: ردیف=خط، ستون=ماه) ===== */
+function finImportFile(inp){const f=inp.files&&inp.files[0];if(!f)return;const biz=document.getElementById('fin_imp_biz').value;
+  loadXLSX().then(()=>{const rd=new FileReader();rd.onload=()=>{try{
+    const wb=XLSX.read(new Uint8Array(rd.result),{type:'array'});const res=finParseWB(wb,biz);
+    alert('✅ '+res.recs.toLocaleString('fa-IR')+' رکورد از '+res.sheets.toLocaleString('fa-IR')+' شیت وارد شد'+(res.miss.length?'\n\nخطوط تشخیص‌داده‌نشده: '+res.miss.slice(0,8).join('، '):''));render();
+  }catch(e){alert('خطا در خواندن فایل: '+e.message);}};rd.readAsArrayBuffer(f);});}
+window.finImportFile=finImportFile;
+function finParseWB(wb,biz){const L=finLines();const nmap={};L.forEach(l=>nmap[_fnorm(l.n)]=l.k);
+  const alias={'بهایتماشدهخدمات':'c_serv','بهایتمامشدهخدمات':'c_serv','بهایتمامشدهکالایفروشرفتهداخلی':'c_goods','هزینهتخفیفورندینگجساب':'e_round','هزینهتخفیفورندینگحساب':'e_round','ایابوذهاب':'e_transp','استهلاک':'e_dep','هزینهاستهلاک':'e_dep','هزینهسایت':'e_site'};
+  const findKey=t=>{
+    if(/دمات/.test(t))return 'c_serv'; // خدمات/حدمات
+    if(t.indexOf('کالایفروش')>=0||t.indexOf('رفتهداخلی')>=0)return 'c_goods';
+    if(nmap[t])return nmap[t];if(alias[t])return alias[t];
+    const f=L.find(l=>{const ln=_fnorm(l.n);return ln===t||ln.slice(0,8)===t.slice(0,8)||(t.length>5&&ln.includes(t.slice(0,6)))||(ln.length>5&&t.includes(ln.slice(0,6)));});return f&&f.k;};
+  let recCount=0,sheets=0;const miss=new Set();
+  wb.SheetNames.forEach(sn=>{const jy=parseInt(_fnorm(sn).replace(/[^0-9]/g,''));if(!(jy>1390&&jy<1420))return;
+    const aoa=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1});if(!aoa.length)return;sheets++;
+    const hdr=(aoa[0]||[]).map(_fnorm);const colMon={};hdr.forEach((c,ci)=>{const mi=FMON.findIndex(m=>_fnorm(m)===c);if(mi>=0)colMon[ci]=FMON[mi];});
+    if(!Object.keys(colMon).length)return;
+    const byMon={};
+    const SKIP=new Set(['فروشخالص','جمعکلدرآمد','سودوزیانناخالص','جمعکلهزینه','سودزیانقبلارمالیات','سودخالص','درصدسودخالص','درصدازفروش']);
+    aoa.slice(1).forEach(row=>{const t=_fnorm(row&&row[0]);if(!t||SKIP.has(t)||t.startsWith('جمع')||t.startsWith('درصد')||t.indexOf('ناخالص')>=0)return;
+      const key=findKey(t);if(!key){if(t)miss.add(row[0]);return;}
+      Object.entries(colMon).forEach(([ci,mon])=>{const val=+row[ci]||0;if(!val)return;(byMon[mon]=byMon[mon]||{})[key]=val;});});
+    Object.entries(byMon).forEach(([mon,v])=>{let rec=byE('plfin').find(r=>(biz?relIds(r,'biz').includes(biz):!relIds(r,'biz').length)&&+r.d.jy===jy&&r.d.jm===mon);
+      if(rec){rec.d.v={...(rec.d.v||{}),...v};rec.d.unit='ریال';rec.u=Date.now();put(rec);}
+      else put({id:uid(),e:'plfin',d:{title:jy+' '+mon,biz:biz?[biz]:[],jy,jm:mon,unit:'ریال',v},u:Date.now()});
+      recCount++;});});
+  return {recs:recCount,sheets,miss:[...miss]};}
+function finTemplate(){loadXLSX().then(()=>{const rows=[['عنوان',...FMON,'کل سال']];
+  finLines().forEach(l=>rows.push([l.n,...FMON.map(()=>''),'']));
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:34},...FMON.map(()=>({wch:13})),{wch:14}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'1404');XLSX.writeFile(wb,'قالب-سود-و-زیان.xlsx');});}
+window.finTemplate=finTemplate;
+/* ===== داشبورد مالی ===== */
+function pldashHTML(){
+  const b=gBiz();const bizzes=byE('business');const years=plYears(b);
+  const yr=view.plYr&&years.includes(view.plYr)?view.plYr:(years[years.length-1]||null);
+  const mode=view.plMode||'year'; // year | month | compare
+  const mon=view.plMon||'کل سال';
+  const pc=v=>v>=0?'#16c784':'#ff3b30';
+  let h=`<div class="tools"><b style="font-size:13px">💰 داشبورد مدیریت مالی (سود و زیان)</b><span style="flex:1"></span>
+    <select class="inp sm" style="width:auto" onchange="setGBiz(this.value)"><option value="">همه کسب‌وکارها</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select>
+    <button class="btn gh sm" onclick="finNew()">✍️ ورود دستی</button>
+    <button class="btn gh sm" onclick="finTemplate()">📄 قالب اکسل</button>
+    <button class="btn sm" onclick="go('pldash');view.plImp=!view.plImp;render()">📥 ورود اکسل</button></div>`;
+  if(view.plImp)h+=`<div class="sec" style="border:1px dashed var(--ac)"><b>📥 ورود از اکسل (فرمت حسابداری: ردیف=عنوان، ستون=ماه‌ها)</b>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
+      <label style="font-size:11px;color:var(--tx2)">کسب‌وکار:</label>
+      <select id="fin_imp_biz" class="inp sm" style="width:auto"><option value="">${b&&recs[b]?esc(recs[b].d.title):'بدون کسب‌وکار'}</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select>
+      <input type="file" accept=".xlsx,.xls" onchange="finImportFile(this)" style="font-size:12px">
+    </div><div style="font-size:10.5px;color:var(--tx2);margin-top:6px">هر شیت با نام سالِ شمسی (مثل 1404) و ستون‌های ماه خوانده می‌شود. مبالغ به «ریال» فرض می‌شوند و خودکار به تومان تبدیل می‌شوند. برای فرمت استاندارد، «📄 قالب اکسل» را بگیر.</div></div>`;
+  if(!years.length){h+=`<div class="empty">هنوز داده‌ای نیست. «📥 ورود اکسل» گزارش حسابداری را وارد کن یا «✍️ ورود دستی» را بزن.</div>`;return h;}
+  // انتخاب سال/دوره/حالت
+  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+    <span style="font-size:11px;color:var(--tx2)">سال:</span><select class="inp sm" style="width:auto" onchange="view.plYr=+this.value;render()">${years.map(y=>`<option ${y===yr?'selected':''}>${y}</option>`).join('')}</select>
+    <span style="width:8px"></span>${[['year','کل سال'],['month','ماهانه'],['compare','مقایسهٔ سال‌ها']].map(m=>`<button class="btn ${mode===m[0]?'':'gh'} sm" onclick="view.plMode='${m[0]}';render()">${m[1]}</button>`).join('')}
+    ${mode==='month'?`<select class="inp sm" style="width:auto" onchange="view.plMon=this.value;render()">${FMON.map(m=>`<option ${m===mon?'selected':''}>${m}</option>`).join('')}</select>`:''}</div>`;
+  if(mode==='compare'){
+    const rows=[['فروش','s_sales'],['فروش خالص','_net'],['جمع درآمد','_ti'],['بهای تمام‌شده','_cogs'],['سود ناخالص','_gp'],['حاشیه ناخالص٪','_gm'],['جمع هزینه','_ox'],['سود قبل مالیات','_pbt'],['سود خالص','_np'],['حاشیه خالص٪','_nm']];
+    const ys=years;const agg=ys.map(y=>({y,...plAgg(b,y,'کل سال')}));
+    const cell=(a,key)=>{const c=a.calc;const m={_net:c.netSales,_ti:c.totalInc,_cogs:c.cogs,_gp:c.gross,_gm:c.grossPct,_ox:c.opex,_pbt:c.pbt,_np:c.net,_nm:c.netPct};
+      if(key==='s_sales')return money(a.v.s_sales||0);if(key.endsWith('m'))return (m[key]||0).toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪';return money(m[key]);};
+    h+=`<div class="sec"><div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">عنوان</th>${ys.map(y=>`<th>${y}</th>`).join('')}<th>رشد سال آخر</th></tr></thead><tbody>
+      ${rows.map(r=>{const last=agg[agg.length-1],prev=agg[agg.length-2];
+        const gv=a=>{const c=a.calc;return ({s_sales:a.v.s_sales||0,_net:c.netSales,_ti:c.totalInc,_cogs:c.cogs,_gp:c.gross,_gm:c.grossPct,_ox:c.opex,_pbt:c.pbt,_np:c.net,_nm:c.netPct})[r[1]];};
+        const g=prev&&gv(prev)?Math.round((gv(last)-gv(prev))/Math.abs(gv(prev))*100):null;
+        return `<tr><td style="text-align:right">${r[0]}</td>${agg.map(a=>`<td style="text-align:center">${cell(a,r[1])}</td>`).join('')}<td style="text-align:center">${g==null?'—':`<b style="color:${g>=0?'#16c784':'#ff3b30'}">${g>=0?'▲':'▼'}${Math.abs(g).toLocaleString('fa-IR')}٪</b>`}</td></tr>`;}).join('')}
+    </tbody></table></div></div>`;
+    // نمودار روند فروش/سود خالص چندساله
+    h+=`<div class="sec"><div style="font-weight:800;margin-bottom:6px">📈 روند چندساله</div>${plMultiLine([{name:'جمع درآمد',color:'#3b82f6',pts:agg.map(a=>a.calc.totalInc)},{name:'سود ناخالص',color:'#16c784',pts:agg.map(a=>a.calc.gross)},{name:'سود خالص',color:'#f5a623',pts:agg.map(a=>a.calc.net)}],ys.map(String))}</div>`;
+    return h;
+  }
+  // year یا month
+  const period=mode==='month'?mon:'کل سال';
+  const A=plAgg(b,yr,period);const c=A.calc;
+  if(!A.n){h+=`<div class="empty">برای ${yr} ${mode==='month'?mon:''} داده‌ای ثبت نشده.</div>`;return h;}
+  // مقایسه با دورهٔ قبل (سال قبل همان دوره)
+  const prev=plAgg(b,yr-1,period);const pcalc=prev.calc;const grow=(a,bb)=>bb?Math.round((a-bb)/Math.abs(bb)*100):null;
+  const kc=(t,v,sub,g)=>`<div class="sec" style="text-align:center;padding:12px 10px"><div style="font-size:11px;color:var(--tx2)">${t}</div><div style="font-size:17px;font-weight:800;margin-top:3px;color:${v<0?'var(--bad)':'var(--tx)'}">${money(v)}</div>${g!=null?`<div style="font-size:10px;color:${g>=0?'#16c784':'#ff3b30'}">${g>=0?'▲':'▼'} ${Math.abs(g).toLocaleString('fa-IR')}٪ نسبت به پارسال</div>`:sub?`<div style="font-size:10px;color:var(--tx2)">${sub}</div>`:''}</div>`;
+  h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-bottom:10px">
+    ${kc('جمع کل درآمد',c.totalInc,'',grow(c.totalInc,pcalc.totalInc))}
+    ${kc('سود ناخالص',c.gross,'حاشیه '+Math.round(c.grossPct).toLocaleString('fa-IR')+'٪',grow(c.gross,pcalc.gross))}
+    ${kc('جمع هزینه‌ها',c.opex,Math.round(c.opexPct).toLocaleString('fa-IR')+'٪ از درآمد',grow(c.opex,pcalc.opex))}
+    ${kc('سود خالص',c.net,'حاشیه '+Math.round(c.netPct).toLocaleString('fa-IR')+'٪',grow(c.net,pcalc.net))}
+  </div>`;
+  // آبشار
+  h+=`<div class="sec"><div style="font-weight:800;margin-bottom:4px">💧 آبشار سود و زیان — ${yr} ${mode==='month'?mon:'(کل سال)'}</div>${plWater(c)}</div>`;
+  // مغایرت‌سنجی با سیستم (سالانه)
+  const appSale=appSalesYear(b,yr);const plSale=A.v.s_sales||0;const dv=plSale?Math.round((appSale-plSale)/plSale*100):null;
+  const appPur=appPurchYear(b,yr);
+  h+=`<div class="sec" style="border:1px solid ${dv!=null&&Math.abs(dv)>5?'var(--warn)':'var(--ok)'}"><div style="font-weight:800;margin-bottom:6px">🔍 کنترل مغایرت با سیستم (سال ${yr})</div>
+    <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">قلم</th><th>سود و زیان (تومان)</th><th>سیستم فروش/خرید (تومان)</th><th>مغایرت</th></tr></thead><tbody>
+      <tr><td style="text-align:right">فروش (ناخالص)</td><td style="text-align:center">${money(plSale)}</td><td style="text-align:center">${money(appSale)}</td><td style="text-align:center">${dv==null?'—':`<b style="color:${Math.abs(dv)>5?'#ff3b30':'#16c784'}">${dv>=0?'+':''}${dv.toLocaleString('fa-IR')}٪</b>`}</td></tr>
+      <tr><td style="text-align:right">بهای تمام‌شده / خرید سیستم</td><td style="text-align:center">${money(c.cogs)}</td><td style="text-align:center">${money(appPur)}</td><td style="text-align:center"><span style="color:var(--tx2);font-size:10px">مرجع کنترلی</span></td></tr>
+    </tbody></table></div>
+    <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">اگر مغایرت فروش زیر ۵٪ باشد، داده‌های سیستم و حسابداری هم‌خوان‌اند. مغایرت زیاد یعنی فاکتور/فروشی در سیستم ثبت یا حذف نشده — همین‌جا کنترلش کن. (بهای تمام‌شده با «خرید ثبت‌شدهٔ سیستم» مقایسهٔ تقریبی است؛ برابری کامل نیاز به لحاظ تغییر موجودی دارد.)</div></div>`;
+  // ساختار هزینه (آبشاری)
+  const opexLines=finLines().filter(l=>l.sec==='opex').map(l=>({l,v:plToman(A.v[l.k]||0,'تومان')})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const opexTot=opexLines.reduce((a,x)=>a+x.v,0)||1;
+  h+=`<div class="sec"><div style="font-weight:800;margin-bottom:6px">🧾 ساختار هزینه‌های عملیاتی <span style="font-weight:400;color:var(--tx2);font-size:11px">(روی هر هزینه بزن تا روند ماهانه‌اش را ببینی)</span></div>
+    ${opexLines.slice(0,12).map(x=>{const on=view.plCard===x.l.k;return `<div onclick="view.plCard=${on?'null':`'${x.l.k}'`};render()" style="cursor:pointer;margin:4px 0">
+      <div style="display:flex;font-size:11.5px;margin-bottom:2px"><span style="flex:1">${esc(x.l.n)}</span><b>${money(x.v)}</b><span style="margin-inline-start:8px;color:var(--tx2)">${Math.round(x.v/opexTot*100).toLocaleString('fa-IR')}٪</span></div>
+      <div style="height:9px;border-radius:5px;background:var(--bg3);overflow:hidden"><div style="height:100%;width:${(x.v/opexLines[0].v*100).toFixed(0)}%;background:${on?'var(--ac)':'#ff9f0a'}"></div></div>
+      ${on?`<div style="margin-top:6px;background:var(--bg);border-radius:8px;padding:8px">${plMultiLine([{name:esc(x.l.n),color:'#ff9f0a',pts:FMON.map(m=>plToman((plAgg(b,yr,m).v[x.l.k])||0,'تومان'))}],FMON.map(m=>m.slice(0,3)))}</div>`:''}</div>`;}).join('')||'<div class="empty">هزینه‌ای ثبت نشده</div>'}</div>`;
+  // روند ماهانهٔ سال جاری
+  if(mode!=='month'){const mAgg=FMON.map(m=>plAgg(b,yr,m).calc);
+    h+=`<div class="sec"><div style="font-weight:800;margin-bottom:6px">📈 روند ماهانهٔ ${yr}</div>${plMultiLine([{name:'جمع درآمد',color:'#3b82f6',pts:mAgg.map(x=>x.totalInc)},{name:'سود ناخالص',color:'#16c784',pts:mAgg.map(x=>x.gross)},{name:'سود خالص',color:'#f5a623',pts:mAgg.map(x=>x.net)}],FMON.map(m=>m.slice(0,3)))}</div>`;}
+  // توصیه‌های مالی
+  const rec=[];
+  if(dv!=null&&Math.abs(dv)>5)rec.push(['🔴','مغایرت فروش','فروشِ سیستم و حسابداری '+Math.abs(dv).toLocaleString('fa-IR')+'٪ اختلاف دارد؛ فاکتورهای ثبت‌نشده یا اضافی را پیدا و اصلاح کن.']);
+  if(c.netPct<3)rec.push(['⚠️','حاشیهٔ سود نازک','سود خالص فقط '+c.netPct.toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪ درآمد است؛ روی قیمت‌گذاری و کنترل هزینه‌های بزرگ تمرکز کن.']);
+  if(opexLines[0]&&opexLines[0].v/opexTot>0.3)rec.push(['🧾','تمرکز هزینه','«'+opexLines[0].l.n+'» به‌تنهایی '+Math.round(opexLines[0].v/opexTot*100).toLocaleString('fa-IR')+'٪ هزینه‌های عملیاتی است؛ بزرگ‌ترین اهرم صرفه‌جویی همین‌جاست.']);
+  const gg=grow(c.gross,pcalc.gross),sg=grow(c.totalInc,pcalc.totalInc);
+  if(gg!=null&&sg!=null&&gg<sg-5)rec.push(['📉','فشار حاشیه','درآمد '+sg.toLocaleString('fa-IR')+'٪ رشد کرده ولی سود ناخالص فقط '+gg.toLocaleString('fa-IR')+'٪؛ یعنی بهای تمام‌شده سریع‌تر بالا رفته — قیمت خرید/فروش را بازبینی کن.']);
+  const lossM=mode!=='month'?FMON.filter(m=>plAgg(b,yr,m).n&&plAgg(b,yr,m).calc.pbt<0):[];
+  if(lossM.length)rec.push(['🗓','ماه‌های زیان‌ده',lossM.length.toLocaleString('fa-IR')+' ماه سودِ قبل از مالیات منفی بوده: '+lossM.join('، ')+'؛ علت فصلی یا هزینهٔ استثنایی را بررسی کن.']);
+  const finCost=plToman(A.v.e_loan||0,'تومان')+plToman(A.v.e_penal||0,'تومان');
+  if(finCost>c.gross*0.15&&c.gross>0)rec.push(['🏦','هزینهٔ مالی سنگین','سود/کارمزد و جریمهٔ وام‌ها '+money(finCost)+' است؛ ساختار تأمین مالی و تسویهٔ به‌موقع وام‌ها را بازنگری کن.']);
+  if(!rec.length)rec.push(['✅','وضعیت سالم','شاخص‌های مالی در محدودهٔ مطلوب‌اند؛ روند را پایش کن.']);
+  h+=`<div class="sec" style="border:1px solid var(--ac)"><div style="font-weight:800;margin-bottom:6px">🧠 توصیه‌های مالی</div>
+    ${rec.map(r=>`<div style="display:flex;gap:8px;align-items:flex-start;margin:5px 0;font-size:12.5px"><span style="font-size:15px">${r[0]}</span><span><b>${r[1]}:</b> ${r[2]}</span></div>`).join('')}</div>`;
   return h;
 }
 function findashHTML(){
