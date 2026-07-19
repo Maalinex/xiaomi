@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.23</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.24</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.23</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.24</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -848,6 +848,33 @@ saletarget:{ic:'🎯',n:'تارگت فروش',grp:'مدیریت کسب و کار
  {k:'tqty',n:'🎯 تارگت تعدادی',t:NUM},
  {k:'note',n:'توضیح',t:LNG}],
  cols:['title','scope','ptype','to'],comp:'targetBrief'},
+perfkpi:{ic:'📐',n:'شاخص عملکرد (KPI)',grp:'مدیریت کسب و کار',f:[
+ {k:'title',n:'عنوان شاخص عملکرد',t:TXT},
+ {k:'cat',n:'دسته',t:SEL,o:['مالی','فروش','عملیاتی','کیفیت','مشتری','رفتاری/فردی','استراتژیک','بهره‌وری']},
+ {k:'scope',n:'قابل‌اعمال بر سطح',t:SEL,o:['همه سطوح','فرد','واحد/تیم','کسب‌وکار','شرکت','هلدینگ']},
+ {k:'unit',n:'واحد اندازه‌گیری',t:TXT},
+ {k:'dir',n:'جهت مطلوب',t:SEL,o:['بیشتر بهتر','کمتر بهتر']},
+ {k:'weight',n:'وزن در امتیاز کل (٪)',t:NUM},
+ {k:'tdefault',n:'هدف پیش‌فرض',t:NUM},
+ {k:'bsc',n:'🎯 هدف استراتژیک مرتبط',t:REL,r:'bsc',s:1},
+ {k:'process',n:'🔁 فرآیند مرتبط',t:REL,r:'process',s:1},
+ {k:'measure',n:'🎚️ سنجهٔ BSC مرتبط',t:REL,r:'measure',s:1},
+ {k:'note',n:'تعریف و فرمول محاسبه',t:LNG}],
+ cols:['title','cat','scope','weight'],comp:'perfKpiBrief'},
+perfscore:{ic:'📊',n:'ثبت عملکرد دوره‌ای',grp:'مدیریت کسب و کار',f:[
+ {k:'title',n:'شرح (اختیاری)',t:TXT},
+ {k:'kpi',n:'شاخص عملکرد',t:REL,r:'perfkpi',s:1},
+ {k:'person',n:'👤 فرد',t:REL,r:'hr',s:1},
+ {k:'orgu',n:'🧩 واحد / تیم',t:REL,r:'orgunit',s:1},
+ {k:'biz',n:'🧢 کسب‌وکار',t:REL,r:'business',s:1},
+ {k:'company',n:'🏢 شرکت',t:REL,r:'company',s:1},
+ {k:'ptype',n:'دوره',t:SEL,o:['روزانه','هفتگی','ماهانه','فصلی','سالانه']},
+ {k:'from',n:'از تاریخ',t:DAT},
+ {k:'to',n:'تا تاریخ',t:DAT},
+ {k:'actual',n:'مقدار واقعی',t:NUM},
+ {k:'target',n:'هدف این دوره',t:NUM},
+ {k:'note',n:'توضیح',t:LNG}],
+ cols:['title','kpi','person','ptype','actual'],comp:'perfScoreBrief'},
 purchinv:{ic:'🧾',n:'فاکتور خرید',grp:'مدیریت کسب و کار',f:[
  {k:'title',n:'شماره / شرح فاکتور خرید',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
@@ -2384,7 +2411,7 @@ const MODULES=[
  {id:'M14',n:'استراتژی و تعالی',ents:['bsc','measure','efqm'],views:['bscmap','bsccanvas']},
  {id:'M07',n:'فروش و فاکتور',ents:['invoice','invline','saletarget','settle','expense','pbudget','plmonth','gateway','pfsettle','kpival','ctrlval','mdef','mval','dashdef','widdef','waste'],views:['salesdash','invnew','targetdash','settlenew','arapdash','cashdash','plreport','ceodash','ctrldash','mbuilder','mydash','pfdash']},
  {id:'M15',n:'کسب‌وکار ویژه (کالا / فروش)',ents:['product','sale','purchase','channel','purchinv','purchline'],views:['bizdash','pinvnew']},
- {id:'M17',n:'EPCF (طراحی│خرید│اجرا│تامین مالی)',ents:['eproject','ewbs','edoc','emr','econtract','eprog','esite','ehse','eclaim','einv','efin'],views:['epcfdash','portdash','perfdash']},
+ {id:'M17',n:'EPCF (طراحی│خرید│اجرا│تامین مالی)',ents:['eproject','ewbs','edoc','emr','econtract','eprog','esite','ehse','eclaim','einv','efin'],views:['epcfdash','portdash']},
  {id:'M18',n:'ساخت و ساز (پروژه ساختمانی)',ents:['cblock','cboq','csub','csubinv','cmat','cquote','clabor','cmach','cpetty'],views:['cdash']},
  {id:'M19',n:'توکن‌سازی پروژه (Tokenization)',ents:['token','tokenholder','tokentx','tokenloan','tokenins'],views:['tokendash']},
  {id:'M20',n:'توسعه نرم‌افزار (Agile)',ents:['aepic','asprint','astory','arelease','adep','aretro'],views:['agiledash']},
@@ -6390,8 +6417,9 @@ function bizMenuHTML(){
     +ent('settle')+ent('expense')+ent('pbudget')+ent('gateway')+ent('pfsettle')+ent('plmonth'));
   // 7️⃣ مدیریت عملکرد
   h+=sec('🎖️ مدیریت عملکرد',
-    it('ctrldash','🎛 داشبرد کنترلی (شاخص‌ها)',"go('ctrldash')",(canSee('invoice')||canSee('product'))&&canView('ctrldash'))
-    +ent('kpival')+ent('ctrlval')+ent('mdef'));
+    it('perfdash','🎖️ داشبورد عملکرد',"go('perfdash')",canSee('perfscore')&&canView('perfdash'))
+    +it('ctrldash','🎛 داشبرد کنترلی (شاخص‌ها)',"go('ctrldash')",(canSee('invoice')||canSee('product'))&&canView('ctrldash'))
+    +ent('perfkpi')+ent('perfscore')+ent('kpival')+ent('ctrlval')+ent('mdef'));
   // 📁 بخش‌های سفارشی که کاربر در این گروه گذاشته
   const cust=Object.keys(schemaCfg().ents||{}).filter(k=>E[k]&&E[k].grp==='مدیریت کسب و کار'&&!['dashdef','widdef','mval'].includes(k)).map(ent).join('');
   if(cust)h+=sec('📁 بخش‌های من',cust);
@@ -8419,78 +8447,122 @@ function perfUnits(P){ // واحدهای سازمانی — از WBS
     if((+w.d.act||0)<(+w.d.plan||0)-5&&w.d.status!=='تمام شده')x.late++;});
   return Object.values(G).map(x=>({...x,np:x.prjs.size,pAvg:x.wsum>0?x.plan/x.wsum:0,aAvg:x.wsum>0?x.act/x.wsum:0}));
 }
+/* ===== 🎖️ مدیریت عملکرد — امتیاز چندسطحیِ کارکنان/تیم/کسب‌وکار/شرکت/هلدینگ ===== */
+function perfKpiBrief(r){return {label:r.d.cat||'شاخص',v:(r.d.dir||'بیشتر بهتر')+(r.d.weight?' · وزن '+(+r.d.weight).toLocaleString('fa-IR')+'٪':''),bad:false};}
+window.perfKpiBrief=perfKpiBrief;
+function perfScoreBrief(r){const kp=recs[relIds(r,'kpi')[0]];const dir=kp?kp.d.dir:'بیشتر بهتر';
+  const ach=perfAch(r.d.actual,r.d.target||(kp&&kp.d.tdefault),dir);
+  return {label:'تحقق'+(kp?' — '+(kp.d.title||''):''),v:ach==null?((+r.d.actual||0).toLocaleString('fa-IR')):(Math.round(ach).toLocaleString('fa-IR')+'٪'),bad:ach!=null&&ach<70};}
+window.perfScoreBrief=perfScoreBrief;
+function perfAch(actual,target,dir){actual=+actual||0;target=+target||0;if(!target)return null;
+  const pct=dir==='کمتر بهتر'?(actual>0?target/actual*100:100):(actual/target*100);return pct;}
+function perfMatch(s,kind,id){if(kind==='hold')return true;const key=kind==='ppl'?'person':kind==='unit'?'orgu':kind;return relIds(s,key).includes(id);}
+function perfTgtKey(kind){return kind==='ppl'?'person':kind==='unit'?'orgu':kind==='biz'?'biz':kind==='company'?'company':null;}
+function perfEntityScore(kind,id,per){
+  const items=[];let wsum=0,wach=0;
+  byE('perfscore').filter(s=>perfMatch(s,kind,id)&&(!per||per==='همه'||s.d.ptype===per)).forEach(s=>{
+    const kp=recs[relIds(s,'kpi')[0]];const dir=kp?kp.d.dir:'بیشتر بهتر';
+    const w=kp&&+kp.d.weight>0?+kp.d.weight:1;
+    const ach=perfAch(s.d.actual,s.d.target||(kp&&kp.d.tdefault),dir);if(ach==null)return;
+    const capped=Math.min(ach,120);wsum+=w;wach+=capped*w;
+    items.push({s,kp,name:(kp&&kp.d.title)||(s.d.title||'شاخص'),cat:kp&&kp.d.cat,actual:+s.d.actual||0,target:+s.d.target||(kp&&+kp.d.tdefault)||0,unit:kp&&kp.d.unit,ach,w});});
+  const tk=perfTgtKey(kind);
+  if(tk){byE('saletarget').filter(t=>relIds(t,tk).includes(id)).forEach(t=>{const pr=targetProgress(t);if(pr.overall==null)return;
+    const capped=Math.min(pr.overall,120);wsum+=1;wach+=capped;
+    items.push({tgt:t,name:'🎯 '+(t.d.title||'تارگت فروش'),cat:'فروش',actual:pr.amount,target:t.d.tamount||0,ach:pr.overall,w:1});});}
+  const score=wsum>0?Math.round(wach/wsum):null;
+  return {score,items,wsum,count:items.length};
+}
+function perfTrend(kind,id){
+  const by={};
+  byE('perfscore').filter(s=>perfMatch(s,kind,id)).forEach(s=>{const d=ds(s.d.from)||ds(s.d.to);if(!d)return;
+    const [gy,gm,gd]=d.split('-').map(Number);const j=g2j(gy,gm,gd);const k=j[0]*100+j[1];
+    const kp=recs[relIds(s,'kpi')[0]];const dir=kp?kp.d.dir:'بیشتر بهتر';const w=kp&&+kp.d.weight>0?+kp.d.weight:1;
+    const ach=perfAch(s.d.actual,s.d.target||(kp&&kp.d.tdefault),dir);if(ach==null)return;
+    const g=by[k]||(by[k]={ws:0,wa:0});g.ws+=w;g.wa+=Math.min(ach,120)*w;});
+  const JM=['','فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
+  return Object.keys(by).map(Number).sort((a,b)=>a-b).slice(-8).map(k=>({l:JM[k%100]+' '+_faY(Math.floor(k/100)%100),v:by[k].ws>0?Math.round(by[k].wa/by[k].ws):0}));
+}
+function perfLineSVG(pts){
+  if(!pts.length)return '<div class="empty" style="padding:16px">هنوز دادهٔ عملکردی برای نمودار روند نیست</div>';
+  const W=760,H=210,pl=42,pr=14,ptp=14,pb=26,iw=W-pl-pr,ih=H-ptp-pb;
+  const mx=Math.max(100,...pts.map(p=>p.v));
+  const X=i=>pl+(pts.length<=1?iw/2:i*iw/(pts.length-1));
+  const Y=v=>ptp+ih-(v/mx)*ih;
+  const line=pts.map((p,i)=>`${X(i).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ');
+  const area=`${pl},${(ptp+ih).toFixed(1)} `+line+` ${(pl+iw).toFixed(1)},${(ptp+ih).toFixed(1)}`;
+  const grid=[0,.25,.5,.75,1].map(f=>{const yy=ptp+ih-f*ih;const vv=Math.round(f*mx);
+    return `<line x1="${pl}" y1="${yy.toFixed(1)}" x2="${W-pr}" y2="${yy.toFixed(1)}" stroke="var(--line)" stroke-width="1" opacity=".5"/><text x="${pl-6}" y="${(yy+3).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--tx2)">${vv}</text>`;}).join('');
+  const pc=v=>v>=90?'#16c784':v>=70?'#9acd32':v>=50?'#f5a623':'#ff3b30';
+  const dots=pts.map((p,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="3" fill="${pc(p.v)}"><title>${esc(p.l)}: ${p.v.toLocaleString('fa-IR')}٪</title></circle>`).join('');
+  const xlab=pts.map((p,i)=>`<text x="${X(i).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="8.5" fill="var(--tx2)">${esc(p.l)}</text>`).join('');
+  return `<svg width="100%" viewBox="0 0 ${W} ${H}" style="max-height:230px">
+    <defs><linearGradient id="pfgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#16c784" stop-opacity="0.38"/><stop offset="100%" stop-color="#16c784" stop-opacity="0.02"/></linearGradient></defs>
+    ${grid}<polygon points="${area}" fill="url(#pfgrad)"/>
+    <polyline points="${line}" fill="none" stroke="#16c784" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>${dots}${xlab}</svg>`;
+}
 function perfdashHTML(){
-  const projects=byE('eproject');
-  const P=view.pfP||'';
-  if(!view.pfKind)view.pfKind='sub';
-  const K=view.pfKind;
-  const KINDS=[['sub','👷‍♂️ پیمانکاران جزء'],['ppl','👤 افراد (مهندس/کارشناس)'],['sup','🚚 تامین‌کنندگان'],['unit','🏢 واحدهای سازمانی']];
-  let h=`<div class="tools"><label style="margin:0">سطح:</label>
-    <select onchange="view.pfP=this.value;view.pfSel=null;render()" style="max-width:200px">
-      <option value="">🏦 کل هلدینگ (همه پروژه‌ها)</option>
-      ${projects.map(x=>`<option value="${x.id}" ${x.id===P?'selected':''}>🏗️ ${esc(x.d.title)}</option>`).join('')}</select>
-    <span style="flex:1"></span></div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
-    ${KINDS.map(([k,n])=>`<button class="btn ${K===k?'':'gh'} sm" onclick="view.pfKind='${k}';view.pfSel=null;render()">${n}</button>`).join('')}
+  const b=gBiz();const bizzes=byE('business');
+  const kind=view.pfKind||'ppl';
+  const per=view.pfPer||'همه';
+  const LV=[['ppl','👤 فرد'],['unit','🧩 واحد/تیم'],['biz','🧢 کسب‌وکار'],['company','🏢 شرکت'],['hold','🏦 هلدینگ']];
+  const pc=v=>v==null?'var(--tx2)':v>=90?'#16c784':v>=70?'#9acd32':v>=50?'#f5a623':'#ff3b30';
+  // فهرست موجودیت‌های این سطح
+  let ents=[];
+  if(kind==='ppl')ents=byE('hr').filter(x=>!b||relIds(x,'biz').includes(b)||!relIds(x,'biz').length).map(x=>({id:x.id,name:x.d.title||'—',sub:x.d.role||''}));
+  else if(kind==='unit')ents=byE('orgunit').map(x=>({id:x.id,name:x.d.title||'—',sub:''}));
+  else if(kind==='biz')ents=byE('business').map(x=>({id:x.id,name:x.d.title||'—',sub:''}));
+  else if(kind==='company')ents=byE('company').map(x=>({id:x.id,name:x.d.title||'—',sub:''}));
+  else ents=[{id:'ALL',name:'کل هلدینگ',sub:''}];
+  ents=ents.map(e=>({...e,...perfEntityScore(kind,e.id,per)})).sort((a,b)=>(b.score==null?-1:b.score)-(a.score==null?-1:a.score));
+  const nDef=byE('perfkpi').length, nSc=byE('perfscore').length;
+  let h=`<div class="tools"><b style="font-size:13px">🎖️ داشبورد مدیریت عملکرد</b><span style="flex:1"></span>
+    <select class="inp sm" style="width:auto" onchange="setGBiz(this.value)"><option value="">همه کسب‌وکارها</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select>
+    <select class="inp sm" style="width:auto" onchange="view.pfPer=this.value;render()">${['همه','روزانه','هفتگی','ماهانه','فصلی','سالانه'].map(x=>`<option ${x===per?'selected':''}>${x}</option>`).join('')}</select>
+    <button class="btn gh sm" onclick="openRec('perfkpi')">📐 شاخص جدید</button>
+    <button class="btn sm" onclick="openRec('perfscore')">📊 ثبت عملکرد</button></div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><span style="font-size:11px;color:var(--tx2);align-self:center">سطح:</span>
+    ${LV.map(([k,n])=>`<button class="btn ${kind===k?'':'gh'} sm" onclick="view.pfKind='${k}';view.pfSel=null;render()">${n}</button>`).join('')}</div>`;
+  if(!nDef&&!nSc)h+=`<div class="sec" style="border:1px dashed var(--ac)"><b>شروع سریع مدیریت عملکرد:</b><div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:2">۱) با «📐 شاخص جدید» شاخص‌های عملکرد را تعریف کن (وزن، جهت مطلوب، اتصال به هدف استراتژیک/فرآیند/سنجه). هر فرد می‌تواند شاخص‌های متفاوت داشته باشد.<br>۲) با «📊 ثبت عملکرد» مقدار واقعی و هدف هر فرد/تیم را در هر دوره وارد کن.<br>۳) امتیاز کل، روند و آبشار همین‌جا خودکار ساخته می‌شود. تارگت‌های فروشِ هر فرد هم خودکار در امتیاز لحاظ می‌شوند.</div></div>`;
+  // نمودار روند سطح جاری (تجمیع) یا موجودیت انتخابی
+  const sel=view.pfSel&&ents.find(e=>e.id===view.pfSel)?view.pfSel:null;
+  const trendPts=sel?perfTrend(kind,sel):(()=>{const by={};byE('perfscore').forEach(s=>{if(kind!=='hold'&&!ents.some(e=>perfMatch(s,kind,e.id)))return;const d=ds(s.d.from)||ds(s.d.to);if(!d)return;const [gy,gm]=d.split('-').map(Number);const j=g2j(gy,gm,15);const k=j[0]*100+j[1];const kp=recs[relIds(s,'kpi')[0]];const dir=kp?kp.d.dir:'بیشتر بهتر';const w=kp&&+kp.d.weight>0?+kp.d.weight:1;const a=perfAch(s.d.actual,s.d.target||(kp&&kp.d.tdefault),dir);if(a==null)return;const g=by[k]||(by[k]={ws:0,wa:0});g.ws+=w;g.wa+=Math.min(a,120)*w;});const JM=['','فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];return Object.keys(by).map(Number).sort((a,b)=>a-b).slice(-8).map(k=>({l:JM[k%100],v:by[k].ws>0?Math.round(by[k].wa/by[k].ws):0}));})();
+  h+=`<div class="sec"><div style="font-weight:800;margin-bottom:6px">📈 روند امتیاز عملکرد ${sel?'— '+esc(ents.find(e=>e.id===sel).name):'(میانگین این سطح)'}</div>${perfLineSVG(trendPts)}</div>`;
+  // کارت‌های موجودیت‌ها
+  h+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:9px;margin-bottom:10px">
+    ${ents.map(e=>{const on=view.pfSel===e.id;return `<div onclick="view.pfSel=${on?'null':`'${e.id}'`};render()" style="cursor:pointer;text-align:center;background:var(--cd);border:1px solid ${on?'var(--ac)':'var(--bd)'};border-radius:14px;padding:12px 8px;box-shadow:0 3px 10px rgba(0,0,0,.1)">
+      <div style="font-size:12.5px;font-weight:800;line-height:1.4">${esc(e.name)}</div>
+      ${e.sub?`<div style="font-size:10px;color:var(--tx2)">${esc(e.sub)}</div>`:''}
+      <div style="font-size:26px;font-weight:900;margin-top:5px;color:${pc(e.score)}">${e.score==null?'—':e.score.toLocaleString('fa-IR')}</div>
+      <div style="height:5px;border-radius:3px;background:var(--bg3);overflow:hidden;margin-top:3px"><div style="height:100%;width:${Math.min(100,e.score||0)}%;background:${pc(e.score)}"></div></div>
+      <div style="font-size:9.5px;color:var(--tx2);margin-top:4px">${e.count.toLocaleString('fa-IR')} شاخص ${e.count?'▾ کلیک':''}</div></div>`;}).join('')||'<div class="empty">در این سطح موجودیتی نیست</div>'}
   </div>`;
-  const dev=(v,inv)=>v==null?'—':`<b style="color:${(inv?-v:v)< -5?'var(--bad)':(inv?-v:v)>=0?'var(--ok)':'#e5b567'}">${(v>=0?'+':'')+v.toLocaleString('fa-IR',{maximumFractionDigits:1})}</b>`;
-  const tbl=(cols,rows,rowFn)=>rows.length?`<div class="tblwrap"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${rows.map(rowFn).join('')}</tbody></table></div>`:'<div class="empty">داده‌ای برای این نما نیست</div>';
-  if(K==='sub'){
-    const rows=perfSubs(P).sort((a,b)=>b.appr-a.appr);
-    h+=`<div class="sec"><h3>👷‍♂️ کارنامه پیمانکاران جزء ${P?'— این پروژه':'— کل هلدینگ (تجمیع چندپروژه‌ای به نام)'} <span class="c">${rows.length.toLocaleString('fa-IR')}</span></h3>
-    ${tbl(['پیمانکار','پروژه‌ها','قراردادها','ص.و تایید','پرداخت','مانده ما به او','پیشرفت آیتم‌های محول','آیتم'],rows,r=>`
-      <tr onclick="view.pfSel=view.pfSel==='${esc(r.k)}'?null:'${esc(r.k)}';render()" style="cursor:pointer;${view.pfSel===r.k?'background:rgba(236,217,143,.06)':''}">
-      <td style="text-align:right"><b>${esc(r.k)}</b>${r.np>1?' 🔗':''}</td><td>${r.np.toLocaleString('fa-IR')}</td>
-      <td>${abbrN(r.contract)}</td><td>${abbrN(r.appr)}</td><td>${abbrN(r.paid)}</td>
-      <td><b style="color:${r.due>0?'#e5b567':'var(--tx)'}">${abbrN(r.due)}</b></td>
-      <td>${r.pg==null?'—':`<b style="color:${r.pg<50?'var(--bad)':r.pg<80?'#e5b567':'var(--ok)'}">${r.pg.toFixed(0)}٪</b>`}</td>
-      <td>${r.items.toLocaleString('fa-IR')}</td></tr>
-      ${view.pfSel===r.k?`<tr><td colspan="8" style="background:var(--bg)"><div style="padding:6px 10px;font-size:11.5px">
-        ${r.ids.map(id=>{const sb=recs[id];const iv=byE('csubinv').filter(v=>relIds(v,'csub').includes(id));
-          const ap=iv.reduce((a,v)=>a+(+v.d.approved||0),0),pd=iv.reduce((a,v)=>a+(+v.d.paid||0),0);
-          return `<div style="display:flex;gap:14px;padding:3px 0;border-bottom:1px dashed var(--line)"><span style="min-width:160px">🏗️ ${esc(_prjName(sb))}</span><span>${esc(sb.d.trade||'—')}</span><span>قرارداد: ${abbrN(+sb.d.camount||0)}</span><span>تایید: ${abbrN(ap)}</span><span>پرداخت: ${abbrN(pd)}</span><span style="color:${ap-pd>0?'#e5b567':'var(--tx2)'}">مانده: ${abbrN(ap-pd)}</span></div>`;}).join('')}
-      </div></td></tr>`:''}`)}
-    <p style="font-size:11px;color:var(--tx2);margin-top:8px">🔗 = در بیش از یک پروژه فعال است (تجمیع به نام). روی هر ردیف بزن تا شکست پروژه‌به‌پروژه‌اش باز شود.</p></div>`;
-  }
-  if(K==='ppl'){
-    const rows=perfPeople(P).sort((a,b)=>b.load-a.load);
-    h+=`<div class="sec"><h3>👤 کارنامه افراد <span class="c">${rows.length.toLocaleString('fa-IR')}</span></h3>
-    ${tbl(['فرد','پروژه‌ها','بسته‌های WBS','میانگین انحراف٪','بسته عقب','مدارک (معوق)','اقلام خرید (معوق)','📘 تسک باز (دیرکرد) / انجام','HSE بسته/باز'],rows,r=>`
-      <tr onclick="go('rec','hr','${r.id}')" style="cursor:pointer">
-      <td style="text-align:right"><b>${esc(r.n)}</b>${r.np>1?' 🔗':''}</td><td>${r.np.toLocaleString('fa-IR')}</td>
-      <td>${r.wbs.toLocaleString('fa-IR')}</td><td>${dev(r.avgDev)}</td>
-      <td>${r.late?`<b style="color:var(--bad)">${r.late.toLocaleString('fa-IR')}</b>`:'۰'}</td>
-      <td>${r.docs.toLocaleString('fa-IR')}${r.docLate?` <b style="color:var(--bad)">(${r.docLate.toLocaleString('fa-IR')} معوق)</b>`:''}</td>
-      <td>${r.mrs.toLocaleString('fa-IR')}${r.mrLate?` <b style="color:var(--bad)">(${r.mrLate.toLocaleString('fa-IR')} معوق)</b>`:''}</td>
-      <td>${r.tOpen.toLocaleString('fa-IR')}${r.tLate?` <b style="color:var(--bad)">(${r.tLate.toLocaleString('fa-IR')} ⏰)</b>`:''} / ${r.tDone.toLocaleString('fa-IR')}</td>
-      <td>${r.hseDone.toLocaleString('fa-IR')} / ${r.hseOpen?`<b style="color:var(--bad)">${r.hseOpen.toLocaleString('fa-IR')}</b>`:'۰'}</td></tr>`)}
-    <p style="font-size:11px;color:var(--tx2);margin-top:8px">میانگین انحراف = واقعی − برنامه‌ایِ بسته‌های تحت مسئولیت (مثبت سبز = جلوتر از برنامه). برای اتصال، فیلد «مسئول» را در WBS/مدارک/اقلام پر کن.</p></div>`;
-  }
-  if(K==='sup'){
-    const rows=perfSuppliers(P).sort((a,b)=>b.total-a.total);
-    h+=`<div class="sec"><h3>🚚 کارنامه تامین‌کنندگان <span class="c">${rows.length.toLocaleString('fa-IR')}</span></h3>
-    ${tbl(['تامین‌کننده','پروژه‌ها','PO / اقلام','مبلغ POها','خرید مصالح','مجموع هزینه با او','تحویل به‌موقع','تاخیر متوسط','استعلام (برد)'],rows,r=>`
-      <tr onclick="go('rec','crm','${r.id}')" style="cursor:pointer">
-      <td style="text-align:right"><b>${esc(r.n)}</b>${r.np>1?' 🔗':''}</td><td>${r.np.toLocaleString('fa-IR')}</td>
-      <td>${r.po.toLocaleString('fa-IR')}</td><td>${abbrN(r.poAmt)}</td><td>${abbrN(r.matAmt)}</td>
-      <td><b>${abbrN(r.total)}</b></td>
-      <td>${r.onTimePct==null?'—':`<b style="color:${r.onTimePct<60?'var(--bad)':r.onTimePct<85?'#e5b567':'var(--ok)'}">${r.onTimePct.toFixed(0)}٪</b>`}</td>
-      <td>${r.avgDelay==null?'—':`<b style="color:${r.avgDelay>7?'var(--bad)':r.avgDelay>0?'#e5b567':'var(--ok)'}">${r.avgDelay.toLocaleString('fa-IR',{maximumFractionDigits:1})} روز</b>`}</td>
-      <td>${r.quotes.toLocaleString('fa-IR')} (${r.wins.toLocaleString('fa-IR')})</td></tr>`)}
-    <p style="font-size:11px;color:var(--tx2);margin-top:8px">تحویل به‌موقع و تاخیر از مقایسه «موعد برنامه‌ای» و «تحویل واقعی» اقلام خرید حساب می‌شود — این جدول برای مذاکره قرارداد بعدی طلاست.</p></div>`;
-  }
-  if(K==='unit'){
-    const rows=perfUnits(P).sort((a,b)=>b.wbs-a.wbs);
-    h+=`<div class="sec"><h3>🏢 کارنامه واحدهای سازمانی <span class="c">${rows.length.toLocaleString('fa-IR')}</span></h3>
-    ${tbl(['واحد','پروژه‌ها','بسته‌ها','برنامه‌ای','واقعی','انحراف','بسته عقب'],rows,r=>`
-      <tr onclick="go('rec','orgunit','${r.id}')" style="cursor:pointer">
-      <td style="text-align:right"><b>${esc(r.n)}</b>${r.np>1?' 🔗':''}</td><td>${r.np.toLocaleString('fa-IR')}</td>
-      <td>${r.wbs.toLocaleString('fa-IR')}</td><td>${r.pAvg.toLocaleString('fa-IR',{maximumFractionDigits:1})}٪</td>
-      <td>${r.aAvg.toLocaleString('fa-IR',{maximumFractionDigits:1})}٪</td><td>${dev(r.aAvg-r.pAvg)}</td>
-      <td>${r.late?`<b style="color:var(--bad)">${r.late.toLocaleString('fa-IR')}</b>`:'۰'}</td></tr>`)}</div>`;
-  }
+  // جزئیات موجودیت انتخابی
+  if(sel){const e=ents.find(x=>x.id===sel);
+    const presetKey=kind==='ppl'?'person':kind==='unit'?'orgu':kind==='biz'?'biz':kind==='company'?'company':'';
+    h+=`<div class="sec" style="border:1px solid var(--ac)">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+        <b style="font-size:14px;flex:1">🎖️ کارنامهٔ عملکرد: ${esc(e.name)}</b>
+        <span style="font-size:22px;font-weight:900;color:${pc(e.score)}">${e.score==null?'—':e.score.toLocaleString('fa-IR')}</span>
+        ${presetKey?`<button class="btn sm" onclick="openRec('perfscore',null,{k:'${presetKey}',id:'${e.id}'})">📊 ثبت عملکرد این ${LV.find(l=>l[0]===kind)[1].split(' ')[1]||''}</button>`:''}
+        <button class="btn gh sm" onclick="view.pfSel=null;render()">✕ بستن</button></div>
+      ${e.items.length?`<div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">شاخص</th><th>دسته</th><th>واقعی</th><th>هدف</th><th>تحقق</th><th>وزن</th><th>سهم در امتیاز</th></tr></thead><tbody>
+        ${e.items.sort((a,b)=>(b.ach||0)-(a.ach||0)).map(it=>{const contrib=e.wsum>0?Math.round(Math.min(it.ach,120)*it.w/e.wsum):0;return `<tr>
+          <td style="text-align:right">${esc(it.name)}${it.unit?` <span style="color:var(--tx2);font-size:10px">(${esc(it.unit)})</span>`:''}</td>
+          <td>${esc(it.cat||'—')}</td>
+          <td>${(it.actual||0).toLocaleString('fa-IR',{maximumFractionDigits:1})}</td>
+          <td>${(it.target||0).toLocaleString('fa-IR',{maximumFractionDigits:1})}</td>
+          <td><b style="color:${pc(it.ach)}">${it.ach==null?'—':Math.round(it.ach).toLocaleString('fa-IR')+'٪'}</b></td>
+          <td>${(it.w||1).toLocaleString('fa-IR')}</td>
+          <td><b>${contrib.toLocaleString('fa-IR')}</b></td></tr>`;}).join('')}
+        </tbody></table></div>
+        <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">امتیاز کل = میانگین وزنیِ درصد تحققِ شاخص‌ها (هر شاخص حداکثر ۱۲۰٪ لحاظ می‌شود). تارگت‌های فروشِ این ${LV.find(l=>l[0]===kind)[1].split(' ')[1]||'مورد'} خودکار در امتیاز آمده‌اند.</div>`
+      :`<div class="empty">برای این مورد هنوز عملکردی ثبت نشده — «📊 ثبت عملکرد» را بزن.</div>`}
+      <div style="margin-top:8px">${perfLineSVG(perfTrend(kind,sel))}</div>
+    </div>`;}
   return h;
 }
+
 /* ===== 🪙 داشبورد توکن — نمای ناشر │ مالکان │ بانک │ بیمه │ اتصال پروژه ===== */
 function tokendashHTML(){
   const toks=byE('token');
