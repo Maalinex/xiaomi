@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.04</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.05</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.04</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.05</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -3397,10 +3397,11 @@ function _fifoCalcRaw(p){
   const dkey=x=>(ds(x.d.date)||'9999-12-31')+'#'+String(x.u).padStart(15,'0');
   // لایه‌های ورودی: موجودی اول دوره (به قیمت خرید واحد کالا) + خریدها به ترتیب تاریخ
   const layers=[];
-  if((p.d.stock0||0)>0)layers.push({q:p.d.stock0,c:p.d.buy||0});
-  purchasesOf(p.id).slice()
-    .sort((a,b)=>dkey(a).localeCompare(dkey(b)))
-    .forEach(x=>{const q=x.d.qty||0;if(q>0)layers.push({q,c:(x.d.price||0)+((x.d.extra||0)/q)});});
+  // تاریخ لایه اول دوره: اولین خرید یا تاریخ ثبت کالا (برای محاسبه سن ماندگاری)
+  const _purs=purchasesOf(p.id).slice().sort((a,b)=>dkey(a).localeCompare(dkey(b)));
+  const s0date=(_purs[0]&&ds(_purs[0].d.date))||(p.c?new Date(p.c).toISOString().slice(0,10):'');
+  if((p.d.stock0||0)>0)layers.push({q:p.d.stock0,c:p.d.buy||0,d:s0date});
+  _purs.forEach(x=>{const q=x.d.qty||0;if(q>0)layers.push({q,c:(x.d.price||0)+((x.d.extra||0)/q),d:ds(x.d.date)||''});});
   let lastCost=layers.length?layers[layers.length-1].c:(p.d.buy||0);
   // مصرف لایه‌ها با فروش‌ها به ترتیب تاریخ
   let profit=0,cogs=0,shortage=0;const bySale={};
@@ -3420,7 +3421,8 @@ function _fifoCalcRaw(p){
     });
   const value=layers.reduce((a,L)=>a+L.q*L.c,0);
   const qty=layers.reduce((a,L)=>a+L.q,0)-0;
-  return {value,profit,cogs,shortage,layerQty:qty,avg:qty>0?value/qty:lastCost,bySale};
+  const oldestDate=layers.length?layers[0].d:''; // تاریخ قدیمی‌ترین جنسِ باقی‌مانده در انبار
+  return {value,profit,cogs,shortage,layerQty:qty,avg:qty>0?value/qty:lastCost,bySale,layers:layers.map(L=>({q:L.q,c:L.c,d:L.d})),oldestDate};
 }
 function productProfit(p){return fifoCalc(p).profit;} // سود تحقق‌یافته FIFO
 function stockValue(p){return fifoCalc(p).value;}     // ارزش انبار FIFO
@@ -6702,20 +6704,41 @@ function ctrldashHTML(){
 
 /* ===== 📦 داشبورد جامع انبار ===== */
 function whUnitCost(p){const f=fifoCalc(p);return f.avg||p.d.buy||0;}
+function whRefDate(biz){ // تاریخ مرجع = جدیدترین رویداد داده (خرید/فروش) — نه ساعت سرور
+  let mx='';
+  byE('sale').forEach(x=>{if(biz&&!relIds(x,'biz').includes(biz))return;const d=ds(x.d.date);if(d&&d>mx)mx=d;});
+  byE('purchase').forEach(x=>{if(biz&&!relIds(x,'biz').includes(biz))return;const d=ds(x.d.date);if(d&&d>mx)mx=d;});
+  byE('invoice').forEach(x=>{if(biz&&!relIds(x,'biz').includes(biz))return;const d=ds(x.d.date);if(d&&d>mx)mx=d;});
+  return mx||today();
+}
+function whDays(from,to){ if(!from||!to)return null; const a=new Date(from+'T00:00:00Z'),b=new Date(to+'T00:00:00Z'); if(isNaN(a)||isNaN(b))return null; return Math.round((b-a)/86400000); }
 function whRows(biz){
+  let ref=whRefDate(biz); if(isNaN(Date.parse(ref)))ref=today();
   return byE('product').filter(p=>!p.d.sub&&(!biz||relIds(p,'biz').includes(biz))).map(p=>{
     const f=fifoCalc(p);const st=stockNow(p);
     const sales=salesOf(p.id);
     let last='';sales.forEach(x=>{const d=ds(x.d.date);if(d&&d>last)last=d;});
-    const t0=today();const win=90;
-    const soldWin=sales.filter(x=>{const d=ds(x.d.date);return d&&d>=_isoAdd(t0,-win);}).reduce((a,x)=>a+(+x.d.qty||0),0);
+    const win=90;
+    const soldWin=sales.filter(x=>{const d=ds(x.d.date);return d&&d>=_isoAdd(ref,-win);}).reduce((a,x)=>a+(+x.d.qty||0),0);
     const avgDaily=soldWin/win;
     const cover=avgDaily>0?st/avgDaily:(st>0?9999:0);
     const cost=whUnitCost(p);
     const low=p.d.minstock!=null&&st<p.d.minstock;
-    const dead=st>0&&(!last||last<_isoAdd(t0,-60));
-    return {p,st,val:f.value,avg:f.avg||cost,cost,last,avgDaily,cover,low,dead,shortage:f.shortage,cogs:f.cogs,profit:f.profit,sold90:soldWin};
+    // 🕰 سن ماندگاری = فاصله قدیمی‌ترین جنس باقی‌مانده تا تاریخ مرجع
+    const ageDays=(st>0&&f.oldestDate)?(whDays(f.oldestDate,ref)||0):0;
+    const dead=st>0&&ageDays>=60; // راکد = بیش از ۶۰ روز در انبار خوابیده
+    return {p,st,val:f.value,avg:f.avg||cost,cost,last,avgDaily,cover,low,dead,ageDays,oldestDate:f.oldestDate,layers:f.layers,shortage:f.shortage,cogs:f.cogs,profit:f.profit,sold90:soldWin,ref};
   });
+}
+/* تفکیک ارزش انبار بر اساس مدت ماندگاری (aging) نسبت به تاریخ مرجع */
+function whAging(rows,ref){
+  const B=[['۰ تا ۳۰ روز',0,30,'#16c784'],['۳۰ تا ۶۰ روز',30,60,'#9acd32'],['۶۰ تا ۹۰ روز',60,90,'#f5a623'],['۹۰ تا ۱۸۰ روز',90,180,'#ff7a00'],['بیش از ۱۸۰ روز',180,1e9,'#ff3b30']];
+  const out=B.map(b=>({label:b[0],lo:b[1],hi:b[2],col:b[3],val:0,qty:0}));
+  rows.forEach(r=>{(r.layers||[]).forEach(L=>{
+    if(L.q<=0)return;const age=L.d?(whDays(L.d,ref)||0):0;
+    const bi=out.findIndex(b=>age>=b.lo&&age<b.hi);if(bi<0)return;
+    out[bi].val+=L.q*L.c;out[bi].qty+=L.q;});});
+  return out;
 }
 function whExpSum(biz,cats,from,to){
   return byE('expense').filter(x=>{
@@ -6784,12 +6807,15 @@ function whdashHTML(){
   const b=gBiz();
   view.whMode=view.whMode||'m';
   const rows=whRows(b);
+  const refD=whRefDate(b);
+  const aging=whAging(rows,refD);
   const totVal=rows.reduce((a,x)=>a+x.val,0);
   const totQty=rows.reduce((a,x)=>a+x.st,0);
   const items=rows.filter(x=>x.st>0).length;
   const low=rows.filter(x=>x.low);
   const dead=rows.filter(x=>x.dead);
-  const deadVal=dead.reduce((a,x)=>a+x.val,0);
+  const deadVal=aging.filter(a=>a.lo>=60).reduce((a,x)=>a+x.val,0); // ارزش خوابیده بیش از ۶۰ روز
+  const deadPct=totVal>0?deadVal/totVal*100:0;
   const shortage=rows.filter(x=>x.shortage>0);
   const totCogs=rows.reduce((a,x)=>a+x.cogs,0);
   const turn=totVal>0?totCogs/totVal:0;               // نرخ گردش (COGS/ارزش انبار)
@@ -6822,18 +6848,26 @@ function whdashHTML(){
     ${card('🔄 نرخ گردش موجودی',turn.toLocaleString('fa-IR',{maximumFractionDigits:2})+'×',turn<1&&totVal>0,'بهای فروش ÷ ارزش انبار')}
     ${card('⏳ روز پوشش موجودی',dio==null?'—':Math.round(dio).toLocaleString('fa-IR')+' روز',dio!=null&&dio>180)}
     ${card('⚠️ زیر حداقل موجودی',low.length.toLocaleString('fa-IR')+' قلم',low.length>0,'نیازمند خرید')}
-    ${card('🧊 ارزش موجودی راکد',money(deadVal),deadVal>0,dead.length.toLocaleString('fa-IR')+' قلم بدون فروش ۶۰ روز')}
+    ${card('🧊 موجودی راکد (>۶۰ روز ماندگاری)',money(deadVal),deadVal>0,deadPct.toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪ کل انبار │ '+dead.length.toLocaleString('fa-IR')+' قلم')}
     ${card('⛔ کسری (Stockout)',shortage.length.toLocaleString('fa-IR')+' قلم',shortage.length>0,'فروش بیش از موجودی')}
     ${card('🗑 ضایعات (کل)',money(waste),waste>0,saleYr>0?(waste/saleYr*100).toLocaleString('fa-IR',{maximumFractionDigits:2})+'٪ فروش':'')}
     ${card('🏬 هزینه انبارداری (کل)',money(storeCost),false,saleYr>0?(storeCost/saleYr*100).toLocaleString('fa-IR',{maximumFractionDigits:2})+'٪ فروش':'')}
     ${card('💵 بهای تمام‌شده فروش‌رفته',money(totCogs))}
   </div>`;
+  // 🕰 تفکیک ارزش انبار بر اساس مدت ماندگاری (aging)
+  const agTot=aging.reduce((a,x)=>a+x.val,0)||1;
+  h+=`<div class="sec"><h3>🕰 ماندگاری موجودی — ارزش بر اساس مدت خواب جنس در انبار <span style="flex:1"></span><span style="font-size:10.5px;color:var(--tx2)">تاریخ مرجع: ${esc(iso2jstr(refD))}</span></h3>
+    <div style="display:flex;height:26px;border-radius:8px;overflow:hidden;margin-bottom:10px">${aging.map(a=>a.val>0?`<div title="${esc(a.label)}: ${money(a.val)}" style="width:${(a.val/agTot*100).toFixed(1)}%;background:${a.col}"></div>`:'').join('')}</div>
+    <div class="tblwrap"><table><thead><tr><th>بازه ماندگاری</th><th>ارزش</th><th>٪ انبار</th><th>تعداد واحد</th></tr></thead><tbody>
+      ${aging.map(a=>`<tr><td style="text-align:right"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${a.col};margin-inline-end:6px"></span>${a.label}</td><td>${money(a.val)}</td><td style="color:${a.lo>=60&&a.val>0?'var(--bad)':'inherit'}">${(a.val/agTot*100).toLocaleString('fa-IR',{maximumFractionDigits:1})}٪</td><td>${a.qty.toLocaleString('fa-IR')}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">سن هر جنس = فاصله تاریخ ورودش به انبار (لایه FIFO) تا تاریخ مرجع (جدیدترین رویداد داده). هرچه به سمت راست‌تر، سرمایه بیشتر خوابیده.</div></div>`;
   // جدول‌ها
   const tbl=(title,list,cols)=>`<div class="sec"><h3>${title}</h3>${list.length?`<div class="tblwrap" style="max-height:300px;overflow:auto"><table><thead><tr>${cols.map(c=>`<th style="${c[2]||''}">${c[0]}</th>`).join('')}</tr></thead><tbody>${list.map(x=>`<tr>${cols.map(c=>`<td style="${c[2]||''}">${c[1](x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`:'<div class="empty" style="padding:14px">موردی نیست ✅</div>'}</div>`;
   h+=tbl('⚠️ اقلام زیر حداقل موجودی (اولویت خرید)',low.sort((a,b)=>a.cover-b.cover),
     [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['حداقل',x=>(x.p.d.minstock||0).toLocaleString('fa-IR')],['روز پوشش',x=>`<b style="color:var(--bad)">${x.cover>=9999?'∞':x.cover.toFixed(1)}</b>`]]);
-  h+=tbl('🧊 موجودی راکد (سرمایه خوابیده)',dead.sort((a,b)=>b.val-a.val).slice(0,20),
-    [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['ارزش خوابیده',x=>money(x.val)],['آخرین فروش',x=>x.last?esc(iso2jstr(x.last)):'هرگز']]);
+  h+=tbl('🧊 موجودی راکد (بیش از ۶۰ روز ماندگاری)',dead.sort((a,b)=>b.ageDays-a.ageDays).slice(0,20),
+    [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['ارزش خوابیده',x=>money(x.val)],['مدت ماندگاری',x=>`<b style="color:var(--bad)">${x.ageDays.toLocaleString('fa-IR')} روز</b>`],['آخرین فروش',x=>x.last?esc(iso2jstr(x.last)):'هرگز']]);
   h+=tbl('💎 بیشترین ارزش انبار',rows.filter(x=>x.st>0).sort((a,b)=>b.val-a.val).slice(0,20),
     [['کالا',pn,'text-align:right'],['موجودی',x=>x.st.toLocaleString('fa-IR')],['بهای واحد',x=>money(x.avg)],['ارزش',x=>money(x.val)],['گردش ۹۰روز',x=>x.sold90.toLocaleString('fa-IR')]]);
   return h;
