@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.38</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.39</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.38</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.39</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -796,6 +796,7 @@ purchase:{ic:'🚚',n:'خرید سریع (تک‌کالا)',grp:'مدیریت ک
  {k:'supplier',n:'تامین‌کننده',t:REL,r:'crm',s:1},
  {k:'kind',n:'نوع',t:SEL,o:['نقدی','اعتباری']},
  {k:'settled',n:'تسویه شد',t:CHK},
+ {k:'due',n:'تاریخ سررسید پرداخت (برای اعتباری)',t:DAT},
  {k:'date',n:'تاریخ',t:DAT}],
  cols:['title','product','qty','kind','date'],comp:'purchTotal'},
 channel:{ic:'📣',n:'کانال‌ها و تبلیغات',grp:'مدیریت کسب و کار',f:[
@@ -4089,6 +4090,29 @@ function apGroups(biz){const map={};
   byE('settle').filter(s=>s.d.kind==='پرداخت به تامین‌کننده'&&!relIds(s,'purchinv').length&&(!biz||relIds(s,'biz').includes(biz)||!relIds(s,'biz').length)).forEach(s=>add(relIds(s,'supplier')[0],-(s.d.amount||0)));
   return Object.values(map).filter(g=>Math.abs(g.bal)>=1).map(g=>({...g,name:g.id&&recs[g.id]?(recs[g.id].d.title||'—'):'❔ بدون تأمین‌کنندهٔ مشخص'})).sort((a,b)=>b.bal-a.bal);
 }
+/* 💧 زمان‌بندی سررسید بدهی‌ها — هر بدهیِ باز با تاریخ پرداخت خودش (برای پایش نقدینگی مورد نیاز) */
+function apSchedule(biz){
+  const items=[];
+  byE('purchinv').filter(v=>v.d.status!=='باطل'&&(!biz||relIds(v,'biz').includes(biz))).forEach(v=>{const open=pinvCalc(v).due;if(open>0.5)items.push({sid:relIds(v,'supplier')[0]||'',amt:open,due:ds(v.d.due)||'',e:'purchinv',id:v.id,desc:'فاکتور خرید '+(v.d.title||'')});});
+  byE('purchase').filter(x=>!x.d._pinv&&x.d.kind==='اعتباری'&&!x.d.settled&&(!biz||relIds(x,'biz').includes(biz)||!relIds(x,'biz').length)).forEach(x=>{const amt=purchAmt(x);if(amt>0.5)items.push({sid:relIds(x,'supplier')[0]||'',amt,due:ds(x.d.due)||'',e:'purchase',id:x.id,desc:'خرید سریع '+(x.d.title||'')});});
+  // پرداخت‌های آزاد (بدون فاکتور مشخص) از بدهیِ همان تأمین‌کننده، زودسررسیدها اول، کم می‌شوند تا با مانده‌ی apGroups بخواند
+  const free={};byE('settle').filter(s=>s.d.kind==='پرداخت به تامین‌کننده'&&!relIds(s,'purchinv').length&&(!biz||relIds(s,'biz').includes(biz)||!relIds(s,'biz').length)).forEach(s=>{const k=relIds(s,'supplier')[0]||'';free[k]=(free[k]||0)+(s.d.amount||0);});
+  Object.keys(free).forEach(k=>{let rem=free[k];const its=items.filter(i=>i.sid===k).sort((a,b)=>((a.due||'9999-99-99')<(b.due||'9999-99-99'))?-1:1);for(const it of its){if(rem<=0.5)break;const cut=Math.min(it.amt,rem);it.amt-=cut;rem-=cut;}});
+  return items.filter(i=>i.amt>0.5).map(i=>({...i,name:i.sid&&recs[i.sid]?recs[i.sid].d.title:'❔ بدون تأمین‌کننده'}));
+}
+/* دسته‌بندی بدهی‌ها بر اساس فاصلهٔ سررسید تا «امروزِ داده» — برای نمایش نقدینگی مورد نیاز هر بازه */
+function apBuckets(biz,ref){
+  ref=ref||whRefDate(biz);if(isNaN(Date.parse(ref)))ref=today();
+  const items=apSchedule(biz).slice().sort((a,b)=>((a.due||'9999-99-99')<(b.due||'9999-99-99'))?-1:1);
+  const B=[{k:'over',n:'⏰ سررسیدگذشته'},{k:'d7',n:'۷ روز آینده'},{k:'d14',n:'۸ تا ۱۴ روز'},{k:'d30',n:'۱۵ تا ۳۰ روز'},{k:'d60',n:'۳۱ تا ۶۰ روز'},{k:'d90',n:'۶۱ تا ۹۰ روز'},{k:'later',n:'بیش از ۹۰ روز'},{k:'none',n:'بدون تاریخ سررسید'}];
+  B.forEach(g=>{g.amt=0;g.items=[];});
+  const G=k=>B.find(x=>x.k===k);
+  items.forEach(it=>{let k;if(!it.due)k='none';else if(it.due<ref)k='over';else{const days=Math.round((Date.parse(it.due)-Date.parse(ref))/86400000);k=days<=7?'d7':days<=14?'d14':days<=30?'d30':days<=60?'d60':days<=90?'d90':'later';}const g=G(k);g.amt+=it.amt;g.items.push(it);});
+  const total=items.reduce((a,i)=>a+i.amt,0);
+  const over=G('over').amt;
+  const need7=over+G('d7').amt, need14=need7+G('d14').amt, need30=need14+G('d30').amt;
+  return {B,items,total,over,need7,need14,need30,none:G('none').amt,ref};
+}
 /* کارت حسابِ سند-محور — cid/sid می‌تواند '' باشد (بدون طرف‌حساب) */
 function arLedger(cid){const rows=[],m=v=>cid?relIds(v,'customer').includes(cid):!relIds(v,'customer').length;
   byE('invoice').filter(v=>v.d.kind!=='پیش‌فاکتور'&&v.d.status!=='باطل'&&m(v)).forEach(v=>{const c=invCalc(v),d=ds(v.d.date)||'';
@@ -4447,6 +4471,7 @@ function arapdashHTML(){
   const bizzes=byE('business');const b=gBiz();
   const arRows=arGroups(b).map(g=>({id:g.id,n:g.name,bal:g.bal}));
   const apRows=apGroups(b).map(g=>({id:g.id,n:g.name,bal:g.bal}));
+  const apS=apBuckets(b);
   const pfg=pfGroups(b);const pfRecv=pfg.reduce((a,g)=>a+g.bal,0);
   const totAR=arRows.reduce((a,x)=>a+x.bal,0)+pfRecv, totAP=apRows.reduce((a,x)=>a+x.bal,0);
   const setl=byE('settle').filter(s=>!b||relIds(s,'biz').includes(b));
@@ -4486,6 +4511,41 @@ function arapdashHTML(){
     <div style="flex:1;min-width:300px"><div style="font-weight:800;font-size:13px;margin-bottom:6px">📤 بدهی به تأمین‌کنندگان (از خرید) <span style="color:var(--tx2);font-weight:400">${apRows.length.toLocaleString('fa-IR')}</span></div>
       ${apRows.length?apRows.map(x=>drill('supp',x)).join(''):'<div class="empty" style="padding:14px">بدهی‌ای نیست — یا فاکتور/خرید اعتباری ثبت نشده، یا همه تسویه شده.</div>'}</div>
   </div>
+  ${(()=>{
+    if(!apS.items.length)return '';
+    const col={over:'#ff3b30',d7:'#ff6a45',d14:'#ff9f0a',d30:'#f5a623',d60:'#eab308',d90:'#48cdb0',later:'#4a9de0',none:'#8ea0b5'};
+    const nc=(t,v,c,strong)=>`<div class="sec" style="text-align:center;padding:11px 8px;${strong?'border:1px solid var(--ac)':''}"><div style="font-size:11px;color:var(--tx2)">${t}</div><div style="font-size:16px;font-weight:800;margin-top:3px;color:${c||'var(--tx)'}">${v}</div></div>`;
+    const mx=Math.max(...apS.B.map(g=>g.amt),1);
+    const barRows=apS.B.filter(g=>g.amt>0.5).map(g=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:12px">
+      <span style="width:120px;text-align:right;color:var(--tx2);flex-shrink:0">${g.n}</span>
+      <div style="flex:1;height:16px;border-radius:5px;background:var(--bg3);overflow:hidden"><div style="height:100%;width:${Math.max(2,g.amt/mx*100)}%;background:${col[g.k]}"></div></div>
+      <b style="width:110px;text-align:left;flex-shrink:0">${money(g.amt)}</b>
+      <span style="width:44px;text-align:center;color:var(--tx2);font-size:10.5px;flex-shrink:0">${g.items.length.toLocaleString('fa-IR')} قلم</span></div>`).join('');
+    const upcoming=apS.items.slice().sort((a,b)=>((a.due||'9999-99-99')<(b.due||'9999-99-99'))?-1:1);
+    const dayTxt=due=>{if(!due)return '<span style="color:#8ea0b5">بدون تاریخ ⚠️</span>';if(due<apS.ref)return `<b style="color:var(--bad)">سررسید گذشته</b>`;const d=Math.round((Date.parse(due)-Date.parse(apS.ref))/86400000);return `<span style="color:${d<=7?'var(--bad)':d<=30?'#e5b567':'var(--tx2)'}">${d.toLocaleString('fa-IR')} روز مانده</span>`;};
+    return `<div class="sec" style="margin-top:12px;border-inline-start:3px solid var(--ac)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b style="flex:1">💧 نقدینگی مورد نیاز برای پرداخت بدهی‌ها <span style="color:var(--tx2);font-weight:400;font-size:11px">(بر اساس تاریخ سررسید — نسبت به ${esc(iso2jstr(apS.ref)||'امروز')})</span></b></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:12px">
+        ${nc('⏰ سررسیدگذشته (همین حالا)',money(apS.over),apS.over>0?'var(--bad)':'var(--tx)',apS.over>0)}
+        ${nc('💧 لازم تا ۷ روز',money(apS.need7),'#ff6a45')}
+        ${nc('💧 لازم تا ۱۴ روز',money(apS.need14),'#ff9f0a')}
+        ${nc('💧 لازم تا ۳۰ روز',money(apS.need30),'#f5a623',true)}
+        ${nc('📤 کل بدهیِ باز',money(apS.total),'var(--tx)')}
+      </div>
+      ${apS.none>0?`<div style="font-size:11px;color:#e5b567;margin-bottom:8px">⚠️ ${money(apS.none)} از بدهی‌ها «تاریخ سررسید» ندارند و در بازه‌بندی بالا نیامده‌اند — با ثبت تاریخ پرداخت روی فاکتور/خرید، دقیق‌تر برنامه‌ریزی کن.</div>`:''}
+      <div style="margin-bottom:12px">${barRows}</div>
+      <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">تأمین‌کننده / سند</th><th>مبلغ باز</th><th>تاریخ سررسید</th><th>وضعیت</th><th></th></tr></thead><tbody>
+      ${upcoming.slice(0,25).map(it=>`<tr onclick="go('rec','${it.e}','${it.id}')" style="cursor:pointer">
+        <td style="text-align:right">🏭 ${esc(it.name)} <span style="color:var(--tx2);font-size:10.5px">· ${esc(it.desc)}</span></td>
+        <td style="text-align:center;font-weight:700;color:var(--bad)">${money(it.amt)}</td>
+        <td style="text-align:center">${it.due?esc(iso2jstr(it.due)):'—'}</td>
+        <td style="text-align:center">${dayTxt(it.due)}</td>
+        <td style="text-align:center"><button class="btn gh sm" style="padding:2px 8px" onclick="event.stopPropagation();settleDraft=null;settleNewDraft('پرداخت به تامین‌کننده');${it.sid?`settleDraft.supplier='${it.sid}';`:''}go('settlenew')">💵 پرداخت</button></td></tr>`).join('')}
+      ${upcoming.length>25?`<tr><td colspan="5" style="text-align:center;color:var(--tx2)">و ${(upcoming.length-25).toLocaleString('fa-IR')} بدهیِ دیگر…</td></tr>`:''}
+      </tbody></table></div>
+      <p style="font-size:10.5px;color:var(--tx2);margin-top:8px">💡 «نقدینگی مورد نیاز تا X روز» = سررسیدگذشته + همهٔ بدهی‌هایی که تا X روز آینده سررسید می‌شوند؛ یعنی نقدی که باید تا آن زمان آماده داشته باشی.</p>
+    </div>`;
+  })()}
   ${pfg.length?`<div class="sec" style="margin-top:12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b style="flex:1">📱 مطالبات از درگاه‌ها و پلتفرم‌ها <span style="color:var(--tx2);font-weight:400;font-size:11px">(در انتظار واریز — در «کل طلب» بالا هم جمع شده)</span></b><button class="btn gh sm" onclick="go('pfdash')">🔄 مدیریت تسویهٔ پلتفرم</button></div>
     <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">پلتفرم/درگاه</th><th>مانده مطالبه</th><th>تعداد دوره</th><th>دوره‌ها (فروش)</th></tr></thead><tbody>
     ${pfg.map(g=>`<tr onclick="go('pfdash')" style="cursor:pointer"><td style="text-align:right">📱 ${esc(g.name)}</td><td style="text-align:center;font-weight:700;color:var(--bad)">${money(g.bal)}</td><td style="text-align:center">${g.items.length.toLocaleString('fa-IR')}</td><td style="text-align:center;font-size:10.5px;color:var(--tx2)">${g.items.slice(0,3).map(s=>esc(iso2jstr(ds(s.d.from))||'')+'…'+esc(iso2jstr(ds(s.d.to))||'')).join('، ')}${g.items.length>3?' …':''}</td></tr>`).join('')}
@@ -6710,13 +6770,10 @@ function nav(){
   let h=`<div class="nav-i ${view.type==='me'?'on':''}" onclick="go('me')">🗂️ میز کار من</div>`;
   h+=`
   ${canView('cal')?`<div class="nav-i ${view.type==='cal'?'on':''}" onclick="go('cal')">📅 تقویم</div>`:''}
-  ${canView('charts')?`<div class="nav-i ${view.type==='charts'?'on':''}" onclick="go('charts')">📊 نمودارها و شاخص‌ها</div>`:''}
-  ${canSee('mdef')&&canView('mbuilder')?`<div class="nav-i ${view.type==='mbuilder'?'on':''}" onclick="go('mbuilder')">🧩 ساختارساز شاخص‌ها</div>`:''}
-  ${canSee('dashdef')&&canView('mydash')?`<div class="nav-i ${view.type==='mydash'?'on':''}" onclick="go('mydash')">📐 داشبردساز من</div>`:''}`;
+  ${canView('charts')?`<div class="nav-i ${view.type==='charts'?'on':''}" onclick="go('charts')">📊 نمودارها و شاخص‌ها</div>`:''}`;
   if(isAdmin())h+=`<div class="nav-i ${view.type==='users'?'on':''}" onclick="go('users')">👤 کاربران و دسترسی</div>
   <div class="nav-i ${view.type==='acl'?'on':''}" onclick="go('acl')" style="${isAdmin()?'':'display:none'}">🛡️ سطوح دسترسی</div>
   <div class="nav-i ${view.type==='schema'?'on':''}" onclick="go('schema')">🧩 فیلدها و بخش‌ها</div>
-  ${isOwnerUser()?`<div class="nav-i ${view.type==='modcfg'?'on':''}" onclick="openModcfg()">🧰 مدیریت محصول</div>`:''}
   <div class="nav-i ${view.type==='backupdash'?'on':''}" onclick="go('backupdash')">💾 پشتیبان‌گیری و بازیابی</div>`;
   else if(!isPending())h+=`<div class="nav-i ${view.type==='backupdash'?'on':''}" onclick="go('backupdash')">🚨 حالت بحران (تغییرات من)</div>`;
   if(!isPending())h+=`<div class="nav-i ${view.type==='impcenter'?'on':''}" onclick="go('impcenter')">📥 مرکز ورود اکسل</div>`;
@@ -8074,6 +8131,7 @@ function ceodashHTML(){
   const cash=bizCashBal(b);
   const chqPay14=ceoChqDue(b,'پرداختنی',14), chqPay7=ceoChqDue(b,'پرداختنی',7), chqRecv14=ceoChqDue(b,'دریافتنی',14);
   const payDue=bizPay(b);
+  const apSch=apBuckets(b); // 💧 زمان‌بندی سررسید بدهی‌ها برای نقدینگی مورد نیاز
   const opexWeekly=ceoOpex(b,_isoAdd(t0,-28),t0).tot/4;
   // 🔄 واریزی‌های پلتفرم که تا ۱۴ روز آینده اعلام شده‌اند (نقدینگی در راه)
   const pfIncoming=byE('pfsettle').filter(s=>(!b||relIds(s,'biz').includes(b))&&s.d.status==='در انتظار واریز')
@@ -8081,7 +8139,7 @@ function ceodashHTML(){
     .reduce((a,s)=>a+pfCalc(s).expected,0);
   const pfPending=byE('pfsettle').filter(s=>(!b||relIds(s,'biz').includes(b))&&s.d.status==='در انتظار واریز')
     .reduce((a,s)=>a+pfCalc(s).expected,0);
-  const cashFc=cash+chqRecv14+pfIncoming-chqPay14-opexWeekly*2; // پیش‌بینی ساده نقد ۲ هفته (شامل واریزی پلتفرم)
+  const cashFc=cash+chqRecv14+pfIncoming-chqPay14-apSch.need14-opexWeekly*2; // پیش‌بینی ساده نقد ۲ هفته (نقد + دریافتی چک/پلتفرم − چک پرداختنی − بدهیِ سررسید تا ۱۴ روز − ۲ هفته OPEX)
   const buyBudget=ceoBudget(b,'خرید کالا',t0), buySpent=ceoPurch(b,from,to);
   const buyLeft=buyBudget?Math.max(0,buyBudget-buySpent):null;
   const canBuy=Math.max(0,Math.min(buyLeft==null?Infinity:buyLeft,Math.max(0,cashFc)));
@@ -8099,6 +8157,7 @@ function ceodashHTML(){
   if(op<=0&&net>0)alerts.push(['bad','سود عملیاتی '+(op<0?'منفی':'صفر')+' است']);
   if(stalePct>30)alerts.push(['bad','٪'+Math.round(stalePct)+' انبار راکد است — بدون فروش در '+SD.toLocaleString('fa-IR')+' روز (بالای حد ۳۰٪)']);
   if(cashFc<0)alerts.push(['bad','⚠️ ریسک کمبود نقدینگی تا ۲ هفته آینده: '+money(-cashFc)+' کسری']);
+  if(apSch.over>0)alerts.push(['bad','⏰ بدهیِ سررسیدگذشته: '+money(apSch.over)+' — باید همین حالا پرداخت شود']);
   const outAge=stock.filter(x=>x.avg>0&&x.cover<7);
   if(outAge.length)alerts.push(['warn',outAge.length.toLocaleString('fa-IR')+' کالای پرفروش زیر ۷ روز پوشش موجودی دارند']);
   if(ox.off>0)alerts.push(['warn','هزینه خارج از بودجه این دوره: '+money(ox.off)]);
@@ -8174,7 +8233,10 @@ function ceodashHTML(){
       ['cashfc','پیش‌بینی نقد ۲ هفته آینده',money(cashFc),cashFc<0,'نقد + چک/واریزی − تعهدات − OPEX'],
       ['chq7','تعهدات ۷ روز آینده (چک)',money(chqPay7),chqPay7>0],
       ['chq14','تعهدات ۱۴ روز آینده (چک)',money(chqPay14),chqPay14>0],
-      ['paydue','بدهی باز به تامین‌کنندگان',money(payDue),payDue>0],
+      ['paydue','بدهی باز به تامین‌کنندگان (کل)',money(payDue),payDue>0],
+      ['apover','⏰ بدهی سررسیدگذشته',money(apSch.over),apSch.over>0],
+      ['apneed7','💧 نقدینگی لازم بدهی (۷ روز)',money(apSch.need7),apSch.need7>cash,'سررسیدگذشته + سررسید ۷ روز'],
+      ['apneed30','💧 نقدینگی لازم بدهی (۳۰ روز)',money(apSch.need30),false,'همه چیز تا ۳۰ روز آینده'],
       ['buybud','بودجه خرید مصوب',buyBudget?money(buyBudget):'تعیین نشده'],
       ['buyspent','خرید واقعی دوره',money(buySpent),buyBudget&&buySpent>buyBudget],
       ['canbuy','🟢 سقف خرید پیشنهادی این هفته',money(canBuy===Infinity?Math.max(0,cashFc):canBuy),false,'کمینه‌ی بودجه باقیمانده و نقد آزاد'],
@@ -8372,7 +8434,7 @@ function ceodashHTML(){
       ${li('۶. انحراف هزینه از بودجه',oxBudget?money(ox.tot-oxBudget):'بودجه تعیین نشده')}
       ${li('۷. بودجه خرید پیشنهادی هفته آینده',money(canBuy===Infinity?Math.max(0,cashFc):canBuy))}
       ${li('۸. موجودی راکد',money(staleVal)+' ('+Math.round(stalePct)+'٪ انبار)')}
-      ${li('۹. تعهدات ۱۴ روز آینده',money(chqPay14+payDue))}
+      ${li('۹. نقدینگی لازم تا ۱۴ روز (چک + بدهیِ سررسیددار)',money(chqPay14+apSch.need14))}
       ${li('۱۰. تسویه‌نشده از مشتریان/پلتفرم‌ها',money(bizRecv(b)+pfPending))}
     </tbody></table></div></div>
     <div class="sec" style="border-inline-start:3px solid var(--ac)"><h3>🎯 ۵ پاسخ صریح این هفته</h3>
