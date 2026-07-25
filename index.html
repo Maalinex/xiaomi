@@ -250,11 +250,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.39</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.40</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.39</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.40</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2217,6 +2217,14 @@ async function pullAll(full){
       await pullMeta();
       setSync('err','⚠️ سرور داده‌ای برنگرداند — کش محلی حفظ شد. اگر ادامه داشت، «🔄 بررسی مجدد (کامل)» را بزنید یا دسترسی سرور را بررسی کنید.');
       render();return;
+    }
+    // 🛟 کاربر تاییدشده‌ای که هیچ داده‌ای نمی‌گیرد (کش محلی هم خالی): تقریباً همیشه یعنی
+    // فایل امنیتی (maalinex-security.sql) نسخه‌ی قدیمی است و سیاست خواندن سرور، رکوردهای
+    // ساخته‌ی دیگران را رد می‌کند. به‌جای نمایش خاموشِ «همه‌چیز صفر»، صریح هشدار می‌دهیم.
+    if(freshData===0 && !isPending()){
+      recs=fresh;invalidateByE();await pullMeta();
+      setSync('err','⚠️ حساب شما تایید شده اما سرور هیچ رکوردی برنگرداند — ادمین باید آخرین نسخه‌ی فایل «maalinex-security.sql» را در Supabase اجرا کند.');
+      saveLocal();render();return;
     }
     recs=fresh;invalidateByE();
   }
