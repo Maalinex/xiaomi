@@ -274,11 +274,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.53</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.54</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.53</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.54</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1001,6 +1001,9 @@ saletarget:{ic:'🎯',n:'تارگت فروش',grp:'مدیریت کسب و کار
  {k:'to',n:'تا تاریخ',t:DAT},
  {k:'tamount',n:'🎯 تارگت مبلغی (تومان)',t:NUM},
  {k:'tqty',n:'🎯 تارگت تعدادی',t:NUM},
+ {k:'members',n:'👥 اعضای تیم برای امتیاز عملکرد (افزودن دستی)',t:REL,r:'hr'},
+ {k:'kpi',n:'📐 شاخص عملکردِ ثبتِ امتیاز (خالی = خودکار)',t:REL,r:'perfkpi',s:1},
+ {k:'autoperf',n:'🏅 امتیاز خودکار در صورت تحقق',t:SEL,o:['فعال','خاموش']},
  {k:'note',n:'توضیح',t:LNG}],
  cols:['title','scope','ptype','to'],comp:'targetBrief'},
 perfkpi:{ic:'📐',n:'شاخص عملکرد (KPI)',grp:'مدیریت کسب و کار',f:[
@@ -5076,10 +5079,190 @@ function tgtNodeHTML(t,depth,seen){
     h+=tgtBar(aggPq,'تعدادی تجمیعی',(agg.qty||0).toLocaleString('fa-IR'),(agg.tqty||0).toLocaleString('fa-IR'),false);
   }
   if(p.pa==null&&p.pq==null&&!agg)h+='<div style="font-size:12px;color:var(--tx2)">برای این تارگت مقدار هدف تعیین نشده است.</div>';
+  {const _pl=(function(){try{return tgtAwardPlan(t);}catch(_e){return null;}})();
+   if(_pl)h+=`<div style="margin-top:8px;font-size:11.5px;color:#16c784">🏅 محقق شد — امتیاز عملکرد برای ${_pl.n.toLocaleString('fa-IR')} عضو تیم${_pl.mode==='equal'?' (مساوی، بدون فروشندهٔ مشخص)':' به نسبت سهم فروش'} ثبت می‌شود · <a href="#" onclick="go('rec','saletarget','${t.id}');return false" style="color:var(--ac)">جزئیات</a></div>`;}
   h+=`</div>`;
   kids.forEach(k=>{h+=tgtNodeHTML(k,depth+1,seen);});
   return h;
 }
+/* ═══ 🏅 امتیاز عملکردِ خودکار در صورت تحقق تارگت فروش در مهلت ═══
+   قاعده: به‌محض رسیدن تحققِ تارگت به ۱۰۰٪ و در حالی که هنوز در مهلت (تا تاریخ) هستیم،
+   برای هر عضو تیم یک رکورد «ثبت عملکرد دوره‌ای» ساخته می‌شود؛ امتیاز هر نفر به نسبتِ
+   سهم خودش از فروشِ همان بازه است (میانگین تیم = درصد تحققِ تارگت).
+   اگر فروش‌ها به نام افراد ثبت نشده باشد، امتیاز مساوی داده و هشدار نمایش داده می‌شود. */
+const TGT_MAXAWARD=200;   // سقف ایمنِ امتیاز هر نفر
+var _tgxKey=null,_tgxLog={made:0,upd:0};
+/* اعضای تیمِ تارگت: دستی + خودکار از ساختار سازمانی */
+function tgtMembers(t){
+  const set=new Set(), add=id=>{if(id&&recs[id]&&!recs[id].del&&recs[id].e==='hr')set.add(id);};
+  relIds(t,'members').forEach(add);
+  const per=relIds(t,'person')[0]; if(per)add(per);
+  const org=relIds(t,'orgu')[0];
+  if(org&&recs[org]&&!recs[org].del){
+    relIds(recs[org],'members').forEach(add); relIds(recs[org],'head').forEach(add);
+    byE('hr').forEach(h=>{if(relIds(h,'orgu').includes(org))add(h.id);});
+    byE('team').forEach(tm=>{if(relIds(tm,'orgu').includes(org)){
+      relIds(tm,'members').forEach(add); relIds(tm,'lead').forEach(add);}});
+  }
+  if(!set.size){const bz=relIds(t,'biz')[0]; if(bz)byE('hr').forEach(h=>{if(relIds(h,'biz').includes(bz))add(h.id);});}
+  if(!set.size){const co=relIds(t,'company')[0]; if(co)byE('hr').forEach(h=>{if(relIds(h,'company').includes(co))add(h.id);});}
+  return [...set];
+}
+/* سهم فروشِ هر نفر در بازه و سطحِ همین تارگت */
+function tgtShares(t){
+  const map={},from=dnorm(t.d.from),to=dnorm(t.d.to);
+  let total=0,unatt=0;
+  const add=(sid,amt)=>{amt=+amt||0;if(!amt)return;total+=amt;
+    if(sid&&recs[sid]&&!recs[sid].del)map[sid]=(map[sid]||0)+amt;else unatt+=amt;};
+  targetInvoices(t).forEach(v=>add(relIds(v,'seller')[0],invCalc(v).total));
+  byE('sale').filter(x=>!x.d._inv).forEach(x=>{
+    if(!tgtMatch(x,t))return;const d=dnorm(x.d.date);
+    if(from&&(!d||d<from))return; if(to&&(!d||d>to))return;
+    add(relIds(x,'seller')[0],saleAmt(x));});
+  return {map:map,total:total,unatt:unatt,attributed:total-unatt};
+}
+/* شاخص استانداردِ «تحقق تارگت فروش تیمی» (ساخت خودکار در صورت نبود) */
+function tgtAwardKpi(){
+  const NM='تحقق تارگت فروش تیمی';
+  const found=byE('perfkpi').find(k=>k.d.title===NM);
+  if(found)return found.id;
+  if(!can('c','perfkpi'))return null;
+  const kid=uid();
+  recs[kid]={id:kid,e:'perfkpi',u:Date.now(),del:false,d:{
+    title:NM,cat:'فروش',scope:'فرد',unit:'درصد',dir:'بیشتر بهتر',weight:15,tdefault:100,
+    note:'امتیازِ خودکارِ سیستم هنگام تحققِ تارگتِ فروشِ تیم در مهلتِ مقرر؛ سهم هر نفر به نسبت فروشِ ثبت‌شده به نام خودش.',
+    _by:myEmail()}};
+  queue.push(kid); return kid;
+}
+/* آیا این تارگت واجدِ امتیازدهی است؟ و امتیاز هر نفر چند است؟ */
+function tgtAwardPlan(t){
+  if(!t||t.del||t.e!=='saletarget')return null;
+  if((t.d.autoperf||'فعال')!=='فعال')return null;
+  const pr=targetProgress(t);
+  if(pr.pa==null&&pr.pq==null)return null;      // هدفی تعیین نشده
+  if((pr.overall||0)<100)return null;            // هنوز محقق نشده
+  const to=dnorm(t.d.to), td=dnorm(today());
+  if(to&&td>to)return null;                      // مهلت گذشته است
+  const mem=tgtMembers(t); if(!mem.length)return null;
+  const sh=tgtShares(t);
+  const memSum=mem.reduce((a,id)=>a+(sh.map[id]||0),0);
+  const mode=memSum>0?'share':'equal';
+  const fair=memSum/mem.length;
+  const rows=mem.map(id=>{const v=sh.map[id]||0;
+    const val=mode==='equal'?pr.overall:Math.round(v/fair*pr.overall);
+    return {hr:id,sales:v,val:Math.max(0,Math.min(TGT_MAXAWARD,val)),
+      share:memSum>0?Math.round(v/memSum*1000)/10:null};})
+    .sort((a,b)=>b.val-a.val);
+  return {t:t,pr:pr,rows:rows,mode:mode,n:mem.length,memSum:memSum,
+    unatt:sh.unatt,total:sh.total,fair:fair};
+}
+function tgtScoreIndex(){
+  const ix={};
+  byE('perfscore').forEach(s=>{const tg=Array.isArray(s.d._tgt)?s.d._tgt:[];
+    const p=relIds(s,'person')[0]; if(tg.length&&p)ix[tg[0]+'|'+p]=s;});
+  return ix;
+}
+function tgtAwardNote(pl,r){
+  const t=pl.t;
+  return 'امتیاز خودکار: تارگت «'+(t.d.title||'')+'» با تحققِ '+(pl.pr.overall||0).toLocaleString('fa-IR')+'٪ در مهلت مقرر ('+(ds(t.d.to)||'—')+') زده شد. '
+   +(pl.mode==='share'
+      ?('سهم این فرد از فروشِ تیم: '+money(r.sales)+' یعنی '+(r.share||0).toLocaleString('fa-IR')+'٪ از '+money(pl.memSum)+'.')
+      :('⚠️ فروش‌های این بازه به نام هیچ‌یک از اعضا ثبت نشده بود، پس امتیاز به‌صورت مساوی توزیع شد. برای امتیازِ نسبی، فیلد «فروشنده» را در فاکتورها/فروش‌ها پر کنید.'))
+   +(pl.unatt>0?(' (بدونِ فروشندهٔ مشخص: '+money(pl.unatt)+')'):'');
+}
+/* اسکنِ خودکار — بی‌اثر در اجرای مکرر (idempotent) */
+function tgtAwardScan(){
+  const ts=byE('saletarget');
+  const key=today()+'#'+ts.map(t=>t.id+':'+(t.u||0)).join(',')
+    +'#'+byE('invoice').length+'/'+byE('sale').length+'/'+byE('invline').length;
+  if(_tgxKey===key)return 0;
+  _tgxKey=key;
+  if(!ts.length)return 0;
+  if(typeof isPending==='function'&&isPending())return 0;
+  if(!can('c','perfscore'))return 0;
+  const ix=tgtScoreIndex(); let made=0,upd=0,auto=null,now=Date.now();
+  for(const t of ts){
+    const pl=tgtAwardPlan(t); if(!pl)continue;
+    let kpi=relIds(t,'kpi');
+    if(!kpi.length){ if(auto===null)auto=tgtAwardKpi()||''; kpi=auto?[auto]:[]; }
+    for(const r of pl.rows){
+      const ex=ix[t.id+'|'+r.hr];
+      const note=tgtAwardNote(pl,r);
+      if(ex){
+        if((+ex.d.actual||0)!==r.val||ex.d.note!==note){
+          ex.d={...ex.d,actual:r.val,target:100,note:note};
+          ex.u=now; ex.del=false; queue.push(ex.id); upd++;
+        }
+        continue;
+      }
+      const id=uid();
+      const rec={id:id,e:'perfscore',u:now,del:false,d:{
+        title:'🏅 تحقق تارگت — '+(t.d.title||'تارگت فروش'),
+        kpi:kpi,person:[r.hr],ptype:t.d.ptype||'ماهانه',
+        from:ds(t.d.from)||'',to:ds(t.d.to)||'',
+        actual:r.val,target:100,note:note,
+        _tgt:[t.id],_tgtday:today(),_by:myEmail()}};
+      if(relIds(t,'orgu').length)rec.d.orgu=relIds(t,'orgu');
+      if(relIds(t,'biz').length)rec.d.biz=relIds(t,'biz');
+      if(relIds(t,'company').length)rec.d.company=relIds(t,'company');
+      recs[id]=rec; queue.push(id); ix[t.id+'|'+r.hr]=rec; made++;
+    }
+  }
+  if(made||upd){_tgxLog={made:made,upd:upd};
+    invalidateByE(); saveLocal(); saveQ(); try{flush();}catch(e){}}
+  return made+upd;
+}
+/* اجرای دستی از روی رکورد تارگت */
+function tgtAwardNow(tid){
+  const t=recs[tid]; if(!t||t.del)return;
+  const pl=tgtAwardPlan(t);
+  if(!pl){ alert('این تارگت هنوز شرایط امتیازدهی را ندارد: باید تحقق به ۱۰۰٪ برسد، در مهلت باشد، امتیاز خودکار «فعال» باشد و حداقل یک عضو تیم داشته باشد.'); return; }
+  _tgxKey=null;
+  const n=tgtAwardScan();
+  render();
+  alert(n?('✅ امتیاز عملکرد برای '+pl.n.toLocaleString('fa-IR')+' عضو تیم ثبت/به‌روزرسانی شد ('+_tgxLog.made.toLocaleString('fa-IR')+' جدید، '+_tgxLog.upd.toLocaleString('fa-IR')+' به‌روزرسانی).')
+            :'ℹ️ امتیازها از قبل ثبت شده و تغییری لازم نبود.');
+}
+/* نمایشِ وضعیت امتیازدهی زیر رکورد تارگت */
+function tgtAwardHTML(t){
+  if(!t||t.e!=='saletarget')return '';
+  const pr=targetProgress(t);
+  const off=(t.d.autoperf||'فعال')!=='فعال';
+  const to=dnorm(t.d.to), late=to&&dnorm(today())>to;
+  const mem=tgtMembers(t);
+  const pl=tgtAwardPlan(t);
+  const done=byE('perfscore').filter(s=>(Array.isArray(s.d._tgt)?s.d._tgt:[]).includes(t.id));
+  let h=`<div class="sec"><h3>🏅 امتیاز عملکردِ خودکار تیم</h3>
+   <div class="comp">
+     <div class="chip">تحقق تارگت: <b style="color:${(pr.overall||0)>=100?'#16c784':'var(--warn)'}">${(pr.overall||0).toLocaleString('fa-IR')}٪</b></div>
+     <div class="chip">مهلت: <b>${esc(iso2jstr(ds(t.d.to))||'بی‌مهلت')}</b>${late?' <span style="color:var(--bad)">(گذشته)</span>':''}</div>
+     <div class="chip">اعضای شناسایی‌شده: <b>${mem.length.toLocaleString('fa-IR')} نفر</b></div>
+     <div class="chip">امتیاز خودکار: <b style="color:${off?'var(--warn)':'#16c784'}">${off?'خاموش':'فعال'}</b></div>
+     <div class="chip">امتیازهای ثبت‌شده: <b>${done.length.toLocaleString('fa-IR')}</b></div>
+   </div>`;
+  if(!mem.length)h+=`<div class="empty">هیچ عضوی شناسایی نشد. یا «واحد / تیم» را به تارگت وصل کنید، یا افراد را در «اعضای تیم برای امتیاز عملکرد» دستی اضافه کنید.</div>`;
+  if(pl){
+    if(pl.mode==='equal')h+=`<div class="sec" style="border:1px solid var(--warn);padding:8px 10px;font-size:12px">⚠️ فروش‌های این بازه به نام هیچ عضوی ثبت نشده است؛ امتیاز به‌صورت مساوی توزیع می‌شود. برای امتیازِ نسبی، فیلد «فروشنده» فاکتورها و فروش‌های سریع را پر کنید.</div>`;
+    h+=`<div class="tblwrap"><table style="font-size:11.5px"><thead><tr>
+      <th style="text-align:right">عضو تیم</th><th>فروش ثبت‌شده به نامش</th><th>سهم از فروش تیم</th><th>🏅 امتیاز (هدف ۱۰۰)</th><th>وضعیت ثبت</th></tr></thead><tbody>`;
+    pl.rows.forEach(r=>{
+      const ex=done.find(s=>relIds(s,'person').includes(r.hr));
+      h+=`<tr><td style="text-align:right">${esc(nameOf(r.hr))}</td>
+        <td>${money(r.sales)}</td>
+        <td>${r.share==null?'—':r.share.toLocaleString('fa-IR')+'٪'}</td>
+        <td><b style="color:${r.val>=100?'#16c784':r.val>=60?'#f5a623':'var(--bad)'}">${r.val.toLocaleString('fa-IR')}</b></td>
+        <td>${ex?('✅ ثبت شد'+((+ex.d.actual||0)!==r.val?' (نیازِ به‌روزرسانی)':'')):'⏳ ثبت نشده'}</td></tr>`;});
+    h+=`</tbody></table></div>
+      <div style="font-size:11px;color:var(--tx2);margin-top:6px">امتیازِ هر نفر = سهم فروش او ÷ سهم متوسط تیم × درصد تحقق تارگت (میانگین تیم برابرِ درصد تحقق است، سقف ${TGT_MAXAWARD.toLocaleString('fa-IR')}).</div>`;
+    if(can('c','perfscore'))h+=`<div style="margin-top:8px"><button class="btn sm" onclick="tgtAwardNow('${t.id}')">🏅 ثبت / به‌روزرسانی امتیازها</button></div>`;
+  } else if(!off&&mem.length){
+    h+=`<div class="empty">${late?'مهلت این تارگت گذشته و در مهلت به ۱۰۰٪ نرسید، پس امتیاز خودکاری ثبت نمی‌شود.':'به‌محض رسیدن تحقق به ۱۰۰٪ (پیش از پایان مهلت) امتیازها خودکار ثبت می‌شوند.'}</div>`;
+  }
+  h+=`</div>`;
+  return h;
+}
+window.tgtAwardScan=tgtAwardScan;window.tgtAwardNow=tgtAwardNow;window.tgtAwardHTML=tgtAwardHTML;
+window.tgtMembers=tgtMembers;window.tgtShares=tgtShares;window.tgtAwardPlan=tgtAwardPlan;
 /* ===== 🎯 داشبرد پایش تارگت‌ها — گیج‌های خودرویی + آبشاری چندسطحی ===== */
 const TG_SCOPES=[['','همه سطوح','🎯'],['هلدینگ','هلدینگ','🏦'],['شرکت','شرکت','🏢'],['کسب‌وکار','کسب‌وکار','🧢'],['واحد/تیم','واحد / تیم','🧩'],['فرد','فرد (فروشنده)','👤']];
 function tgScopeIcon(t){const s=t.d.scope;const f=TG_SCOPES.find(x=>x[0]===s);return f?f[2]:'🎯';}
@@ -7222,6 +7405,7 @@ function render(){
   try{rebuildSchema();}catch(e){} // فیلدها و بخش‌های سفارشی ادمین
   try{rebuildHabitFields();}catch(e){} // لیست عادت‌های شخصی کاربر جاری
   try{rtMaterialize();}catch(e){console.warn('rt',e);} // 🔁 ساخت تسک‌های تکرارشوندهٔ امروز
+  try{tgtAwardScan();}catch(e){console.warn('tgt',e);} // 🏅 امتیاز خودکار تحقق تارگت فروش
   nav();
   const c=document.getElementById('content');
   if(isPending()){
@@ -10210,6 +10394,7 @@ function recHTML(e,id){
   }
   if(e==='bsc'&&r.d.target)chips.push(['مقدار فعلی / هدف',`<b>${fmtN(r.d.current||0)} / ${fmtN(r.d.target)} ${esc(r.d.unit||'')}</b>`]);
   if(chips.length)h+=`<div class="comp" style="margin-bottom:12px">${chips.map(c=>`<div class="chip">${c[0]}: ${c[1]}</div>`).join('')}</div>`;
+  if(e==='saletarget'){try{h+=tgtAwardHTML(r);}catch(_e){}}
   // properties
   h+=`<div class="props">`;
   visFields(e).filter(f=>f.k!=='title').forEach(f=>{
