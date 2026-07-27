@@ -274,11 +274,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.58</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.59</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.58</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.59</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1679,15 +1679,17 @@ widdef:{ic:'🧱',n:'ویجت داشبرد',grp:'مدیریت کسب و کار',
  {k:'size',n:'اندازه',t:SEL,o:['کوچک','متوسط','بزرگ']},
  {k:'ord',n:'ترتیب (عدد کوچکتر جلوتر)',t:NUM}],
  cols:['title','dash','wtype','src']},
-waste:{ic:'🗑',n:'ضایعات کالا',grp:'مدیریت کسب و کار',f:[
- {k:'title',n:'شرح (مثل: خرابی ۵ گوشی در انبار)',t:TXT},
+waste:{ic:'🗑',n:'ضایعات و خروج از انبار',grp:'مدیریت کسب و کار',f:[
+ {k:'title',n:'شرح (مثل: خرابی ۵ گوشی در انبار، هدیه به مشتری)',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
- {k:'kind',n:'نوع رویداد',t:SEL,o:['ثبت ضایعات (خروج از انبار)','فروش/بازیافت ضایعات']},
+ {k:'kind',n:'نوع رویداد',t:SEL,o:['ثبت ضایعات (خروج از انبار)','خروج بدون فروش (هدیه/نمونه/مصرف داخلی)','فروش/بازیافت ضایعات']},
  {k:'product',n:'کالا',t:REL,r:'product',s:1},
  {k:'wh',n:'🏬 انبار',t:REL,r:'whouse',s:1},
  {k:'qty',n:'تعداد',t:NUM},
  {k:'recover',n:'مبلغ فروش/بازیافت (تومان) — فقط برای نوع فروش',t:NUM},
- {k:'reason',n:'علت',t:SEL,o:['خرابی/آسیب فیزیکی','شکستگی','آب‌دیدگی','انقضا','افت کیفیت','سرقت/مفقودی','سایر']},
+ {k:'reason',n:'علت (برای ضایعات)',t:SEL,o:['خرابی/آسیب فیزیکی','شکستگی','آب‌دیدگی','انقضا','افت کیفیت','سرقت/مفقودی','سایر']},
+ {k:'outuse',n:'🎁 مصرف (برای خروج بدون فروش)',t:SEL,o:['هدیه به مشتری','نمونه بازاریابی/تستر','مصرف داخلی','جایزه/پاداش کارکنان','اهدا/خیریه','گارانتی و جبران خسارت','سایر']},
+ {k:'to',n:'دریافت‌کننده / مقصد (اختیاری)',t:TXT},
  {k:'date',n:'تاریخ',t:DAT},
  {k:'note',n:'توضیح',t:LNG}],
  cols:['title','kind','product','qty','date'],comp:'wasteBrief'},
@@ -2370,10 +2372,14 @@ function purchasesOf(pid){
   return _prodPurchIdx[pid]||[];
 }
 let _prodWasteIdx=null;
-function wasteOf(pid){ // فقط «ثبت ضایعات (خروج)» — خروج از انبار
-  if(!_prodWasteIdx){_prodWasteIdx={};byE('waste').forEach(x=>{if((x.d.kind||'').indexOf('ثبت ضایعات')<0)return;const p=relIds(x,'product')[0];if(p)(_prodWasteIdx[p]||(_prodWasteIdx[p]=[])).push(x);});}
+const WOUT_W='ثبت ضایعات (خروج از انبار)',WOUT_G='خروج بدون فروش (هدیه/نمونه/مصرف داخلی)';
+function wIsGift(r){return (r.d.kind||'').indexOf('خروج بدون فروش')>=0;}
+function wIsOut(r){const k=r.d.kind||'';return k.indexOf('ثبت ضایعات')>=0||k.indexOf('خروج بدون فروش')>=0;} // هر خروجی که موجودی را کم می‌کند
+function wasteOf(pid){ // همهٔ خروج‌های غیرفروشی: ضایعات + هدیه/نمونه/مصرف داخلی
+  if(!_prodWasteIdx){_prodWasteIdx={};byE('waste').forEach(x=>{if(!wIsOut(x))return;const p=relIds(x,'product')[0];if(p)(_prodWasteIdx[p]||(_prodWasteIdx[p]=[])).push(x);});}
   return _prodWasteIdx[pid]||[];
 }
+window.wIsGift=wIsGift;window.wIsOut=wIsOut;
 function wasteQtyOf(pid){return wasteOf(pid).reduce((a,x)=>a+(+x.d.qty||0),0);}
 function _rebuildByRaw(){_byRaw={};for(const id in recs){const r=recs[id];if(!r||r.del||!r.e)continue;if(!r.d||typeof r.d!=='object')r.d={};(_byRaw[r.e]||(_byRaw[r.e]=[])).push(r);}}
 function byE(e){
@@ -3952,9 +3958,11 @@ function productStat(p){
 }
 window.saleTotal=saleTotal;window.purchTotal=purchTotal;window.productStat=productStat;
 function wasteBrief(r){const pid=relIds(r,'product')[0];const p=pid&&recs[pid];const q=+r.d.qty||0;
-  const isSale=(r.d.kind||'').indexOf('فروش')>=0;
+  const isSale=(r.d.kind||'').indexOf('فروش/بازیافت')>=0;
   if(isSale)return {label:'بازیافت',v:'💵 '+money(+r.d.recover||0)+(p?' ('+esc(p.d.title)+')':''),bad:false};
   const cost=p?q*(+p.d.buy||0):0;
+  if(wIsGift(r))return {label:'خروج بدون فروش │ بهای کالا',
+    v:'🎁 '+q.toLocaleString('fa-IR')+' عدد │ '+money(cost)+(r.d.outuse?' — '+esc(r.d.outuse):'')+(p?' — '+esc(p.d.title):''),bad:false};
   return {label:'تعداد │ ضرر (خرید)',v:q.toLocaleString('fa-IR')+' عدد │ '+money(cost)+(p?' — '+esc(p.d.title):''),bad:true};}
 window.wasteBrief=wasteBrief;
 /* ===== 🧾 موتور فاکتور فروش (M07) ===== */
@@ -6576,7 +6584,8 @@ function mydTplApply(k){
 window.mydTplApply=mydTplApply;
 function wasteNew(kind){
   if(!can('c','waste')){alert('اجازه ثبت ندارید');return;}
-  const d={kind:kind==='sale'?'فروش/بازیافت ضایعات':'ثبت ضایعات (خروج از انبار)',date:{s:today()}};
+  const d={kind:kind==='sale'?'فروش/بازیافت ضایعات':kind==='gift'?WOUT_G:WOUT_W,date:{s:today()}};
+  if(kind==='gift')d.outuse='هدیه به مشتری';
   if(gBiz())d.biz=[gBiz()];
   openRec('waste',null,null);
   if(cur){cur.d=Object.assign(cur.d,d);drawModal();}
@@ -9015,11 +9024,18 @@ function whdashHTML(){
   const waste=whExpSum(b,['ضایعات'],'','');
   const storeCost=whExpSum(b,['حمل و انبارداری','انبار','بسته‌بندی','وانت'],'','');
   // 🗑 ضایعات کالا — تعدادی و ریالی، به قیمت خرید و قیمت فروش، خالص پس از بازیافت
-  const wByProd={};
+  const wByProd={},gByProd={};
   byE('waste').forEach(w=>{if(b&&!relIds(w,'biz').includes(b))return;const pid=relIds(w,'product')[0];if(!pid)return;
-    const p=recs[pid];if(!p)return;const g=wByProd[pid]||(wByProd[pid]={p,qty:0,cost:0,sell:0,recover:0});
-    if((w.d.kind||'').indexOf('فروش')>=0){g.recover+=(+w.d.recover||0);}
+    const p=recs[pid];if(!p)return;
+    if(wIsGift(w)){ // 🎁 هدیه/نمونه/مصرف داخلی — خروج بدون فروش، جدا از ضایعات
+      const g2=gByProd[pid]||(gByProd[pid]={p,qty:0,cost:0,sell:0,uses:{}});
+      const q=+w.d.qty||0;g2.qty+=q;g2.cost+=q*(+p.d.buy||0);g2.sell+=q*(+p.d.sell||0);
+      const u=w.d.outuse||'سایر';g2.uses[u]=(g2.uses[u]||0)+q;return;}
+    const g=wByProd[pid]||(wByProd[pid]={p,qty:0,cost:0,sell:0,recover:0});
+    if((w.d.kind||'').indexOf('فروش/بازیافت')>=0){g.recover+=(+w.d.recover||0);}
     else{const q=+w.d.qty||0;g.qty+=q;g.cost+=q*(+p.d.buy||0);g.sell+=q*(+p.d.sell||0);}});
+  const gArr=Object.values(gByProd);
+  const gTot={qty:0,cost:0,sell:0};gArr.forEach(x=>{gTot.qty+=x.qty;gTot.cost+=x.cost;gTot.sell+=x.sell;});
   const wArr=Object.values(wByProd).filter(x=>x.qty>0||x.recover>0);
   const wTot={qty:0,cost:0,sell:0,recover:0};wArr.forEach(x=>{wTot.qty+=x.qty;wTot.cost+=x.cost;wTot.sell+=x.sell;wTot.recover+=x.recover;});
   const wNet=wTot.cost-wTot.recover; // ضرر خالص (به بهای خرید) پس از بازیافت
@@ -9040,6 +9056,7 @@ function whdashHTML(){
     <span style="flex:1"></span>
     <select onchange="setGBiz(this.value)" style="max-width:180px"><option value="">همه کسب‌وکارها</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select>
     <button class="btn gh sm" onclick="wasteNew('out')">🗑 ثبت ضایعات</button>
+    <button class="btn gh sm" onclick="wasteNew('gift')">🎁 هدیه/نمونه از انبار</button>
     <button class="btn gh sm" onclick="wasteNew('sale')">💵 فروش ضایعات</button></div>`;
   h+=_whTree;
   if(!rows.length){return h+`<div class="empty">هنوز کالایی در «مدیریت انبار ← کالا و خدمات» ثبت نشده — بعد از افزودن کالا و ثبت خرید/فروش، همه شاخص‌ها اینجا محاسبه می‌شوند.</div>`;}
@@ -9061,6 +9078,10 @@ function whdashHTML(){
       <div style="font-size:11px;color:var(--tx2)">🗑 ضرر خالص ضایعات کالا ▾</div>
       <div style="font-size:18px;font-weight:800;margin-top:4px;color:${wNet>0?'var(--bad)':'var(--tx)'}">${money(wNet)}</div>
       <div style="font-size:10px;color:var(--tx2);margin-top:3px">به قیمت خرید ${abbrN(wTot.cost)} │ به قیمت فروش ${abbrN(wTot.sell)}${wTot.recover?' │ بازیافت '+abbrN(wTot.recover):''}<br>${wTot.qty.toLocaleString('fa-IR')} عدد ضایع │ برای جزئیات کلیک کن</div></div>
+    <div class="sec" style="text-align:center;padding:13px 10px;cursor:pointer;${view.whGiftOpen?'border:1px solid var(--ac)':''}" onclick="view.whGiftOpen=!view.whGiftOpen;render()">
+      <div style="font-size:11px;color:var(--tx2)">🎁 خروج بدون فروش (هدیه/نمونه) ▾</div>
+      <div style="font-size:18px;font-weight:800;margin-top:4px">${money(gTot.cost)}</div>
+      <div style="font-size:10px;color:var(--tx2);margin-top:3px">${gTot.qty.toLocaleString('fa-IR')} عدد │ به قیمت فروش ${abbrN(gTot.sell)}<br>از موجودی کسر شده — برای جزئیات کلیک کن</div></div>
     ${kcard('store','🏬 هزینه انبارداری (کل)',money(storeCost),false,saleYr>0?(storeCost/saleYr*100).toLocaleString('fa-IR',{maximumFractionDigits:2})+'٪ فروش':'')}
     ${kcard('cogs','💵 بهای تمام‌شده فروش‌رفته',money(totCogs))}
   </div>`;
@@ -9081,6 +9102,22 @@ function whdashHTML(){
         <tr style="font-weight:800;background:rgba(255,255,255,.03)"><td style="text-align:right">جمع</td><td>${wTot.qty.toLocaleString('fa-IR')}</td><td>${money(wTot.cost)}</td><td>${money(wTot.sell)}</td><td style="color:var(--ok)">${money(wTot.recover)}</td><td style="color:${wNet>0?'var(--bad)':'var(--ok)'}">${money(wNet)}</td></tr>
       </tbody></table></div>
       <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">ضرر خالص = ضرر به قیمت خرید − مبلغ فروش ضایعات. روی هر ردیف بزن تا رکوردهای ضایعات آن باز شود.</div>`;}
+    h+=`</div>`;
+  }
+  // 🎁 جزئیات خروج بدون فروش (هدیه/نمونه/مصرف داخلی)
+  if(view.whGiftOpen){
+    h+=`<div class="sec" style="border:1px solid var(--ac)"><h3>🎁 خروج بدون فروش به تفکیک کالا <span style="flex:1"></span>
+      <button class="btn gh sm" onclick="wasteNew('gift')">＋ هدیه/نمونه از انبار</button>
+      <button class="btn gh sm" onclick="view.whGiftOpen=false;render()">✕ بستن</button></h3>`;
+    if(!gArr.length)h+=`<div class="empty">هنوز خروج بدون فروشی ثبت نشده — با «🎁 هدیه/نمونه از انبار» کالایی که هدیه داده‌ای یا داخلی مصرف شده را ثبت کن؛ تعداد و ارزش انبار خودکار کم می‌شود.</div>`;
+    else{
+      h+=`<div class="tblwrap"><table><thead><tr><th style="text-align:right">کالا</th><th>تعداد</th><th>بهای کالا (خرید)</th><th>ارزش به قیمت فروش</th><th>مصرف</th></tr></thead><tbody>
+        ${gArr.sort((a,b)=>b.cost-a.cost).map(x=>`<tr style="cursor:pointer" onclick="view={type:'list',e:'waste'};render()"><td style="text-align:right">${esc(x.p.d.title||'—')}</td>
+          <td>${x.qty.toLocaleString('fa-IR')}</td><td>${money(x.cost)}</td><td>${money(x.sell)}</td>
+          <td style="font-size:11px">${Object.entries(x.uses).map(([u,q])=>esc(u)+' ('+q.toLocaleString('fa-IR')+')').join(' │ ')}</td></tr>`).join('')}
+        <tr style="font-weight:800;background:rgba(255,255,255,.03)"><td style="text-align:right">جمع</td><td>${gTot.qty.toLocaleString('fa-IR')}</td><td>${money(gTot.cost)}</td><td>${money(gTot.sell)}</td><td></td></tr>
+      </tbody></table></div>
+      <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">این خروج‌ها درآمد ندارند، پس در سود فروش نمی‌آیند؛ ولی موجودی تعدادی و ارزش FIFO انبار را دقیقاً مثل ضایعات کم می‌کنند.</div>`;}
     h+=`</div>`;
   }
   // 🕰 تفکیک ارزش انبار بر اساس مدت ماندگاری (aging)
