@@ -274,11 +274,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.52</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.53</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.52</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.53</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -9256,6 +9256,64 @@ function perfLineSVG(pts){
     ${grid}<polygon points="${area}" fill="url(#pfgrad)"/>
     <polyline points="${line}" fill="none" stroke="#16c784" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>${dots}${xlab}</svg>`;
 }
+
+/* ══════════════ 🏆 امتیاز نسبی و رتبه‌بندی در هر شاخص ══════════════
+   امتیاز مطلق = عملکرد فرد نسبت به هدفِ خودش (منطق قبلی، دست‌نخورده)
+   امتیاز نسبی = صدکِ فرد در بین همهٔ افراد/واحدها در همان شاخص
+   امتیاز نهایی = ترکیب وزنیِ این دو (وزن قابل تنظیم؛ پیش‌فرض ۷۰٪ مطلق + ۳۰٪ نسبی) */
+function perfRelW(){const raw=localStorage.getItem('xr_perfrelw');if(raw===null||raw==='')return 30;const v=+raw;return (isNaN(v)||v<0||v>100)?30:v;}
+function setPerfRelW(v){localStorage.setItem('xr_perfrelw',String(Math.max(0,Math.min(100,Math.round(+v||0)))));render();}
+function perfBlend(abs,rel){const w=perfRelW();
+  if(abs==null&&rel==null)return null;
+  if(rel==null)return abs==null?null:Math.round(abs);
+  if(abs==null)return Math.round(rel);
+  return Math.round(abs*(100-w)/100+rel*w/100);}
+/* تحققِ یک موجودیت به تفکیک شاخص (میانگین ثبت‌های آن شاخص در دوره) */
+function perfEntAchByKpi(kind,id,per){
+  const out={};
+  byE('perfscore').filter(s=>perfMatch(s,kind,id)&&(!per||per==='همه'||s.d.ptype===per)).forEach(s=>{
+    const kid=relIds(s,'kpi')[0]; if(!kid)return;
+    const kp=recs[kid]; if(!kp||kp.del)return;
+    const ach=perfAch(s.d.actual,s.d.target||kp.d.tdefault,kp.d.dir||'بیشتر بهتر');
+    if(ach==null)return;
+    const g=out[kid]||(out[kid]={n:0,sum:0,actual:0,target:0,
+      w:(+kp.d.weight>0?+kp.d.weight:1),name:kp.d.title||'شاخص',
+      unit:kp.d.unit||'',cat:kp.d.cat||'',dir:kp.d.dir||'بیشتر بهتر'});
+    g.n++; g.sum+=ach; g.actual+=+s.d.actual||0; g.target+=(+s.d.target||+kp.d.tdefault||0);
+  });
+  Object.keys(out).forEach(k=>{out[k].ach=out[k].sum/out[k].n;});
+  return out;
+}
+/* رتبه‌بندی کل جمعیتِ یک سطح در همهٔ شاخص‌ها */
+function perfRankAll(kind,ids,per){
+  const byEnt={}; ids.forEach(id=>{byEnt[id]=perfEntAchByKpi(kind,id,per);});
+  const kset={}; ids.forEach(id=>Object.keys(byEnt[id]).forEach(k=>{kset[k]=1;}));
+  const rank={};
+  Object.keys(kset).forEach(kid=>{
+    const arr=ids.filter(id=>byEnt[id][kid]).map(id=>Object.assign({id:id},byEnt[id][kid]));
+    if(!arr.length)return;
+    arr.sort((a,b)=>b.ach-a.ach);
+    const n=arr.length, best=arr[0].ach, avg=arr.reduce((t,x)=>t+x.ach,0)/n;
+    let r=0,prev=null,seen=0;
+    arr.forEach(x=>{seen++;if(prev===null||x.ach<prev){r=seen;prev=x.ach;}x.rank=r;});
+    arr.forEach(x=>{x.n=n;x.best=best;x.avg=avg;
+      x.pct=n>1?Math.round((n-x.rank)/(n-1)*100):100;   // صدک: نفر اول ۱۰۰، نفر آخر ۰
+      x.vsAvg=avg>0?Math.round(x.ach/avg*100):null;      // نسبت به میانگین گروه
+      x.vsBest=best>0?Math.round(x.ach/best*100):null;});// نسبت به بهترین نفر
+    const map={}; arr.forEach(x=>{map[x.id]=x;});
+    rank[kid]={list:arr,map:map,n:n,avg:avg,best:best,
+      name:arr[0].name,unit:arr[0].unit,cat:arr[0].cat,dir:arr[0].dir};
+  });
+  const rel={};
+  ids.forEach(id=>{let ws=0,wa=0;
+    Object.keys(rank).forEach(kid=>{const x=rank[kid].map[id];if(!x)return;ws+=x.w;wa+=x.pct*x.w;});
+    rel[id]=ws>0?Math.round(wa/ws):null;});
+  return {rank:rank,rel:rel,byEnt:byEnt};
+}
+function perfMedal(r){return r===1?'🥇':r===2?'🥈':r===3?'🥉':'#'+r.toLocaleString('fa-IR');}
+function perfRelColor(v){return v==null?'var(--tx2)':v>=75?'#16c784':v>=50?'#9acd32':v>=25?'#f5a623':'var(--bad)';}
+window.setPerfRelW=setPerfRelW;window.perfRankAll=perfRankAll;window.perfBlend=perfBlend;window.perfEntAchByKpi=perfEntAchByKpi;
+
 function perfdashHTML(){
   const b=gBiz();const bizzes=byE('business');
   const kind=view.pfKind||'ppl';
@@ -9269,11 +9327,22 @@ function perfdashHTML(){
   else if(kind==='biz')ents=byE('business').map(x=>({id:x.id,name:x.d.title||'—',sub:''}));
   else if(kind==='company')ents=byE('company').map(x=>({id:x.id,name:x.d.title||'—',sub:''}));
   else ents=[{id:'ALL',name:'کل هلدینگ',sub:''}];
-  ents=ents.map(e=>({...e,...perfEntityScore(kind,e.id,per)})).sort((a,b)=>(b.score==null?-1:b.score)-(a.score==null?-1:a.score));
+  const _ids=ents.map(e=>e.id);
+  const RK=perfRankAll(kind,_ids,per);
+  const relW=perfRelW();
+  ents=ents.map(e=>{const es=perfEntityScore(kind,e.id,per);
+    const rel=RK.rel[e.id];
+    return {...e,...es,abs:es.score,rel:rel,score:perfBlend(es.score,rel)};})
+    .sort((a,b)=>(b.score==null?-1:b.score)-(a.score==null?-1:a.score));
+  // رتبهٔ کلی بر اساس امتیاز نهایی
+  {const scored=ents.filter(e=>e.score!=null);let r=0,prev=null,seen=0;
+   scored.forEach(e=>{seen++;if(prev===null||e.score<prev){r=seen;prev=e.score;}e.orank=r;e.on=scored.length;});}
   const nDef=byE('perfkpi').length, nSc=byE('perfscore').length;
   let h=`<div class="tools"><b style="font-size:13px">🎖️ داشبورد مدیریت عملکرد</b><span style="flex:1"></span>
     <select class="inp sm" style="width:auto" onchange="setGBiz(this.value)"><option value="">همه کسب‌وکارها</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select>
     <select class="inp sm" style="width:auto" onchange="view.pfPer=this.value;render()">${['همه','روزانه','هفتگی','ماهانه','فصلی','سالانه'].map(x=>`<option ${x===per?'selected':''}>${x}</option>`).join('')}</select>
+    <select class="inp sm" style="width:auto" title="وزن امتیاز نسبی (رتبه در مقایسه با بقیه) در امتیاز نهایی" onchange="setPerfRelW(this.value)">
+      ${[0,10,20,30,40,50,60,70,100].map(x=>`<option value="${x}" ${x===perfRelW()?'selected':''}>⚖️ ${(100-x).toLocaleString('fa-IR')}٪ هدف خود + ${x.toLocaleString('fa-IR')}٪ رتبه</option>`).join('')}</select>
     <button class="btn gh sm" onclick="openRec('perfkpi')">📐 شاخص جدید</button>
     <button class="btn sm" onclick="openRec('perfscore')">📊 ثبت عملکرد</button></div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><span style="font-size:11px;color:var(--tx2);align-self:center">سطح:</span>
@@ -9312,28 +9381,81 @@ function perfdashHTML(){
       ${e.sub?`<div style="font-size:10px;color:var(--tx2)">${esc(e.sub)}</div>`:''}
       <div style="font-size:26px;font-weight:900;margin-top:5px;color:${pc(e.score)}">${e.score==null?'—':e.score.toLocaleString('fa-IR')}</div>
       <div style="height:5px;border-radius:3px;background:var(--bg3);overflow:hidden;margin-top:3px"><div style="height:100%;width:${Math.min(100,e.score||0)}%;background:${pc(e.score)}"></div></div>
-      <div style="font-size:9.5px;color:var(--tx2);margin-top:4px">${e.count.toLocaleString('fa-IR')} شاخص ${e.count?'▾ کلیک':''}</div></div>`;}).join('')||'<div class="empty">در این سطح موجودیتی نیست</div>'}
-  </div>`;
+      <div style="font-size:9.5px;margin-top:4px;line-height:1.7">
+        <span title="عملکرد نسبت به هدفِ خودش" style="color:var(--tx2)">🎯 ${e.abs==null?'—':e.abs.toLocaleString('fa-IR')}</span>
+        <span style="color:var(--tx2)"> · </span>
+        <span title="امتیاز نسبی: جایگاه در مقایسه با بقیه (صدک)" style="color:${perfRelColor(e.rel)};font-weight:700">🏆 ${e.rel==null?'—':e.rel.toLocaleString('fa-IR')}</span>
+        ${e.orank?`<div style="color:var(--tx2)">رتبهٔ کلی ${perfMedal(e.orank)} از ${e.on.toLocaleString('fa-IR')}</div>`:''}
+      </div>
+      <div style="font-size:9.5px;color:var(--tx2)">${e.count.toLocaleString('fa-IR')} شاخص ${e.count?'▾ کلیک':''}</div></div>`;}).join('')||'<div class="empty">در این سطح موجودیتی نیست</div>'}
+  </div>
+  <div style="font-size:10.5px;color:var(--tx2);margin:-4px 0 10px">عدد بزرگ = <b>امتیاز نهایی</b> (${(100-relW).toLocaleString('fa-IR')}٪ عملکرد نسبت به هدفِ خود + ${relW.toLocaleString('fa-IR')}٪ جایگاه نسبت به بقیه). 🎯 = امتیاز مطلق · 🏆 = امتیاز نسبی (صدک). وزن را از نوار بالا عوض کن.</div>`;
+
+  // 🏆 رتبه‌بندی در هر شاخص
+  {
+    const kids=Object.keys(RK.rank).sort((a,b)=>((RK.rank[b].list[0]||{}).w||1)-((RK.rank[a].list[0]||{}).w||1));
+    const cur=(view.pfRankK&&RK.rank[view.pfRankK])?view.pfRankK:(kids[0]||null);
+    h+=`<div class="sec"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px">
+      <b style="flex:1">🏆 رتبه‌بندی در هر شاخص <span style="font-weight:400;font-size:11px;color:var(--tx2)">(مقایسهٔ همهٔ ${esc((LV.find(l=>l[0]===kind)||['','موارد'])[1])}‌ها در یک شاخص)</span></b>
+      ${kids.length?`<select class="inp sm" style="width:auto;max-width:280px" onchange="view.pfRankK=this.value;render()">${kids.map(k=>`<option value="${k}" ${k===cur?'selected':''}>${esc(RK.rank[k].name)}</option>`).join('')}</select>`:''}</div>`;
+    if(!cur)h+=`<div class="empty">هنوز در هیچ شاخصی برای این سطح داده‌ای ثبت نشده — با «📊 ثبت عملکرد» شروع کن. وقتی برای دو نفر یا بیشتر در یک شاخص داده ثبت شود، رتبه‌بندی خودکار ساخته می‌شود.</div>`;
+    else{
+      const R=RK.rank[cur], nm=id=>{const e=ents.find(x=>x.id===id);return e?e.name:nameOf(id);};
+      h+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:7px">
+        <span class="chip">تعداد در رقابت: <b>${R.n.toLocaleString('fa-IR')}</b></span>
+        <span class="chip">میانگین تحقق: <b>${Math.round(R.avg).toLocaleString('fa-IR')}٪</b></span>
+        <span class="chip">بهترین: <b style="color:#16c784">${Math.round(R.best).toLocaleString('fa-IR')}٪</b></span>
+        ${R.unit?`<span class="chip">واحد: <b>${esc(R.unit)}</b></span>`:''}
+        <span class="chip">جهت مطلوب: <b>${esc(R.dir)}</b></span></div>
+      <div class="tblwrap"><table style="font-size:11.5px"><thead><tr>
+        <th style="width:52px">رتبه</th><th style="text-align:right">${esc((LV.find(l=>l[0]===kind)||['','مورد'])[1])}</th>
+        <th>واقعی</th><th>هدف خودش</th><th title="عملکرد نسبت به هدفِ خودش">🎯 تحقق</th>
+        <th title="صدک: نفر اول ۱۰۰، نفر آخر ۰">🏆 امتیاز نسبی</th>
+        <th title="عملکرد این مورد تقسیم بر میانگین گروه">نسبت به میانگین</th>
+        <th title="عملکرد این مورد تقسیم بر بهترین نفر">نسبت به بهترین</th></tr></thead><tbody>
+        ${R.list.map(x=>{const me2=view.pfSel===x.id;return `<tr onclick="view.pfSel=${me2?'null':`'${x.id}'`};render()" style="cursor:pointer;${me2?'background:rgba(212,175,55,.14)':''}">
+          <td style="text-align:center;font-weight:800">${perfMedal(x.rank)}</td>
+          <td style="text-align:right">${esc(nm(x.id))}</td>
+          <td>${x.actual.toLocaleString('fa-IR',{maximumFractionDigits:1})}</td>
+          <td>${x.target.toLocaleString('fa-IR',{maximumFractionDigits:1})}</td>
+          <td><b style="color:${pc(Math.round(x.ach))}">${Math.round(x.ach).toLocaleString('fa-IR')}٪</b></td>
+          <td><b style="color:${perfRelColor(x.pct)}">${x.pct.toLocaleString('fa-IR')}</b>
+            <div style="height:4px;border-radius:3px;background:var(--bg3);overflow:hidden;margin-top:2px"><div style="height:100%;width:${x.pct}%;background:${perfRelColor(x.pct)}"></div></div></td>
+          <td style="color:${x.vsAvg!=null&&x.vsAvg>=100?'#16c784':'var(--bad)'}">${x.vsAvg==null?'—':x.vsAvg.toLocaleString('fa-IR')+'٪'}</td>
+          <td style="color:var(--tx2)">${x.vsBest==null?'—':x.vsBest.toLocaleString('fa-IR')+'٪'}</td></tr>`;}).join('')}
+        </tbody></table></div>
+      <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">🎯 تحقق = عملکرد نسبت به هدفِ خودِ همان مورد. 🏆 امتیاز نسبی = جایگاه در بین بقیه (صدک: نفر اول ۱۰۰، نفر آخر ۰). اگر همه نزدیک هم باشند، ستون «نسبت به میانگین» تفاوت واقعی را نشان می‌دهد. روی هر ردیف بزن تا کارنامهٔ کاملش باز شود.</div>`;
+    }
+    h+=`</div>`;
+  }
   // جزئیات موجودیت انتخابی
   if(sel){const e=ents.find(x=>x.id===sel);
     const presetKey=kind==='ppl'?'person':kind==='unit'?'orgu':kind==='biz'?'biz':kind==='company'?'company':'';
     h+=`<div class="sec" style="border:1px solid var(--ac)">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
         <b style="font-size:14px;flex:1">🎖️ کارنامهٔ عملکرد: ${esc(e.name)}</b>
-        <span style="font-size:22px;font-weight:900;color:${pc(e.score)}">${e.score==null?'—':e.score.toLocaleString('fa-IR')}</span>
+        <span style="font-size:22px;font-weight:900;color:${pc(e.score)}" title="امتیاز نهایی">${e.score==null?'—':e.score.toLocaleString('fa-IR')}</span>
+        <span class="chip" title="عملکرد نسبت به هدفِ خودش">🎯 مطلق: <b>${e.abs==null?'—':e.abs.toLocaleString('fa-IR')}</b></span>
+        <span class="chip" title="جایگاه در مقایسه با بقیه (صدک وزنی)">🏆 نسبی: <b style="color:${perfRelColor(e.rel)}">${e.rel==null?'—':e.rel.toLocaleString('fa-IR')}</b></span>
+        ${e.orank?`<span class="chip">رتبهٔ کلی: <b>${perfMedal(e.orank)}</b> از ${e.on.toLocaleString('fa-IR')}</span>`:''}
         ${presetKey?`<button class="btn sm" onclick="openRec('perfscore',null,{k:'${presetKey}',id:'${e.id}'})">📊 ثبت عملکرد این ${LV.find(l=>l[0]===kind)[1].split(' ')[1]||''}</button>`:''}
         <button class="btn gh sm" onclick="view.pfSel=null;render()">✕ بستن</button></div>
-      ${e.items.length?`<div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">شاخص</th><th>دسته</th><th>واقعی</th><th>هدف</th><th>تحقق</th><th>وزن</th><th>سهم در امتیاز</th></tr></thead><tbody>
+      ${e.items.length?`<div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">شاخص</th><th>دسته</th><th>واقعی</th><th>هدف</th><th>🎯 تحقق</th><th title="رتبهٔ این مورد در همین شاخص بین همه">رتبه</th><th title="صدک در همین شاخص">🏆 نسبی</th><th title="نسبت به میانگین گروه در همین شاخص">به میانگین</th><th>وزن</th><th>سهم در امتیاز</th></tr></thead><tbody>
         ${e.items.sort((a,b)=>(b.ach||0)-(a.ach||0)).map(it=>{const contrib=e.wsum>0?Math.round(Math.min(it.ach,120)*it.w/e.wsum):0;return `<tr>
           <td style="text-align:right">${esc(it.name)}${it.unit?` <span style="color:var(--tx2);font-size:10px">(${esc(it.unit)})</span>`:''}${it.kp?`<div style="margin-top:2px">${perfKpiLinks(it.kp)}</div>`:''}</td>
           <td>${esc(it.cat||'—')}</td>
           <td>${(it.actual||0).toLocaleString('fa-IR',{maximumFractionDigits:1})}</td>
           <td>${(it.target||0).toLocaleString('fa-IR',{maximumFractionDigits:1})}</td>
           <td><b style="color:${pc(it.ach)}">${it.ach==null?'—':Math.round(it.ach).toLocaleString('fa-IR')+'٪'}</b></td>
+          ${(()=>{const kid=it.kp&&it.kp.id, rr=kid&&RK.rank[kid]&&RK.rank[kid].map[e.id];
+            if(!rr)return `<td style="color:var(--tx2)">—</td><td style="color:var(--tx2)">—</td><td style="color:var(--tx2)">—</td>`;
+            return `<td style="font-weight:800">${perfMedal(rr.rank)} <span style="font-weight:400;color:var(--tx2);font-size:10px">از ${rr.n.toLocaleString('fa-IR')}</span></td>
+              <td><b style="color:${perfRelColor(rr.pct)}">${rr.pct.toLocaleString('fa-IR')}</b></td>
+              <td style="color:${rr.vsAvg!=null&&rr.vsAvg>=100?'#16c784':'var(--bad)'}">${rr.vsAvg==null?'—':rr.vsAvg.toLocaleString('fa-IR')+'٪'}</td>`;})()}
           <td>${(it.w||1).toLocaleString('fa-IR')}</td>
           <td><b>${contrib.toLocaleString('fa-IR')}</b></td></tr>`;}).join('')}
         </tbody></table></div>
-        <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">امتیاز کل = میانگین وزنیِ درصد تحققِ شاخص‌ها (هر شاخص حداکثر ۱۲۰٪ لحاظ می‌شود). تارگت‌های فروشِ این ${LV.find(l=>l[0]===kind)[1].split(' ')[1]||'مورد'} خودکار در امتیاز آمده‌اند.</div>`
+        <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">🎯 امتیاز مطلق = میانگین وزنیِ درصد تحققِ شاخص‌ها نسبت به هدفِ خودِ این ${LV.find(l=>l[0]===kind)[1].split(' ')[1]||'مورد'} (هر شاخص حداکثر ۱۲۰٪). 🏆 امتیاز نسبی = میانگین وزنیِ صدکِ رتبه در همان شاخص‌ها. امتیاز نهایی = ${(100-relW).toLocaleString('fa-IR')}٪ مطلق + ${relW.toLocaleString('fa-IR')}٪ نسبی. تارگت‌های فروش هم خودکار در امتیاز مطلق لحاظ شده‌اند.</div>`
       :`<div class="empty">برای این مورد هنوز عملکردی ثبت نشده — «📊 ثبت عملکرد» را بزن.</div>`}
       <div style="margin-top:8px">${perfLineSVG(perfTrend(kind,sel))}</div>
     </div>`;}
