@@ -274,11 +274,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.55</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.56</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.55</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.56</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2767,6 +2767,7 @@ const VIEWS_ACL=[
  ['gdash_charts','✨ ↳ نمودارهای رشد'],
  ['gdash_plans','✨ ↳ برنامه‌های پیش رو'],
  ['bizdash','🏪 داشبورد کسب‌وکار'],
+ ['whdash','📦 داشبورد انبار (موجودی چند‌انباره)'],
  ['findash','💼 داشبورد مالی تخصصی'],
  ['invdash','💎 داشبورد سرمایه‌گذاری'],
  ['cfaacad','🎓 آموزش و کاربرد CFA'],
@@ -2912,7 +2913,7 @@ function modcfgHTML(){
     <button class="btn" style="margin-top:12px" onclick="saveWizard()">💾 ذخیره مشخصات نسخه</button>
   </div>`;
   const rows=MODULES.map(m=>{const on=modOn(m.id);
-    return `<div class="arow" style="gap:10px">
+    return `<div class="arow" data-sr="mods" data-srt="${esc(m.n+' '+m.id)}" style="gap:10px">
       <span class="an">${esc(m.n)} <span style="color:var(--tx2);font-size:11px">(${m.id})</span></span>
       <button class="btn sm ${on?'':'gh'}" onclick="toggleModule('${m.id}')" style="min-width:96px">${on?'✅ روشن':'⬜ خاموش'}</button>
     </div>`;}).join('');
@@ -2920,6 +2921,7 @@ function modcfgHTML(){
   const lbl='style="font-size:12px;color:var(--tx2)"';
   return wizard+`<div class="sec">
     <h3>🧰 مدیریت محصول — ماژول‌ها</h3>
+    ${srchBox('mods','جستجوی ماژول…','','[data-sr="mods"]')}
     <p style="font-size:12px;color:var(--tx2);line-height:2">ماژول‌های خاموش برای همه‌ی کاربرانِ این نسخه (حتی ادمین) پنهان می‌شوند. این تنظیم «بالای» سطوح دسترسی عمل می‌کند و روی همین دیتابیس ذخیره و سینک می‌شود. داده‌ها پاک نمی‌شوند؛ فقط نمایش داده نمی‌شوند و با روشن‌کردن دوباره برمی‌گردند.</p>
     ${rows}
   </div>
@@ -3312,13 +3314,15 @@ function impParse(arr){
     ${(()=>{const dp=ok.filter(r=>r.dup&&!r.existing).length;return dp?`<span style="color:var(--warn)">⏭ ${dp.toLocaleString('fa-IR')} ردیف تکراری (رد می‌شوند)</span>`:'';})()}
     ${unknown.length?`<span style="color:var(--warn)">ستون‌های ناشناخته (نادیده گرفته شد): ${unknown.map(esc).join('، ')}</span>`:''}
   </div>
+  ${out.length>=8?srchBox('impp','جستجو در ردیف‌های فایل (عنوان یا متن خطا)…','— برای پیدا کردن سریع ردیف‌های خطادار «⚠️» را بنویسید','[data-sr="impp"]'):''}
   <div class="tblwrap" style="max-height:300px;overflow:auto"><table><thead><tr><th>ردیف فایل</th><th>عنوان</th><th>وضعیت</th></tr></thead><tbody>`;
   out.slice(0,200).forEach(r=>{
-    h+=`<tr><td>${r.n.toLocaleString('fa-IR')}</td><td>${esc(r.d.title||'—')}</td>
+    h+=`<tr data-sr="impp"><td>${r.n.toLocaleString('fa-IR')}</td><td>${esc(r.d.title||'—')}</td>
       <td style="white-space:normal">${r.errs.length?'<span class="imp-bad">⚠️ '+r.errs.map(esc).join(' │ ')+'</span>':(r.dup&&!r.existing?'<span style="color:var(--warn)">⏭ تکراری با رکورد موجود (همان دوره/مبلغ) — وارد نمی‌شود</span>':(r.existing?'<span style="color:var(--warn)">🔁 هم‌نام موجود — '+(document.getElementById('imp_upsert').checked?'به‌روزرسانی می‌شود':'رکورد جدید ساخته می‌شود')+'</span>':'<span class="imp-ok">✅ جدید</span>'))}</td></tr>`;
   });
   h+=`</tbody></table></div>${out.length>200?'<div style="font-size:11px;color:var(--tx2);margin-top:4px">… و '+(out.length-200).toLocaleString('fa-IR')+' ردیف دیگر</div>':''}`;
   prev.innerHTML=h;
+  try{srchRun('impp');}catch(e){}
   document.getElementById('imp_go').disabled=!impState.valid.length;
   document.getElementById('imp_go').textContent='ثبت نهایی '+impState.valid.length.toLocaleString('fa-IR')+' ردیف';
 }
@@ -7606,6 +7610,7 @@ function render(){
   try{if(view.type!=='targetdash'&&view.type!=='modcfg'){const tb=targetBannerHTML();if(tb)c.insertAdjacentHTML('afterbegin',tb);}}catch(e){} // بنر هشدار تارگت
   try{if(view.type!=='chqdash'&&view.type!=='modcfg'){const cb=chqBoardBanner();if(cb)c.insertAdjacentHTML('afterbegin',cb);}}catch(e){} // بنر چک سررسیدگذشته
   try{applySecLayout();}catch(e){} // چیدمان سفارشی المان‌های صفحه
+  try{srchApplyAll();}catch(e){} // 🔍 بازاعمال جستجوهای درون‌صفحه‌ای
   try{if(_foc){let el=null;
     if(_foc.id)el=document.getElementById(_foc.id);
     if(!el&&_foc.ds)el=document.querySelector('#content [data-search="'+_foc.ds+'"]');
@@ -7616,6 +7621,69 @@ function render(){
   }catch(e){}
   whoami();
 }
+/* ===== 🔍 جستجوی زندهٔ درون‌صفحه‌ای (فیلتر DOM، بدون render و بدون از‌دست‌رفتن فوکوس) ===== */
+var _srchQ={},_srchSel={},_srchSec={};
+function srchNorm(x){
+  const s=String(x==null?'':x);const fa='۰۱۲۳۴۵۶۷۸۹',ar='٠١٢٣٤٥٦٧٨٩';let o='';
+  for(const ch of s){
+    let i=fa.indexOf(ch); if(i<0)i=ar.indexOf(ch);
+    if(i>=0){o+=String(i);continue;}
+    if('يﻱﻲﯼﯽئ'.indexOf(ch)>=0){o+='ی';continue;}
+    if('كﻙﻚ'.indexOf(ch)>=0){o+='ک';continue;}
+    if('أإآٱ'.indexOf(ch)>=0){o+='ا';continue;}
+    if(ch==='ۀ'||ch==='ة'){o+='ه';continue;}
+    if('ًٌٍَُِّْٰءٔ‌‍‎‏'.indexOf(ch)>=0)continue;
+    o+=ch;
+  }
+  return o.toLowerCase().replace(/[\s ]+/g,' ').trim();
+}
+/* srchBox: جعبهٔ جستجو. sel = انتخابگر ردیف‌ها (پیش‌فرض [data-sr="id"]) ، sec = انتخابگر بخش‌هایی که اگر خالی شدند مخفی شوند */
+function srchBox(id,ph,hint,sel,sec){
+  _srchSel[id]=sel||('[data-sr="'+id+'"]');
+  if(sec)_srchSec[id]=sec; else if(!_srchSec[id])_srchSec[id]='[data-srsec="'+id+'"]';
+  const q=_srchQ[id]||'';
+  return `<div class="srchw" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0 10px">
+    <input id="srch_${id}" data-search="srch_${id}" value="${esc(q)}" placeholder="🔍 ${esc(ph||'جستجو…')}"
+      oninput="srchRun('${id}')" onkeydown="if(event.key==='Escape'){srchClear('${id}');event.stopPropagation();}"
+      style="max-width:290px;padding:6px 10px;font-size:12px">
+    <button class="btn gh sm" id="srchx_${id}" onclick="srchClear('${id}')" style="${q?'':'display:none'}">✕ پاک‌کردن</button>
+    <span id="srchc_${id}" style="font-size:11px;color:var(--tx2)"></span>
+    ${hint?`<span style="font-size:11px;color:var(--tx2)">${hint}</span>`:''}</div>`;
+}
+function srchRun(id){
+  const inp=document.getElementById('srch_'+id);
+  const raw=inp?inp.value:(_srchQ[id]||'');
+  _srchQ[id]=raw;
+  const toks=srchNorm(raw).split(' ').filter(Boolean);
+  const sel=_srchSel[id]||('[data-sr="'+id+'"]');
+  let vis=0,tot=0;
+  document.querySelectorAll(sel).forEach(row=>{
+    tot++;
+    const hay=srchNorm(row.getAttribute('data-srt')||row.textContent);
+    const ok=!toks.length||toks.every(t=>hay.indexOf(t)>=0);
+    row.style.display=ok?'':'none';
+    if(ok)vis++;
+  });
+  const secSel=_srchSec[id]||('[data-srsec="'+id+'"]');
+  document.querySelectorAll(secSel).forEach(sec=>{
+    const rows=sec.querySelectorAll(sel);
+    let any=false; rows.forEach(r=>{if(r.style.display!=='none')any=true;});
+    sec.style.display=(!toks.length||!rows.length||any)?'':'none';
+  });
+  const c=document.getElementById('srchc_'+id);
+  if(c)c.textContent=toks.length?(vis?vis.toLocaleString('fa-IR')+' مورد از '+tot.toLocaleString('fa-IR'):'موردی پیدا نشد'):'';
+  const x=document.getElementById('srchx_'+id);
+  if(x)x.style.display=toks.length?'':'none';
+  return vis;
+}
+function srchClear(id){
+  _srchQ[id]='';
+  const i=document.getElementById('srch_'+id); if(i){i.value='';try{i.focus();}catch(e){}}
+  srchRun(id);
+}
+/* پس از هر بازترسیم، جستجوهای فعال دوباره اعمال شوند */
+function srchApplyAll(){for(const id in _srchQ){if(_srchQ[id]&&document.getElementById('srch_'+id))try{srchRun(id);}catch(e){}}}
+window.srchBox=srchBox;window.srchRun=srchRun;window.srchClear=srchClear;window.srchApplyAll=srchApplyAll;window.srchNorm=srchNorm;
 let _searchT=null;
 function listSearch(v){view.q=v;view.page=0;clearTimeout(_searchT);_searchT=setTimeout(render,200);}
 window.listSearch=listSearch;
@@ -11335,13 +11403,14 @@ function aclHTML(){
   if(!v)return h+`<div class="empty">کاربری ثبت نشده است</div>`;
   // صفحات و ابزارهای ویژه
   h+=`<div class="sec"><h3>🖥️ صفحات و ابزارها (داشبوردها)</h3>
+  ${srchBox('aclv','جستجوی صفحه یا ابزار…','','[data-sr="aclv"]')}
   <div class="tblwrap"><table><thead><tr><th>صفحه / ابزار</th><th>دسترسی</th></tr></thead><tbody>
   ${VIEWS_ACL.map(([vk,vn])=>{
     const curV=(cfg.views||{})[vk]||'';
-    if(vk==='layout'||vk==='seclayout')return `<tr><td>${vn}</td><td><select onchange="setAclView('${vk}',this.value)" style="max-width:190px">
+    if(vk==='layout'||vk==='seclayout')return `<tr data-sr="aclv" data-srt="${esc(vn)}"><td>${vn}</td><td><select onchange="setAclView('${vk}',this.value)" style="max-width:190px">
       <option value="" ${curV===''?'selected':''}>غیرفعال (پیش‌فرض)</option>
       <option value="show" ${curV==='show'?'selected':''}>مجاز ✅</option></select></td></tr>`;
-    return `<tr><td>${vn}</td><td><select onchange="setAclView('${vk}',this.value)" style="max-width:190px">
+    return `<tr data-sr="aclv" data-srt="${esc(vn)}"><td>${vn}</td><td><select onchange="setAclView('${vk}',this.value)" style="max-width:190px">
       <option value="" ${curV===''?'selected':''}>نمایش (پیش‌فرض)</option>
       <option value="hide" ${curV==='hide'?'selected':''}>مخفی 🚫</option></select></td></tr>`;
   }).join('')}
@@ -11353,8 +11422,9 @@ function aclHTML(){
     const pick=(ent,ax,ic)=>{
       const rows=byE(ent);
       if(!rows.length)return `<p style="font-size:11px;color:var(--tx2)">موردی ثبت نشده</p>`;
-      return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px">`+rows.map(x=>
-        `<label style="display:flex;gap:6px;align-items:center;font-size:12px;cursor:pointer">
+      return (rows.length>=10?srchBox('aclsc_'+ax,'جستجو در این فهرست…','','[data-sr="aclsc_'+ax+'"]'):'')
+        +`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px">`+rows.map(x=>
+        `<label data-sr="aclsc_${ax}" data-srt="${esc(x.d.title||'')}" style="display:flex;gap:6px;align-items:center;font-size:12px;cursor:pointer">
           <input type="checkbox" ${((sc[ax]||[]).includes(x.id))?'checked':''} onchange="setAclScopeId('${ax}','${x.id}',this.checked);render()">
           ${ic} ${esc(x.d.title||'—')}</label>`).join('')+`</div>`;
     };
@@ -11374,10 +11444,11 @@ function aclHTML(){
       <h3 style="font-size:12.5px;margin-top:10px">🧩 واحدهای سازمانی مجاز</h3>${pick('orgunit','u','🧩')}`:''}
     </div>`;
   }
+  h+=srchBox('acle','جستجوی بخش (دیتابیس) در همهٔ گروه‌ها…','— گروه‌های بی‌نتیجه موقتاً پنهان می‌شوند');
   allGroups().forEach((g,gi)=>{
     if(!Object.values(E).some(d=>d.grp===g))return;
     const gHid=(cfg.grp||{})[g]==='hide';
-    h+=`<div class="sec" style="${gHid?'opacity:.55':''}"><h3>${esc(grpLabel(g))}
+    h+=`<div class="sec" data-srsec="acle" style="${gHid?'opacity:.55':''}"><h3>${esc(grpLabel(g))}
       <span style="flex:1"></span>
       <select onchange="setAclGrp('${g.replace(/'/g,"\\'")}',this.value)" style="max-width:190px;font-size:11.5px" title="یک‌ضرب کل گروه (همه بخش‌ها و داشبوردهایش) را برای این نقش مخفی کن">
         <option value="" ${!gHid?'selected':''}>گروه: نمایش عادی</option>
@@ -11389,15 +11460,18 @@ function aclHTML(){
     <div class="tblwrap"><table><thead><tr><th>بخش</th><th>دسترسی</th><th>فیلدها</th></tr></thead><tbody>`;
     Object.entries(E).filter(([k,d])=>d.grp===g).forEach(([ek,ed])=>{
       const cur=(cfg.ent||{})[ek]||'';
-      h+=`<tr><td>${ed.ic} ${ed.n}</td>
+      h+=`<tr data-sr="acle" data-srt="${esc(ed.n+' '+ek)}"><td>${ed.ic} ${ed.n}</td>
         <td><select onchange="setAclEnt('${ek}',this.value)" style="max-width:190px">
           ${LVLOPTS.map(([val,l])=>`<option value="${val}" ${cur===val?'selected':''}>${l}</option>`).join('')}</select></td>
         <td><button class="btn gh sm" onclick="view.aclEnt=view.aclEnt==='${ek}'?null:'${ek}';render()">${view.aclEnt===ek?'بستن':'تنظیم فیلدها'}</button></td></tr>`;
       if(view.aclEnt===ek){
-        h+=`<tr><td colspan="3" style="white-space:normal"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;padding:6px 0">`;
-        ed.f.filter(f=>f.k!=='title').forEach(f=>{
+        const _efs=ed.f.filter(f=>f.k!=='title');
+        h+=`<tr data-sr="acle" data-srt="${esc(ed.n+' '+ek)}"><td colspan="3" style="white-space:normal">
+          ${_efs.length>=10?srchBox('aclf','جستجوی فیلد در «'+ed.n+'»…','','[data-sr=\"aclf\"]'):''}
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;padding:6px 0">`;
+        _efs.forEach(f=>{
           const fc=(cfg.fld||{})[ek+'.'+f.k]||'';
-          h+=`<div style="display:flex;gap:6px;align-items:center;font-size:12px">
+          h+=`<div data-sr="aclf" data-srt="${esc(f.n+' '+f.k)}" style="display:flex;gap:6px;align-items:center;font-size:12px">
             <span style="flex:1;color:var(--tx2)">${f.n}</span>
             <select onchange="setAclFld('${ek}','${f.k}',this.value)" style="max-width:130px;padding:4px 6px;font-size:11.5px">
               ${FLDOPTS.map(([val,l])=>`<option value="${val}" ${fc===val?'selected':''}>${l}</option>`).join('')}</select></div>`;
@@ -24728,11 +24802,12 @@ function usersHTML(){
   const list=usersList();
   let h=`<div class="sec"><h3>👤 کاربران و سطح دسترسی</h3>
   <p style="font-size:12px;color:var(--tx2);margin-bottom:12px">هر کاربر با ایمیل و رمز خودش وارد می‌شود (بار اول در صفحه ورود، خودش ثبت‌نام می‌کند). اینجا نقش هر ایمیل را تعیین می‌کنید. ایمیلی که در این لیست نباشد، نقش «کاربر» می‌گیرد.</p>
+  ${list.length>=8?srchBox('usr','جستجوی ایمیل، نقش یا نام پرونده…','','[data-sr=\"usr\"]'):''}
   <div class="tblwrap"><table><thead><tr><th>ایمیل</th><th>نقش</th><th>👥 پرونده منابع انسانی</th><th></th></tr></thead><tbody>`;
   list.forEach((u,i)=>{
     const hrLinked=u.hr&&recs[u.hr]&&!recs[u.hr].del?u.hr:'';
     const emailMatch=!hrLinked&&byE('hr').find(x=>(x.d.email||'').toLowerCase()===(u.email||'').toLowerCase());
-    h+=`<tr><td dir="ltr" style="text-align:left">${esc(u.email)}</td>
+    h+=`<tr data-sr="usr" data-srt="${esc(u.email+' '+(u.role||'')+' '+(hrLinked&&recs[hrLinked]?recs[hrLinked].d.title||'':''))}"><td dir="ltr" style="text-align:left">${esc(u.email)}</td>
       <td><select onchange="setRole(${i},this.value)" style="max-width:170px;${u.role===PENDING?'border-color:var(--warn)':''}">${aclRoles().concat([PENDING]).map(r=>`<option ${u.role===r?'selected':''}>${r}</option>`).join('')}</select>
       ${u.role===PENDING?'<div style="font-size:10.5px;color:var(--warn)">تازه ثبت‌نام کرده — منتظر تایید شما</div>':''}</td>
       <td><select onchange="setUserHR(${i},this.value)" style="max-width:190px">
@@ -24883,6 +24958,7 @@ function stratNode(b,depth){
 /* ================= RECORD MODAL ================= */
 let cur=null;
 function openRec(e,id,preset){
+  _srchQ['mfld']='';
   if(!can(id?'e':'c',e,id?recs[id]:null)){alert('سطح دسترسی شما ('+myRole()+') اجازه این کار را نمی‌دهد');return;}
   cur=id?JSON.parse(JSON.stringify(recs[id])):{id:uid(),e,d:{},u:0,_new:true};
   if(preset&&preset.k&&!id)cur.d[preset.k]=[preset.id];
@@ -25015,8 +25091,9 @@ function drawModal(){
       <span style="font-size:11px;color:var(--tx2)">${formArrange?'با ▲▼ جابجا کن، با 👁 مخفی/نمایش بده — روی همه کاربران اعمال می‌شود. دوباره بزن تا تمام شود.':'ترتیب و نمایش فیلدهای این فرم را تغییر بده'}</span></div>`;
   }
   const hid=formHidden(e);
-  h+=`<div class="mrow" id="mrow_dnd">`;
   const _ff=formFields(e), _ffkeys=_ff.map(x=>x.k);
+  if(_ff.length>=14&&!formArrange)h+=srchBox('mfld','جستجوی فیلد در این فرم…','— فیلدهای پرشده و بقیه دست‌نخورده می‌مانند','#mrow_dnd > div[data-fk]');
+  h+=`<div class="mrow" id="mrow_dnd">`;
   _ff.forEach((f,_fi)=>{
     const v=cur.d[f.k];
     const ro=fldMode(e,f.k)==='read';
@@ -25094,6 +25171,7 @@ function drawModal(){
   formFields(e).filter(f=>fldMode(e,f.k)==='read').forEach(f=>{
     document.querySelectorAll(`#modal [data-k="${f.k}"],#modal [data-dk="${f.k}"]`).forEach(el=>{el.disabled=true;el.style.opacity=.55;});
   });
+  try{srchRun('mfld');}catch(e){} // 🔍 بازاعمال جستجوی فیلدهای فرم
   document.getElementById('ovl').classList.add('show');
   // 🧲 جابجایی چیدمان فیلدها با درگ‌اند‌دراپ (ذخیره برای همه)
   if(canLayout()&&!formArrange){
@@ -25582,7 +25660,7 @@ function delRec(){
   cur.del=true;cur.u=Date.now();const e=cur.e,id=cur.id;put(cur);closeModal();
   if(view.type==='rec'&&view.id===id)go('list',e);
 }
-function closeModal(){document.getElementById('ovl').classList.remove('show');cur=null;formArrange=false;clearDraft();}
+function closeModal(){document.getElementById('ovl').classList.remove('show');cur=null;formArrange=false;_srchQ['mfld']='';clearDraft();}
 /* کلیک اشتباهی بیرون فرم دیگر فرم را نمی‌بندد — فقط تکان می‌خورد تا یادآوری کند */
 document.getElementById('ovl').addEventListener('click',e=>{
   if(e.target.id==='ovl'){
