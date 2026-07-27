@@ -70,6 +70,7 @@ table{border-collapse:collapse;width:100%;min-width:600px}
 th{font-size:12px;color:var(--tx2);text-align:right;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;background:var(--bg2)}
 td{padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis}
 tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
+tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
 .tag{display:inline-block;background:var(--bg3);border:1px solid var(--line);border-radius:99px;padding:1px 9px;font-size:11px;margin-inline-end:4px}
 .tag.g{border-color:var(--ok);color:var(--ok)} .tag.y{border-color:var(--warn);color:var(--warn)}
 .tag.r{border-color:var(--bad);color:var(--bad)} .tag.b{border-color:var(--ac);color:var(--ac)}
@@ -273,11 +274,11 @@ tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg3)}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.50</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.51</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.50</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.51</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -9876,7 +9877,7 @@ function listHTML(e){
   let h=`<div class="tools">
     ${can('c',e)?`<button class="btn" onclick="openRec('${e}')">＋ افزودن</button>`:''}
     ${can('c',e)?`<button class="btn gh sm" onclick="impOpen('${e}')" title="ورود گروهی داده از فایل اکسل یا CSV">📥 ورود از اکسل</button>`:''}
-    ${can('d',e)&&rows.length?`<button class="btn bad sm" onclick="bulkDel('${e}')" title="حذف همه رکوردهایی که الان در لیست (با فیلتر/جستجوی فعلی) می‌بینید">🗑 حذف گروهی</button>`:''}
+    ${can('d',e)&&rows.length?(view.selMode?`<button class="btn gh sm" onclick="bulkSelCancel()">✕ لغو انتخاب</button>`:`<button class="btn bad sm" onclick="bulkSelStart('${e}')" title="کنار هر مورد یک چک‌باکس می‌آید؛ فقط موارد تیک‌خورده حذف می‌شوند">🗑 حذف گروهی</button>`):''}
     <input data-search="listq" placeholder="🔍 جستجو در همه فیلدها…" value="${esc(q)}" oninput="listSearch(this.value)">
     <span style="color:var(--tx2);font-size:12px">${rows.length.toLocaleString('fa-IR')} مورد</span></div>
   <div class="tools" style="margin-top:-4px">
@@ -9891,7 +9892,7 @@ function listHTML(e){
       ${sortFs.filter(f=>[SEL,STA,REL,CHK,MUL,TXT].includes(f.t)).map(f=>`<option value="${f.k}" ${view.grp===f.k?'selected':''}>${esc(f.n)}</option>`).join('')}</select>
     <button class="btn gh sm" onclick="view.filterOpen=!view.filterOpen;render()">🔎 فیلتر ستونی${Object.values(colFlt).filter(Boolean).length?' ('+Object.values(colFlt).filter(Boolean).length.toLocaleString('fa-IR')+')':''}</button>
     ${(view.sort||view.grp||Object.values(colFlt).some(Boolean)||view.flt)?`<button class="btn bad sm" onclick="view.sort=null;view.grp=null;view.cf={};view.flt=null;view.page=0;render()">پاک‌سازی ابزارها ✕</button>`:''}
-  </div>${_bizHint}${lvlBar}`;
+  </div>${view.selMode?selBarHTML(e,rows):''}${_bizHint}${lvlBar}`;
   // پنل فیلتر ستونی
   if(view.filterOpen){
     h+=`<div class="sec" style="margin-bottom:10px"><h3 style="font-size:13px">🔎 فیلتر بر اساس فیلد</h3>
@@ -9942,9 +9943,18 @@ function listHTML(e){
   if(!rows.length)return h+`<div class="empty">${q||Object.values(colFlt).some(Boolean)?'موردی با این فیلتر پیدا نشد':'هنوز موردی ثبت نشده — با «＋ افزودن» شروع کنید'}</div>`;
   // سربرگ ستون‌ها با امکان کلیک برای مرتب‌سازی
   const thSort=f=>`<th onclick="view.sort='${f.k}';view.sortDir=(view.sort==='${f.k}'&&view.sortDir!==-1?-1:1);render()" style="cursor:pointer;user-select:none" title="کلیک برای مرتب‌سازی">${esc(f.n)}${view.sort===f.k?(view.sortDir===-1?' ↓':' ↑'):''}</th>`;
-  const headRow=`<tr>${cols.map(thSort).join('')}${e==='measure'?'<th>سطح</th>':''}${def.prog?'<th>پیشرفت</th>':''}${def.comp?'<th>محاسبه</th>':''}</tr>`;
+  const headRow=`<tr>${view.selMode?'<th style="width:36px;text-align:center" title="انتخاب برای حذف">☑</th>':''}${cols.map(thSort).join('')}${e==='measure'?'<th>سطح</th>':''}${def.prog?'<th>پیشرفت</th>':''}${def.comp?'<th>محاسبه</th>':''}</tr>`;
   const rowHTML=r=>{
-    let s=`<tr onclick="go('rec','${e}','${r.id}')">${cols.map(f=>`<td>${cellHTML(r,f)}</td>`).join('')}`;
+    let s;
+    if(view.selMode){
+      const _ok=can('d',e,r), _on=!!(view.sel||{})[r.id];
+      s=`<tr ${_ok?`onclick="bulkSelToggle('${r.id}')" style="cursor:pointer"`:'style="opacity:.45"'}`
+       +`${_on?' data-sel="1"':''}>`
+       +`<td style="text-align:center">${_ok?`<input type="checkbox" ${_on?'checked':''} onclick="event.stopPropagation();bulkSelToggle('${r.id}')" style="width:17px;height:17px;cursor:pointer;accent-color:var(--bad)">`:'<span title="اجازه حذف این مورد را ندارید" style="color:var(--tx2)">🔒</span>'}</td>`
+       +`${cols.map(f=>`<td>${cellHTML(r,f)}</td>`).join('')}`;
+    } else {
+      s=`<tr onclick="go('rec','${e}','${r.id}')">${cols.map(f=>`<td>${cellHTML(r,f)}</td>`).join('')}`;
+    }
     if(e==='measure'){const b=relIds(r,'bsc')[0],sc=(b&&recs[b]&&recs[b].d&&recs[b].d.scope)||'';
       s+=`<td>${sc?`${LVIC[sc]||''} ${sc}`:'<span style="color:var(--warn)">—</span>'}</td>`;}
     if(def.prog)s+=`<td>${pbarHTML(progOf(def.prog,r))}</td>`;
@@ -24587,6 +24597,49 @@ function bulkDel(e){
   alert('✅ '+n.toLocaleString('fa-IR')+' رکورد حذف شد');
 }
 window.bulkDel=bulkDel;
+/* ☑ حذف گروهیِ انتخابی — کاربر با تیک‌زدن دقیقاً مشخص می‌کند چه چیزی پاک شود.
+   دکمه‌ی «حذف گروهی» فقط این حالت را روشن می‌کند و هیچ‌چیزی را خودش حذف نمی‌کند. */
+function bulkSelStart(e){view.selMode=true;view.sel={};render();}
+function bulkSelCancel(){view.selMode=false;view.sel={};render();}
+function bulkSelToggle(id){
+  view.sel=view.sel||{};
+  if(view.sel[id])delete view.sel[id];else view.sel[id]=true;
+  render();
+}
+function bulkSelCount(){return Object.keys(view.sel||{}).length;}
+function bulkSelDeletable(e){
+  return (window._listIds||[]).filter(id=>recs[id]&&!recs[id].del&&can('d',e,recs[id]));
+}
+function bulkSelAll(e){const s={};bulkSelDeletable(e).forEach(id=>s[id]=true);view.sel=s;render();}
+function bulkSelNone(){view.sel={};render();}
+function selBarHTML(e,rows){
+  const n=bulkSelCount(), tot=bulkSelDeletable(e).length;
+  return `<div class="tools" style="margin-top:-4px;border:1px solid var(--bad);border-radius:8px;padding:6px 8px">
+    <span style="font-size:12px">☑ انتخاب‌شده: <b style="color:var(--bad)">${n.toLocaleString('fa-IR')}</b> از ${tot.toLocaleString('fa-IR')} مورد قابل حذف</span>
+    <button class="btn gh sm" onclick="bulkSelAll('${e}')">انتخاب همه‌ی این لیست</button>
+    <button class="btn gh sm" ${n?'':'disabled style=opacity:.4'} onclick="bulkSelNone()">هیچ‌کدام</button>
+    <button class="btn bad sm" ${n?'':'disabled style=opacity:.4'} onclick="bulkDelSel('${e}')">🗑 حذف ${n?n.toLocaleString('fa-IR')+' مورد انتخاب‌شده':'انتخاب‌شده‌ها'}</button>
+    <button class="btn gh sm" onclick="bulkSelCancel()">✕ لغو</button>
+    <span style="font-size:11px;color:var(--tx2);flex:1">فقط موارد تیک‌خورده حذف می‌شوند</span></div>`;
+}
+function bulkDelSel(e){
+  const dels=Object.keys(view.sel||{}).filter(id=>recs[id]&&!recs[id].del&&can('d',e,recs[id]));
+  if(!dels.length){alert('هیچ موردی انتخاب نشده است — اول کنار موارد تیک بزنید');return;}
+  const n=dels.length;
+  const names=dels.slice(0,6).map(id=>'• '+(((recs[id].d||{}).title)||'بی‌نام')).join('\n');
+  if(!confirm('⚠️ '+n.toLocaleString('fa-IR')+' مورد انتخاب‌شده حذف شود؟\n\n'+names+(n>6?'\n… و '+(n-6).toLocaleString('fa-IR')+' مورد دیگر':'')))return;
+  if(n>50){const t=prompt('برای تایید نهایی، کلمه «حذف» را بنویسید:');if(t!=='حذف'){alert('لغو شد');return;}}
+  const now=Date.now();
+  dels.forEach(id=>{const r=recs[id];
+    if(AUDIT_ENTS.includes(e))r.d._log=(r.d._log||[]).concat([{t:now,by:myEmail(),c:['🗑 حذف گروهی (انتخابی)']}]).slice(-40);
+    r.del=true;r.u=now;queue.push(id);});
+  view.selMode=false;view.sel={};
+  invalidateByE();saveLocal();saveQ();flush();
+  view.page=0;render();
+  alert('✅ '+n.toLocaleString('fa-IR')+' مورد حذف شد');
+}
+window.bulkSelStart=bulkSelStart;window.bulkSelCancel=bulkSelCancel;window.bulkSelToggle=bulkSelToggle;
+window.bulkSelAll=bulkSelAll;window.bulkSelNone=bulkSelNone;window.bulkDelSel=bulkDelSel;window.selBarHTML=selBarHTML;
 function delRec(){
   if(!can('d',cur.e,recs[cur.id])){alert('اجازه حذف ندارید');return;}
   if(!confirm('حذف شود؟'))return;

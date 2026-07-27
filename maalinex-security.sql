@@ -136,7 +136,6 @@ $$ select app_is_admin()
      or coalesce(d->>'_by','')=''
      or lower(d->>'_by')=app_email() $$;
 
-
 -- مالکیت هدف BSC / سنجه (خودش یا از طریق هدفِ والد سنجه)
 create or replace function public.app_bsc_mine(ent text, d jsonb) returns boolean
 language plpgsql stable security definer set search_path=public as $$
