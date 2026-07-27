@@ -274,11 +274,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.51</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.52</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.51</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.52</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -352,6 +352,13 @@ const SEL='sel',MUL='mul',TXT='text',LNG='long',NUM='num',DAT='date',REL='rel',S
 const STATUS=['Not started','In progress','Done'];
 const STATFA={'Not started':'شروع نشده','In progress':'در جریان','Done':'انجام شد'};
 const PRIO=['بحرانی','بالا','متوسط','پایین'];
+/* 🔁 وظایف تکرارشونده */
+const WDAYS=['شنبه','یک‌شنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه'];
+const RT_FREQ=['روزانه','هفتگی (روزهای مشخص)','ماهانه (روز مشخص)'];
+const RT_ACT=['فعال','موقتاً متوقف'];
+const RT_BACKFILL=7;   // حداکثر تعداد روزِ گذشته که در صورت باز نبودن برنامه ساخته می‌شود
+const RT_MAXGEN=300;   // سقف ایمنِ تعداد تسکِ ساخته‌شده در هر اجرا
+
 /* ═══ ISO 31000:2018 — مقیاس‌ها و سطوح آبشار ریسک (مادر-۲۶۶) ═══ */
 const RM_LEVELS=['🏛️ هلدینگ','🏢 شرکت','🧩 کسب‌وکار','🗂️ واحد سازمانی','🔁 فرآیند','🏗️ پروژه','👤 نفر'];
 const RM_PROB_O=['قطعی','محتمل','ممکن','بعید','نادر'];
@@ -537,8 +544,9 @@ task:{ic:'📘',n:'تسک‌ها',grp:'سازمان',f:[
  {k:'created',n:'تاریخ و ساعت ایجاد تسک',t:DAT},
  {k:'due',n:'تاریخ و ساعت ددلاین',t:DAT},{k:'est',n:'تخمین زمان (ساعت)',t:NUM},
  {k:'dep',n:'⛓ وابسته به تسک‌های',t:REL,r:'task'},
- {k:'owner',n:'مسئول',t:REL,r:'hr',s:1},
+ {k:'owner',n:'مسئول (می‌تواند چند نفر باشد)',t:REL,r:'hr'},
  {k:'helpers',n:'🤝 همکاران تسک',t:REL,r:'hr'},
+ {k:'rt',n:'🔁 از وظیفهٔ تکرارشونده',t:REL,r:'rtask',s:1},
  {k:'project',n:'پروژه (ستادی/غیر EPCF)',t:REL,r:'project',s:1},
  {k:'eproject',n:'🏗️ پروژه EPCF',t:REL,r:'eproject',s:1},
  {k:'ewbs',n:'🧱 بسته کاری (WBS)',t:REL,r:'ewbs',s:1},
@@ -547,6 +555,24 @@ task:{ic:'📘',n:'تسک‌ها',grp:'سازمان',f:[
  {k:'risk',n:'ریسک مرتبط',t:REL,r:'risk'},
  {k:'parent',n:'تسک والد',t:REL,r:'task',s:1}],
  cols:['title','status','prio','created','due','owner','project'],prog:'taskProg'},
+rtask:{ic:'🔁',n:'وظایف تکرارشونده',grp:'سازمان',f:[
+ {k:'title',n:'عنوان وظیفهٔ تکرارشونده',t:TXT},
+ {k:'assignees',n:'👥 مسئولان (چند نفر)',t:REL,r:'hr'},
+ {k:'freq',n:'دورهٔ تکرار',t:SEL,o:RT_FREQ},
+ {k:'wdays',n:'روزهای هفته (برای تکرار هفتگی)',t:MUL,o:WDAYS},
+ {k:'mday',n:'روز ماه (برای تکرار ماهانه ۱ تا ۳۱)',t:NUM},
+ {k:'sdate',n:'شروع از تاریخ',t:DAT},
+ {k:'edate',n:'پایان در تاریخ (خالی = بی‌انتها)',t:DAT},
+ {k:'active',n:'وضعیت',t:SEL,o:RT_ACT},
+ {k:'prio',n:'اولویت تسک‌های ساخته‌شده',t:SEL,o:PRIO},
+ {k:'est',n:'تخمین زمان هر بار (ساعت)',t:NUM},
+ {k:'project',n:'پروژه مرتبط',t:REL,r:'project',s:1},
+ {k:'eproject',n:'🏗️ پروژه EPCF',t:REL,r:'eproject',s:1},
+ {k:'objective',n:'هدف BSC مرتبط',t:REL,r:'bsc'},
+ {k:'orgu',n:'🧩 واحد / تیم',t:REL,r:'orgunit',s:1},
+ {k:'kpi',n:'📐 شاخص عملکرد برای ثبت امتیاز',t:REL,r:'perfkpi',s:1},
+ {k:'note',n:'شرح کار / چه چیزی باید انجام شود',t:LNG}],
+ cols:['title','freq','assignees','active','prio'],comp:'rtaskBrief'},
 milestone:{ic:'🚩',n:'مایلستون‌ها / فازها',grp:'سازمان',f:[
  {k:'title',n:'عنوان مایلستون',t:TXT},
  {k:'project',n:'پروژه',t:REL,r:'project',s:1},
@@ -2517,7 +2543,7 @@ function subscribeRT(){
 /* ================= کاربران و سطح دسترسی ================= */
 const ROLES=['ادمین','مدیرارشد','مدیر','معاون','کارشناس ارشد','کارشناس','کاربر'];
 const FIN=['bank','tx','budget','hrcontract','bizcontract'];
-const MIDSET=['project','task','meeting','idea','crm','contact','letter','leave','milestone','product','sale','purchase','channel','bsc','measure','efqm'];
+const MIDSET=['project','task','rtask','meeting','idea','crm','contact','letter','leave','milestone','product','sale','purchase','channel','bsc','measure','efqm'];
 const LOWSET=['task','idea','leave'];
 function myEmail(){return session&&session.user?session.user.email:'local';}
 function usersList(){const m=recs[MU];return (m&&!m.del&&m.d.list)||[];}
@@ -7195,6 +7221,7 @@ function render(){
   try{applyBrand();}catch(e){} // نام/لوگو/رنگ سفارشی نسخه
   try{rebuildSchema();}catch(e){} // فیلدها و بخش‌های سفارشی ادمین
   try{rebuildHabitFields();}catch(e){} // لیست عادت‌های شخصی کاربر جاری
+  try{rtMaterialize();}catch(e){console.warn('rt',e);} // 🔁 ساخت تسک‌های تکرارشوندهٔ امروز
   nav();
   const c=document.getElementById('content');
   if(isPending()){
@@ -9145,10 +9172,10 @@ function perfPeople(P){ // مهندسان/افراد — از WBS، مدارک،
   byE('task').forEach(tk=>{
     if(P){const viaP=relIds(tk,'eproject'),w=relIds(tk,'ewbs')[0];const wp=w&&recs[w]?relIds(recs[w],'eproject'):[];
       if(!viaP.includes(P)&&!wp.includes(P))return;}
-    const o=relIds(tk,'owner')[0];const x=o&&g(o);if(!x)return;
+    relIds(tk,'owner').forEach(o=>{const x=o&&g(o);if(!x)return;
     x.tAll=(x.tAll||0)+1;
     if(tk.d.status==='Done')x.tDone=(x.tDone||0)+1;
-    else{x.tOpen=(x.tOpen||0)+1;const d=ds(tk.d.due);if(d&&d<t0)x.tLate=(x.tLate||0)+1;}
+    else{x.tOpen=(x.tOpen||0)+1;const d=ds(tk.d.due);if(d&&d<t0)x.tLate=(x.tLate||0)+1;}})
   });
   return Object.values(G).map(x=>({...x,avgDev:x.wbs>0?x.dev/x.wbs:null,np:x.prjs.size,load:x.wbs+x.docs+x.mrs+(x.tAll||0),tOpen:x.tOpen||0,tLate:x.tLate||0,tDone:x.tDone||0}));
 }
@@ -9256,6 +9283,28 @@ function perfdashHTML(){
   const sel=view.pfSel&&ents.find(e=>e.id===view.pfSel)?view.pfSel:null;
   const trendPts=sel?perfTrend(kind,sel):(()=>{const by={};byE('perfscore').forEach(s=>{if(kind!=='hold'&&!ents.some(e=>perfMatch(s,kind,e.id)))return;const d=ds(s.d.from)||ds(s.d.to);if(!d)return;const [gy,gm]=d.split('-').map(Number);const j=g2j(gy,gm,15);const k=j[0]*100+j[1];const kp=recs[relIds(s,'kpi')[0]];const dir=kp?kp.d.dir:'بیشتر بهتر';const w=kp&&+kp.d.weight>0?+kp.d.weight:1;const a=perfAch(s.d.actual,s.d.target||(kp&&kp.d.tdefault),dir);if(a==null)return;const g=by[k]||(by[k]={ws:0,wa:0});g.ws+=w;g.wa+=Math.min(a,120)*w;});const JM=['','فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];return Object.keys(by).map(Number).sort((a,b)=>a-b).slice(-8).map(k=>({l:JM[k%100],v:by[k].ws>0?Math.round(by[k].wa/by[k].ws):0}));})();
   h+=`<div class="sec"><div style="font-weight:800;margin-bottom:6px">📈 روند امتیاز عملکرد ${sel?'— '+esc(ents.find(e=>e.id===sel).name):'(میانگین این سطح)'}</div>${perfLineSVG(trendPts)}</div>`;
+  // 🔁 پایبندی به وظایف تکرارشونده (محاسبهٔ خودکار) — فقط در سطح «فرد»
+  if(kind==='ppl'){
+    const pp=view.pfRtPer||'ماهانه';
+    const [f0,t1]=rtPeriod(pp);
+    const rowsC=ents.map(e=>({...e,c:rtCompliance(e.id,f0,t1)})).filter(x=>x.c.exp>0)
+      .sort((a,b)=>(b.c.pct||0)-(a.c.pct||0));
+    h+=`<div class="sec"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+      <b style="flex:1">🔁 پایبندی به وظایف تکرارشونده <span style="font-weight:400;font-size:11px;color:var(--tx2)">(خودکار — از ${esc(f0)} تا ${esc(t1)})</span></b>
+      <select class="inp sm" style="width:auto" onchange="view.pfRtPer=this.value;render()">${['روزانه','هفتگی','ماهانه','فصلی','سالانه'].map(x=>`<option ${x===pp?'selected':''}>${x}</option>`).join('')}</select>
+      ${canSee('rtask')?`<button class="btn gh sm" onclick="go('list','rtask')">🗂️ تعریف وظایف تکرارشونده</button>`:''}</div>`;
+    if(!rowsC.length)h+=`<div class="empty">در این دوره وظیفهٔ تکرارشونده‌ای سررسید نشده است${canSee('rtask')?' — با «🔁 وظایف تکرارشونده» یک‌بار تعریف کنید تا هر روز خودکار روی میز افراد بنشیند.':'.'}</div>`;
+    else h+=`<div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">فرد</th><th>سررسیدشده</th><th>انجام‌شده</th><th>عقب‌افتاده</th><th>در جریان</th><th>پایبندی</th><th></th></tr></thead><tbody>
+      ${rowsC.map(x=>`<tr><td style="text-align:right">${esc(x.name)}</td>
+        <td>${x.c.exp.toLocaleString('fa-IR')}</td><td>${x.c.done.toLocaleString('fa-IR')}</td>
+        <td style="color:${x.c.late?'var(--bad)':'inherit'}">${x.c.late.toLocaleString('fa-IR')}</td>
+        <td>${Math.max(0,x.c.open).toLocaleString('fa-IR')}</td>
+        <td><b style="color:${rtPctColor(x.c.pct)}">${x.c.pct==null?'—':x.c.pct.toLocaleString('fa-IR')+'٪'}</b></td>
+        <td><button class="btn gh sm" onclick="rtRecordPerf('${x.id}','${pp}')" title="این درصد را به‌عنوان رکورد رسمی «ثبت عملکرد دوره‌ای» ذخیره کن">📊 ثبت در عملکرد</button></td></tr>`).join('')}
+      </tbody></table></div>
+      <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">پایبندی = تسک‌های تکرارشوندهٔ «Done» ÷ تسک‌های سررسیدشدهٔ همان دوره. با «📊 ثبت در عملکرد» این عدد به شکل رکورد رسمی در امتیاز کل فرد لحاظ می‌شود.</div>`;
+    h+=`</div>`;
+  }
   // کارت‌های موجودیت‌ها
   h+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:9px;margin-bottom:10px">
     ${ents.map(e=>{const on=view.pfSel===e.id;return `<div onclick="view.pfSel=${on?'null':`'${e.id}'`};render()" style="cursor:pointer;text-align:center;background:var(--cd);border:1px solid ${on?'var(--ac)':'var(--bd)'};border-radius:14px;padding:12px 8px;box-shadow:0 3px 10px rgba(0,0,0,.1)">
@@ -10195,7 +10244,28 @@ function meHTML(){
     ${card('⚖️ اهداف BSC من',myBsc.length,null,jmp('sec_my_bsc'))}
     ${card('🎚️ سنجه‌های من',myMs.length,msOd.length?'var(--bad)':null,jmp('sec_my_ms'))}
     ${card('🍅 پومودورو امروز',pomoCount(),null,"togglePomo()")}
+    ${(()=>{const rt=rtMyToday();const dn=rt.filter(t=>t.d.status==='Done').length;
+      return card('🔁 تکرارشوندهٔ امروز',rt.length?dn.toLocaleString('fa-IR')+' از '+rt.length.toLocaleString('fa-IR'):0,
+        rt.length&&dn<rt.length?'var(--warn)':(rt.length?'#16c784':null),jmp('sec_my_rt'));})()}
   </div>`;
+  // 🔁 وظایف تکرارشوندهٔ امروزِ من
+  h+=(()=>{const rt=rtMyToday().sort((a,b)=>String(a.d.title||'').localeCompare(String(b.d.title||''),'fa'));
+    const t0=today(),hi=[...myHRids()][0]||null;
+    const c30=hi?rtCompliance(hi,rtDayShift(t0,-29),t0):null;
+    let x=`<div class="sec" id="sec_my_rt"><h3>🔁 وظایف تکرارشوندهٔ امروز من <span style="flex:1"></span>
+      ${c30&&c30.exp?`<span style="font-size:11.5px;color:var(--tx2)">پایبندی ۳۰ روز اخیر: ${rtBadge(c30.pct)}</span>`:''}
+      ${canSee('rtask')?`<button class="btn gh sm" onclick="go('list','rtask')">🗂️ تعریف‌ها</button>`:''}</h3>`;
+    if(!rt.length)x+=`<div class="empty">امروز وظیفهٔ تکرارشونده‌ای برای شما تعریف نشده است.${canSee('rtask')?' برای تعریف یک‌بارهٔ کارهای هر روز، از «🔁 وظایف تکرارشونده» استفاده کنید.':''}</div>`;
+    else{
+      x+=`<div class="tblwrap"><table style="font-size:12px"><thead><tr><th style="width:40px">انجام</th><th style="text-align:right">عنوان</th><th>اولویت</th><th>ساعت پایان</th></tr></thead><tbody>
+        ${rt.map(t=>{const d=t.d.status==='Done';return `<tr>
+          <td style="text-align:center"><input type="checkbox" ${d?'checked':''} onclick="event.stopPropagation();rtToggleDone('${t.id}')" style="width:18px;height:18px;cursor:pointer;accent-color:#16c784"></td>
+          <td style="text-align:right;cursor:pointer;${d?'opacity:.55;text-decoration:line-through':''}" onclick="go('rec','task','${t.id}')">${esc(t.d.title||'—')}</td>
+          <td>${esc(t.d.prio||'—')}</td><td style="color:var(--tx2);font-size:11px">${esc(String(t.d.due||'').slice(11)||'—')}</td></tr>`;}).join('')}
+        </tbody></table></div>
+        <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">✅ تیک زدن همین‌جا وضعیت تسک را «Done» می‌کند و مستقیم در امتیاز عملکرد شما اثر می‌گذارد.</div>`;
+    }
+    return x+`</div>`;})();
   h+=`<div style="font-size:11px;color:var(--tx2);background:var(--bg2);border:1px dashed var(--line);border-radius:9px;padding:8px 11px;margin-bottom:10px">🗂️ این میز کار فقط کارهای <b>سپرده‌شده به شخص شما</b> را نشان می‌دهد${canView('dash')?' — کارهای کلی سازمان و همهٔ تسک‌های سیستم در «🎛️ اتاق کنترل سازمان» پایین همین صفحه است.':'.'}</div>`;
   // ⚖️ اهداف BSC تحت مسئولیت من — با زنجیره کامل پاسخ‌گویی
   if(myBsc.length){
@@ -24638,6 +24708,198 @@ function bulkDelSel(e){
   view.page=0;render();
   alert('✅ '+n.toLocaleString('fa-IR')+' مورد حذف شد');
 }
+
+/* ══════════════ 🔁 موتور وظایف تکرارشونده ══════════════
+   منطق: برای هر «وظیفهٔ تکرارشونده» فعال و برای هر مسئول، در هر روزِ سررسید
+   یک تسکِ واقعی ساخته می‌شود (نسخهٔ مستقل هر نفر) تا در همهٔ گزارش‌ها،
+   فیلترها، میز کار و امتیاز عملکرد به‌صورت طبیعی دیده شود.
+   کلید یگانگی: d.rt=[شناسهٔ تعریف] + d._rtday='YYYY-MM-DD' + مسئول */
+var _rtxKey=null, _rtxLog={made:0,day:''};
+function rtDayShift(day,n){const t=new Date(day+'T00:00:00Z');t.setUTCDate(t.getUTCDate()+n);return t.toISOString().slice(0,10);}
+function rtWday(day){const g=new Date(day+'T00:00:00Z').getUTCDay();return (g+1)%7;} // 0=شنبه
+function rtWdayName(day){return WDAYS[rtWday(day)];}
+function rtIsDue(def,day){ // آیا این تعریف در این روز سررسید دارد؟
+  if(!def||def.del)return false;
+  if((def.d.active||'فعال')!=='فعال')return false;
+  const sd=ds(def.d.sdate), ed=ds(def.d.edate);
+  if(sd&&day<sd)return false;
+  if(ed&&day>ed)return false;
+  const f=def.d.freq||'روزانه';
+  if(f.indexOf('روزانه')===0)return true;
+  if(f.indexOf('هفتگی')===0){const w=def.d.wdays;const arr=Array.isArray(w)?w:(w?String(w).split(/[،,;]/).map(x=>x.trim()):[]);return arr.indexOf(rtWdayName(day))>=0;}
+  if(f.indexOf('ماهانه')===0){const dm=Math.round(+def.d.mday||0);if(!dm)return false;
+    const dd=+day.slice(8,10);
+    if(dd===dm)return true;
+    // اگر روز موردنظر در این ماه وجود ندارد (مثلاً ۳۱)، آخرین روز ماه در نظر گرفته می‌شود
+    const last=new Date(Date.UTC(+day.slice(0,4),+day.slice(5,7),0)).getUTCDate();
+    return dm>last&&dd===last;}
+  return false;
+}
+function rtDays(def){ // روزهای قابل ساخت: از (امروز - RT_BACKFILL) تا امروز
+  const t0=today(), out=[];
+  const sd=ds(def.d.sdate);
+  for(let i=RT_BACKFILL;i>=0;i--){const d=rtDayShift(t0,-i);
+    if(sd&&d<sd)continue;
+    if(rtIsDue(def,d))out.push(d);}
+  return out;
+}
+/* ایندکس تسک‌های ساخته‌شده: 'defId|day|hrId' */
+function rtIndex(){
+  const ix={};
+  byE('task').forEach(t=>{
+    const d=t.d._rtday, defs=relIds(t,'rt');
+    if(!d||!defs.length)return;
+    relIds(t,'owner').forEach(o=>{ix[defs[0]+'|'+d+'|'+o]=t;});
+  });
+  return ix;
+}
+function rtMaterialize(){
+  const defs=byE('rtask');
+  const key=today()+'#'+defs.map(d=>d.id+':'+(d.u||0)).join(',');
+  if(_rtxKey===key)return 0;      // هیچ تغییری نداده — دوباره نساز
+  _rtxKey=key;
+  if(!defs.length)return 0;
+  if(isPending&&isPending())return 0;
+  const ix=rtIndex(); let made=0; const now=Date.now();
+  for(const def of defs){
+    const people=relIds(def,'assignees');
+    if(!people.length)continue;
+    for(const day of rtDays(def)){
+      for(const hid of people){
+        if(ix[def.id+'|'+day+'|'+hid])continue;
+        if(made>=RT_MAXGEN){console.warn('rtMaterialize: سقف ساخت رسید');break;}
+        const id=uid();
+        const rec={id:id,e:'task',u:now,del:false,d:{
+          title:(def.d.title||'وظیفهٔ تکرارشونده'),
+          status:'Not started',
+          prio:def.d.prio||'متوسط',
+          created:day+'T08:00',
+          due:day+'T23:59',
+          est:def.d.est||'',
+          owner:[hid],
+          rt:[def.id],
+          _rtday:day,
+          note:def.d.note||'',
+          _by:myEmail()
+        }};
+        if(relIds(def,'project').length)rec.d.project=relIds(def,'project');
+        if(relIds(def,'eproject').length)rec.d.eproject=relIds(def,'eproject');
+        if(relIds(def,'objective').length)rec.d.objective=relIds(def,'objective');
+        recs[id]=rec; queue.push(id); ix[def.id+'|'+day+'|'+hid]=rec; made++;
+      }
+    }
+  }
+  if(made){
+    _rtxLog={made:made,day:today()};
+    invalidateByE(); saveLocal(); saveQ();
+    try{flush();}catch(e){}
+  }
+  return made;
+}
+/* ── پایبندی (٪) یک فرد به وظایف تکرارشونده در یک بازه ── */
+function rtCompliance(hrId,from,to,defId){
+  const rows=byE('task').filter(t=>{
+    if(!t.d._rtday)return false;
+    if(!relIds(t,'rt').length)return false;
+    if(defId&&relIds(t,'rt')[0]!==defId)return false;
+    if(hrId&&!relIds(t,'owner').includes(hrId))return false;
+    if(from&&t.d._rtday<from)return false;
+    if(to&&t.d._rtday>to)return false;
+    return true;});
+  const exp=rows.length, done=rows.filter(t=>t.d.status==='Done').length;
+  const late=rows.filter(t=>t.d.status!=='Done'&&t.d._rtday<today()).length;
+  return {exp:exp,done:done,late:late,open:exp-done-late,
+          pct:exp?Math.round(done/exp*1000)/10:null,rows:rows};
+}
+function rtPeriod(kind){ // بازهٔ پیش‌فرض دوره
+  const t0=today();
+  if(kind==='روزانه')return [t0,t0];
+  if(kind==='هفتگی')return [rtDayShift(t0,-6),t0];
+  if(kind==='ماهانه')return [rtDayShift(t0,-29),t0];
+  if(kind==='فصلی')return [rtDayShift(t0,-89),t0];
+  if(kind==='سالانه')return [rtDayShift(t0,-364),t0];
+  return [rtDayShift(t0,-29),t0];
+}
+function rtMyToday(){ // تسک‌های تکرارشوندهٔ امروزِ خودم
+  const ids=myHRids(); if(!ids.size)return [];
+  const t0=today();
+  return byE('task').filter(t=>t.d._rtday===t0&&relIds(t,'rt').length&&relIds(t,'owner').some(x=>ids.has(x)));
+}
+function rtToggleDone(id){
+  const r=recs[id]; if(!r||r.del)return;
+  if(!can('e','task',r)){alert('اجازهٔ تغییر این تسک را ندارید');return;}
+  r.d={...r.d,status:r.d.status==='Done'?'Not started':'Done'};
+  r.u=Date.now(); r.del=false;
+  put(r);
+}
+/* ── ثبت رسمیِ پایبندی به‌عنوان «ثبت عملکرد دوره‌ای» ── */
+function rtRecordPerf(hrId,ptype,defId){
+  const [f,t]=rtPeriod(ptype||'ماهانه');
+  const c=rtCompliance(hrId,f,t,defId);
+  if(!c.exp){alert('در این دوره هیچ وظیفهٔ تکرارشونده‌ای برای این فرد ساخته نشده است');return;}
+  if(!can('c','perfscore')){alert('اجازهٔ ثبت عملکرد را ندارید');return;}
+  const def=defId&&recs[defId];
+  let kpi=def?relIds(def,'kpi'):[];
+  if(!kpi.length){ // اگر شاخصی وصل نشده، خودکار یک شاخص استاندارد ساخته/پیدا می‌شود
+    const found=byE('perfkpi').find(k=>k.d.title==='پایبندی به وظایف تکرارشونده');
+    if(found)kpi=[found.id];
+    else if(can('c','perfkpi')){
+      const kid=uid();
+      recs[kid]={id:kid,e:'perfkpi',u:Date.now(),del:false,d:{
+        title:'پایبندی به وظایف تکرارشونده',cat:'رفتاری/فردی',scope:'فرد',
+        unit:'درصد',dir:'بیشتر بهتر',weight:10,tdefault:100,
+        note:'درصد وظایف تکرارشوندهٔ انجام‌شده تقسیم بر وظایف سررسیدشده در دوره (محاسبهٔ خودکار سیستم).',
+        _by:myEmail()}};
+      queue.push(kid); kpi=[kid];
+    }
+  }
+  const id=uid();
+  recs[id]={id:id,e:'perfscore',u:Date.now(),del:false,d:{
+    title:'پایبندی به وظایف تکرارشونده'+(def?' — '+(def.d.title||''):''),
+    kpi:kpi,person:[hrId],ptype:ptype||'ماهانه',
+    from:f,to:t,actual:c.pct,target:100,
+    note:'محاسبهٔ خودکار: '+c.done.toLocaleString('fa-IR')+' انجام‌شده از '+c.exp.toLocaleString('fa-IR')+' وظیفهٔ سررسیدشده در بازهٔ '+f+' تا '+t+'.',
+    _by:myEmail()}};
+  queue.push(id);
+  invalidateByE(); saveLocal(); saveQ(); try{flush();}catch(e){}
+  render();
+  alert('✅ امتیاز '+String(c.pct).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d])+'٪ برای این فرد در «ثبت عملکرد دوره‌ای» ذخیره شد');
+}
+function rtPctColor(p){return p==null?'var(--tx2)':p>=90?'#16c784':p>=70?'#9acd32':p>=50?'#f5a623':'var(--bad)';}
+function rtBadge(p){return `<b style="color:${rtPctColor(p)}">${p==null?'—':p.toLocaleString('fa-IR')+'٪'}</b>`;}
+/* ── خلاصهٔ رکورد تعریف ── */
+function rtaskBrief(r){
+  const people=relIds(r,'assignees');
+  const t0=today();
+  const c=rtCompliance(null,rtDayShift(t0,-29),t0,r.id);
+  const f=r.d.freq||'روزانه';
+  let when=f;
+  if(f.indexOf('هفتگی')===0)when=f+': '+((r.d.wdays||[]).join('، ')||'⚠️ روزی انتخاب نشده');
+  if(f.indexOf('ماهانه')===0)when=f+': روز '+((+r.d.mday||0).toLocaleString('fa-IR')||'—');
+  let h=`<div class="comp">
+    <div class="chip">تکرار: <b>${esc(when)}</b></div>
+    <div class="chip">وضعیت: <b style="color:${(r.d.active||'فعال')==='فعال'?'#16c784':'var(--warn)'}">${esc(r.d.active||'فعال')}</b></div>
+    <div class="chip">مسئولان: <b>${people.length.toLocaleString('fa-IR')} نفر</b></div>
+    <div class="chip">سررسید امروز؟ <b>${rtIsDue(r,t0)?'بله ✅':'خیر'}</b></div>
+    <div class="chip">پایبندی ۳۰ روز: ${rtBadge(c.pct)}</div>
+  </div>`;
+  if(!people.length)h+=`<div class="empty">هنوز مسئولی انتخاب نشده — تا وقتی «مسئولان» خالی باشد هیچ تسکی ساخته نمی‌شود.</div>`;
+  if(people.length){
+    h+=`<div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">مسئول</th><th>سررسیدشده (۳۰ روز)</th><th>انجام‌شده</th><th>عقب‌افتاده</th><th>پایبندی</th><th></th></tr></thead><tbody>
+      ${people.map(id=>{const cc=rtCompliance(id,rtDayShift(t0,-29),t0,r.id);
+        return `<tr><td style="text-align:right">${esc(nameOf(id))}</td>
+          <td>${cc.exp.toLocaleString('fa-IR')}</td><td>${cc.done.toLocaleString('fa-IR')}</td>
+          <td style="color:${cc.late?'var(--bad)':'inherit'}">${cc.late.toLocaleString('fa-IR')}</td>
+          <td>${rtBadge(cc.pct)}</td>
+          <td><button class="btn gh sm" onclick="event.stopPropagation();rtRecordPerf('${id}','ماهانه','${r.id}')" title="ثبت این درصد به‌عنوان رکورد رسمی عملکرد">📊 ثبت عملکرد</button></td></tr>`;}).join('')}
+      </tbody></table></div>`;
+  }
+  h+=`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">🔁 برای هر مسئول و هر روزِ سررسید یک تسک مستقل ساخته می‌شود؛ پس امتیاز هر نفر جدا محاسبه می‌شود. تسک‌های گذشته تا ${RT_BACKFILL.toLocaleString('fa-IR')} روز عقب‌تر هم در صورت نبودن ساخته می‌شوند.</div>`;
+  return h;
+}
+window.rtMaterialize=rtMaterialize;window.rtToggleDone=rtToggleDone;window.rtRecordPerf=rtRecordPerf;
+window.rtCompliance=rtCompliance;window.rtaskBrief=rtaskBrief;window.rtIsDue=rtIsDue;window.rtMyToday=rtMyToday;
+
 window.bulkSelStart=bulkSelStart;window.bulkSelCancel=bulkSelCancel;window.bulkSelToggle=bulkSelToggle;
 window.bulkSelAll=bulkSelAll;window.bulkSelNone=bulkSelNone;window.bulkDelSel=bulkDelSel;window.selBarHTML=selBarHTML;
 function delRec(){
