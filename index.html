@@ -274,11 +274,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.65</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.66</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.65</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.66</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -442,6 +442,7 @@ hr:{ic:'👥',n:'منابع انسانی',grp:'سازمان',f:[
  {k:'title',n:'نام و نام خانوادگی',t:TXT},{k:'role',n:'سمت',t:TXT},
  {k:'unit',n:'واحد',t:SEL,o:['مدیریت','مالی','اداری','بازرگانی','فنی']},
  {k:'wstatus',n:'وضعیت همکاری',t:SEL,o:['شاغل','مرخصی بلندمدت','بازنشسته','قطع همکاری']},
+ {k:'code',n:'کد تفصیل سپیدار (برای اتصال حسابداری)',t:TXT},
  {k:'email',n:'ایمیل',t:TXT},{k:'phone',n:'تلفن',t:TXT},
  {k:'hire',n:'تاریخ استخدام',t:DAT},{k:'quota',n:'سهمیه مرخصی سالانه',t:NUM},
  {k:'manager',n:'مدیر مستقیم',t:REL,r:'hr',s:1},
@@ -756,7 +757,7 @@ payslip:{ic:'🧾',n:'فیش حقوقی',grp:'سازمان',f:[
  {k:'paid',n:'پرداخت شد',t:CHK},
  {k:'note',n:'توضیح',t:LNG}],
  cols:['title','person','month','base','paid'],comp:'payslipBrief'},
-sepdoc:{ic:'⚖️',n:'اسناد حسابداری (سپیدار)',grp:'مدیریت مالی',f:[
+sepdoc:{ic:'⚖️',n:'اسناد حسابداری (سپیدار)',grp:'مدیریت کسب و کار',f:[
  {k:'title',n:'عنوان سند',t:TXT},
  {k:'kind',n:'نوع سند',t:SEL,o:SEP_KINDS},
  {k:'no',n:'شماره سند سپیدار',t:TXT},
@@ -2112,7 +2113,7 @@ aretro:{ic:'🔄',n:'رتروسپکتیو (اقدامات بهبود)',grp:'تو
  {k:'status',n:'وضعیت',t:SEL,o:['ثبت شد','در حال انجام','انجام شد']}],
  cols:['title','asprint','kind','owner','status']},
 };
-const GROUPS=['سازمان','مدیریت کسب و کار','مدیریت مالی','فرآیندها (ISO)','استراتژی و تعالی','حاکمیت'];
+const GROUPS=['سازمان','مدیریت کسب و کار','فرآیندها (ISO)','استراتژی و تعالی','حاکمیت'];
 const GROWTH=['growth','habit','win','plan','asset','area','note','book','booknote','course','reminder'];
 /* ================= 🧩 ساختار سفارشی: فیلدها و بخش‌های قابل تعریف توسط ادمین ================= */
 const E_BASE=JSON.parse(JSON.stringify(E)); // اسکیمای پایه — سفارشی‌ها موقع اجرا رویش سوار می‌شوند
@@ -3180,18 +3181,62 @@ function impHint(e,f){
 function sepNorm(x){return String(x??'').replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/\u200c/g,' ').replace(/\s+/g,' ').trim();}
 function sepNum(x){const v=parseFloat(String(x??'').replace(/[,٬]/g,''));return isNaN(v)?0:v;}
 function sepDate(x){
-  const m=String(x??'').match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+  const str=String(x??'');
+  const m=str.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
   if(!m)return null;
   const g=j2g(+m[1],+m[2],+m[3]);
-  return g[0]+'-'+String(g[1]).padStart(2,'0')+'-'+String(g[2]).padStart(2,'0');
+  let iso=g[0]+'-'+String(g[1]).padStart(2,'0')+'-'+String(g[2]).padStart(2,'0');
+  // ⏰ تفکیک ساعت از همان سلول (مثل «1405/05/05 12:00:00 ق.ظ»)
+  const t=str.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(ق\.?\s*ظ|ب\.?\s*ظ|AM|PM)?/i);
+  if(t){
+    let hh=+t[1];const mm=+t[2];const ap=(t[4]||'').replace(/\s|\./g,'');
+    if(/بظ|PM/i.test(ap)&&hh<12)hh+=12;
+    if(/قظ|AM/i.test(ap)&&hh===12)hh=0;
+    if(hh||mm)iso+='T'+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+  }
+  return iso;
 }
 function sepReadFile(file){
   return new Promise((res,rej)=>{
-    if(/\.csv$/i.test(file.name)){const r=new FileReader();r.onload=()=>res(csvParse(r.result));r.onerror=()=>rej(new Error('خوانده نشد'));r.readAsText(file,'utf-8');}
+    if(/\.csv$/i.test(file.name)){const r=new FileReader();r.onload=()=>res({arr:csvParse(r.result)});r.onerror=()=>rej(new Error('خوانده نشد'));r.readAsText(file,'utf-8');}
     else loadXLSX().then(()=>{const r=new FileReader();
-      r.onload=()=>{try{const wb=XLSX.read(new Uint8Array(r.result),{type:'array'});res(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''}));}catch(err){rej(err);}};
+      r.onload=()=>{try{const wb=XLSX.read(new Uint8Array(r.result),{type:'array'});res({arr:XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''}),wb});}catch(err){rej(err);}};
       r.onerror=()=>rej(new Error('خوانده نشد'));r.readAsArrayBuffer(file);}).catch(rej);
   });
+}
+function sepIsPL(arr){ // تشخیص فایل سود و زیان: ستون اول «عنوان» + سربرگ ماه شمسی یا سال
+  if(!arr||!arr.length)return false;
+  const hdr=(arr[0]||[]).map(x=>sepNorm(x));
+  if(hdr[0]!=='عنوان')return false;
+  return hdr.some(h=>FMON.some(m=>sepNorm(m)===h)||/^1[34]\d{2}$/.test(h));
+}
+function sepPLYearly(wb,biz){ // شیت‌های مقایسه‌ای (ستون=سال) → رکوردهای «کل سال»
+  let n=0;
+  wb.SheetNames.forEach(sn=>{
+    if(/^1[34]\d{2}/.test(sepNorm(sn).replace(/[^0-9]/g,'').slice(0,4))&&parseInt(sepNorm(sn).replace(/[^0-9]/g,''))>1390)return; // شیت سال‌دار را finParseWB می‌خواند
+    const aoa=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1});if(!aoa.length)return;
+    const hdr=(aoa[0]||[]).map(x=>sepNorm(x));
+    if(hdr[0]!=='عنوان')return;
+    const colY={};hdr.forEach((h,ci)=>{if(/^1[34]\d{2}$/.test(h))colY[ci]=+h;});
+    if(!Object.keys(colY).length)return;
+    // فقط تا اولین ستون خالی (نیمهٔ دوم شیت مقایسه‌ای نسبت‌هاست)
+    const stop=hdr.findIndex((h,i2)=>i2>0&&h==='');
+    const L=finLines();const nmap={};L.forEach(l=>nmap[_fnorm(l.n)]=l.k);
+    const findKey=t=>{if(/دمات/.test(t))return 'c_serv';if(t.indexOf('کالایفروش')>=0||t.indexOf('رفتهداخلی')>=0)return 'c_goods';
+      if(nmap[t])return nmap[t];
+      const f=L.find(l=>{const ln=_fnorm(l.n);return ln===t||ln.slice(0,8)===t.slice(0,8)||(t.length>5&&ln.includes(t.slice(0,6)))||(ln.length>5&&t.includes(ln.slice(0,6)));});return f&&f.k;};
+    const byY={};
+    const SKIP=/^(جمع|درصد)|ناخالص|فروشخالص|سودخالص|سودزیانقبل/;
+    aoa.slice(1).forEach(row=>{const t=_fnorm(row&&row[0]);if(!t||SKIP.test(t))return;
+      const key=findKey(t);if(!key)return;
+      Object.entries(colY).forEach(([ci,jy])=>{if(stop>0&&+ci>=stop)return;const val=+row[ci]||0;if(!val)return;(byY[jy]=byY[jy]||{})[key]=val;});});
+    Object.entries(byY).forEach(([jy,v])=>{
+      let rec=byE('plfin').find(r=>(biz?relIds(r,'biz').includes(biz):!relIds(r,'biz').length)&&+r.d.jy===+jy&&r.d.jm==='کل سال');
+      if(rec){rec.d.v={...(rec.d.v||{}),...v};rec.d.unit='ریال';rec.u=Date.now();put(rec);}
+      else put({id:uid(),e:'plfin',d:{title:jy+' کل سال',biz:biz?[biz]:[],jy:+jy,jm:'کل سال',unit:'ریال',v},u:Date.now()});
+      n++;});
+  });
+  return n;
 }
 function sepDetect(hdr){
   const H=hdr.map(sepNorm).join('|');
@@ -3238,7 +3283,7 @@ let _sepPlan=null;
 function sepFiles(inp){
   const files=[...inp.files];inp.value='';
   if(!files.length)return;
-  Promise.all(files.map(f=>sepReadFile(f).then(a=>({name:f.name,arr:a})).catch(err=>({name:f.name,err:String(err)}))))
+  Promise.all(files.map(f=>sepReadFile(f).then(o=>({name:f.name,arr:o.arr,wb:o.wb})).catch(err=>({name:f.name,err:String(err)}))))
   .then(list=>{
     const plan={adds:[],ups:[],skips:[],errs:[],notes:[],dups:[]};
     // کلیدهای موجود برای جلوگیری از تکرار
@@ -3275,6 +3320,16 @@ function sepFiles(inp){
     };
     list.forEach(f=>{
       if(f.err||!f.arr||!f.arr.length){plan.errs.push('⚠️ '+f.name+': '+(f.err||'خالی'));return;}
+      // 💰 فایل سود و زیان → مستقیم به «داشبورد مالی (سود و زیان)» (plfin)
+      if(sepIsPL(f.arr)){
+        if(!f.wb){plan.errs.push('⚠️ '+f.name+': فایل سود و زیان را با پسوند xlsx بدهید (نه CSV) تا همهٔ شیت‌ها خوانده شود');return;}
+        try{
+          const r1=finParseWB(f.wb,gBiz()||'');
+          const r2=sepPLYearly(f.wb,gBiz()||'');
+          plan.notes.push('💰 '+f.name+': '+(r1.recs+r2).toLocaleString('fa-IR')+' دورهٔ سود و زیان وارد «داشبورد مالی» شد ('+r1.sheets.toLocaleString('fa-IR')+' شیت ماهانه + '+r2.toLocaleString('fa-IR')+' سالانه)'+(r1.miss.length?' │ خطوط ناشناخته: '+r1.miss.slice(0,5).join('، '):''));
+        }catch(err){plan.errs.push('⚠️ '+f.name+': '+String(err));}
+        return;
+      }
       const kind=sepDetect(f.arr[0]);
       if(!kind){plan.errs.push('⚠️ '+f.name+': قالب سپیدار شناخته نشد');return;}
       const {col,rows}=sepRows(f.arr);
@@ -3428,12 +3483,14 @@ window.sepdocBrief=sepdocBrief;
 /* ⚖️ تطبیق عملیات و حسابداری */
 function sepOpDocs(kind){
   // اسناد عملیاتی هم‌خانواده با هر نوع سند سپیدار
+  const ccode=v=>{const c=relIds(v,'customer')[0];return c&&recs[c]?sepNorm(recs[c].d.code||''):'';};
+  const scode=v=>{const c=relIds(v,'supplier')[0];return c&&recs[c]?sepNorm(recs[c].d.code||''):'';};
   if(kind==='فاکتور فروش')return byE('invoice').filter(v=>v.d.kind!=='پیش‌فاکتور'&&v.d.status!=='باطل')
-    .map(v=>{let t=0;try{t=invCalc(v).total;}catch(e){}return {e:'invoice',id:v.id,t:v.d.title,amt:t,d:ds(v.d.date),party:nameOf(relIds(v,'customer')[0]||'')};})
-    .concat(byE('sale').map(v=>({e:'sale',id:v.id,t:v.d.title,amt:(+v.d.qty||0)*(+v.d.price||0)+(+v.d.extra||0),d:ds(v.d.date),party:nameOf(relIds(v,'customer')[0]||'')})));
-  if(kind==='رسید انبار (خرید)')return byE('purchase').map(v=>({e:'purchase',id:v.id,t:v.d.title,amt:((+v.d.qty||0)*(+v.d.price||0)*(+v.d.fx||1))+(+v.d.extra||0),d:ds(v.d.date),party:nameOf(relIds(v,'supplier')[0]||'')}));
-  if(kind==='رسید دریافت')return byE('settle').filter(v=>v.d.kind==='دریافت از مشتری').map(v=>({e:'settle',id:v.id,t:v.d.title,amt:+v.d.amount||0,d:ds(v.d.date),party:nameOf(relIds(v,'customer')[0]||'')}));
-  if(kind==='اعلامیه پرداخت')return byE('settle').filter(v=>v.d.kind==='پرداخت به تامین‌کننده').map(v=>({e:'settle',id:v.id,t:v.d.title,amt:+v.d.amount||0,d:ds(v.d.date),party:nameOf(relIds(v,'supplier')[0]||'')}));
+    .map(v=>{let t=0;try{t=invCalc(v).total;}catch(e){}return {e:'invoice',id:v.id,t:v.d.title,amt:t,d:ds(v.d.date),party:nameOf(relIds(v,'customer')[0]||''),code:ccode(v)};})
+    .concat(byE('sale').map(v=>({e:'sale',id:v.id,t:v.d.title,amt:(+v.d.qty||0)*(+v.d.price||0)+(+v.d.extra||0),d:ds(v.d.date),party:nameOf(relIds(v,'customer')[0]||''),code:ccode(v)})));
+  if(kind==='رسید انبار (خرید)')return byE('purchase').map(v=>({e:'purchase',id:v.id,t:v.d.title,amt:((+v.d.qty||0)*(+v.d.price||0)*(+v.d.fx||1))+(+v.d.extra||0),d:ds(v.d.date),party:nameOf(relIds(v,'supplier')[0]||''),code:scode(v)}));
+  if(kind==='رسید دریافت')return byE('settle').filter(v=>v.d.kind==='دریافت از مشتری').map(v=>({e:'settle',id:v.id,t:v.d.title,amt:+v.d.amount||0,d:ds(v.d.date),party:nameOf(relIds(v,'customer')[0]||''),code:ccode(v)}));
+  if(kind==='اعلامیه پرداخت')return byE('settle').filter(v=>v.d.kind==='پرداخت به تامین‌کننده').map(v=>({e:'settle',id:v.id,t:v.d.title,amt:+v.d.amount||0,d:ds(v.d.date),party:nameOf(relIds(v,'supplier')[0]||''),code:scode(v)}));
   return [];
 }
 function sepMatchField(e){return e==='invoice'?'minv':(e==='sale'?'msale':(e==='settle'?'msettle':'mpurch'));}
@@ -3453,6 +3510,7 @@ function sepFindMatch(doc,ops,usedOp){
     const dt=o.d?Math.abs(new Date(o.d).getTime()-t0):Infinity;
     if(dt>W)return;
     let sc=10-dt/864e5;
+    if(doc.d.pcode&&o.code&&sepNorm(doc.d.pcode)===o.code)sc+=12; // 🔑 اتصال با کد سپیدار — قوی‌ترین معیار
     if(doc.d.party&&o.party&&sepNorm(o.party)&&sepNorm(doc.d.party).includes(sepNorm(o.party).slice(0,8)))sc+=5;
     if(sc>bestScore){bestScore=sc;best=o;}
   });
@@ -3559,6 +3617,7 @@ function sepfinHTML(){
     <span class="tag">بازهٔ اسناد: ${esc(iso2jstr(dMin)||'—')} تا ${esc(iso2jstr(dMax)||'—')}</span>
     <button class="btn gh sm" onclick="go('impcenter')">📥 ورود اکسل</button>
     <button class="btn gh sm" onclick="go('list','sepdoc')">🗂️ اسناد</button>
+    <button class="btn gh sm" onclick="go('pldash')">💰 سود و زیان</button>
     <button class="btn sm" onclick="go('sepdash')">⚖️ تطبیق سندبه‌سند</button></h3>
   <div class="cards">
     <div class="card"><div class="l">🧾 فروش (حسابداری)</div><div class="v">${money(sale)}</div><div class="l" style="font-size:10.5px;margin-top:3px">${A('فاکتور فروش').length.toLocaleString('fa-IR')} فاکتور</div></div>
@@ -7698,7 +7757,7 @@ let view={type:'me'};
 /* 🪗 جمع‌شوندگی گروه‌های منو بر اساس موضوع */
 let navCol=null;
 try{navCol=JSON.parse(localStorage.getItem('xr_navcol')||'null');}catch(e){navCol=null;}
-const DASH_GRP={sepdash:'مدیریت مالی',sepfin:'مدیریت مالی',gdash:'رشد شخصی',bizdash:'کسب‌وکار ویژه',findash:'مالی تخصصی (IFRS)',invdash:'سرمایه‌گذاری و ثروت',gldash:'حسابداری',glnew:'حسابداری',procmap:'فرآیندها (ISO)',riskdash:'سازمان',bscmap:'استراتژی و تعالی',bsccanvas:'استراتژی و تعالی'};
+const DASH_GRP={sepdash:'کسب‌وکار ویژه',sepfin:'کسب‌وکار ویژه',gdash:'رشد شخصی',bizdash:'کسب‌وکار ویژه',findash:'مالی تخصصی (IFRS)',invdash:'سرمایه‌گذاری و ثروت',gldash:'حسابداری',glnew:'حسابداری',procmap:'فرآیندها (ISO)',riskdash:'سازمان',bscmap:'استراتژی و تعالی',bsccanvas:'استراتژی و تعالی'};
 function activeGrp(){ // گروهی که صفحه فعلی به آن تعلق دارد (همیشه باز نمایش داده می‌شود)
   if(DASH_GRP[view.type])return DASH_GRP[view.type];
   if((view.type==='list'||view.type==='rec')&&view.e&&E[view.e])return E[view.e].grp;
@@ -8020,10 +8079,12 @@ function bizMenuHTML(){
   // 6️⃣ مدیریت مالی
   h+=sec('💵 مدیریت مالی',
     it('pldash','💰 داشبورد مالی (سود و زیان)',"go('pldash')",canSee('plfin')&&canView('pldash'))
+    +it('sepfin','🟦 داشبورد حسابداری رسمی (سپیدار)',"go('sepfin')",canSee('sepdoc')&&canView('sepfin'))
+    +it('sepdash','⚖️ تطبیق عملیات و حسابداری',"go('sepdash')",canSee('sepdoc')&&canView('sepdash'))
     +it('arapdash','💵 طلب، بدهی و دریافت/پرداخت',"go('arapdash')",canSee('settle')&&canView('arapdash'))
     +it('bankdash','🏦 صندوق و بانک',"go('bankdash')",canSee('account')&&canView('bankdash'))
     +it('pfdash','🔄 تسویه درگاه‌ها/پلتفرم‌ها',"go('pfdash')",canSee('pfsettle')&&canView('pfdash'))
-    +ent('expense')+ent('pbudget'));
+    +ent('sepdoc')+ent('expense')+ent('pbudget'));
   // 7️⃣ مدیریت عملکرد
   h+=sec('🎖️ مدیریت عملکرد',
     it('perfdash','🎖️ داشبورد عملکرد',"go('perfdash')",canSee('perfscore')&&canView('perfdash'))
@@ -8076,8 +8137,6 @@ function nav(){
     if(g==='سازمان'&&canSee('risk')&&canView('riskdash'))items+=`<div class="nav-i ${view.type==='riskdash'?'on':''}" onclick="go('riskdash')">🤨 داشبورد ریسک (ISO 31000)</div>`;
     if(g==='استراتژی و تعالی'&&canSee('bsc')&&canView('stratdash'))items+=`<div class="nav-i ${view.type==='stratdash'?'on':''}" onclick="go('stratdash')">🏛️ داشبورد استراتژیک</div>`;
     if(g==='استراتژی و تعالی'&&canSee('swot')&&canView('swotmap'))items+=`<div class="nav-i ${view.type==='swotmap'?'on':''}" onclick="go('swotmap')">🧭 بوم SWOT / PESTEL</div>`;
-    if(g==='مدیریت مالی'&&canSee('sepdoc')&&canView('sepfin'))items+=`<div class="nav-i ${view.type==='sepfin'?'on':''}" onclick="go('sepfin')">💰 داشبورد مالی (سپیدار)</div>`;
-    if(g==='مدیریت مالی'&&canSee('sepdoc')&&canView('sepdash'))items+=`<div class="nav-i ${view.type==='sepdash'?'on':''}" onclick="go('sepdash')">⚖️ تطبیق عملیات و حسابداری</div>`;
     if(g==='استراتژی و تعالی'&&canSee('process')&&canView('procmap'))items+=`<div class="nav-i ${view.type==='procmap'?'on':''}" onclick="go('procmap')">🔁 نقشه فرآیندها</div>`;
     if(g==='استراتژی و تعالی'&&canSee('bsc')&&canView('bscmap'))items+=`<div class="nav-i ${view.type==='bscmap'?'on':''}" onclick="go('bscmap')">🗺️ نقشه استراتژی</div>`;
     if(g==='استراتژی و تعالی'&&canSee('bsc')&&canView('bsccanvas'))items+=`<div class="nav-i ${view.type==='bsccanvas'?'on':''}" onclick="go('bsccanvas')">🧭 بوم استراتژی</div>`;
