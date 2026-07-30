@@ -274,11 +274,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.64</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.65</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.64</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.65</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2903,7 +2903,7 @@ const MODULES=[
  {id:'M19',n:'توکن‌سازی پروژه (Tokenization)',ents:['token','tokenholder','tokentx','tokenloan','tokenins'],views:['tokendash']},
  {id:'M20',n:'توسعه نرم‌افزار (Agile)',ents:['aepic','asprint','astory','arelease','adep','aretro'],views:['agiledash']},
  {id:'M16',n:'رشد شخصی',ents:['growth','habit','win','plan','asset','area','book','course','booknote','note','reminder'],views:['gdash']},
- {id:'M19',n:'مدیریت مالی (تطبیق سپیدار)',ents:['sepdoc'],views:['sepdash']}
+ {id:'M19',n:'مدیریت مالی (تطبیق سپیدار)',ents:['sepdoc'],views:['sepdash','sepfin']}
 ];
 const ENT_MOD={},VIEW_MOD={};MODULES.forEach(m=>{(m.ents||[]).forEach(e=>ENT_MOD[e]=m.id);(m.views||[]).forEach(v=>VIEW_MOD[v]=m.id);});
 /* ✨ ماژول‌های «تازه» — وقتی در یک مادرِ جدید ماژولی می‌سازیم، کدش را اینجا اضافه می‌کنیم
@@ -3534,6 +3534,80 @@ function sepdashHTML(){
     }
     h+=`</div>`;
   });
+  return h;
+}
+function sepJm(iso){if(!iso)return null;const p=iso.slice(0,10).split('-').map(Number);const j=g2j(p[0],p[1]||1,p[2]||1);return j[0]+'/'+String(j[1]).padStart(2,'0');}
+function sepfinHTML(){
+  const docs=byE('sepdoc');
+  if(!docs.length)return `<div class="sec"><h3>💰 داشبورد مالی (سپیدار)</h3>
+    <div class="empty">هنوز سندی از سپیدار وارد نشده — از «📥 مرکز ورود اکسل › 🟦 ورود از سپیدار» شروع کنید.</div>
+    <button class="btn" onclick="go('impcenter')">📥 مرکز ورود اکسل</button></div>`;
+  const A=k=>docs.filter(r=>r.d.kind===k);
+  const S=k=>A(k).reduce((a,r)=>a+(+r.d.amount||0),0);
+  const sale=S('فاکتور فروش'),buy=S('رسید انبار (خرید)'),rcv=S('رسید دریافت'),pay=S('اعلامیه پرداخت');
+  const dts=docs.map(r=>ds(r.d.date)).filter(Boolean).sort();
+  const dMin=dts[0],dMax=dts[dts.length-1];
+  const inRange=d2=>d2&&dMin&&d2>=dMin&&d2<=dMax;
+  // عملیات در همان بازه
+  const opSale=sepOpDocs('فاکتور فروش').filter(o=>inRange(o.d));
+  const opRcv=sepOpDocs('رسید دریافت').filter(o=>inRange(o.d));
+  const opPay=sepOpDocs('اعلامیه پرداخت').filter(o=>inRange(o.d));
+  const opBuy=sepOpDocs('رسید انبار (خرید)').filter(o=>inRange(o.d));
+  const oS=a=>a.reduce((x,o)=>x+(o.amt||0),0);
+  let h=`<div class="sec"><h3>💰 داشبورد مالی — گزارش رسمی سپیدار
+    <span style="flex:1"></span>
+    <span class="tag">بازهٔ اسناد: ${esc(iso2jstr(dMin)||'—')} تا ${esc(iso2jstr(dMax)||'—')}</span>
+    <button class="btn gh sm" onclick="go('impcenter')">📥 ورود اکسل</button>
+    <button class="btn gh sm" onclick="go('list','sepdoc')">🗂️ اسناد</button>
+    <button class="btn sm" onclick="go('sepdash')">⚖️ تطبیق سندبه‌سند</button></h3>
+  <div class="cards">
+    <div class="card"><div class="l">🧾 فروش (حسابداری)</div><div class="v">${money(sale)}</div><div class="l" style="font-size:10.5px;margin-top:3px">${A('فاکتور فروش').length.toLocaleString('fa-IR')} فاکتور</div></div>
+    <div class="card"><div class="l">🚚 خرید (حسابداری)</div><div class="v">${money(buy)}</div><div class="l" style="font-size:10.5px;margin-top:3px">${A('رسید انبار (خرید)').length.toLocaleString('fa-IR')} رسید</div></div>
+    <div class="card"><div class="l">💵 دریافت‌ها</div><div class="v" style="color:var(--ok)">${money(rcv)}</div><div class="l" style="font-size:10.5px;margin-top:3px">${A('رسید دریافت').length.toLocaleString('fa-IR')} رسید</div></div>
+    <div class="card"><div class="l">📤 پرداخت‌ها</div><div class="v" style="color:var(--bad)">${money(pay)}</div><div class="l" style="font-size:10.5px;margin-top:3px">${A('اعلامیه پرداخت').length.toLocaleString('fa-IR')} اعلامیه</div></div>
+    <div class="card"><div class="l">💧 خالص جریان نقد</div><div class="v" style="color:${rcv-pay>=0?'var(--ok)':'var(--bad)'}">${money(rcv-pay)}</div><div class="l" style="font-size:10.5px;margin-top:3px">دریافت − پرداخت</div></div>
+    <div class="card"><div class="l">📦 خروج انبار</div><div class="v">${A('خروج انبار').reduce((a,r)=>a+(+r.d.qty||0),0).toLocaleString('fa-IR')} قلم</div><div class="l" style="font-size:10.5px;margin-top:3px">${A('خروج انبار').length.toLocaleString('fa-IR')} سند</div></div>
+  </div></div>`;
+  // 📊 مقایسهٔ حسابداری ↔ عملیات
+  const cmp=[['🧾 فروش',sale,oS(opSale),'فاکتورها و فروش‌های سریع'],
+             ['🚚 خرید',buy,oS(opBuy),'خریدهای ثبت‌شده'],
+             ['💵 دریافت',rcv,oS(opRcv),'دریافت‌های آرشیو'],
+             ['📤 پرداخت',pay,oS(opPay),'پرداخت‌های آرشیو']];
+  h+=`<div class="sec"><h3>📊 حسابداری در برابر عملیات (در بازهٔ اسناد)</h3>
+    <div class="tblwrap"><table style="font-size:12px"><thead><tr><th>بخش</th><th>حسابداری (سپیدار)</th><th>عملیات (سیستم)</th><th>اختلاف</th><th>وضعیت</th></tr></thead><tbody>
+    ${cmp.map(([t,a,b2])=>{const df=a-b2;const ok=Math.abs(df)<=Math.max(1000,Math.max(a,b2)*0.005);
+      return `<tr><td style="text-align:right;font-weight:700">${t}</td><td>${money(a)}</td><td>${money(b2)}</td>
+      <td style="color:${ok?'var(--ok)':'var(--bad)'};font-weight:700">${money(df)}</td>
+      <td>${ok?'<span class="tag g">✅ همخوان</span>':'<span class="tag r">🔴 مغایرت — تطبیق سندبه‌سند را ببینید</span>'}</td></tr>`;}).join('')}
+    </tbody></table></div>
+    <div class="hint">مبنای مقایسه فقط اسناد هم‌بازه است؛ برای ریز مغایرت‌ها از «⚖️ تطبیق سندبه‌سند» استفاده کنید.</div></div>`;
+  // 📅 روند ماهانه (شمسی)
+  const M={};
+  docs.forEach(r=>{const m=sepJm(ds(r.d.date));if(!m)return;const o=(M[m]=M[m]||{sale:0,buy:0,rcv:0,pay:0,opSale:0});
+    if(r.d.kind==='فاکتور فروش')o.sale+=+r.d.amount||0;
+    if(r.d.kind==='رسید انبار (خرید)')o.buy+=+r.d.amount||0;
+    if(r.d.kind==='رسید دریافت')o.rcv+=+r.d.amount||0;
+    if(r.d.kind==='اعلامیه پرداخت')o.pay+=+r.d.amount||0;});
+  opSale.forEach(o2=>{const m=sepJm(o2.d);if(m&&M[m])M[m].opSale+=o2.amt;});
+  const mk=Object.keys(M).sort();
+  if(mk.length)h+=`<div class="sec"><h3>📅 روند ماهانه (شمسی)</h3>
+    <div class="tblwrap"><table style="font-size:12px"><thead><tr><th>ماه</th><th>فروش حسابداری</th><th>فروش عملیات</th><th>اختلاف فروش</th><th>خرید</th><th>دریافت</th><th>پرداخت</th><th>خالص نقد</th></tr></thead><tbody>
+    ${mk.map(m=>{const o=M[m];const df=o.sale-o.opSale;
+      return `<tr><td style="font-weight:700">${m.split('/').map(x=>(+x).toLocaleString('fa-IR')).join('/')}</td>
+      <td>${money(o.sale)}</td><td>${money(o.opSale)}</td>
+      <td style="color:${Math.abs(df)<=Math.max(1000,o.sale*0.005)?'var(--ok)':'var(--bad)'}">${money(df)}</td>
+      <td>${money(o.buy)}</td><td style="color:var(--ok)">${money(o.rcv)}</td>
+      <td style="color:var(--bad)">${money(o.pay)}</td>
+      <td style="font-weight:700">${money(o.rcv-o.pay)}</td></tr>`;}).join('')}
+    </tbody></table></div></div>`;
+  // 🧑 برترین طرف حساب‌ها
+  const P={};
+  A('فاکتور فروش').forEach(r=>{const k=(r.d.party||r.d.pcode||'نامشخص');(P[k]=P[k]||{n:0,amt:0});P[k].n++;P[k].amt+=+r.d.amount||0;});
+  const tops=Object.entries(P).sort((a,b2)=>b2[1].amt-a[1].amt).slice(0,10);
+  if(tops.length)h+=`<div class="sec"><h3>🧑‍🤝‍🧑 برترین مشتریان (بر اساس فروش حسابداری)</h3>
+    <div class="tblwrap"><table style="font-size:12px"><thead><tr><th>طرف حساب</th><th>تعداد فاکتور</th><th>جمع فروش</th><th>سهم</th></tr></thead><tbody>
+    ${tops.map(([k,x])=>`<tr><td style="text-align:right">${esc(k)}</td><td>${x.n.toLocaleString('fa-IR')}</td><td>${money(x.amt)}</td><td>${sale?(x.amt/sale*100).toLocaleString('fa-IR',{maximumFractionDigits:1}):'۰'}٪</td></tr>`).join('')}
+    </tbody></table></div></div>`;
   return h;
 }
 function impcenterHTML(){
@@ -7624,7 +7698,7 @@ let view={type:'me'};
 /* 🪗 جمع‌شوندگی گروه‌های منو بر اساس موضوع */
 let navCol=null;
 try{navCol=JSON.parse(localStorage.getItem('xr_navcol')||'null');}catch(e){navCol=null;}
-const DASH_GRP={sepdash:'مدیریت مالی',gdash:'رشد شخصی',bizdash:'کسب‌وکار ویژه',findash:'مالی تخصصی (IFRS)',invdash:'سرمایه‌گذاری و ثروت',gldash:'حسابداری',glnew:'حسابداری',procmap:'فرآیندها (ISO)',riskdash:'سازمان',bscmap:'استراتژی و تعالی',bsccanvas:'استراتژی و تعالی'};
+const DASH_GRP={sepdash:'مدیریت مالی',sepfin:'مدیریت مالی',gdash:'رشد شخصی',bizdash:'کسب‌وکار ویژه',findash:'مالی تخصصی (IFRS)',invdash:'سرمایه‌گذاری و ثروت',gldash:'حسابداری',glnew:'حسابداری',procmap:'فرآیندها (ISO)',riskdash:'سازمان',bscmap:'استراتژی و تعالی',bsccanvas:'استراتژی و تعالی'};
 function activeGrp(){ // گروهی که صفحه فعلی به آن تعلق دارد (همیشه باز نمایش داده می‌شود)
   if(DASH_GRP[view.type])return DASH_GRP[view.type];
   if((view.type==='list'||view.type==='rec')&&view.e&&E[view.e])return E[view.e].grp;
@@ -8002,6 +8076,7 @@ function nav(){
     if(g==='سازمان'&&canSee('risk')&&canView('riskdash'))items+=`<div class="nav-i ${view.type==='riskdash'?'on':''}" onclick="go('riskdash')">🤨 داشبورد ریسک (ISO 31000)</div>`;
     if(g==='استراتژی و تعالی'&&canSee('bsc')&&canView('stratdash'))items+=`<div class="nav-i ${view.type==='stratdash'?'on':''}" onclick="go('stratdash')">🏛️ داشبورد استراتژیک</div>`;
     if(g==='استراتژی و تعالی'&&canSee('swot')&&canView('swotmap'))items+=`<div class="nav-i ${view.type==='swotmap'?'on':''}" onclick="go('swotmap')">🧭 بوم SWOT / PESTEL</div>`;
+    if(g==='مدیریت مالی'&&canSee('sepdoc')&&canView('sepfin'))items+=`<div class="nav-i ${view.type==='sepfin'?'on':''}" onclick="go('sepfin')">💰 داشبورد مالی (سپیدار)</div>`;
     if(g==='مدیریت مالی'&&canSee('sepdoc')&&canView('sepdash'))items+=`<div class="nav-i ${view.type==='sepdash'?'on':''}" onclick="go('sepdash')">⚖️ تطبیق عملیات و حسابداری</div>`;
     if(g==='استراتژی و تعالی'&&canSee('process')&&canView('procmap'))items+=`<div class="nav-i ${view.type==='procmap'?'on':''}" onclick="go('procmap')">🔁 نقشه فرآیندها</div>`;
     if(g==='استراتژی و تعالی'&&canSee('bsc')&&canView('bscmap'))items+=`<div class="nav-i ${view.type==='bscmap'?'on':''}" onclick="go('bscmap')">🗺️ نقشه استراتژی</div>`;
@@ -8122,6 +8197,7 @@ function render(){
     view.type==='glnew'?'🖊️ ثبت سند حسابداری':
     view.type==='procmap'?'🔁 نقشه فرآیندها (ISO)':
     view.type==='sepdash'?'⚖️ تطبیق عملیات و حسابداری':
+    view.type==='sepfin'?'💰 داشبورد مالی (سپیدار)':
     view.type==='riskdash'?'🤨 مدیریت ریسک (ISO 31000)':
     view.type==='charts'?'📊 نمودارها و شاخص‌ها':
     view.type==='swotmap'?'🧭 بوم SWOT و PESTEL':
@@ -8133,7 +8209,7 @@ function render(){
     view.type==='rec'?(E[view.e].ic+' '+(recs[view.id].d.title||E[view.e].n)):
     E[view.e].ic+' '+E[view.e].n;
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',invdash:'invdash',cfaacad:'invdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',sepdash:'sepdash',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash'};
+  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',invdash:'invdash',cfaacad:'invdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',sepdash:'sepdash',sepfin:'sepfin',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -8160,6 +8236,7 @@ function render(){
     else if(view.type==='invdash'||view.type==='cfaacad')c.innerHTML=invdashHTML();
     else if(view.type==='procmap')c.innerHTML=procmapHTML();
     else if(view.type==='sepdash')c.innerHTML=sepdashHTML();
+    else if(view.type==='sepfin')c.innerHTML=sepfinHTML();
     else if(view.type==='riskdash')c.innerHTML=riskdashHTML();
     else if(view.type==='gldash')c.innerHTML=gldashHTML();
     else if(view.type==='glnew')c.innerHTML=glnewHTML();
