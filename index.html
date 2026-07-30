@@ -274,11 +274,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.63</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.64</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.63</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.64</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -351,6 +351,8 @@ const PRESET={url:'https://rybcusmcwwifciciuvvv.supabase.co',key:'eyJhbGciOiJIUz
 const SEL='sel',MUL='mul',TXT='text',LNG='long',NUM='num',DAT='date',REL='rel',STA='sta',CHK='chk',FIL='fil',URLF='url';
 const STATUS=['Not started','In progress','Done'];
 const LV_APPR=['در انتظار تأیید','تأیید شد','رد شد'];
+const SEP_KINDS=['فاکتور فروش','رسید انبار (خرید)','خروج انبار','رسید دریافت','اعلامیه پرداخت'];
+const SEP_MSTAT=['تطبیق نشده','تطبیق شد','مغایرت'];
 const STATFA={'Not started':'شروع نشده','In progress':'در جریان','Done':'انجام شد'};
 const PRIO=['بحرانی','بالا','متوسط','پایین'];
 /* 🏬 انبارداری چندانباره */
@@ -754,6 +756,22 @@ payslip:{ic:'🧾',n:'فیش حقوقی',grp:'سازمان',f:[
  {k:'paid',n:'پرداخت شد',t:CHK},
  {k:'note',n:'توضیح',t:LNG}],
  cols:['title','person','month','base','paid'],comp:'payslipBrief'},
+sepdoc:{ic:'⚖️',n:'اسناد حسابداری (سپیدار)',grp:'مدیریت مالی',f:[
+ {k:'title',n:'عنوان سند',t:TXT},
+ {k:'kind',n:'نوع سند',t:SEL,o:SEP_KINDS},
+ {k:'no',n:'شماره سند سپیدار',t:TXT},
+ {k:'date',n:'تاریخ سند',t:DAT},
+ {k:'party',n:'طرف حساب',t:TXT},
+ {k:'pcode',n:'کد طرف حساب',t:TXT},
+ {k:'amount',n:'مبلغ (تومان)',t:NUM},
+ {k:'qty',n:'تعداد کالا',t:NUM},
+ {k:'mstat',n:'وضعیت تطبیق',t:SEL,o:SEP_MSTAT},
+ {k:'minv',n:'سند عملیاتی: فاکتور',t:REL,r:'invoice',s:1},
+ {k:'msale',n:'سند عملیاتی: فروش سریع',t:REL,r:'sale',s:1},
+ {k:'msettle',n:'سند عملیاتی: دریافت/پرداخت',t:REL,r:'settle',s:1},
+ {k:'mpurch',n:'سند عملیاتی: خرید',t:REL,r:'purchase',s:1},
+ {k:'note',n:'جزئیات / اقلام',t:LNG}],
+ cols:['title','kind','no','amount','mstat'],comp:'sepdocBrief'},
 risk:{ic:'🤨',n:'مدیریت ریسک',grp:'سازمان',f:[
  {k:'title',n:'عنوان ریسک',t:TXT},
  {k:'code',n:'کد ریسک',t:TXT},
@@ -2094,7 +2112,7 @@ aretro:{ic:'🔄',n:'رتروسپکتیو (اقدامات بهبود)',grp:'تو
  {k:'status',n:'وضعیت',t:SEL,o:['ثبت شد','در حال انجام','انجام شد']}],
  cols:['title','asprint','kind','owner','status']},
 };
-const GROUPS=['سازمان','مدیریت کسب و کار','فرآیندها (ISO)','استراتژی و تعالی','حاکمیت'];
+const GROUPS=['سازمان','مدیریت کسب و کار','مدیریت مالی','فرآیندها (ISO)','استراتژی و تعالی','حاکمیت'];
 const GROWTH=['growth','habit','win','plan','asset','area','note','book','booknote','course','reminder'];
 /* ================= 🧩 ساختار سفارشی: فیلدها و بخش‌های قابل تعریف توسط ادمین ================= */
 const E_BASE=JSON.parse(JSON.stringify(E)); // اسکیمای پایه — سفارشی‌ها موقع اجرا رویش سوار می‌شوند
@@ -2884,7 +2902,8 @@ const MODULES=[
  {id:'M18',n:'ساخت و ساز (پروژه ساختمانی)',ents:['cblock','cboq','csub','csubinv','cmat','cquote','clabor','cmach','cpetty'],views:['cdash']},
  {id:'M19',n:'توکن‌سازی پروژه (Tokenization)',ents:['token','tokenholder','tokentx','tokenloan','tokenins'],views:['tokendash']},
  {id:'M20',n:'توسعه نرم‌افزار (Agile)',ents:['aepic','asprint','astory','arelease','adep','aretro'],views:['agiledash']},
- {id:'M16',n:'رشد شخصی',ents:['growth','habit','win','plan','asset','area','book','course','booknote','note','reminder'],views:['gdash']}
+ {id:'M16',n:'رشد شخصی',ents:['growth','habit','win','plan','asset','area','book','course','booknote','note','reminder'],views:['gdash']},
+ {id:'M19',n:'مدیریت مالی (تطبیق سپیدار)',ents:['sepdoc'],views:['sepdash']}
 ];
 const ENT_MOD={},VIEW_MOD={};MODULES.forEach(m=>{(m.ents||[]).forEach(e=>ENT_MOD[e]=m.id);(m.views||[]).forEach(v=>VIEW_MOD[v]=m.id);});
 /* ✨ ماژول‌های «تازه» — وقتی در یک مادرِ جدید ماژولی می‌سازیم، کدش را اینجا اضافه می‌کنیم
@@ -3260,7 +3279,7 @@ function sepFiles(inp){
       if(!kind){plan.errs.push('⚠️ '+f.name+': قالب سپیدار شناخته نشد');return;}
       const {col,rows}=sepRows(f.arr);
       const V=(r,name)=>{const i=col(name);return i<0?'':r[i];};
-      if(kind==='party'){
+      if(kind==='party'&&document.getElementById('sepMaster')&&document.getElementById('sepMaster').checked){
         const byCode={};
         rows.forEach(r=>{const c=sepNorm(V(r,'طرف حساب کد'));if(!c)return;(byCode[c]=byCode[c]||[]).push(r);});
         Object.entries(byCode).forEach(([code,rs])=>{
@@ -3287,7 +3306,7 @@ function sepFiles(inp){
           }
         });
       }
-      if(kind==='item'){
+      if(kind==='item'&&document.getElementById('sepMaster')&&document.getElementById('sepMaster').checked){
         rows.forEach(r=>{
           const sku=sepNorm(V(r,'کالا/خدمت کد'));if(!sku)return;
           const d={title:sepNorm(V(r,'کالا/خدمت عنوان')),sku,unit:sepNorm(V(r,'کالا/خدمت واحد اصلی'))||'عدد',
@@ -3303,112 +3322,64 @@ function sepFiles(inp){
         rows.forEach(r=>{const n=sepNorm(V(r,'فاکتور شماره'));if(!n)return;(byNo[n]=byNo[n]||[]).push(r);});
         Object.entries(byNo).forEach(([no,rs])=>{
           const r0=rs[0];
-          const cust=ensureCust(V(r0,'فاکتور کد مشتری'),sepNorm(V(r0,'فاکتور نام مشتری')));
-          const wh=sepFindBy('whouse','code',V(rs[0],'قلم فاکتور کد انبار'));
-          // 🔎 تشخیص فاکتور مشابه (فروش قبلاً با شمارهٔ دیگری ثبت شده)
-          {
-            const total=rs.reduce((a,r)=>a+sepNum(V(r,'قلم فاکتور کل'))-sepNum(V(r,'قلم فاکتور تخفیف مبلغی'))-sepNum(V(r,'قلم فاکتور تخفیف مشتری')),0);
-            const prodQty=rs.map(r=>({p:(prodBySku(V(r,'قلم فاکتور کد'))||{}).id,q:sepNum(V(r,'قلم فاکتور واحد اصلی'))||1}));
-            const iso=sepDate(V(r0,'فاکتور تاریخ'));
-            const custEx=custByCode(V(r0,'فاکتور کد مشتری'));
-            const sim=sepSimilarSale(custEx&&custEx.id&&recs[custEx.id]?custEx.id:null,sepNorm(V(r0,'فاکتور نام مشتری')),total,iso,prodQty);
-            if(sim.length&&!(seen.has('invoice#inv:'+no)||planned.has('invoice#inv:'+no))){
-              const lines=rs.map((r,i)=>{const p=prodBySku(V(r,'قلم فاکتور کد'));
-                const q=sepNum(V(r,'قلم فاکتور واحد اصلی'))||1;const tot2=sepNum(V(r,'قلم فاکتور کل'));
-                return {p:p?p.id:null,q,fee:sepNum(V(r,'قلم فاکتور فی'))||(q?tot2/q:0),
-                  disc:sepNum(V(r,'قلم فاکتور تخفیف مبلغی'))+sepNum(V(r,'قلم فاکتور تخفیف مشتری')),
-                  title:sepNorm(V(r,'قلم فاکتور عنوان ردیابی'))||(p?p.d.title:('ردیف '+(i+1)))};});
-              plan.dups.push({sepNo:no,total,iso,sim,mode:'link',lines,cust:custEx,wh});
-              return; // فعلاً وارد نشود — تصمیم در پیش‌نمایش
-            }
-          }
-          const inv=addOnce('invoice',{title:'فاکتور سپیدار '+no,kind:'فاکتور فروش',status:'صادر شده',
-            date:{s:sepDate(V(r0,'فاکتور تاریخ'))||today()},
-            customer:cust?[cust.id]:[],wh:wh?[wh.id]:[],
-            note:'ایمپورت سپیدار'},'inv:'+no,'فاکتور '+no);
-          if(!inv)return;
-          inv._tmp=uid();
-          rs.forEach((r,i)=>{
-            const p=prodBySku(V(r,'قلم فاکتور کد'))||null;
-            const qty=sepNum(V(r,'قلم فاکتور واحد اصلی'))||1;
-            const tot=sepNum(V(r,'قلم فاکتور کل'));
-            const fee=sepNum(V(r,'قلم فاکتور فی'))||(qty?tot/qty:0);
-            const disc=sepNum(V(r,'قلم فاکتور تخفیف مبلغی'))+sepNum(V(r,'قلم فاکتور تخفیف مشتری'));
-            addOnce('invline',{title:sepNorm(V(r,'قلم فاکتور عنوان ردیابی'))||(p?p.d.title:('ردیف '+(i+1))),
-              invoice:[inv._tmp],product:p?[p.id]:[],qty,price:fee,ldisc:disc||undefined},
-              'invl:'+no+':'+i,'ردیف '+(i+1)+' فاکتور '+no);
-            if(!p)plan.notes.push('کالای «'+sepNorm(V(r,'قلم فاکتور کد'))+'» در فاکتور '+no+' پیدا نشد — ردیف بدون کالا ثبت می‌شود (الگوی کالا را اول ایمپورت کنید)');
-          });
+          const total=rs.reduce((a,r)=>a+sepNum(V(r,'قلم فاکتور کل'))-sepNum(V(r,'قلم فاکتور تخفیف مبلغی'))-sepNum(V(r,'قلم فاکتور تخفیف مشتری')),0);
+          const qty=rs.reduce((a,r)=>a+(sepNum(V(r,'قلم فاکتور واحد اصلی'))||1),0);
+          const cname=sepNorm(V(r0,'فاکتور نام مشتری'));
+          const lines=rs.map((r,i2)=>'• '+(sepNorm(V(r,'قلم فاکتور کد'))||('ردیف '+(i2+1)))+' × '+(sepNum(V(r,'قلم فاکتور واحد اصلی'))||1)+' @ '+sepNum(V(r,'قلم فاکتور فی')).toLocaleString('fa-IR')).join('\n');
+          addOnce('sepdoc',{title:'فاکتور فروش '+no+(cname?' — '+cname:''),kind:'فاکتور فروش',no,
+            party:cname,pcode:sepNorm(V(r0,'فاکتور کد مشتری')),amount:total,qty,
+            date:{s:sepDate(V(r0,'فاکتور تاریخ'))||today()},mstat:SEP_MSTAT[0],note:lines},'inv:'+no,'فاکتور '+no);
         });
       }
       if(kind==='wrcv'){
-        rows.forEach((r,i)=>{
+        rows.forEach((r,i2)=>{
           const no=sepNorm(V(r,'رسید انبار شماره'));if(!no)return;
-          const p=prodBySku(V(r,'قلم رسید انبار کد'));
-          const supp=ensureSupp(V(r,'رسید انبار کد تحویل دهنده'),'');
-          const wh=sepFindBy('whouse','code',V(r,'رسید انبار کد انبار'));
-          addOnce('purchase',{title:'رسید انبار سپیدار '+no,product:p?[p.id]:[],
-            qty:sepNum(V(r,'قلم رسید انبار واحد اصلی'))||1,price:sepNum(V(r,'قلم رسید انبار فی')),
-            extra:sepNum(V(r,'قلم رسید انبار کرایه حمل'))||undefined,
-            supplier:supp?[supp.id]:[],wh:wh?[wh.id]:[],kind:'اعتباری',
-            date:{s:sepDate(V(r,'رسید انبار تاریخ'))||today()}},'rcv:'+no+':'+i,'رسید انبار '+no+' ردیف '+(i+1));
-          if(!p)plan.notes.push('کالای «'+sepNorm(V(r,'قلم رسید انبار کد'))+'» در رسید '+no+' پیدا نشد');
+          addOnce('sepdoc',{title:'رسید انبار '+no+' — '+sepNorm(V(r,'قلم رسید انبار کد')),kind:'رسید انبار (خرید)',no,
+            pcode:sepNorm(V(r,'رسید انبار کد تحویل دهنده')),
+            amount:sepNum(V(r,'قلم رسید انبار کل'))||sepNum(V(r,'قلم رسید انبار فی'))*(sepNum(V(r,'قلم رسید انبار واحد اصلی'))||1),
+            qty:sepNum(V(r,'قلم رسید انبار واحد اصلی'))||1,
+            date:{s:sepDate(V(r,'رسید انبار تاریخ'))||today()},mstat:SEP_MSTAT[0],
+            note:'کالا: '+sepNorm(V(r,'قلم رسید انبار کد'))+' │ فی: '+sepNum(V(r,'قلم رسید انبار فی')).toLocaleString('fa-IR')+' │ انبار: '+sepNorm(V(r,'رسید انبار کد انبار'))},'rcv:'+no+':'+i2,'رسید انبار '+no+' ردیف '+(i2+1));
         });
       }
       if(kind==='wdlv'){
-        rows.forEach((r,i)=>{
+        rows.forEach((r,i2)=>{
           const no=sepNorm(V(r,'خروج انبار شماره'));if(!no)return;
           const dst=sepNorm(V(r,'خروج انبار کد انبار مقصد'));
-          if(!dst){plan.skips.push('⏭ خروج انبار '+no+' ردیف '+(i+1)+' — تحویل فروش است و با فاکتور فروش پوشش داده می‌شود');return;}
-          const p=prodBySku(V(r,'قلم خروج انبار کد'));
-          const wf=sepFindBy('whouse','code',V(r,'خروج انبار کد انبار'));
-          const wt=sepFindBy('whouse','code',dst);
-          addOnce('whmove',{title:'انتقال سپیدار '+no,product:p?[p.id]:[],
+          addOnce('sepdoc',{title:'خروج انبار '+no+' — '+sepNorm(V(r,'قلم خروج انبار کد')),kind:'خروج انبار',no,
+            pcode:sepNorm(V(r,'خروج انبار کد تحویل گیرنده')),
             qty:sepNum(V(r,'قلم خروج انبار واحد اصلی'))||1,
-            from:wf?[wf.id]:[],to:wt?[wt.id]:[],status:'تحویل شد',
-            date:{s:sepDate(V(r,'خروج انبار تاریخ'))||today()}},'dlv:'+no+':'+i,'انتقال '+no+' ردیف '+(i+1));
+            date:{s:sepDate(V(r,'خروج انبار تاریخ'))||today()},mstat:SEP_MSTAT[0],
+            note:'کالا: '+sepNorm(V(r,'قلم خروج انبار کد'))+' │ از انبار: '+sepNorm(V(r,'خروج انبار کد انبار'))+(dst?' │ به انبار: '+dst:'')},'dlv:'+no+':'+i2,'خروج انبار '+no+' ردیف '+(i2+1));
         });
       }
       if(kind==='rcpt'){
-        rows.forEach((r,i)=>{
+        rows.forEach((r,i2)=>{
           const no=sepNorm(V(r,'رسید دریافت شماره'));if(!no)return;
           const cash=sepNum(V(r,'رسید دریافت مبلغ نقد')), chq=sepNum(V(r,'چک مبلغ')),
                 hav=sepNum(V(r,'حواله مبلغ')), card=sepNum(V(r,'کارت خوان مبلغ'));
           const amt=sepNum(V(r,'رسید دریافت مبلغ دریافت به ارز پایه'))||cash+chq+hav+card;
           if(!amt){plan.skips.push('⏭ رسید دریافت '+no+' — مبلغ صفر');return;}
-          const cust=ensureCust('',sepNorm(V(r,'رسید دریافت طرف مقابل')));
-          const method=chq?'چک':(card?'کارت':(hav?'انتقال بانکی':'نقد'));
-          addOnce('settle',{title:sepNorm(V(r,'رسید دریافت شرح'))||('رسید دریافت '+no),kind:'دریافت از مشتری',
-            customer:cust?[cust.id]:[],amount:amt,method,
-            date:{s:sepDate(V(r,'رسید دریافت تاریخ'))||today()},
-            note:'سپیدار — رسید '+no},'rc:'+no+':'+i,'دریافت '+no);
-          if(chq){
-            addOnce('cheque',{title:sepNorm(V(r,'چک شماره'))||('چک رسید '+no),kind:'دریافتنی',amount:chq,
-              due:{s:sepDate(V(r,'چک تاریخ سررسید'))||today()},
-              customer:cust?[cust.id]:[],party:sepNorm(V(r,'رسید دریافت طرف مقابل')),
-              status:'نزد صندوق',note:'سپیدار — رسید '+no+' │ بانک: '+sepNorm(V(r,'چک بانک'))},'chq-r:'+no+':'+i,'چک دریافتنی '+no);
-          }
+          const method=chq?'چک '+sepNorm(V(r,'چک شماره')):(card?'کارتخوان':(hav?'حواله '+sepNorm(V(r,'حواله شماره')):'نقد'));
+          addOnce('sepdoc',{title:'رسید دریافت '+no+' — '+sepNorm(V(r,'رسید دریافت طرف مقابل')),kind:'رسید دریافت',no,
+            party:sepNorm(V(r,'رسید دریافت طرف مقابل')),amount:amt,
+            date:{s:sepDate(V(r,'رسید دریافت تاریخ'))||today()},mstat:SEP_MSTAT[0],
+            note:sepNorm(V(r,'رسید دریافت شرح'))+' │ روش: '+method+(chq?' │ سررسید چک: '+(sepDate(V(r,'چک تاریخ سررسید'))||'—'):'')},'rc:'+no+':'+i2,'دریافت '+no);
         });
       }
       if(kind==='pay'){
-        rows.forEach((r,i)=>{
+        rows.forEach((r,i2)=>{
           const no=sepNorm(V(r,'اعلامیه پرداخت شماره'));if(!no)return;
           const cash=sepNum(V(r,'اعلامیه پرداخت مبلغ نقد')), chq=sepNum(V(r,'پرداخت چک مبلغ')),
                 brd=sepNum(V(r,'اعلامیه برداشت مبلغ'));
           const amt=cash+chq+brd;
           if(!amt){plan.skips.push('⏭ اعلامیه پرداخت '+no+' — مبلغ صفر');return;}
-          const supp=ensureSupp(V(r,'اعلامیه پرداخت کد تفصیل'),sepNorm(V(r,'اعلامیه پرداخت شرح')));
-          const method=chq?'چک':(brd?'انتقال بانکی':'نقد');
           const fee=sepNum(V(r,'اعلامیه برداشت کارمزد بانکی'));
-          addOnce('settle',{title:sepNorm(V(r,'اعلامیه پرداخت شرح'))||('اعلامیه پرداخت '+no),kind:'پرداخت به تامین‌کننده',
-            supplier:supp?[supp.id]:[],amount:amt,method,
-            date:{s:sepDate(V(r,'اعلامیه پرداخت تاریخ'))||today()},
-            note:'سپیدار — اعلامیه '+no+(fee?' │ کارمزد بانکی: '+fee.toLocaleString('fa-IR'):'')},'pay:'+no+':'+i,'پرداخت '+no+' ردیف '+(i+1));
-          if(chq){
-            addOnce('cheque',{title:sepNorm(V(r,'پرداخت چک شماره'))||('چک اعلامیه '+no),kind:'پرداختنی',amount:chq,
-              due:{s:sepDate(V(r,'پرداخت چک تاریخ سررسید'))||today()},
-              supplier:supp?[supp.id]:[],status:'نزد صندوق',note:'سپیدار — اعلامیه '+no},'chq-p:'+no+':'+i,'چک پرداختنی '+no);
-          }
+          const method=chq?'چک '+sepNorm(V(r,'پرداخت چک شماره')):(brd?'برداشت بانکی '+sepNorm(V(r,'اعلامیه برداشت شماره')):'نقد');
+          addOnce('sepdoc',{title:'اعلامیه پرداخت '+no+' — '+sepNorm(V(r,'اعلامیه پرداخت شرح')),kind:'اعلامیه پرداخت',no,
+            party:sepNorm(V(r,'اعلامیه پرداخت شرح')),pcode:sepNorm(V(r,'اعلامیه پرداخت کد تفصیل')),amount:amt,
+            date:{s:sepDate(V(r,'اعلامیه پرداخت تاریخ'))||today()},mstat:SEP_MSTAT[0],
+            note:'روش: '+method+(fee?' │ کارمزد بانکی: '+fee.toLocaleString('fa-IR'):'')},'pay:'+no+':'+i2,'پرداخت '+no+' ردیف '+(i2+1));
         });
       }
     });
@@ -3423,48 +3394,13 @@ function sepFiles(inp){
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${Object.entries(cnt).map(([e,n])=>`<span class="tag" style="font-size:11px">${E[e]?E[e].ic+' '+E[e].n:e}: <b>${n.toLocaleString('fa-IR')}</b></span>`).join('')}</div>
       ${plan.errs.concat(plan.notes).slice(0,10).map(x=>`<div style="font-size:11px;color:var(--warn)">${esc(x)}</div>`).join('')}
       ${plan.skips.slice(0,6).map(x=>`<div style="font-size:11px;color:var(--tx2)">${esc(x)}</div>`).join('')}${plan.skips.length>6?`<div style="font-size:11px;color:var(--tx2)">… و ${(plan.skips.length-6).toLocaleString('fa-IR')} مورد دیگر</div>`:''}
-      ${plan.dups.length?`<div style="border:1px solid var(--warn);border-radius:9px;padding:10px;margin-top:8px">
-        <b style="color:var(--warn)">⚠️ ${plan.dups.length.toLocaleString('fa-IR')} فاکتور مشکوک به تکرار</b>
-        <div style="font-size:11px;color:var(--tx2);margin:4px 0 8px">برای همین مشتری، همین مبلغ و همین بازهٔ تاریخ، سند دیگری در سیستم هست (مثلاً واحد فروش با شمارهٔ خودش ثبت کرده). پیش‌فرض: <b>پیوند</b> — فاکتور جدید ساخته نمی‌شود و شمارهٔ سپیدار روی همان سند موجود می‌نشیند تا در ایمپورت‌های بعدی هم تکرار نشود.</div>
-        <table style="font-size:11.5px"><thead><tr><th>فاکتور سپیدار</th><th>مبلغ</th><th>سند مشابه موجود</th><th>تصمیم</th></tr></thead><tbody>
-        ${plan.dups.map((d,i)=>`<tr><td>${esc(d.sepNo)}</td><td>${money(d.total)}</td>
-          <td style="text-align:right">${d.sim.map(x=>(x.e==='invoice'?'🧾 ':'🛒 ')+esc(x.t||'—')+' ('+money(x.tot)+')').join('<br>')}</td>
-          <td><select onchange="_sepPlan.dups[${i}].mode=this.value" style="width:150px">
-            <option value="link">🔗 پیوند به سند موجود</option>
-            <option value="add">➕ ورود به‌عنوان فاکتور جدید</option>
-            <option value="skip">⏭ نادیده بگیر</option></select></td></tr>`).join('')}
-        </tbody></table></div>`:''}
-      ${(plan.adds.length||plan.ups.length||plan.dups.length)?`<button class="btn" style="margin-top:8px" onclick="sepCommit()">✅ ثبت نهایی</button>`:'<div class="empty">چیزی برای ورود نیست</div>'}`;
+      ${(plan.adds.length||plan.ups.length)?`<button class="btn" style="margin-top:8px" onclick="sepCommit()">✅ ثبت نهایی</button>`:'<div class="empty">چیزی برای ورود نیست</div>'}
+      ${plan.adds.some(a=>a.e==='sepdoc')?`<div class="hint" style="margin-top:6px">پس از ثبت، از «⚖️ تطبیق عملیات و حسابداری» در گروه مدیریت مالی، این اسناد را با ثبت‌های عملیاتی مقایسه کنید.</div>`:''}`;
   });
 }
 function sepCommit(){
   const plan=_sepPlan;if(!plan)return;
   const now=Date.now();
-  // ⚖️ تصمیم فاکتورهای مشکوک به تکرار
-  (plan.dups||[]).forEach(d=>{
-    if(d.mode==='skip')return;
-    if(d.mode==='link'){
-      const tgt=recs[d.sim[0].id];
-      if(tgt&&!tgt.del){
-        tgt.d={...tgt.d,_sep:'inv:'+d.sepNo,note:((tgt.d.note||'')+' │ شماره فاکتور سپیدار: '+d.sepNo).trim()};
-        tgt.u=now;queue.push(tgt.id);
-      }
-      return;
-    }
-    // add: ساخت فاکتور و ردیف‌ها
-    const invId=uid();
-    const dd={title:'فاکتور سپیدار '+d.sepNo,kind:'فاکتور فروش',status:'صادر شده',
-      date:{s:d.iso||today()},customer:(d.cust&&d.cust.id)?[d.cust.id]:[],wh:d.wh?[d.wh.id]:[],
-      note:'ایمپورت سپیدار',_sep:'inv:'+d.sepNo,_by:myEmail()};
-    recs[invId]={id:invId,e:'invoice',d:dd,u:now};queue.push(invId);
-    (d.lines||[]).forEach((l,i)=>{
-      const lid=uid();
-      recs[lid]={id:lid,e:'invline',d:{title:l.title,invoice:[invId],product:l.p?[l.p]:[],
-        qty:l.q,price:l.fee,ldisc:l.disc||undefined,_sep:'invl:'+d.sepNo+':'+i,_by:myEmail()},u:now};
-      Object.keys(recs[lid].d).forEach(k=>{if(recs[lid].d[k]===undefined)delete recs[lid].d[k];});
-      queue.push(lid);
-    });
-  });
   const _autoBizFor=e=>{const f=(E[e].f||[]).find(x=>x.t===REL&&x.r==='business');return f&&gBiz()&&recs[gBiz()]?f.k:null;};
   plan.adds.forEach(a=>{
     const id=a._tmp||uid();
@@ -3484,6 +3420,122 @@ function sepCommit(){
   render();
 }
 window.sepFiles=sepFiles;window.sepCommit=sepCommit;
+function sepdocBrief(r){
+  const st=r.d.mstat||SEP_MSTAT[0];
+  return {label:'تطبیق',v:(st===SEP_MSTAT[1]?'✅ ':(st===SEP_MSTAT[2]?'🔴 ':'⏳ '))+st,bad:st===SEP_MSTAT[2]};
+}
+window.sepdocBrief=sepdocBrief;
+/* ⚖️ تطبیق عملیات و حسابداری */
+function sepOpDocs(kind){
+  // اسناد عملیاتی هم‌خانواده با هر نوع سند سپیدار
+  if(kind==='فاکتور فروش')return byE('invoice').filter(v=>v.d.kind!=='پیش‌فاکتور'&&v.d.status!=='باطل')
+    .map(v=>{let t=0;try{t=invCalc(v).total;}catch(e){}return {e:'invoice',id:v.id,t:v.d.title,amt:t,d:ds(v.d.date),party:nameOf(relIds(v,'customer')[0]||'')};})
+    .concat(byE('sale').map(v=>({e:'sale',id:v.id,t:v.d.title,amt:(+v.d.qty||0)*(+v.d.price||0)+(+v.d.extra||0),d:ds(v.d.date),party:nameOf(relIds(v,'customer')[0]||'')})));
+  if(kind==='رسید انبار (خرید)')return byE('purchase').map(v=>({e:'purchase',id:v.id,t:v.d.title,amt:((+v.d.qty||0)*(+v.d.price||0)*(+v.d.fx||1))+(+v.d.extra||0),d:ds(v.d.date),party:nameOf(relIds(v,'supplier')[0]||'')}));
+  if(kind==='رسید دریافت')return byE('settle').filter(v=>v.d.kind==='دریافت از مشتری').map(v=>({e:'settle',id:v.id,t:v.d.title,amt:+v.d.amount||0,d:ds(v.d.date),party:nameOf(relIds(v,'customer')[0]||'')}));
+  if(kind==='اعلامیه پرداخت')return byE('settle').filter(v=>v.d.kind==='پرداخت به تامین‌کننده').map(v=>({e:'settle',id:v.id,t:v.d.title,amt:+v.d.amount||0,d:ds(v.d.date),party:nameOf(relIds(v,'supplier')[0]||'')}));
+  return [];
+}
+function sepMatchField(e){return e==='invoice'?'minv':(e==='sale'?'msale':(e==='settle'?'msettle':'mpurch'));}
+function sepLinkedOpIds(){
+  const set=new Set();
+  byE('sepdoc').forEach(r=>['minv','msale','msettle','mpurch'].forEach(k=>relIds(r,k).forEach(id=>set.add(id))));
+  return set;
+}
+function sepFindMatch(doc,ops,usedOp){
+  const amt=+doc.d.amount||0;if(!amt)return null;
+  const t0=ds(doc.d.date)?new Date(ds(doc.d.date)).getTime():0;
+  const tol=Math.max(1000,amt*0.005), W=3*864e5;
+  let best=null,bestScore=-1;
+  ops.forEach(o=>{
+    if(usedOp.has(o.id))return;
+    if(Math.abs((o.amt||0)-amt)>tol)return;
+    const dt=o.d?Math.abs(new Date(o.d).getTime()-t0):Infinity;
+    if(dt>W)return;
+    let sc=10-dt/864e5;
+    if(doc.d.party&&o.party&&sepNorm(o.party)&&sepNorm(doc.d.party).includes(sepNorm(o.party).slice(0,8)))sc+=5;
+    if(sc>bestScore){bestScore=sc;best=o;}
+  });
+  return best;
+}
+function sepAutoMatch(){
+  const usedOp=sepLinkedOpIds();
+  let matched=0;
+  byE('sepdoc').forEach(doc=>{
+    if((doc.d.mstat||SEP_MSTAT[0])===SEP_MSTAT[1])return;
+    const ops=sepOpDocs(doc.d.kind||'');
+    const m=sepFindMatch(doc,ops,usedOp);
+    if(m){
+      doc.d={...doc.d,mstat:SEP_MSTAT[1],[sepMatchField(m.e)]:[m.id]};
+      doc.u=Date.now();queue.push(doc.id);usedOp.add(m.id);matched++;
+    } else if(+doc.d.amount>0){
+      doc.d={...doc.d,mstat:SEP_MSTAT[2]};doc.u=Date.now();queue.push(doc.id);
+    }
+  });
+  invalidateByE();saveLocal();saveQ();flush();
+  alert('✅ تطبیق خودکار: '+matched.toLocaleString('fa-IR')+' سند منطبق شد');
+  render();
+}
+window.sepAutoMatch=sepAutoMatch;
+function sepdashHTML(){
+  const docs=byE('sepdoc');
+  if(!docs.length)return `<div class="sec"><h3>⚖️ تطبیق عملیات و حسابداری</h3>
+    <div class="empty">هنوز سند حسابداری وارد نشده — از «📥 مرکز ورود اکسل › 🟦 ورود از سپیدار» فایل‌های سپیدار را بارگذاری کنید.</div></div>`;
+  const usedOp=sepLinkedOpIds();
+  // بازهٔ تاریخ اسناد سپیدار برای پیدا کردن اسناد عملیاتیِ بی‌همتا
+  const dts=docs.map(r=>ds(r.d.date)).filter(Boolean).sort();
+  const dMin=dts[0],dMax=dts[dts.length-1];
+  const inRange=d2=>d2&&dMin&&d2>=dMin&&d2<=dMax;
+  let h='';
+  const KINDS=[['فاکتور فروش','🧾'],['رسید دریافت','💵'],['اعلامیه پرداخت','📤'],['رسید انبار (خرید)','🚚'],['خروج انبار','📦']];
+  // KPI کلان
+  const sSale=docs.filter(r=>r.d.kind==='فاکتور فروش').reduce((a,r)=>a+(+r.d.amount||0),0);
+  const oSale=sepOpDocs('فاکتور فروش').filter(o=>inRange(o.d)).reduce((a,o)=>a+o.amt,0);
+  const nUn=docs.filter(r=>(r.d.mstat||SEP_MSTAT[0])!==SEP_MSTAT[1]).length;
+  h+=`<div class="sec"><h3>⚖️ تطبیق عملیات و حسابداری
+    <span style="flex:1"></span>
+    <button class="btn sm" onclick="sepAutoMatch()">🤖 تطبیق خودکار</button>
+    <button class="btn gh sm" onclick="go('list','sepdoc')">🗂️ اسناد حسابداری</button></h3>
+    <div class="comp" style="margin-bottom:6px">
+      <div class="chip">اسناد سپیدار: <b>${docs.length.toLocaleString('fa-IR')}</b></div>
+      <div class="chip">فروش حسابداری (بازهٔ اسناد): <b>${money(sSale)}</b></div>
+      <div class="chip">فروش عملیات (همان بازه): <b>${money(oSale)}</b></div>
+      <div class="chip">اختلاف: <b style="color:${Math.abs(sSale-oSale)>Math.max(1000,sSale*0.005)?'var(--bad)':'var(--ok)'}">${money(sSale-oSale)}</b></div>
+      <div class="chip">تطبیق‌نشده/مغایر: <b style="color:${nUn?'var(--warn)':'var(--ok)'}">${nUn.toLocaleString('fa-IR')}</b></div></div>
+    <div class="hint">تطبیق خودکار: مبلغ برابر (±۰٫۵٪) + تاریخ در بازهٔ ±۳ روز + در صورت امکان همان طرف حساب. هر سند عملیاتی حداکثر به یک سند حسابداری وصل می‌شود.</div></div>`;
+  KINDS.forEach(([k,ic])=>{
+    const ds2=docs.filter(r=>(r.d.kind||'')===k);
+    if(!ds2.length)return;
+    const ops=sepOpDocs(k);
+    const sum=ds2.reduce((a,r)=>a+(+r.d.amount||0),0);
+    h+=`<div class="sec"><h3>${ic} ${esc(k)} <span class="c">${ds2.length.toLocaleString('fa-IR')}</span>
+      <span style="flex:1"></span><span class="tag">جمع: ${money(sum)}</span></h3>
+      <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">سند سپیدار</th><th>تاریخ</th><th>طرف حساب</th><th>مبلغ</th><th>سند عملیاتی منطبق</th><th>وضعیت</th></tr></thead><tbody>`;
+    ds2.sort((a,b)=>(ds(b.d.date)||'').localeCompare(ds(a.d.date)||'')).forEach(r=>{
+      const mF=['minv','msale','msettle','mpurch'].map(f=>relIds(r,f)[0]).find(Boolean);
+      const st=r.d.mstat||SEP_MSTAT[0];
+      h+=`<tr><td style="text-align:right;cursor:pointer" onclick="go('rec','sepdoc','${r.id}')">${esc(r.d.title||'—')}</td>
+        <td>${esc(iso2jstr(ds(r.d.date))||'—')}</td><td>${esc(r.d.party||r.d.pcode||'—')}</td>
+        <td><b>${r.d.amount?money(+r.d.amount):'—'}</b></td>
+        <td>${mF&&recs[mF]?`<a href="#" onclick="go('rec','${recs[mF].e}','${mF}');return false" style="color:var(--ac2)">${esc(recs[mF].d.title||'—')}</a>`:'—'}</td>
+        <td>${st===SEP_MSTAT[1]?'<span class="tag g">✅ تطبیق شد</span>':(st===SEP_MSTAT[2]?'<span class="tag r">🔴 مغایرت</span>':'<span class="tag y">⏳ تطبیق نشده</span>')}</td></tr>`;
+    });
+    h+=`</tbody></table></div>`;
+    // اسناد عملیاتیِ بدون سند حسابداری (فقط انواع مبلغ‌دار)
+    if(k!=='خروج انبار'){
+      const orphans=ops.filter(o=>o.amt>0&&inRange(o.d)&&!usedOp.has(o.id));
+      if(orphans.length){
+        h+=`<div style="font-size:12px;color:var(--warn);margin-top:8px">⚠️ ${orphans.length.toLocaleString('fa-IR')} سند عملیاتی در همین بازه که در گزارش حسابداری نیست:</div>
+        <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">سند عملیاتی</th><th>تاریخ</th><th>طرف حساب</th><th>مبلغ</th></tr></thead><tbody>
+        ${orphans.slice(0,30).map(o=>`<tr><td style="text-align:right;cursor:pointer" onclick="go('rec','${o.e}','${o.id}')">${esc(o.t||'—')}</td>
+          <td>${esc(iso2jstr(o.d)||'—')}</td><td>${esc(o.party||'—')}</td><td>${money(o.amt)}</td></tr>`).join('')}
+        </tbody></table></div>${orphans.length>30?`<div class="hint">… و ${(orphans.length-30).toLocaleString('fa-IR')} مورد دیگر</div>`:''}`;
+      }
+    }
+    h+=`</div>`;
+  });
+  return h;
+}
 function impcenterHTML(){
   const b=gBiz();
   let h=`<div class="sec"><h3>📥 مرکز ورود اکسل</h3>
@@ -3494,9 +3546,8 @@ function impcenterHTML(){
     <span style="flex:1"></span>
     <input type="file" id="sepf" multiple accept=".xls,.xlsx,.csv" style="display:none" onchange="sepFiles(this)">
     <button class="btn sm" onclick="document.getElementById('sepf').click()">📂 بارگذاری فایل‌های سپیدار</button></h3>
-    <p style="font-size:12px;color:var(--tx2);line-height:2">خروجی‌های اکسل سپیدار را مستقیم و بدون هیچ تغییری این‌جا بریزید — چند فایل با هم هم می‌شود. سیستم نوع هر فایل را از سربرگش تشخیص می‌دهد:
-    <b>طرف حساب</b> → مشتریان/تأمین‌کنندگان │ <b>الگوی کالا</b> → کالا و خدمات (تطبیق با کد SKU) │ <b>فاکتور فروش</b> → فاکتور + ردیف‌ها │ <b>رسید انبار</b> → خرید │ <b>خروج انبار</b> → انتقال بین انبار (تحویل‌های فروش که فاکتور دارند رد می‌شوند) │ <b>رسید دریافت / اعلامیه پرداخت</b> → دریافت/پرداخت + چک‌ها.
-    رکورد تکراری هرگز دوباره وارد نمی‌شود (کلید سند سپیدار روی هر رکورد ذخیره می‌شود)؛ اطلاعات پایه (کالا/طرف حساب) با کد به‌روزرسانی می‌شوند.</p>
+    <p style="font-size:12px;color:var(--tx2);line-height:2">خروجی‌های اکسل سپیدار مستقیم و بدون تغییر این‌جا بارگذاری می‌شوند. <b>همهٔ اسناد مالی (فاکتور فروش، رسید/خروج انبار، دریافت و پرداخت) فقط در بخش «مدیریت مالی › اسناد حسابداری» ثبت می‌شوند</b> و هیچ رکورد عملیاتی (فاکتور، فروش، خرید، انتقال) نمی‌سازند — تا بعداً در «⚖️ تطبیق عملیات و حسابداری» با ثبت‌های واحدهای عملیاتی مقایسه شوند. رکورد تکراری هرگز دوباره وارد نمی‌شود.</p>
+    <label style="font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:6px"><input type="checkbox" id="sepMaster" checked style="width:16px;height:16px">به‌روزرسانی اطلاعات پایه از فایل‌های «طرف حساب» و «الگوی کالا» (مشتری/تأمین‌کننده/کالا — سند مالی نیستند)</label>
     <div id="sepPrev"></div></div>`;
   // 🤖 ورود خودکار از پوشه
   if(isAdmin()){
@@ -7573,7 +7624,7 @@ let view={type:'me'};
 /* 🪗 جمع‌شوندگی گروه‌های منو بر اساس موضوع */
 let navCol=null;
 try{navCol=JSON.parse(localStorage.getItem('xr_navcol')||'null');}catch(e){navCol=null;}
-const DASH_GRP={gdash:'رشد شخصی',bizdash:'کسب‌وکار ویژه',findash:'مالی تخصصی (IFRS)',invdash:'سرمایه‌گذاری و ثروت',gldash:'حسابداری',glnew:'حسابداری',procmap:'فرآیندها (ISO)',riskdash:'سازمان',bscmap:'استراتژی و تعالی',bsccanvas:'استراتژی و تعالی'};
+const DASH_GRP={sepdash:'مدیریت مالی',gdash:'رشد شخصی',bizdash:'کسب‌وکار ویژه',findash:'مالی تخصصی (IFRS)',invdash:'سرمایه‌گذاری و ثروت',gldash:'حسابداری',glnew:'حسابداری',procmap:'فرآیندها (ISO)',riskdash:'سازمان',bscmap:'استراتژی و تعالی',bsccanvas:'استراتژی و تعالی'};
 function activeGrp(){ // گروهی که صفحه فعلی به آن تعلق دارد (همیشه باز نمایش داده می‌شود)
   if(DASH_GRP[view.type])return DASH_GRP[view.type];
   if((view.type==='list'||view.type==='rec')&&view.e&&E[view.e])return E[view.e].grp;
@@ -7951,6 +8002,7 @@ function nav(){
     if(g==='سازمان'&&canSee('risk')&&canView('riskdash'))items+=`<div class="nav-i ${view.type==='riskdash'?'on':''}" onclick="go('riskdash')">🤨 داشبورد ریسک (ISO 31000)</div>`;
     if(g==='استراتژی و تعالی'&&canSee('bsc')&&canView('stratdash'))items+=`<div class="nav-i ${view.type==='stratdash'?'on':''}" onclick="go('stratdash')">🏛️ داشبورد استراتژیک</div>`;
     if(g==='استراتژی و تعالی'&&canSee('swot')&&canView('swotmap'))items+=`<div class="nav-i ${view.type==='swotmap'?'on':''}" onclick="go('swotmap')">🧭 بوم SWOT / PESTEL</div>`;
+    if(g==='مدیریت مالی'&&canSee('sepdoc')&&canView('sepdash'))items+=`<div class="nav-i ${view.type==='sepdash'?'on':''}" onclick="go('sepdash')">⚖️ تطبیق عملیات و حسابداری</div>`;
     if(g==='استراتژی و تعالی'&&canSee('process')&&canView('procmap'))items+=`<div class="nav-i ${view.type==='procmap'?'on':''}" onclick="go('procmap')">🔁 نقشه فرآیندها</div>`;
     if(g==='استراتژی و تعالی'&&canSee('bsc')&&canView('bscmap'))items+=`<div class="nav-i ${view.type==='bscmap'?'on':''}" onclick="go('bscmap')">🗺️ نقشه استراتژی</div>`;
     if(g==='استراتژی و تعالی'&&canSee('bsc')&&canView('bsccanvas'))items+=`<div class="nav-i ${view.type==='bsccanvas'?'on':''}" onclick="go('bsccanvas')">🧭 بوم استراتژی</div>`;
@@ -8069,6 +8121,7 @@ function render(){
     view.type==='gldash'?'📒 دفتر کل و صورت‌های مالی':
     view.type==='glnew'?'🖊️ ثبت سند حسابداری':
     view.type==='procmap'?'🔁 نقشه فرآیندها (ISO)':
+    view.type==='sepdash'?'⚖️ تطبیق عملیات و حسابداری':
     view.type==='riskdash'?'🤨 مدیریت ریسک (ISO 31000)':
     view.type==='charts'?'📊 نمودارها و شاخص‌ها':
     view.type==='swotmap'?'🧭 بوم SWOT و PESTEL':
@@ -8080,7 +8133,7 @@ function render(){
     view.type==='rec'?(E[view.e].ic+' '+(recs[view.id].d.title||E[view.e].n)):
     E[view.e].ic+' '+E[view.e].n;
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',invdash:'invdash',cfaacad:'invdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash'};
+  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',invdash:'invdash',cfaacad:'invdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',sepdash:'sepdash',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -8106,6 +8159,7 @@ function render(){
     else if(view.type==='finform')c.innerHTML=finFormHTML();
     else if(view.type==='invdash'||view.type==='cfaacad')c.innerHTML=invdashHTML();
     else if(view.type==='procmap')c.innerHTML=procmapHTML();
+    else if(view.type==='sepdash')c.innerHTML=sepdashHTML();
     else if(view.type==='riskdash')c.innerHTML=riskdashHTML();
     else if(view.type==='gldash')c.innerHTML=gldashHTML();
     else if(view.type==='glnew')c.innerHTML=glnewHTML();
