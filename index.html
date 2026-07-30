@@ -274,11 +274,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.62</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.63</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.62</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.63</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2533,9 +2533,13 @@ async function pullAll(full){
   setSync('','در حال سینک…');
   let maxU=incremental?syncCursor:'';
   if(incremental){
+    // 🕰 حاشیهٔ امن ۱۵ دقیقه‌ای: updated_at را ساعتِ دستگاهِ فرستنده می‌سازد؛ اگر ساعت یک کاربر عقب باشد،
+    // رکوردش پشت مکان‌نمای سینک بقیه پنهان می‌ماند. با عقب‌کشیدن مکان‌نما، هم‌پوشانی می‌گیریم (ادغام ایمن است).
+    let curLag=syncCursor;
+    try{curLag=new Date(Math.max(0,new Date(syncCursor).getTime()-15*60*1000)).toISOString();}catch(e){}
     let from=0, page=1000;
     while(true){
-      const {data,error}=await sb.from('records').select('*').gt('updated_at',syncCursor).order('updated_at',{ascending:true}).range(from,from+page-1);
+      const {data,error}=await sb.from('records').select('*').gt('updated_at',curLag).order('updated_at',{ascending:true}).range(from,from+page-1);
       if(error){setSync('err','خطای سینک: '+String(error.message||'').slice(0,80));return;}
       (data||[]).forEach(row=>{
         const loc=recs[row.id], remoteU=new Date(row.updated_at).getTime();
@@ -2580,6 +2584,15 @@ async function pullAll(full){
   syncCursor=maxU||new Date().toISOString();localStorage.setItem('xr_synccur',syncCursor);
   // اگر کاربر تازه از «در انتظار تایید» به نقش واقعی ارتقا یافت، یک سینک کامل بزن تا داده‌های تازه‌مجاز بیایند
   if(!full&&wasPending&&!isPending()){return pullAll(true);}
+  // 🔑 اگر نقش یا سطح دسترسی کاربر از آخرین سینک عوض شده (مثلاً ادمین دسترسی وسیع‌تری داده)،
+  // سینک کامل بزن تا رکوردهای قدیمیِ تازه‌مجاز هم بیایند — و گرنه «اطلاعات گذشته» هرگز نمی‌آمد.
+  try{
+    let sig='';try{sig=myRole()+'|'+JSON.stringify(aclFor()||{});}catch(e){sig=myRole();}
+    sig=String(sig.length)+':'+sig.slice(0,400);
+    const prev=localStorage.getItem('xr_rolesig');
+    localStorage.setItem('xr_rolesig',sig);
+    if(!full&&prev&&prev!==sig&&!isPending()){return pullAll(true);}
+  }catch(e){}
   afterPull();
 }
 let _flushing=false;
@@ -2628,6 +2641,7 @@ async function flush(){
 let _rtTimer=null;
 function subscribeRT(){
   if(!sb||!session)return;
+  try{if(rt)sb.removeChannel(rt);}catch(e){}
   rt=sb.channel('recs').on('postgres_changes',{event:'*',schema:'public',table:'records'},p=>{
     const row=p.new&&p.new.id?p.new:p.old; if(!row||!row.id)return;
     const remoteU=new Date(row.updated_at||Date.now()).getTime();
@@ -2638,7 +2652,13 @@ function subscribeRT(){
       clearTimeout(_rtTimer);
       _rtTimer=setTimeout(()=>{saveLocal();render();},400);
     }
-  }).subscribe();
+  }).subscribe(st=>{
+    // 📡 اگر کانال قطع شد (خواب دستگاه، قطعی شبکه)، خودکار دوباره وصل شو
+    if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'||st==='CLOSED'){
+      clearTimeout(window._rtReTimer);
+      window._rtReTimer=setTimeout(()=>{try{subscribeRT();}catch(e){}},6000);
+    }
+  });
 }
 
 /* ================= کاربران و سطح دسترسی ================= */
@@ -26639,6 +26659,14 @@ window.addEventListener('online',()=>{flush();});
 let lastPull=0;
 window.addEventListener('focus',()=>{if(sb&&session&&Date.now()-lastPull>15000){lastPull=Date.now();pullAll().then(()=>flush());}});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&sb&&session&&Date.now()-lastPull>15000){lastPull=Date.now();pullAll().then(()=>flush());}});
+// 🔁 سینک دوره‌ای: حتی وقتی کاربر پنجره را باز نگه داشته، هر ۴۵ ثانیه تغییرات بقیه گرفته شود
+// (اگر رئال‌تایم سرور فعال باشد این فقط پشتیبان است؛ اگر نباشد، همین مسیر اصلی هم‌دیدی کاربران است)
+setInterval(()=>{
+  if(sb&&session&&!document.hidden&&navigator.onLine!==false&&!_flushing&&Date.now()-lastPull>30000){
+    lastPull=Date.now();
+    pullAll().then(()=>flush()).catch(()=>{});
+  }
+},45000);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
