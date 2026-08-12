@@ -274,11 +274,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.75</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.76</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.75</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.76</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2711,7 +2711,22 @@ function subscribeRT(){
 }
 
 /* ================= کاربران و سطح دسترسی ================= */
-const ROLES=['ادمین','مدیرارشد','مدیر','معاون','کارشناس ارشد','کارشناس','کاربر'];
+const ROLES=['ادمین','مدیرارشد','مدیر','کارمند'];
+const ROLE_LEGACY={'معاون':'مدیر','کارشناس ارشد':'کارمند','کارشناس':'کارمند','کاربر':'کارمند'};
+/* 🛡️ پیش‌فرض دید سه‌سطحی — تا وقتی ادمین تنظیم سفارشی نگذاشته اعمال می‌شود */
+const DEF_ACL={
+ 'کارمند':{
+   grp:['مالی'],
+   ent:['bank','tx','budget','pbudget','expense','plmonth','sepdoc','cheque','payroll','payslip','hrcontract','bizcontract','saletarget','perfkpi','company','share','business','orgunit','whcount','waste','purchinv','purchline','channel','settle','whouse','whmove','hr','team'],
+   views:['ceodash','pldash','bankdash','arapdash','chqdash','sepfin','sepdash','pfdash','plreport','perfdash','aligndash','targetdash','pudash','supdash','smdash','mbuilder','impcenter','pinvnew']},
+ 'مدیر':{
+   grp:[],
+   ent:['bank','tx','sepdoc','payroll','share','hrcontract'],
+   views:['bankdash','sepfin','sepdash','impcenter']},
+ 'مدیرارشد':{grp:[],ent:[],views:[]}
+};
+const EMP_EDIT=['task','rtask','worklog','leave','letter','crm','customer','contact','meeting','invoice','invline','note','idea','perfscore'];
+function defHidden(kind,key){const r=myRole();const d=DEF_ACL[r];return !!(d&&d[kind]&&d[kind].includes(key));}
 const FIN=['bank','tx','budget','hrcontract','bizcontract'];
 const MIDSET=['project','task','rtask','meeting','idea','crm','contact','letter','leave','milestone','product','sale','purchase','channel','bsc','measure','efqm'];
 const LOWSET=['task','idea','leave'];
@@ -2726,7 +2741,7 @@ const PENDING='در انتظار تایید';
 function myRole(){
   if(!session)return 'ادمین'; // حالت محلی
   const u=usersList().find(x=>x.email&&x.email.toLowerCase()===myEmail().toLowerCase());
-  if(u)return u.role;
+  if(u)return ROLE_LEGACY[u.role]||u.role;
   if(!usersList().length)return 'ادمین'; // اولین کاربر
   return PENDING; // ثبت‌نامی جدید تا تایید ادمین هیچ دسترسی‌ای ندارد
 }
@@ -3066,17 +3081,18 @@ const VIEW_GRP={bizkpi:'مدیریت کسب و کار',bizdash:'مدیریت ک�
  findash:'مالی تخصصی (IFRS)',invdash:'سرمایه‌گذاری و ثروت',procmap:'فرآیندها (ISO)',riskdash:'سازمان',
  epcfdash:'EPCF',portdash:'EPCF',perfdash:'EPCF',cdash:'ساخت و ساز',tokendash:'توکن‌سازی',agiledash:'توسعه نرم‌افزار',
  bscmap:'استراتژی و تعالی',bsccanvas:'استراتژی و تعالی',gdash:'رشد شخصی'};
-function grpHidden(g){if(isAdmin()||!g)return false;return (aclFor().grp||{})[g]==='hide';}
+function grpHidden(g){if(isAdmin()||!g)return false;const v=(aclFor().grp||{})[g];if(v)return v==='hide';return defHidden('grp',g);}
 function canView(v){
   if(isPending())return false;
   if(VIEW_MOD[v]&&!viewEnabled(v))return false; // ماژول خاموش
   if(isAdmin())return true;
   if(grpHidden(VIEW_GRP[v]))return false; // کل گروه برای این نقش مخفی است
-  return (aclFor().views||{})[v]!=='hide';
+  const x=(aclFor().views||{})[v];if(x)return x!=='hide';
+  return !defHidden('views',v);
 }
 function entLevel(e){if(isAdmin())return null;return aclFor().ent[e]||null;} // hide|read|edit|full|null
 function fldMode(e,k){if(isAdmin())return null;return aclFor().fld[e+'.'+k]||null;} // hide|read|null
-function canSee(e){if(isPending())return false;if(!entEnabled(e))return false;if(!isAdmin()&&E[e]&&grpHidden(E[e].grp))return false;return entLevel(e)!=='hide';}
+function canSee(e){if(isPending())return false;if(!entEnabled(e))return false;if(!isAdmin()&&E[e]&&grpHidden(E[e].grp))return false;const l=entLevel(e);if(l)return l!=='hide';return !defHidden('ent',e);}
 function visFields(e){return E[e].f.filter(f=>fldMode(e,f.k)!=='hide');}
 
 function can(a,e,rec){ // a: 'c' ایجاد | 'e' ویرایش | 'd' حذف
@@ -3102,6 +3118,7 @@ function can(a,e,rec){ // a: 'c' ایجاد | 'e' ویرایش | 'd' حذف
   }
   // ۱) اگر ادمین برای این نقش/کاربر تنظیم سفارشی گذاشته، همان حاکم است
   const lvl=entLevel(e);
+  if(!lvl&&defHidden('ent',e))return false; // پیش‌فرض سه‌سطحی: موجودیت مخفی = بدون اثرگذاری
   if(lvl){
     if(lvl==='full')return true;
     if(lvl==='edit')return a!=='d'||(rec&&rec.d._by===myEmail());
@@ -3111,10 +3128,7 @@ function can(a,e,rec){ // a: 'c' ایجاد | 'e' ویرایش | 'd' حذف
   if(r==='مدیرارشد')return true;
   if(GROWTH.includes(e))return a!=='d'||(rec&&rec.d._by===myEmail());
   if(r==='مدیر')return a!=='d'||(rec&&rec.d._by===myEmail());
-  if(r==='معاون')return a!=='d'&&!FIN.includes(e);
-  if(r==='کارشناس ارشد')return a!=='d'&&MIDSET.includes(e);
-  if(r==='کارشناس')return a!=='d'&&LOWSET.includes(e);
-  if(r==='کاربر')return a!=='d'&&['leave','idea'].includes(e);
+  if(r==='کارمند')return a!=='d'&&EMP_EDIT.includes(e)&&!defHidden('ent',e);
   // نقش سفارشی بدون تنظیم: فقط مشاهده
   return false;
 }
@@ -8349,7 +8363,7 @@ function nav(){
   <div class="nav-i ${view.type==='schema'?'on':''}" onclick="go('schema')">🧩 فیلدها و بخش‌ها</div>
   <div class="nav-i ${view.type==='backupdash'?'on':''}" onclick="go('backupdash')">💾 پشتیبان‌گیری و بازیابی</div>`;
   else if(!isPending())h+=`<div class="nav-i ${view.type==='backupdash'?'on':''}" onclick="go('backupdash')">🚨 حالت بحران (تغییرات من)</div>`;
-  if(!isPending())h+=`<div class="nav-i ${view.type==='impcenter'?'on':''}" onclick="go('impcenter')">📥 مرکز ورود اکسل</div>`;
+  if(!isPending()&&canView('impcenter'))h+=`<div class="nav-i ${view.type==='impcenter'?'on':''}" onclick="go('impcenter')">📥 مرکز ورود اکسل</div>`;
   // 🏢 انتخاب‌گر کسب‌وکار فعالِ سراسری (موقعیت قابل جابجایی: بالا / پایین / مخفی)
   if(bizSelPos()==='top')h+=bizSelectorHTML();
   navGroupsOrdered().forEach(g=>{
@@ -12414,7 +12428,7 @@ function rmRole(){
   const {t,v}=aclTarget(); if(t!=='role'||ROLES.includes(v)){alert('نقش‌های پایه حذف نمی‌شوند');return;}
   if(!confirm('نقش «'+v+'» حذف شود؟ کاربرانش به «کاربر» برمی‌گردند'))return;
   saveAcl(d=>{if(d.roles)delete d.roles[v];});
-  saveUsers(usersList().map(u=>u.role===v?{...u,role:'کاربر'}:u));
+  saveUsers(usersList().map(u=>u.role===v?{...u,role:'کارمند'}:u));
   view.aclV=null;render();
 }
 function aclHTML(){
