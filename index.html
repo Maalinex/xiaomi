@@ -274,11 +274,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.80</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.81</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.80</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.81</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2406,8 +2406,8 @@ function _patchCaches(old,rec){
   if(hit('sale')){_prodSaleIdx=null;_fifoCache=null;_ceoLineCache=null;_ceoDayCache=null;}
   if(hit('waste')){_prodWasteIdx=null;_fifoCache=null;}
   if(hit('purchase')){_prodPurchIdx=null;_fifoCache=null;}
-  if(hit('invoice')||hit('invline')){_invLineIdx=null;_ceoLineCache=null;_ceoDayCache=null;_whQtyCache=null;}
-  if(hit('purchinv')||hit('purchline')){_pinvLineIdx=null;_whQtyCache=null;}
+  if(hit('invoice')||hit('invline')){_invLineIdx=null;_ceoLineCache=null;_ceoDayCache=null;_whQtyCache=null;_fifoCache=null;}
+  if(hit('purchinv')||hit('purchline')){_pinvLineIdx=null;_whQtyCache=null;_fifoCache=null;}
   if(hit('product')){_fifoCache=null;_ceoLineCache=null;_ceoDayCache=null;}
 }
 let _scoping=false;
@@ -4584,17 +4584,37 @@ function _fifoCalcRaw(p){
   // لایه‌های ورودی: موجودی اول دوره (به قیمت خرید واحد کالا) + خریدها به ترتیب تاریخ
   const layers=[];
   // تاریخ لایه اول دوره: اولین خرید یا تاریخ ثبت کالا (برای محاسبه سن ماندگاری)
-  const _purs=purchasesOf(p.id).slice().sort((a,b)=>dkey(a).localeCompare(dkey(b)));
-  const s0date=(_purs[0]&&ds(_purs[0].d.date))||(p.c?new Date(p.c).toISOString().slice(0,10):'');
+  const buys=[];
+  purchasesOf(p.id).forEach(x=>{const q=+x.d.qty||0;if(q>0)buys.push({q,c:puUnitToman(x)+((+x.d.extra||0)/q),d:ds(x.d.date)||'',u:x.u||0});});
+  byE('purchline').forEach(l=>{                                  // 🧾 ردیف‌های فاکتور خرید هم لایهٔ بهای تمام‌شده‌اند
+    if(relIds(l,'product')[0]!==p.id)return;
+    const inv=recs[relIds(l,'purchinv')[0]];if(!inv||inv.del)return;
+    const stt=inv.d.status||'';if(stt==='پیش‌نویس'||stt==='باطل')return;
+    const q=+l.d.qty||0;if(q<=0)return;
+    let mul=1;try{mul=curMul(inv);}catch(e){}
+    const c=Math.max(0,(q*(+l.d.price||0)-(+l.d.ldisc||0))/q)*mul;
+    buys.push({q,c,d:ds(inv.d.date)||'',u:inv.u||0});
+  });
+  buys.sort((a,b)=>((a.d||'9999-12-31')+'#'+String(a.u).padStart(15,'0')).localeCompare((b.d||'9999-12-31')+'#'+String(b.u).padStart(15,'0')));
+  const s0date=(buys[0]&&buys[0].d)||(p.c?new Date(p.c).toISOString().slice(0,10):'');
   if((p.d.stock0||0)>0)layers.push({q:p.d.stock0,c:p.d.buy||0,d:s0date});
-  _purs.forEach(x=>{const q=x.d.qty||0;if(q>0)layers.push({q,c:puUnitToman(x)+((+x.d.extra||0)/q),d:ds(x.d.date)||''});});
+  buys.forEach(b2=>layers.push({q:b2.q,c:b2.c,d:b2.d}));
   let lastCost=layers.length?layers[layers.length-1].c:(p.d.buy||0);
   // مصرف لایه‌ها با فروش‌ها به ترتیب تاریخ
   let profit=0,cogs=0,shortage=0;const bySale={};
-  salesOf(p.id).slice()
-    .sort((a,b)=>dkey(a).localeCompare(dkey(b)))
-    .forEach(s=>{
-      let need=s.d.qty||0, cost=0;
+  const sells=[];
+  salesOf(p.id).forEach(s2=>sells.push({id:s2.id,q:+s2.d.qty||0,price:+s2.d.price||0,extra:+s2.d.extra||0,d:ds(s2.d.date)||'',u:s2.u||0}));
+  byE('invline').forEach(l=>{                                    // 🧾 ردیف‌های فاکتور فروش هم مصرف‌کنندهٔ لایه‌ها هستند
+    if(relIds(l,'product')[0]!==p.id)return;
+    const inv=recs[relIds(l,'invoice')[0]];if(!inv||inv.del)return;
+    if((inv.d.kind||'')!=='فاکتور فروش')return;
+    const stt=inv.d.status||'';if(stt==='پیش‌نویس'||stt==='باطل')return;
+    const q=+l.d.qty||0;if(q<=0)return;
+    sells.push({id:l.id,q,price:+l.d.price||0,extra:+l.d.ldisc||0,d:ds(inv.d.date)||'',u:inv.u||0});
+  });
+  sells.sort((a,b)=>((a.d||'9999-12-31')+'#'+String(a.u).padStart(15,'0')).localeCompare((b.d||'9999-12-31')+'#'+String(b.u).padStart(15,'0')));
+  sells.forEach(s=>{
+      let need=s.q, cost=0;
       while(need>0&&layers.length){
         const L=layers[0], take=Math.min(need,L.q);
         cost+=take*L.c; L.q-=take; need-=take;
@@ -4602,7 +4622,7 @@ function _fifoCalcRaw(p){
       }
       if(need>0){cost+=need*lastCost;shortage+=need;} // فروش بیش از موجودی: با آخرین بهای شناخته‌شده
       cogs+=cost;
-      const pr=(s.d.qty||0)*(s.d.price||0)-(s.d.extra||0)-cost;
+      const pr=s.q*s.price-s.extra-cost;
       bySale[s.id]=pr; profit+=pr;
     });
   // 🗑 مصرف لایه‌ها بابت ضایعات (خروج از انبار) — پس از فروش‌ها
