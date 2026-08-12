@@ -274,11 +274,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.73</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.75</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.73</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.75</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -8583,8 +8583,6 @@ function render(){
       <button class="btn gh sm" onclick="location.reload()">بارگذاری مجدد اپ</button></div>`;
   }
   try{if(view.type!=='modcfg'){const bn=modBannerHTML();if(bn)c.insertAdjacentHTML('afterbegin',bn);}}catch(e){} // بنر ماژول تازه
-  try{if(view.type!=='targetdash'&&view.type!=='modcfg'){const tb=targetBannerHTML();if(tb)c.insertAdjacentHTML('afterbegin',tb);}}catch(e){} // بنر هشدار تارگت
-  try{if(view.type!=='chqdash'&&view.type!=='modcfg'){const cb=chqBoardBanner();if(cb)c.insertAdjacentHTML('afterbegin',cb);}}catch(e){} // بنر چک سررسیدگذشته
   try{applySecLayout();}catch(e){} // چیدمان سفارشی المان‌های صفحه
   try{srchApplyAll();}catch(e){} // 🔍 بازاعمال جستجوهای درون‌صفحه‌ای
   try{if(_foc){let el=null;
