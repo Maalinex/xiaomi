@@ -274,11 +274,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.79</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.80</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.79</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.80</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -3549,7 +3549,68 @@ function sepFindMatch(doc,ops,usedOp){
   });
   return best;
 }
+
+/* 🧩 همگام‌سازی خودکار کد تفصیل از اسناد سپیدار → مشتری/تأمین‌کننده عملیات */
+function sepPartyMap(){
+  const m={};
+  byE('sepdoc').forEach(r=>{
+    const nm=sepNorm(r.d.party||''),pc=sepNorm(r.d.pcode||'');
+    if(!nm||!pc)return;
+    (m[nm]||(m[nm]={}))[pc]=(m[nm][pc]||0)+1;
+  });
+  return m;
+}
+function sepCodeSync(silent){
+  const map=sepPartyMap();
+  const res={set:[],already:0,amb:[],sugg:[]};
+  const tryRec=r=>{
+    if(r.del)return;
+    const nm=sepNorm(r.d.title||'');if(!nm)return;
+    const cur=sepNorm(r.d.code||'');
+    const hit=map[nm];
+    if(hit){
+      const codes=Object.keys(hit);
+      if(codes.length===1){
+        if(cur===codes[0]){res.already++;return;}
+        if(!cur){r.d={...r.d,code:codes[0]};r.u=Date.now();put(r);res.set.push({t:r.d.title,code:codes[0]});return;}
+        res.amb.push({id:r.id,t:r.d.title,cur,codes});
+      }else res.amb.push({id:r.id,t:r.d.title,cur,codes});
+    }else if(!cur){
+      const cand=Object.keys(map).filter(k=>k.length>2&&(k.includes(nm)||nm.includes(k)));
+      if(cand.length===1){
+        const codes=Object.keys(map[cand[0]]);
+        if(codes.length===1)res.sugg.push({id:r.id,t:r.d.title,party:cand[0],code:codes[0]});
+      }
+    }
+  };
+  byE('customer').slice().forEach(tryRec);   // کپی: put داخل حلقه آرایهٔ زنده را جابه‌جا می‌کند
+  byE('crm').slice().forEach(tryRec);
+  if(!silent){
+    const el=document.getElementById('sepCodeOut');
+    if(el){
+      el.innerHTML=`<div style="margin-top:8px">
+        <div class="chip" style="display:inline-block">✅ کد جدید ثبت شد: <b>${res.set.length.toLocaleString('fa-IR')}</b></div>
+        <div class="chip" style="display:inline-block">از قبل درست: <b>${res.already.toLocaleString('fa-IR')}</b></div>
+        ${res.set.length?`<div style="font-size:11px;color:var(--tx2);margin-top:4px">${res.set.slice(0,10).map(x=>esc(x.t)+' ← '+esc(x.code)).join(' │ ')}${res.set.length>10?' │ …':''}</div>`:''}
+        ${res.sugg.length?`<div style="margin-top:8px"><b style="font-size:12px">🔎 پیشنهادها (شباهت نام — با تأیید شما اعمال می‌شود):</b>
+          ${res.sugg.map(x=>`<div style="display:flex;gap:8px;align-items:center;padding:4px 0;font-size:12px;border-bottom:1px solid var(--line)">
+            <span style="flex:1">${esc(x.t)} ↔ «${esc(x.party)}» (کد ${esc(x.code)})</span>
+            <button class="btn sm" onclick="sepCodeApply('${x.id}','${esc(x.code)}');sepCodeSync()">✔ اعمال</button></div>`).join('')}</div>`:''}
+        ${res.amb.length?`<div style="margin-top:8px"><b style="font-size:12px;color:var(--warn)">⚠️ نیازمند بررسی دستی (چند کد یا کد متفاوت):</b>
+          ${res.amb.map(x=>`<div style="display:flex;gap:8px;align-items:center;padding:4px 0;font-size:12px;border-bottom:1px solid var(--line)">
+            <span style="flex:1">${esc(x.t)}${x.cur?' (کد فعلی: '+esc(x.cur)+')':''}</span>
+            ${x.codes.map(c=>`<button class="btn gh sm" onclick="sepCodeApply('${x.id}','${esc(c)}');sepCodeSync()">${esc(c)}</button>`).join('')}</div>`).join('')}</div>`:''}
+        ${(!res.set.length&&!res.sugg.length&&!res.amb.length)?'<div class="hint">همهٔ طرف‌حساب‌های شناخته‌شده کد دارند — چیزی برای همگام‌سازی نبود.</div>':''}
+      </div>`;
+    }
+  }
+  return res;
+}
+window.sepCodeApply=function(id,code){const r=recs[id];if(!r||r.del)return;r.d={...r.d,code};r.u=Date.now();put(r);};
+window.sepCodeSync=sepCodeSync;
 function sepAutoMatch(){
+  try{sepCodeSync(true);}catch(e){} // اول کدها را یاد بگیر، بعد تطبیق کن
+
   const usedOp=sepLinkedOpIds();
   let matched=0;
   byE('sepdoc').forEach(doc=>{
@@ -3586,7 +3647,9 @@ function sepdashHTML(){
   h+=`<div class="sec"><h3>⚖️ تطبیق عملیات و حسابداری
     <span style="flex:1"></span>
     <button class="btn sm" onclick="sepAutoMatch()">🤖 تطبیق خودکار</button>
+    <button class="btn gh sm" onclick="sepCodeSync()">🧩 دریافت کدهای تفصیل از سپیدار</button>
     <button class="btn gh sm" onclick="go('list','sepdoc')">🗂️ اسناد حسابداری</button></h3>
+    <div id="sepCodeOut"></div>
     <div class="comp" style="margin-bottom:6px">
       <div class="chip">اسناد سپیدار: <b>${docs.length.toLocaleString('fa-IR')}</b></div>
       <div class="chip">فروش حسابداری (بازهٔ اسناد): <b>${money(sSale)}</b></div>
