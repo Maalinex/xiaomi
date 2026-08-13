@@ -280,11 +280,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.85</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.86</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.85</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.86</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -10657,7 +10657,7 @@ function ceodashHTML(){
   // 📅 حالت دوره: d7/d30 نسبی │ w هفتگی │ m ماهانه │ q فصلی │ y سالانه (تقویم شمسی)
   const _tp=t0.split('-').map(Number), _jt=g2j(_tp[0],_tp[1],_tp[2]);
   const _doy=Math.round((new Date(t0)-new Date(_jgIso(_jt[0],1,1)))/86400000);
-  if(!view.cpm)view.cpm=(view.cp==30||view.cp==='30')?'d30':'d7';
+  if(!view.cpm)view.cpm='d30';
   if(!view.cpy)view.cpy=_jt[0];
   if(!view.cpn)view.cpn={w:Math.min(52,Math.floor(_doy/7)+1),m:_jt[1],q:Math.ceil(_jt[1]/3),y:1}[view.cpm]||1;
   const MODE=view.cpm, JY=+view.cpy, JN=+view.cpn;
@@ -10851,6 +10851,58 @@ function ceodashHTML(){
     if(PS==='op'){
       if(!byE('invoice').length&&!byE('sale').length)h+=plmFallbackHTML('ceo');
       h+=renderCards('prof');
+      // ⚖️ مقایسهٔ شاخص‌به‌شاخص با دورهٔ قبل
+      {
+        const prevOx=ceoOpex(b,prevFrom,prevTo).tot;
+        const prevCogsV=ceoRange(b,prevFrom,prevTo,'cogs');
+        const prevOp=prevGp-prevOx;
+        const cmpRows=[
+          ['فروش خالص',net,prevNet,true],
+          ['بهای تمام‌شده (COGS)',cogs,prevCogsV,false],
+          ['سود ناخالص',gp,prevGp,true],
+          ['هزینهٔ عملیاتی',ox.tot,prevOx,false],
+          ['سود عملیاتی',op,prevOp,true]];
+        const mxc=Math.max(1,...cmpRows.map(r2=>Math.max(Math.abs(r2[1]),Math.abs(r2[2]))));
+        h+=`<div class="sec"><h3>⚖️ مقایسهٔ دورهٔ جاری با دورهٔ قبل <span style="font-size:11px;color:var(--tx2);font-weight:400">│ ${esc(periodLabel)} در برابر دورهٔ قبلی هم‌طول</span></h3>
+          <div class="tblwrap"><table style="font-size:12.5px"><thead><tr><th style="text-align:right">شاخص</th><th>دورهٔ جاری</th><th>دورهٔ قبل</th><th>تغییر</th><th>٪</th><th style="min-width:200px">مقایسه</th></tr></thead><tbody>
+          ${cmpRows.map(([t,c2,p2,goodUp])=>{
+            const df=c2-p2;const pct=p2!==0?df/Math.abs(p2)*100:null;
+            const up=df>0.5,dn=df<-0.5;const good=up?goodUp:dn?!goodUp:null;
+            const col=good==null?'var(--tx2)':good?'var(--ok)':'var(--bad)';
+            return `<tr><td style="text-align:right;font-weight:700">${t}</td>
+              <td style="font-weight:800">${money(c2)}</td><td style="color:var(--tx2)">${money(p2)}</td>
+              <td style="color:${col};font-weight:700">${up?'▲':dn?'▼':'＝'} ${money(Math.abs(df))}</td>
+              <td style="color:${col};font-weight:700">${pct==null?'—':(Math.abs(pct)).toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪'}</td>
+              <td><div style="display:flex;flex-direction:column;gap:2px">
+                <div style="height:7px;border-radius:4px;background:var(--ac);width:${(Math.abs(c2)/mxc*100).toFixed(1)}%"></div>
+                <div style="height:7px;border-radius:4px;background:#c9d6ea;width:${(Math.abs(p2)/mxc*100).toFixed(1)}%"></div></div></td></tr>`;}).join('')}
+          </tbody></table></div>
+          <div style="font-size:10.5px;color:var(--tx2);margin-top:4px">میلهٔ آبی = دورهٔ جاری │ خاکستری = دورهٔ قبل</div></div>`;
+      }
+      // 🧩 فروش و سود به تفکیک گروه کالا
+      {
+        const prevLines=ceoSaleLines(b,prevFrom,prevTo);
+        const gsum=ls=>{const m={};ls.forEach(L=>{const p2=recs[L.pid];const g=(p2&&p2.d.grp)||'بدون گروه';(m[g]||(m[g]={rev:0,gp:0,q:0}));m[g].rev+=L.rev;m[g].gp+=L.rev-L.cogs;m[g].q+=L.q;});return m;};
+        const cur=gsum(lines),prv=gsum(prevLines);
+        const keys=Object.keys(cur).sort((a,b2)=>cur[b2].rev-cur[a].rev);
+        if(keys.length){
+          const mx=Math.max(1,...keys.map(k=>cur[k].rev));
+          h+=`<div class="sec"><h3>🧩 فروش به تفکیک گروه کالا <span style="font-size:11px;color:var(--tx2);font-weight:400">│ ${esc(periodLabel)}</span></h3>
+            ${keys.map(k=>{const c2=cur[k],p2=prv[k]||{rev:0};
+              const df=p2.rev?((c2.rev-p2.rev)/p2.rev*100):null;
+              const mrg=c2.rev>0?c2.gp/c2.rev*100:0;
+              return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px">
+                <div style="width:150px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(k)}</div>
+                <div style="flex:1;background:var(--bg3);border-radius:6px;height:16px;position:relative;overflow:hidden">
+                  <div style="position:absolute;inset-inline-start:0;top:0;bottom:0;width:${(c2.rev/mx*100).toFixed(1)}%;background:linear-gradient(90deg,#3d7bff,#7c5cff);border-radius:6px"></div>
+                  <span style="position:absolute;inset-inline-start:8px;top:0;font-size:10px;line-height:16px;color:#fff">${money(c2.rev)}</span></div>
+                <div style="width:70px;text-align:center">${c2.q.toLocaleString('fa-IR')} عدد</div>
+                <div style="width:90px;text-align:center">حاشیه ${mrg.toLocaleString('fa-IR',{maximumFractionDigits:0})}٪</div>
+                <div style="width:90px;text-align:center;color:${df==null?'var(--tx2)':df>=0?'var(--ok)':'var(--bad)'}">${df==null?'جدید':(df>=0?'▲':'▼')+Math.abs(df).toLocaleString('fa-IR',{maximumFractionDigits:0})+'٪'}</div>
+              </div>`;}).join('')}
+            <div style="font-size:10.5px;color:var(--tx2);margin-top:4px">ستون آخر: تغییر نسبت به دورهٔ قبل │ «گروه کالا» را در پروندهٔ هر کالا پر کن تا تفکیک دقیق شود.</div></div>`;
+        }
+      }
       const f2=r=>esc(prodName(r.pid));
       h+=topTbl('🏆 ۱۰ کالای پرفروش (تعدادی)',rows.slice().sort((a,b)=>b.q-a.q).slice(0,10),[['کالا',f2,'text-align:right'],['تعداد',r=>r.q.toLocaleString('fa-IR')],['فروش',r=>money(r.rev)],['حاشیه',r=>r.m.toFixed(0)+'٪']]);
       h+=topTbl('💎 ۱۰ کالای پرسود (مبلغی)',rows.slice().sort((a,b)=>b.pr-a.pr).slice(0,10),[['کالا',f2,'text-align:right'],['سود',r=>money(r.pr)],['فروش',r=>money(r.rev)],['حاشیه',r=>r.m.toFixed(0)+'٪']]);
