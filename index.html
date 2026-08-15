@@ -280,11 +280,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.86</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.88</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.86</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.88</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -12906,27 +12906,16 @@ const INDICATORS=[
    const extra=[CH.yellow,CH.violet,CH.aqua,CH.red];let xi=0;
    return donutSVG(Object.entries(stMap).map(([s,v])=>({l:STATFA[s]||s,v,c:stColor[s]||extra[xi++%extra.length]})));}},
  {k:'prjProg',ic:'🏗️',n:'پیشرفت پروژه‌ها',fn:dom=>hbarsHTML(chE('project',dom).map(p=>({l:p.d.title||'—',v:projectProg(p),href:`go('rec','project','${p.id}')`})).sort((a,b)=>b.v-a.v).slice(0,10),CH.blue)},
- {k:'objProg',ic:'🎯',n:'تحقق اهداف استراتژیک',fn:dom=>barsTraffic(chE('bsc',dom).filter(x=>x.d.kind!=='استراتژی کلان').map(o=>({l:o.d.title||'—',v:bscProg(o),href:`go('rec','bsc','${o.id}')`})).sort((a,b)=>b.v-a.v).slice(0,10))},
- {k:'stratProg',ic:'🔗',n:'تحقق استراتژی‌های کلان',fn:dom=>hbarsHTML(chE('bsc',dom).filter(x=>x.d.kind==='استراتژی کلان').map(o=>({l:o.d.title||'—',v:bscProg(o),href:`go('rec','bsc','${o.id}')`})).sort((a,b)=>b.v-a.v).slice(0,10),CH.violet)},
- {k:'bscLights',ic:'⚖️',n:'اهداف BSC (چراغ وضعیت)',fn:dom=>barsTraffic(byE('bsc').filter(x=>dom==='_h'?true:chInDom(x,dom)).map(x=>({l:(x.d.persp?x.d.persp+' │ ':'')+(x.d.title||'—'),v:bscProg(x),href:`go('rec','bsc','${x.id}')`})).sort((a,b)=>b.v-a.v).slice(0,12))},
- {k:'measures',ic:'🎚️',n:'سنجه‌های BSC (فعلی از هدف)',fn:dom=>barsTraffic(byE('measure').filter(m=>{const b=relIds(m,'bsc')[0];return dom==='_h'||!b||!recs[b]?dom==='_h':chInDom(recs[b],dom);}).map(m=>({l:m.d.title||'—',v:measureProg(m),sub:fmtN(m.d.current)+' از '+fmtN(m.d.target)+' '+(m.d.unit||''),href:`go('rec','measure','${m.id}')`})).slice(0,12))},
  {k:'cash',ic:'💳',n:'دریافت و پرداخت — ۶ ماه اخیر',fn:dom=>monthlySVG(chE('tx',dom))},
  {k:'bank',ic:'🏦',n:'موجودی حساب‌های بانکی',fn:dom=>barsMoney(chE('bank',dom).map(b=>({l:(b.d.title||'—')+(b.d.bank?' │ '+b.d.bank:''),v:byE('tx').filter(t=>relIds(t,'bank').includes(b.id)).reduce((a,t)=>a+(t.d.kind==='دریافت'?1:-1)*(+t.d.amount||0),0),href:`go('rec','bank','${b.id}')`})),CH.aqua)},
  {k:'budget',ic:'💹',n:'بودجه: هزینه‌شده از مصوب',fn:dom=>barsTraffic(chE('budget',dom).map(b=>{
    const spent=byE('tx').filter(t=>relIds(t,'budget').includes(b.id)&&t.d.kind==='پرداخت').reduce((a,t)=>a+(+t.d.amount||0),0);
    const amt=+b.d.amount||0;return {l:b.d.title||'—',v:amt?Math.min(100,spent/amt*100):0,sub:money(spent)+' از '+money(amt),href:`go('rec','budget','${b.id}')`};}))},
- {k:'risks',ic:'🤨',n:'ریسک‌ها بر اساس امتیاز',fn:dom=>{
-   const rows=chE('risk',dom).map(r=>({l:r.d.title||'—',s:rmNet(r),href:`go('rec','risk','${r.id}')`})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).slice(0,10);
-   if(!rows.length)return `<div class="empty">ریسک امتیازدهی‌شده‌ای نیست</div>`;
-   return rows.map(x=>`<div style="margin:9px 0;cursor:pointer" onclick="${x.href}">
-     <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%">${esc(x.l)}</span><b style="color:${rmBand(x.s).c}">${x.s.toLocaleString('fa-IR')} از ۲۵ — ${rmBand(x.s).n}</b></div>
-     <div style="background:var(--bg);border-radius:99px;height:9px;overflow:hidden"><div style="width:${Math.round(x.s/25*100)}%;height:100%;border-radius:99px;background:${rmBand(x.s).c}"></div></div></div>`).join('');}},
  {k:'sales',ic:'🛒',n:'فروش و خرید کالا — ۶ ماه اخیر',fn:dom=>{
    const mk=(rows,kind)=>rows.map(s=>({d:{date:s.d.date,kind,amount:(+s.d.qty||0)*(+s.d.price||0)+(+s.d.extra||0)}}));
    return monthlySVG([...mk(chE('sale',dom),'دریافت'),...mk(chE('purchase',dom),'پرداخت')]);}},
  {k:'fifo',ic:'💰',n:'سود محصولات (FIFO)',fn:dom=>barsMoney(chE('product',dom).map(p=>{try{return {l:p.d.title||'—',v:fifoCalc(p).profit,href:`go('rec','product','${p.id}')`};}catch(e){return null;}}),CH.good)},
  {k:'stockVal',ic:'📦',n:'ارزش انبار (FIFO)',fn:dom=>barsMoney(chE('product',dom).map(p=>{try{return {l:p.d.title||'—',v:fifoCalc(p).value,href:`go('rec','product','${p.id}')`};}catch(e){return null;}}),CH.yellow)},
- {k:'efqm',ic:'🏅',n:'امتیاز معیارهای EFQM',fn:dom=>hbarsHTML(byE('efqm').filter(x=>dom==='_h'?true:chInDom(x,dom)).map(x=>({l:x.d.sub||x.d.crit||x.d.title||'—',v:efqmScore(x),href:`go('rec','efqm','${x.id}')`})),CH.violet)},
 ];
 function chSelGet(dom){
   let all={};try{all=JSON.parse(localStorage.getItem('xr_chsel')||'{}');}catch(e){}
