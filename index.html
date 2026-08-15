@@ -280,11 +280,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.91</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.92</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.91</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.92</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2605,6 +2605,7 @@ function afterPull(quiet){ // کاربرِ در انتظار تایید نبای
   }
   const chg=window._pullChg||0;window._pullChg=0;
   if(!quiet||chg>0){invalidateByE();saveLocal();}
+  try{migrateRoles();}catch(e){}
   setSync('ok','سینک شد');
   if(!quiet)render();               // سینک کامل/دستی: رندر عادی
   else if(chg>0)renderSafe();       // سینک پس‌زمینه: فقط اگر واقعاً چیزی تغییر کرده و کاربر بی‌کار است
@@ -2786,6 +2787,15 @@ const MIDSET=['project','task','rtask','meeting','idea','crm','contact','letter'
 const LOWSET=['task','idea','leave'];
 function myEmail(){return session&&session.user?session.user.email:'local';}
 function usersList(){const m=recs[MU];return (m&&!m.del&&m.d.list)||[];}
+function migrateRoles(){ // 🔧 نقش‌های قدیمی → سه‌سطحی جدید (یک‌بار، فقط توسط ادمین)
+  try{
+    if(!isAdmin())return;
+    const l=usersList();if(!l.length)return;
+    let ch=false;
+    const nl=l.map(u=>{const nr=ROLE_LEGACY[u.role];if(nr){ch=true;return {...u,role:nr};}return u;});
+    if(ch)saveUsers(nl);
+  }catch(e){}
+}
 function saveUsers(list){const m=recs[MU]||{id:MU,e:'_users',d:{}};m.d={...m.d,list};m.u=Date.now();m.del=false;put(m);}
 /* 👑 مالک نسخه = اولین کاربری که ثبت‌نام کرده. فقط او «مدیریت محصول» را می‌بیند. */
 function ownerEmail(){const m=recs[MU];if(m&&!m.del&&m.d.owner)return m.d.owner;const l=usersList();return l.length?(l[0].email||''):'';}
@@ -7223,7 +7233,15 @@ function invnewHTML(){
   const custName=invDraft.customer&&recs[invDraft.customer]?recs[invDraft.customer].d.title:'';
   const prodName=id=>id&&recs[id]?recs[id].d.title:'';
   const lbl='style="font-size:11px;color:var(--tx2)"';
-  let h=`<div class="sec"><h3>🧾 صدور فاکتور / پیش‌فاکتور</h3>
+  let h='';
+  if(!byE('customer').length||!byE('product').length){
+    h+=`<div class="sec" style="border-inline-start:3px solid var(--warn)"><b style="font-size:13px">⚠️ فهرست ${!byE('customer').length?'مشتریان':''}${!byE('customer').length&&!byE('product').length?' و ':''}${!byE('product').length?'کالاها':''} روی این دستگاه خالی است</b>
+      <div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:2">اگر مطمئنی در سیستم ثبت شده‌اند، یکی از این دو دلیل است:<br>
+      ۱) همگام‌سازی این دستگاه هنوز کامل نشده — دکمهٔ <b>🔄</b> بالای صفحه را بزن و چند لحظه صبر کن.<br>
+      ۲) حساب شما هنوز توسط ادمین تایید نشده یا نقش/دسترسی‌ات تازه عوض شده — از ادمین بخواه در «👤 کاربران و دسترسی» نقش‌ات را چک کند، بعد یک‌بار خروج و ورود کن.</div>
+      <button class="btn sm" style="margin-top:8px" onclick="pullAll(true)">🔄 دریافت کامل اطلاعات از سرور</button></div>`;
+  }
+  h+=`<div class="sec"><h3>🧾 صدور فاکتور / پیش‌فاکتور</h3>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px">
     <div><label ${lbl}>نوع سند</label><select onchange="invSetHead('kind',this.value)">${['فاکتور فروش','پیش‌فاکتور'].map(k=>`<option ${k===invDraft.kind?'selected':''}>${k}</option>`).join('')}</select></div>
     <div><label ${lbl}>کسب‌وکار</label><select onchange="invSetHead('biz',this.value)"><option value="">—</option>${byE('business').map(x=>`<option value="${x.id}" ${x.id===invDraft.biz?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></div>
