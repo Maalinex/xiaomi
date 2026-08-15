@@ -280,11 +280,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.88</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.89</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.88</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.89</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -5291,6 +5291,12 @@ function aprMine(){
     const to=relIds(l,'tou');
     if(to.some(t=>my.has?my.has(t):[...my].includes(t)))out.push(l);
   });
+  byE('invoice').forEach(v=>{
+    if(v.d._blc!=='pending')return;
+    const ap=relIds(v,'blcap');
+    if(ap.length){if(ap.some(t=>my.has?my.has(t):[...my].includes(t)))out.push(v);}
+    else if(isAdmin()||myRole()==='مدیر'||myRole()==='مدیرارشد')out.push(v);
+  });
   return out;
 }
 function aprCount(){try{return aprMine().length;}catch(e){return 0;}}
@@ -5320,7 +5326,17 @@ function cartHTML(){
     `<button class="btn gh sm" onclick="letCompose('${relIds(l,'fromu')[0]||''}','پاسخ: ${esc((l.d.title||'').replace(/'/g,''))}')">↩️ پاسخ</button>
      <button class="btn gh sm" onclick="letArch('${l.id}')">🗄 بایگانی</button>`)).join('')||'<div class="hint">نامه‌ای در کارتابل شما نیست.</div>';
   if(tab==='sent')body=sent.map(l=>row(l,`<button class="btn gh sm" onclick="letArch('${l.id}')">🗄 بایگانی</button>`)).join('')||'<div class="hint">نامه‌ای ارسال نکرده‌اید.</div>';
-  if(tab==='apr')body=aprs.map(l=>l.e==='leave'?
+  if(tab==='apr')body=aprs.map(l=>l.e==='invoice'?
+    (()=>{let c2={total:0};try{c2=invCalc(l);}catch(e){}
+      const bls=invLinesOf(l.id).filter(x=>{const pid=relIds(x,'product')[0];return pid&&(+x.d.price||0)<invCostOf(pid);});
+      return `<div style="border:1px solid var(--bad);border-radius:12px;padding:10px 14px;margin:8px 0;background:var(--bg2)">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <b style="cursor:pointer" onclick="go('rec','invoice','${l.id}')">🧾 ${esc(l.d.title||'—')} — فروش زیر قیمت خرید</b>
+        <span style="font-size:11px;color:var(--tx2)">مبلغ کل: ${money(c2.total)} │ ${bls.map(x=>{const pid=relIds(x,'product')[0];return esc(recs[pid]?recs[pid].d.title:'')+': '+money(+x.d.price||0)+' (بهای تمام‌شده '+money(invCostOf(pid))+')';}).join(' ، ')}</span>
+        <span style="flex:1"></span>
+        <button class="btn sm" onclick="invBlcApprove('${l.id}',true);render()">✅ تأیید و صدور</button>
+        <button class="btn gh sm" onclick="invBlcApprove('${l.id}',false);render()">⛔ رد</button></div></div>`;})():
+    l.e==='leave'?
     `<div style="border:1px solid var(--warn);border-radius:12px;padding:10px 14px;margin:8px 0;background:var(--bg2)">
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <b>🌴 ${esc(l.d.title||'درخواست مرخصی')}</b>
@@ -6916,10 +6932,40 @@ function invTotalsDraft(){
   const tax=Math.round(base*((+invDraft.taxpct||0)/100));const ship=+invDraft.ship||0;
   return {sub,disc,base,tax,ship,total:base+tax+ship};
 }
+function invCostOf(pid){const p=recs[pid];if(!p)return 0;try{const f=fifoCalc(p);if(f.avg>0)return f.avg;}catch(e){}return +p.d.buy||0;}
+function blcMode(){const m=recs[MO];return (m&&!m.del&&m.d._blc)||'self';}
+window.saveBlcMode=function(v){const m=recs[MO]||{id:MO,e:'_opts',d:{}};m.d={...m.d,_blc:v};m.u=Date.now();m.del=false;put(m);};
+function blcLines(){return (invDraft&&invDraft.lines||[]).filter(l=>l.product&&(+l.qty||0)>0&&(+l.price||0)>0&&(+l.price||0)<invCostOf(l.product));}
+window.invBlcApprove=function(id,ok){
+  const r=recs[id];if(!r||r.del)return;
+  const me=_meHr();
+  r.d={...r.d,_blc:ok?'approved':'rejected',blcby:me?[me]:[]};
+  if(ok)r.d.status='صادر شده';
+  r.u=Date.now();put(r);
+  if(ok){try{postInvoice(id,true);}catch(e){}}
+};
 function invSave(status){
   const valid=invDraft.lines.filter(l=>l.product&&(+l.qty||0)>0);
   if(!valid.length){alert('حداقل یک ردیف با کالا و تعداد لازم است');return;}
   if(!invDraft.customer&&!confirm('مشتری انتخاب نشده است. ادامه می‌دهید؟'))return;
+  // ⚠️ فروش زیر بهای تمام‌شده
+  let _blcFlag=null,_blcAp=[];
+  {
+    const bl=blcLines();
+    if(bl.length&&invDraft.kind!=='پیش‌فاکتور'||bl.length){
+      const msg=bl.map(l=>{const p=recs[l.product];return '• '+((p&&p.d.title)||'کالا')+': فروش '+money(+l.price||0)+' < بهای تمام‌شده '+money(invCostOf(l.product));}).join('\n');
+      if(bl.length){
+        if(blcMode()==='mgr'&&!isAdmin()){
+          const me=_meHr();const mgr=me&&recs[me]?relIds(recs[me],'manager')[0]:null;
+          alert('⚠️ فروش زیر قیمت خرید:\n'+msg+'\n\nاین سند به‌صورت «پیش‌نویس» ذخیره و برای تأیید مدیر به کارتابل ارسال می‌شود.');
+          status='پیش‌نویس';_blcFlag='pending';_blcAp=mgr?[mgr]:[];
+        }else{
+          if(!confirm('⚠️ فروش زیر قیمت خرید:\n'+msg+'\n\nتأیید می‌کنید و ادامه می‌دهید؟'))return;
+          _blcFlag='self-ok';
+        }
+      }
+    }
+  }
   const iid=uid();
   const num=(Math.max(0,...byE('invoice').map(v=>+String(v.d.title).replace(/\D/g,'')||0))+1);
   const _tot=invTotalsDraft().total;
@@ -6927,7 +6973,7 @@ function invSave(status){
   put({id:iid,e:'invoice',d:{title:invDraft.desc||('فاکتور '+num),biz:invDraft.biz?[invDraft.biz]:[],
     customer:invDraft.customer?[invDraft.customer]:[],seller:invDraft.seller?[invDraft.seller]:[],orgu:invDraft.orgu?[invDraft.orgu]:(invDraft.seller&&recs[invDraft.seller]?relIds(recs[invDraft.seller],'orgu'):[]),kind:invDraft.kind,status:status||'صادر شده',
     date:{s:invDraft.vdate},due:invDraft.due?{s:invDraft.due}:null,
-    disc:+invDraft.disc||0,taxpct:+invDraft.taxpct||0,ship:+invDraft.ship||0,paid,note:invDraft.note},u:Date.now()});
+    disc:+invDraft.disc||0,taxpct:+invDraft.taxpct||0,ship:+invDraft.ship||0,paid,note:invDraft.note,_blc:_blcFlag||undefined,blcap:_blcAp},u:Date.now()});
   valid.forEach(l=>{const p=recs[l.product];
     put({id:uid(),e:'invline',d:{title:(p&&p.d&&p.d.title)||'',invoice:[iid],product:[l.product],
       biz:invDraft.biz?[invDraft.biz]:[],qty:+l.qty||0,price:+l.price||0,ldisc:+l.ldisc||0},u:Date.now()});});
@@ -7003,6 +7049,13 @@ function invnewHTML(){
     <div style="display:flex"><span style="flex:1;color:var(--tx2)">+ هزینه ارسال</span><b>${money(t.ship)}</b></div>
     <div style="display:flex;border-top:1px solid var(--line);margin-top:6px;padding-top:6px;font-size:15px"><span style="flex:1">💰 مبلغ نهایی</span><b style="color:var(--ok)">${money(t.total)}</b></div>
   </div>
+  ${(()=>{const bl=blcLines();return bl.length?`<div style="margin-top:10px;border:1px solid var(--bad);background:rgba(240,86,74,.07);border-radius:12px;padding:10px 14px;font-size:12.5px;color:var(--bad)">
+    ⚠️ <b>فروش زیر قیمت خرید:</b> ${bl.map(l=>{const p=recs[l.product];return esc((p&&p.d.title)||'کالا')+' (فروش '+money(+l.price||0)+' │ بهای تمام‌شده '+money(invCostOf(l.product))+')';}).join(' ، ')}
+    — ${blcMode()==='mgr'&&!isAdmin()?'هنگام ثبت، سند پیش‌نویس می‌شود و به تأیید مدیر می‌رود.':'هنگام ثبت از شما تأییدیه گرفته می‌شود.'}</div>`:'';})()}
+  ${isAdmin()?`<div style="margin-top:8px;font-size:11.5px;color:var(--tx2);display:flex;gap:8px;align-items:center">🛡 تأیید فروش زیر قیمت خرید:
+    <select onchange="saveBlcMode(this.value)" style="max-width:220px;font-size:12px">
+      <option value="self" ${blcMode()==='self'?'selected':''}>خود اپراتور (با تأییدیه)</option>
+      <option value="mgr" ${blcMode()==='mgr'?'selected':''}>مدیر بالادستی (ارسال به کارتابل)</option></select></div>`:''}
   <div style="margin-top:10px"><label ${lbl}>توضیحات</label><input value="${esc(invDraft.note||'')}" oninput="invDraft.note=this.value" placeholder="اختیاری"></div>
   ${draftBuyHist(invDraft.lines)}
   <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
