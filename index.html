@@ -280,11 +280,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.90</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.91</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.90</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.91</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2637,7 +2637,7 @@ async function pullAll(full){
     let from=0, page=1000;
     while(true){
       const {data,error}=await sb.from('records').select('*').gt('updated_at',curLag).order('updated_at',{ascending:true}).range(from,from+page-1);
-      if(error){setSync('err','خطای سینک: '+String(error.message||'').slice(0,80));return;}
+      if(error){setSync('err','خطای سینک: '+String(error.message||'').slice(0,80));const _dv=document.getElementById('fsync');if(_dv)_dv.remove();return;}
       (data||[]).forEach(row=>{
         const loc=recs[row.id], remoteU=new Date(row.updated_at).getTime();
         if(!loc||loc.u<remoteU){recs[row.id]={id:row.id,e:row.entity,d:row.data||{},u:remoteU,del:row.deleted};window._pullChg=(window._pullChg||0)+1;}
@@ -2651,7 +2651,7 @@ async function pullAll(full){
     let from=0, page=1000;
     while(true){
       const {data,error}=await sb.from('records').select('*').order('updated_at',{ascending:true}).range(from,from+page-1);
-      if(error){setSync('err','خطای سینک: '+String(error.message||'').slice(0,80));return;}
+      if(error){setSync('err','خطای سینک: '+String(error.message||'').slice(0,80));const _dv=document.getElementById('fsync');if(_dv)_dv.remove();return;}
       (data||[]).forEach(row=>{fresh[row.id]={id:row.id,e:row.entity,d:row.data||{},u:new Date(row.updated_at).getTime(),del:row.deleted};
         if(row.updated_at>maxU)maxU=row.updated_at;});
       if(!data||data.length<page)break; from+=page;
@@ -2672,6 +2672,7 @@ async function pullAll(full){
     if(freshData===0 && !isPending()){
       recs=fresh;invalidateByE();await pullMeta();
       setSync('err','⚠️ حساب شما تایید شده اما سرور هیچ رکوردی برنگرداند — ادمین باید آخرین نسخه‌ی فایل «maalinex-security.sql» را در Supabase اجرا کند.');
+      const _dv2=document.getElementById('fsync');if(_dv2)_dv2.remove();
       saveLocal();render();return;
     }
     recs=fresh;invalidateByE();
@@ -2690,6 +2691,7 @@ async function pullAll(full){
     localStorage.setItem('xr_rolesig',sig);
     if(!full&&prev&&prev!==sig&&!isPending()){return pullAll(true);}
   }catch(e){}
+  try{const dv=document.getElementById('fsync');if(dv){dv.remove();invalidateByE();nav();render();}}catch(e){}
   afterPull(incremental);
 }
 let _flushing=false;
@@ -3163,6 +3165,10 @@ function can(a,e,rec){ // a: 'c' ایجاد | 'e' ویرایش | 'd' حذف
     if(xlvl==='full')return true;
     if(xlvl==='edit')return a!=='d';
     return false;
+  }
+  // 🔒 پیش‌فاکتورِ در گردش تأیید قفل است — تغییر فقط از مسیر کارتابل (دکمه‌های گردش فروش)
+  if((a==='e'||a==='d')&&rec&&(e==='invoice')&&rec.d&&rec.d.wfst&&!['—','فاکتور صادر شد','باطل/بایگانی'].includes(rec.d.wfst)){
+    if(!window._wfActing)return false;
   }
   // 🔒 سند تاییدشده نهایی قفل است — اصلاح فقط با سند اصلاحی (ادمین در شاخه بالاتر مجاز است و لاگ می‌شود)
   if((a==='e'||a==='d')&&rec&&(e==='voucher'||e==='vline')){
@@ -3810,17 +3816,51 @@ function myWrole(){
 function wfLog(r,act,note){
   const lg=(r.d.wflog||[]).slice();
   const me=_meHr();
-  lg.push({t:Date.now(),by:me&&recs[me]?recs[me].d.title:myEmail(),role:myWrole()||myRole(),act,note:note||''});
+  lg.push({t:Date.now(),by:me&&recs[me]?recs[me].d.title:myEmail(),em:myEmail().toLowerCase(),role:myWrole()||myRole(),act,note:note||''});
   r.d.wflog=lg;
+}
+function wfIsSeller(r){
+  const my=[...myHRids()];
+  return relIds(r,'seller').some(x=>my.includes(x))||(r.d._by||'').toLowerCase()===myEmail().toLowerCase();
+}
+function wfActor(r,act){const e=(r.d.wflog||[]).slice().reverse().find(x=>x.act&&x.act.includes(act));return e?(e.em||''):'';}
+function wfCan(act,r){
+  const w=myWrole(),st=r.d.wfst,me=myEmail().toLowerCase();
+  const FINR=['کارمند حسابداری','مدیر مالی','مدیر ارشد','ادمین'];
+  const MGRR=['مدیر فروش','مدیر ارشد','ادمین'];
+  const need={mgrOk:[WF_ST.NEW,MGRR],finOk:[WF_ST.FIN,FINR],mgrFwd:[WF_ST.FINOK,MGRR],
+    paySend:[WF_ST.SELL,null],issue:[WF_ST.PAY,FINR],
+    fix:[[WF_ST.NEW,WF_ST.FIN,WF_ST.FINOK,WF_ST.PAY],[...MGRR,...FINR]],
+    void:[[WF_ST.NEW,WF_ST.FIN,WF_ST.FINOK,WF_ST.FIX],[...MGRR,...FINR]]}[act];
+  if(!need)return 'اقدام ناشناخته';
+  const sts=Array.isArray(need[0])?need[0]:[need[0]];
+  if(!sts.includes(st))return 'این سند در مرحلهٔ «'+(st||'—')+'» است و این اقدام برای آن مجاز نیست';
+  if(need[1]&&!need[1].includes(w))return 'نقش شما ('+(w||'تعریف‌نشده')+') اجازهٔ این اقدام را ندارد — این کار مربوط به '+(need[1][0])+' است';
+  if(act==='paySend'&&!wfIsSeller(r)&&!['ادمین','مدیر ارشد'].includes(w))return 'فقط فروشندهٔ همین سند می‌تواند اسناد پرداخت را ارسال کند';
+  // 🛡 تفکیک وظایف: تأییدکننده نمی‌تواند فروشندهٔ همان سند باشد
+  if(['mgrOk','finOk','issue'].includes(act)&&wfIsSeller(r)){
+    if(w==='ادمین')return confirm('⚠️ شما فروشندهٔ همین سند هستید. طبق تفکیک وظایف، تأیید سند خودتان مجاز نیست.\nبه‌عنوان ادمین با مسئولیت خودتان ادامه می‌دهید؟')?'':'BLOCK';
+    return 'تفکیک وظایف: نمی‌توانید سندی را که خودتان فروشنده‌اش هستید تأیید/صادر کنید';
+  }
+  // 🛡 تأیید مالی و صدور نباید توسط همان کسی باشد که تأیید مدیر فروش را زده
+  if(act==='finOk'&&wfActor(r,'تأیید مدیر فروش')===me&&w!=='ادمین')
+    return 'تفکیک وظایف: تأیید مالی باید توسط شخص دیگری غیر از تأییدکنندهٔ مدیر فروش انجام شود';
+  if(act==='issue'&&wfActor(r,'تأیید مدیر فروش')===me&&w!=='ادمین'&&w!=='مدیر مالی')
+    return 'تفکیک وظایف: صدور فاکتور باید توسط واحد مالی انجام شود';
+  return '';
 }
 function wfSet(id,st,act,note){
   const r=recs[id];if(!r||r.del)return;
-  r.d={...r.d,wfst:st};wfLog(r,act,note);r.u=Date.now();put(r);
+  window._wfActing=1;
+  try{r.d={...r.d,wfst:st};wfLog(r,act,note);r.u=Date.now();put(r);}finally{window._wfActing=0;}
 }
 window.wfSubmit=function(id){wfSet(id,WF_ST.NEW,'📤 ارسال برای تأیید مدیر فروش');};
 window.wfAct=function(id,act){
   const note=(document.getElementById('wfn_'+id)||{}).value||'';
   const r=recs[id];if(!r)return;
+  const gate=wfCan(act,r);
+  if(gate==='BLOCK')return;
+  if(gate){alert('🛡 '+gate);return;}
   if(act==='mgrOk')wfSet(id,WF_ST.FIN,'✅ تأیید مدیر فروش — ارسال به مالی',note);
   else if(act==='finOk')wfSet(id,WF_ST.FINOK,'✅ تأیید مالی (موجودی/قیمت/سیاست)',note);
   else if(act==='mgrFwd')wfSet(id,WF_ST.SELL,'📨 اعلام تأیید به فروشنده',note);
@@ -3840,6 +3880,9 @@ window.wfAct=function(id,act){
 };
 window.wfUpload=function(id,which,inp){
   const r=recs[id];if(!r||r.del)return;
+  const w=myWrole();
+  if(which==='sepfile'&&!['کارمند حسابداری','مدیر مالی','مدیر ارشد','ادمین'].includes(w)){alert('🛡 پیوست پیش‌فاکتور سپیدار فقط توسط واحد مالی مجاز است');inp.value='';return;}
+  if(which==='payfile'&&!wfIsSeller(r)&&!['ادمین','مدیر ارشد'].includes(w)){alert('🛡 اسناد پرداخت را فقط فروشندهٔ همین سند می‌تواند پیوست کند');inp.value='';return;}
   const f=inp.files&&inp.files[0];if(!f)return;
   if(f.size>800*1024){alert('حداکثر حجم فایل ۸۰۰ کیلوبایت');inp.value='';return;}
   const rd=new FileReader();
@@ -3858,6 +3901,7 @@ window.wfDownload=function(id,which){
 };
 window.wfResubmit=function(id){
   const r=recs[id];if(!r)return;
+  if(!wfIsSeller(r)&&!['ادمین','مدیر ارشد'].includes(myWrole())){alert('🛡 اصلاح و ارسال مجدد فقط توسط فروشندهٔ همین سند مجاز است');return;}
   // بارگذاری در فرم فاکتور برای اصلاح؛ نسخهٔ قبلی بایگانی می‌شود
   invDraft=null;invNewDraft&&0;
   go('invnew');
