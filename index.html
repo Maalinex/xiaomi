@@ -280,11 +280,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.98</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.99</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.98</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.99</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -9248,6 +9248,7 @@ function wsMenu(g){
     return `<div class="nav-i ${on?'on':''}" onclick="invGo('${kind}')">${ic} ${label}<span class="c">${invKindCount(kind).toLocaleString('fa-IR')}</span></div>`;};
   if(g==='فروش')return (
     it('smdash','📈 داشبورد فروش',"go('smdash')",canSee('invoice')&&canView('smdash'))+
+    (canSee('invoice')&&canView('saleswf')?(()=>{const _wc=wfCount();return `<div class="nav-i ${view.type==='saleswf'?'on':''}" onclick="go('saleswf')">🔁 گردش فروش${_wc?` <span class="c" style="background:var(--ac);color:#fff">${_wc.toLocaleString('fa-IR')}</span>`:''}</div>`;})():'')+
     it('invnew','📝 صدور پیش‌فاکتور',"invDraft=null;window._invPf=1;go('invnew')",canSee('invoice')&&can('c','invoice')&&canView('invnew'))+
     it('invnew','🧾 صدور فاکتور فروش',"invDraft=null;window._invPf=0;go('invnew')",canSee('invoice')&&can('c','invoice')&&canView('invnew'))+
     (canSee('invoice')?invRow(INV_KIND_SALE,'فاکتورهای فروش','🧾')+invRow(INV_KIND_PROF,'پیش‌فاکتورها','📝'):'')+
@@ -9285,7 +9286,6 @@ function nav(){
   if((canSee('invoice')||canSee('product')||canSee('purchinv'))&&canView('ceodash'))h+=`<div class="nav-i ${view.type==='ceodash'?'on':''}" onclick="go('ceodash')">🧭 داشبورد مدیریت</div>`;
   if(canSee('leave')&&canView('lvreq'))h+=`<div class="nav-i ${view.type==='lvreq'?'on':''}" onclick="go('lvreq')">🌴 درخواست مرخصی</div>`;
   if(canSee('letter')&&canView('cartable')){const _ac=aprCount();h+=`<div class="nav-i ${view.type==='cartable'?'on':''}" onclick="go('cartable')">📨 کارتابل نامه‌ها${_ac?` <span class="c" style="background:var(--warn);color:#000">${_ac.toLocaleString('fa-IR')}</span>`:''}</div>`;}
-  if(canSee('invoice')&&canView('saleswf')){const _wc=wfCount();h+=`<div class="nav-i ${view.type==='saleswf'?'on':''}" onclick="go('saleswf')">🔁 گردش فروش${_wc?` <span class="c" style="background:var(--ac);color:#fff">${_wc.toLocaleString('fa-IR')}</span>`:''}</div>`;}
   if(canView('myhub'))h+=`<div class="nav-i ${view.type==='myhub'?'on':''}" onclick="go('myhub')">🤝 کارهای من و همکاری</div>`;
   h+=`
   ${canView('cal')?`<div class="nav-i ${view.type==='cal'?'on':''}" onclick="go('cal')">📅 تقویم</div>`:''}
