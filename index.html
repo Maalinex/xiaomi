@@ -280,11 +280,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.93</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.94</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.93</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.94</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2406,17 +2406,24 @@ function _u8b64(u8){let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCha
 function _b64u8(b){const t=atob(b);const u=new Uint8Array(t.length);for(let i=0;i<t.length;i++)u[i]=t.charCodeAt(i);return u;}
 async function _deflate(str){const cs=new CompressionStream('deflate');const w=cs.writable.getWriter();w.write(new TextEncoder().encode(str));w.close();return _u8b64(new Uint8Array(await new Response(cs.readable).arrayBuffer()));}
 async function _inflate(b64){const ds=new DecompressionStream('deflate');const w=ds.writable.getWriter();w.write(_b64u8(b64));w.close();return new TextDecoder().decode(await new Response(ds.readable).arrayBuffer());}
+let _slAgain=false;
 function _saveLocalNow(){
   _slT=null;
-  const json=JSON.stringify(recs);
-  if(window.CompressionStream&&json.length>200000){ // داده حجیم → فشرده
-    if(_slBusy)return;_slBusy=true;
-    _deflate(json).then(z=>{
-      try{localStorage.setItem('xr_dataz',z);localStorage.removeItem('xr_data');}
-      catch(e){try{setSync('err','⚠️ حافظه محلی مرورگر پر شد — داده‌ها فقط روی سرور ذخیره می‌شوند');}catch(_){}}
-      _slBusy=false;
-    }).catch(()=>{_slBusy=false;_savePlain(json);});
-  } else _savePlain(json);
+  if(_slBusy){_slAgain=true;return;}
+  _slBusy=true;
+  // 🗄 کش محلی روی IndexedDB (بدون سقف ~۵MB مرورگر) — با فایل‌های پیوست هم جا می‌شود؛
+  // قبلاً وقتی localStorage پر می‌شد، کش ذخیره نمی‌شد و «هر بار» باز شدن اپ سینک کامل می‌خورد.
+  _idbSet('recs',recs).then(()=>{
+    try{localStorage.removeItem('xr_data');localStorage.removeItem('xr_dataz');}catch(e){}
+  }).catch(()=>{ // IndexedDB در دسترس نبود → مسیر قدیمی (فشرده در localStorage)
+    const json=JSON.stringify(recs);
+    if(window.CompressionStream&&json.length>200000){
+      return _deflate(json).then(z=>{
+        try{localStorage.setItem('xr_dataz',z);localStorage.removeItem('xr_data');}
+        catch(e){try{setSync('err','⚠️ حافظه محلی مرورگر پر شد — داده‌ها فقط روی سرور ذخیره می‌شوند');}catch(_){}}
+      }).catch(()=>_savePlain(json));
+    } else _savePlain(json);
+  }).then(()=>{_slBusy=false;if(_slAgain){_slAgain=false;saveLocal();}},()=>{_slBusy=false;if(_slAgain){_slAgain=false;saveLocal();}});
 }
 function _savePlain(json){
   try{localStorage.setItem('xr_data',json);localStorage.removeItem('xr_dataz');}
@@ -2430,9 +2437,13 @@ window.addEventListener('pagehide',()=>{if(_slT)_saveLocalNow();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&_slT)_saveLocalNow();});
 async function loadLocal(){
   try{
-    const z=localStorage.getItem('xr_dataz');
-    if(z&&window.DecompressionStream){recs=JSON.parse(await _inflate(z));}
-    else recs=JSON.parse(localStorage.getItem('xr_data')||'{}');
+    let v=null;try{v=await _idbGet('recs');}catch(e){}
+    if(v&&typeof v==='object'&&Object.keys(v).length){recs=v;}
+    else{
+      const z=localStorage.getItem('xr_dataz');
+      if(z&&window.DecompressionStream){recs=JSON.parse(await _inflate(z));}
+      else recs=JSON.parse(localStorage.getItem('xr_data')||'{}');
+    }
   }catch(e){try{recs=JSON.parse(localStorage.getItem('xr_data')||'{}');}catch(_){recs={};}}
   // مهاجرت شناسه‌های متا به UUID (رفع مشکل سینک نقش‌ها و گزینه‌ها)
   [['meta-users',MU],['meta-opts',MO]].forEach(([old,nid])=>{
@@ -2662,11 +2673,11 @@ async function pullAll(full){
     const page=1000, CONC=4;
     // 📊 شمارش کل رکوردها (بدون دانلود) برای نمایش درصد پیشرفت
     let total=0;
-    try{const {count}=await sb.from('records').select('id',{count:'exact',head:true});total=count||0;}catch(e){}
+    try{const {count}=await sb.from('records').select('id',{count:'exact',head:true}).eq('deleted',false);total=count||0;}catch(e){}
     // ⚡ دانلود موازی: هر موج ۴ صفحهٔ ۱۰۰۰تایی را همزمان می‌گیرد (~۴ برابر سریع‌تر از حالت پشت‌سرهم)
     let from=0, done=false, got=0;
     while(!done){
-      const reqs=[];for(let i=0;i<CONC;i++)reqs.push(sb.from('records').select('*').order('updated_at',{ascending:true}).range(from+i*page,from+(i+1)*page-1));
+      const reqs=[];for(let i=0;i<CONC;i++)reqs.push(sb.from('records').select('*').eq('deleted',false).order('updated_at',{ascending:true}).range(from+i*page,from+(i+1)*page-1));
       const waves=await Promise.all(reqs);
       for(const {data,error} of waves){
         if(error){setSync('err','خطای سینک: '+String(error.message||'').slice(0,80));const _dv=document.getElementById('fsync');if(_dv)_dv.remove();return;}
@@ -3248,7 +3259,8 @@ async function authAction(){
     try{await sb.auth.signOut();}catch(e){}
     session=null;localStorage.removeItem('xr_authok');if(rt){try{sb.removeChannel(rt);}catch(e){}rt=null;}
     // 🧹 پاک‌سازی کش محلی هنگام خروج تا کاربر بعدی/حذف‌شده داده قبلی را نبیند
-    recs={};queue=[];localStorage.removeItem('xr_data');localStorage.removeItem('xr_q');
+    recs={};queue=[];localStorage.removeItem('xr_data');localStorage.removeItem('xr_dataz');localStorage.removeItem('xr_q');
+    try{_idbSet('recs',null);}catch(e){}
     syncCursor='';localStorage.removeItem('xr_synccur');
     setSync('off','خارج شدید');nav();whoami();
     fillLoginForm();document.getElementById('login').classList.add('show');

@@ -340,3 +340,100 @@ begin
   end;
 end $$;
 alter table public.records replica identity full;
+
+-- ============================================================
+-- ⚡ نسخه ۱.۹۴ — شتاب‌دهی اساسی سینک (این بخش را حتماً اجرا کنید)
+-- مشکل: سیاست‌های RLS برای کاربران غیرادمین، به ازای «هر ردیف» دوباره
+-- رکورد کاربران/ACL را از جدول می‌خواندند → سینک کامل کارمندان بسیار کند می‌شد.
+-- راه‌حل: نتیجه‌ی توابع نقش/لیست کاربران/ACL در طول هر درخواست کش می‌شود
+-- و بررسی‌های سراسری سیاست‌ها فقط یک‌بار در هر کوئری اجرا می‌شوند.
+-- ============================================================
+
+create or replace function public.app_users_list() returns jsonb
+language plpgsql stable security definer set search_path=public as $$
+declare c text; j jsonb;
+begin
+  c:=current_setting('app.c_ul', true);
+  if c is not null and c<>'' then return c::jsonb; end if;
+  j:=coalesce((select data->'list' from records
+      where id='00000000-0000-4000-8000-00000000aaaa' and not deleted),'[]'::jsonb);
+  perform set_config('app.c_ul', j::text, true);
+  return j;
+end $$;
+
+create or replace function public.app_role() returns text
+language plpgsql stable security definer set search_path=public as $$
+declare lst jsonb; r text; c text;
+begin
+  if app_email()='' then return ''; end if;
+  c:=current_setting('app.c_role', true);
+  if c is not null and c<>'' then return c; end if;
+  lst:=app_users_list();
+  if jsonb_array_length(lst)=0 then r:='ادمین'; -- نخستین کاربر: راه‌اندازی
+  else
+    select x->>'role' into r from jsonb_array_elements(lst) x
+     where lower(coalesce(x->>'email',''))=app_email() limit 1;
+    r:=coalesce(r,'در انتظار تایید');
+  end if;
+  perform set_config('app.c_role', r, true);
+  return r;
+end $$;
+
+create or replace function public.app_acl() returns jsonb
+language plpgsql stable security definer set search_path=public as $$
+declare c text; j jsonb;
+begin
+  c:=current_setting('app.c_acl', true);
+  if c is not null and c<>'' then return c::jsonb; end if;
+  j:=coalesce((select data from records
+      where id='00000000-0000-4000-8000-00000000cccc' and not deleted),'{}'::jsonb);
+  perform set_config('app.c_acl', j::text, true);
+  return j;
+end $$;
+
+-- سیاست‌ها: بررسی‌های ثابتِ هر درخواست (ادمین/تاییدشده) به‌صورت InitPlan فقط یک‌بار اجرا شوند
+drop policy if exists rec_select on public.records;
+create policy rec_select on public.records for select to authenticated using (
+  (select app_is_admin())
+  or id='00000000-0000-4000-8000-00000000aaaa'
+  or (
+    (select app_approved())
+    and (app_is_meta(id) or app_ent_level(entity)<>'hide')
+    and app_priv_ok(entity,data)
+    and app_in_scope(id,entity,data)
+  )
+);
+
+drop policy if exists rec_insert on public.records;
+create policy rec_insert on public.records for insert to authenticated with check (
+  (select app_approved())
+  and (not app_is_meta(id) or (select app_is_admin())
+       or (id='00000000-0000-4000-8000-00000000aaaa'
+           and jsonb_array_length(app_users_list())=0))
+  and (app_is_meta(id) or app_ent_level(entity) not in ('hide','read'))
+  and (coalesce(data->>'_by','')='' or lower(data->>'_by')=app_email() or (select app_is_admin()))
+  and app_in_scope(id,entity,data)
+);
+
+drop policy if exists rec_update on public.records;
+create policy rec_update on public.records for update to authenticated using (
+  (select app_approved())
+  and (not app_is_meta(id) or (select app_is_admin()))
+  and app_priv_ok(entity,data)
+  and app_in_scope(id,entity,data)
+  and (app_is_meta(id) or app_ent_level(entity) not in ('hide','read'))
+  and (entity not in ('bsc','measure') or (select app_is_admin())
+       or app_bsc_mine(entity,data) or app_ent_level(entity) in ('edit','full'))
+) with check (
+  (select app_approved()) and (not app_is_meta(id) or (select app_is_admin()))
+);
+
+-- ایندکس مخصوص صفحه‌بندی سینک کامل (فقط ردیف‌های حذف‌نشده، به ترتیب زمان)
+create index if not exists records_del_upd_idx on public.records(deleted, updated_at);
+
+-- مهلت بیشتر برای نخستین سینکِ حجیم
+do $$ begin
+  begin execute 'alter role authenticated set statement_timeout = ''60s'''; exception when others then null; end;
+end $$;
+
+select '⚡ شتاب‌دهی سینک ۱.۹۴ اعمال شد ✅' as status;
