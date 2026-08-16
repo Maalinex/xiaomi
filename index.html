@@ -35,7 +35,7 @@ body{font-family:Vazirmatn,Tahoma,sans-serif;color:var(--tx);font-size:14px;
 #nav{overflow-y:auto;flex:1;padding:8px}
 .nav-h{font-size:11.5px;color:var(--tx);font-weight:800;margin:14px 8px 4px}
 .navg::after{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-start:6px;background:var(--gdot,#c4cfde);vertical-align:middle}
-.navg[data-g="CRM و فروش"]{--gdot:#2f6bff}.navg[data-g="کالا و انبار"]{--gdot:#f6862c}
+.navg[data-g="فروش"]{--gdot:#2f6bff}.navg[data-g="CRM و مشتریان"]{--gdot:#12b3c7}.navg[data-g="کالا و انبار"]{--gdot:#f6862c}
 .navg[data-g="عملکرد و تارگت"]{--gdot:#8a6ff0}.navg[data-g="مالی"]{--gdot:#18b26b}
 .navg[data-g="پرسنل و سازمان"]{--gdot:#f05a9b}
 .nav-h.navg{cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px;border-radius:8px;padding:6px 7px;margin:12px 2px 3px;font-size:13.5px;font-weight:700;color:var(--tx)}
@@ -280,11 +280,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.96</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.97</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.96</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.97</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -602,7 +602,7 @@ evt:{ic:'🗒️',n:'وقایع و پیگیری‌ها',grp:'پرسنل و سا�
  {k:'subjId',n:'شناسه موضوع',t:TXT},
  {k:'subjT',n:'موضوع',t:TXT}],
  cols:['etype','title','subjT','when'],comp:'evtBrief'},
-customer:{ic:'🛍️',n:'مشتریان کسب‌وکار',grp:'CRM و فروش',f:[
+customer:{ic:'🛍️',n:'مشتریان کسب‌وکار',grp:'CRM و مشتریان',f:[
  {k:'title',n:'نام مشتری',t:TXT},
  {k:'code',n:'کد مشتری',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
@@ -627,7 +627,7 @@ customer:{ic:'🛍️',n:'مشتریان کسب‌وکار',grp:'CRM و فروش
  {k:'company',n:'شرکت مجری',t:REL,r:'company',s:1},
  {k:'note',n:'یادداشت',t:LNG}],
  cols:['title','code','mobile','city','segment'],comp:'custBrief'},
-crm:{ic:'🧑‍🤝‍🧑',n:'CRM | ذینفعان',grp:'CRM و فروش',f:[
+crm:{ic:'🧑‍🤝‍🧑',n:'CRM | ذینفعان',grp:'CRM و مشتریان',f:[
  {k:'title',n:'نام',t:TXT},
  {k:'kind',n:'شخصیت',t:SEL,o:['حقیقی','حقوقی']},
  {k:'rel',n:'نوع رابطه',t:SEL,o:['مشتری','سرمایه‌گذار','بانک','بیمه','پیمانکار','تامین‌کننده','شریک تجاری','مشاور','دولتی']},
@@ -658,7 +658,7 @@ contact:{ic:'📇',n:'مخاطبین (افراد رابط)',grp:'سازمان',s
  {k:'note',n:'یادداشت',t:LNG},
  {k:'company',n:'شرکت',t:REL,r:'company',s:1}],
  cols:['title','crm','position','role','mobile']},
-meeting:{ic:'🗃️',n:'جلسات',grp:'CRM و فروش',f:[
+meeting:{ic:'🗃️',n:'جلسات',grp:'CRM و مشتریان',f:[
  {k:'title',n:'عنوان جلسه',t:TXT},
  {k:'kind',n:'نوع جلسه',t:SEL,o:['هیات مدیره','شورای مدیران','جلسه داخلی','جلسه پروژه','جلسه با مشتریان','مجمع']},
  {k:'status',n:'وضعیت برگزاری',t:STA,o:STATUS},
@@ -672,7 +672,7 @@ meeting:{ic:'🗃️',n:'جلسات',grp:'CRM و فروش',f:[
  {k:'project',n:'پروژه مرتبط',t:REL,r:'project'},
  {k:'company',n:'شرکت مرتبط',t:REL,r:'company'}],
  cols:['title','kind','status','date']},
-letter:{ic:'✉️',n:'مکاتبات',grp:'CRM و فروش',f:[
+letter:{ic:'✉️',n:'مکاتبات',grp:'CRM و مشتریان',f:[
  {k:'title',n:'عنوان نامه',t:TXT},
  {k:'kind',n:'نوع نامه',t:SEL,o:['وارده 📥','صادره 📤','داخلی 🔄']},
  {k:'sec',n:'محرمانگی',t:SEL,o:['عادی','محرمانه','خیلی محرمانه']},
@@ -696,7 +696,7 @@ hrcontract:{ic:'📜',n:'قراردادهای پرسنلی',grp:'پرسنل و �
  {k:'person',n:'فرد مرتبط',t:REL,r:'hr',s:1},
  {k:'company',n:'شرکت طرف قرارداد',t:REL,r:'company',s:1}],
  cols:['title','kind','person','company','salary']},
-bizcontract:{ic:'🏁',n:'قراردادهای تجاری',grp:'CRM و فروش',f:[
+bizcontract:{ic:'🏁',n:'قراردادهای تجاری',grp:'CRM و مشتریان',f:[
  {k:'title',n:'عنوان قرارداد',t:TXT},
  {k:'status',n:'وضعیت اجرایی',t:SEL,o:['در حال مذاکره','در حال امضاء','در حال اجراء','اتمام یافته']},
  {k:'amount',n:'مبلغ قرارداد',t:NUM},{k:'signed',n:'تاریخ امضاء',t:DAT},
@@ -1026,7 +1026,7 @@ product:{ic:'📦',n:'کالا و خدمات',grp:'کالا و انبار',f:[
  {k:'minmargin',n:'حداقل حاشیه سود هدف (٪)',t:NUM},
  {k:'cover',n:'تصویر',t:FIL,img:1}],
  cols:['title','biz','grp','sell'],comp:'productStat'},
- delivery:{ic:'🛵',n:'ارسال و توزیع',grp:'CRM و فروش',f:[
+ delivery:{ic:'🛵',n:'ارسال و توزیع',grp:'فروش',f:[
  {k:'title',n:'شرح ارسال',t:TXT},
  {k:'invoice',n:'فاکتور مرتبط',t:REL,r:'invoice',s:1},
  {k:'customer',n:'مشتری',t:REL,r:'customer',s:1},
@@ -1045,13 +1045,13 @@ product:{ic:'📦',n:'کالا و خدمات',grp:'کالا و انبار',f:[
  {k:'status',n:'وضعیت',t:SEL,o:['باز','بسته — برنده انتخاب شد','لغو']},
  {k:'note',n:'توضیح',t:LNG}],
  cols:['title','product','qty','status'],comp:'rfqBrief'},
- loyredeem:{ic:'🎁',n:'استفاده از امتیاز (باشگاه)',grp:'CRM و فروش',sub:1,f:[
+ loyredeem:{ic:'🎁',n:'استفاده از امتیاز (باشگاه)',grp:'CRM و مشتریان',sub:1,f:[
  {k:'title',n:'شرح جایزه/تخفیف',t:TXT},
  {k:'customer',n:'مشتری',t:REL,r:'customer',s:1},
  {k:'points',n:'امتیاز مصرف‌شده',t:NUM},
  {k:'date',n:'تاریخ',t:DAT}],
  cols:['title','customer','points','date']},
- smslog:{ic:'💬',n:'پیامک‌های ارسالی',grp:'CRM و فروش',sub:1,f:[
+ smslog:{ic:'💬',n:'پیامک‌های ارسالی',grp:'CRM و مشتریان',sub:1,f:[
  {k:'title',n:'متن پیامک',t:TXT},
  {k:'to',n:'شماره گیرنده',t:TXT},
  {k:'customer',n:'مشتری',t:REL,r:'customer',s:1},
@@ -1100,7 +1100,7 @@ purchase:{ic:'🚚',n:'خرید سریع (تک‌کالا)',grp:'مدیریت ک
  {k:'due',n:'تاریخ سررسید پرداخت (برای اعتباری)',t:DAT},
  {k:'date',n:'تاریخ',t:DAT}],
  cols:['title','product','qty','kind','date'],comp:'purchTotal'},
-channel:{ic:'📣',n:'کانال‌ها و تبلیغات',grp:'CRM و فروش',f:[
+channel:{ic:'📣',n:'کانال‌ها و تبلیغات',grp:'فروش',f:[
  {k:'title',n:'نام کانال',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'kind',n:'نوع',t:SEL,o:['کانال فروش','تبلیغات','ارتباط با مشتری','لجستیک']},
@@ -1108,7 +1108,7 @@ channel:{ic:'📣',n:'کانال‌ها و تبلیغات',grp:'CRM و فروش'
  {k:'link',n:'لینک',t:URLF},
  {k:'note',n:'توضیح',t:TXT}],
  cols:['title','biz','kind','cost']},
-invoice:{ic:'🧾',n:'فاکتور و پیش‌فاکتور',grp:'CRM و فروش',sub:1,f:[
+invoice:{ic:'🧾',n:'فاکتور و پیش‌فاکتور',grp:'فروش',sub:1,f:[
  {k:'title',n:'شماره / شرح فاکتور',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'customer',n:'مشتری',t:REL,r:'customer',s:1},
@@ -1128,7 +1128,7 @@ invoice:{ic:'🧾',n:'فاکتور و پیش‌فاکتور',grp:'CRM و فرو�
  {k:'acode',n:'کد حسابداری درآمد (اختیاری)',t:REL,r:'acct',s:1},
  {k:'note',n:'توضیحات',t:LNG}],
  cols:['title','customer','kind','status','date'],comp:'invBrief'},
-invline:{sub:1,ic:'➖',n:'ردیف فاکتور',grp:'CRM و فروش',sub:1,f:[
+invline:{sub:1,ic:'➖',n:'ردیف فاکتور',grp:'فروش',sub:1,f:[
  {k:'title',n:'شرح ردیف',t:TXT},
  {k:'invoice',n:'فاکتور',t:REL,r:'invoice',s:1},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
@@ -1208,7 +1208,7 @@ purchline:{ic:'➕',n:'ردیف خرید',grp:'کالا و انبار',sub:1,f:[
  {k:'price',n:'قیمت واحد (تومان)',t:NUM},
  {k:'ldisc',n:'تخفیف این ردیف (تومان)',t:NUM}],
  cols:['title','purchinv','qty','price'],comp:'pinvLineBrief'},
-settle:{ic:'📂',n:'آرشیو دریافت/پرداخت‌ها',grp:'CRM و فروش',f:[
+settle:{ic:'📂',n:'آرشیو دریافت/پرداخت‌ها',grp:'مالی',f:[
  {k:'title',n:'شرح',t:TXT},
  {k:'kind',n:'نوع',t:SEL,o:['دریافت از مشتری','پرداخت به تامین‌کننده']},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
@@ -2166,7 +2166,7 @@ aretro:{ic:'🔄',n:'رتروسپکتیو (اقدامات بهبود)',grp:'تو
  {k:'status',n:'وضعیت',t:SEL,o:['ثبت شد','در حال انجام','انجام شد']}],
  cols:['title','asprint','kind','owner','status']},
 };
-const GROUPS=['CRM و فروش','کالا و انبار','عملکرد و تارگت','مالی','پرسنل و سازمان'];
+const GROUPS=['فروش','CRM و مشتریان','کالا و انبار','عملکرد و تارگت','مالی','پرسنل و سازمان'];
 const GROWTH=['growth','habit','win','plan','asset','area','note','book','booknote','course','reminder'];
 /* ================= 🧩 ساختار سفارشی: فیلدها و بخش‌های قابل تعریف توسط ادمین ================= */
 const E_BASE=JSON.parse(JSON.stringify(E)); // اسکیمای پایه — سفارشی‌ها موقع اجرا رویش سوار می‌شوند
@@ -3192,7 +3192,8 @@ function modAutopostHTML(){
 function drawModcfg(){if(view&&view.type==='modcfg')document.getElementById('content').innerHTML=modcfgHTML();}
 window.openModcfg=openModcfg;window.toggleModule=toggleModule;window.saveBrand=saveBrand;
 const VIEW_GRP={
- custdash:'CRM و فروش',smdash:'CRM و فروش',invnew:'CRM و فروش',plreport:'CRM و فروش',distdash:'CRM و فروش',loyaldash:'CRM و فروش',smsdash:'CRM و فروش',saleswf:'CRM و فروش',
+ smdash:'فروش',invnew:'فروش',plreport:'فروش',distdash:'فروش',saleswf:'فروش',
+ custdash:'CRM و مشتریان',loyaldash:'CRM و مشتریان',smsdash:'CRM و مشتریان',
  whdash:'کالا و انبار',pudash:'کالا و انبار',supdash:'کالا و انبار',pinvnew:'کالا و انبار',
  perfdash:'عملکرد و تارگت',targetdash:'عملکرد و تارگت',aligndash:'عملکرد و تارگت',
  pldash:'مالی',bankdash:'مالی',arapdash:'مالی',settlenew:'مالی',chqdash:'مالی',sepfin:'مالی',sepdash:'مالی',dualdash:'مالی',pfdash:'مالی',
@@ -7275,7 +7276,7 @@ function invPickProd(i,name){
 }
 window.invPickProd=invPickProd;
 function invnewHTML(){
-  if(!invDraft)invNewDraft();
+  if(!invDraft){invNewDraft();if(window._invPf)invDraft.kind='پیش‌فاکتور';window._invPf=0;}
   const prods=byE('product').filter(p=>{const b=relIds(p,'biz');return !invDraft.biz||!b.length||b.includes(invDraft.biz);});
   const custs=byE('customer').filter(c=>{const b=relIds(c,'biz');return !invDraft.biz||!b.length||b.includes(invDraft.biz);});
   let sellers=byE('hr').filter(hh=>{const b=relIds(hh,'biz');return !invDraft.biz||!b.length||b.includes(invDraft.biz);});
@@ -9170,13 +9171,15 @@ function wsMenu(g){
   const it=(type,label,onclick,cond)=>cond?`<div class="nav-i ${view.type===type?'on':''}" onclick="${onclick}">${label}</div>`:'';
   const invRow=(kind,label,ic)=>{const on=view.type==='list'&&view.e==='invoice'&&view.ikind===kind;
     return `<div class="nav-i ${on?'on':''}" onclick="invGo('${kind}')">${ic} ${label}<span class="c">${invKindCount(kind).toLocaleString('fa-IR')}</span></div>`;};
-  if(g==='CRM و فروش')return (
-    it('custdash','🛍️ داشبورد مشتریان',"go('custdash')",canSee('customer')&&canView('custdash'))+
+  if(g==='فروش')return (
     it('smdash','📈 داشبورد فروش',"go('smdash')",canSee('invoice')&&canView('smdash'))+
-    it('invnew','🧾 صدور فاکتور فروش',"invDraft=null;go('invnew')",canSee('invoice')&&can('c','invoice')&&canView('invnew'))+
+    it('invnew','📝 صدور پیش‌فاکتور',"invDraft=null;window._invPf=1;go('invnew')",canSee('invoice')&&can('c','invoice')&&canView('invnew'))+
+    it('invnew','🧾 صدور فاکتور فروش',"invDraft=null;window._invPf=0;go('invnew')",canSee('invoice')&&can('c','invoice')&&canView('invnew'))+
     (canSee('invoice')?invRow(INV_KIND_SALE,'فاکتورهای فروش','🧾')+invRow(INV_KIND_PROF,'پیش‌فاکتورها','📝'):'')+
     it('plreport','💰 سود و زیان فروش',"go('plreport')",canSee('invoice')&&canView('plreport'))+
-    it('distdash','🛵 داشبورد پخش و توزیع',"go('distdash')",canSee('delivery')&&canView('distdash'))+
+    it('distdash','🛵 داشبورد پخش و توزیع',"go('distdash')",canSee('delivery')&&canView('distdash')));
+  if(g==='CRM و مشتریان')return (
+    it('custdash','🛍️ داشبورد مشتریان',"go('custdash')",canSee('customer')&&canView('custdash'))+
     it('loyaldash','💎 باشگاه مشتریان',"go('loyaldash')",canSee('customer')&&canView('loyaldash'))+
     it('smsdash','💬 پنل پیامک',"go('smsdash')",canSee('customer')&&canView('smsdash')));
   if(g==='کالا و انبار')return (
@@ -9253,7 +9256,7 @@ function nav(){
       items+=`<div class="nav-i ${view.type==='list'&&view.e===k?'on':''}" onclick="go('list','${k}')">${v.ic} ${v.n}<span class="c">${menuCount(k).toLocaleString('fa-IR')}</span></div>`;
     });
     // 📐 داشبردهای ساخته‌شده کاربر که در این گروه گذاشته شده‌اند
-    byE('dashdef').filter(d=>d.d.grp===g||(g==='CRM و فروش'&&d.d.grp==='مدیریت کسب و کار')||(g==='پرسنل و سازمان'&&d.d.grp==='سازمان')).forEach(d=>{
+    byE('dashdef').filter(d=>d.d.grp===g||(g==='فروش'&&d.d.grp==='مدیریت کسب و کار')||(g==='پرسنل و سازمان'&&d.d.grp==='سازمان')).forEach(d=>{
       items+=`<div class="nav-i ${view.type==='mydash'&&view.mdSel===d.id?'on':''}" onclick="view={type:'mydash',mdSel:'${d.id}'};render()">${esc((d.d.ic||'📐')+' '+(d.d.title||'—'))}</div>`;});
     if(!items)return; // گروه خالی (بدون دسترسی) اصلاً نمایش داده نشود
     const col=navIsCol(g);
@@ -9935,6 +9938,10 @@ function smWin(biz,mode){ // بازه دوره جاری + دوره قبل هم�
   const ref=smRef(biz);const j=g2j(...ref.split('-').map(Number));
   const MN=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
   let from,to,pfrom,pto,label;
+  if(mode==='c'&&view.smFrom&&view.smTo){from=view.smFrom;to=view.smTo;
+    const len=Math.max(1,Math.round((new Date(to)-new Date(from))/86400000)+1);
+    pto=_isoAdd(from,-1);pfrom=_isoAdd(pto,-(len-1));
+    return {from,to,pfrom,pto,label:'بازه دلخواه '+iso2jstr(from)+' تا '+iso2jstr(to),ref};}
   if(mode==='d7'){to=ref;from=_isoAdd(ref,-6);pto=_isoAdd(from,-1);pfrom=_isoAdd(pto,-6);label='۷ روز اخیر';}
   else if(mode==='d30'){to=ref;from=_isoAdd(ref,-29);pto=_isoAdd(from,-1);pfrom=_isoAdd(pto,-29);label='۳۰ روز اخیر';}
   else if(mode==='q'){const q=Math.ceil(j[1]/3);const sm=(q-1)*3+1;from=_jgIso(j[0],sm,1);const em=q*3;to=_isoAdd(em===12?_jgIso(j[0]+1,1,1):_jgIso(j[0],em+1,1),-1);
@@ -9943,6 +9950,9 @@ function smWin(biz,mode){ // بازه دوره جاری + دوره قبل هم�
   else{from=_jgIso(j[0],j[1],1);const nx=j[1]===12?_jgIso(j[0]+1,1,1):_jgIso(j[0],j[1]+1,1);to=_isoAdd(nx,-1);
     const pm=j[1]-1>0?j[1]-1:12,py=j[1]-1>0?j[0]:j[0]-1;pfrom=_jgIso(py,pm,1);const pnx=pm===12?_jgIso(py+1,1,1):_jgIso(py,pm+1,1);pto=_isoAdd(pnx,-1);label=MN[j[1]-1]+' '+j[0];}
   return {from,to,pfrom,pto,label,ref};}
+function smJp(t){t=faNum(String(t||'')).trim();const m=t.match(/(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);if(!m)return null;try{return _jgIso(+m[1],+m[2],+m[3]);}catch(e){return null;}}
+function smSetRange(f,t){if(f!=null){view.smFromJ=f;view.smFrom=smJp(f);}if(t!=null){view.smToJ=t;view.smTo=smJp(t);}render();}
+window.smSetRange=smSetRange;
 function smSeries(biz,mode,metric){
   const MN=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
   const nowJ=g2j(...smRef(biz).split('-').map(Number));
@@ -9993,7 +10003,10 @@ function smdashHTML(){
     <button class="btn gh sm" onclick="impOpen('sale')">📥 ورود اکسل فروش</button></div>`;
   if(!H.length)return h+`<div class="empty">هنوز فروشی ثبت نشده — «🧾 فاکتور جدید» یا «🛒 فروش سریع» بزن، یا با «📥 ورود اکسل فروش» داده را گروهی وارد کن.<br><span style="font-size:11px">ورود اکسل ساده‌تر با «فروش سریع» است (هر ردیف = یک فروش: کالا، تعداد، قیمت، مشتری، فروشنده، تاریخ).</span></div>`;
   // انتخاب دوره
-  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${PER.map(([k,n])=>`<button class="btn ${k===view.smPer?'':'gh'} sm" onclick="view.smPer='${k}';render()">${n}</button>`).join('')}<span style="font-size:11px;color:var(--tx2);align-self:center">│ دوره: ${esc(W.label)} (مقایسه با دوره قبل)</span></div>`;
+  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center">${PER.map(([k,n])=>`<button class="btn ${k===view.smPer?'':'gh'} sm" onclick="view.smPer='${k}';render()">${n}</button>`).join('')}
+    <button class="btn ${view.smPer==='c'?'':'gh'} sm" onclick="view.smPer='c';render()">🗓 بازه دلخواه</button>
+    ${view.smPer==='c'?`<input value="${esc(view.smFromJ||'')}" placeholder="از: ۱۴۰۴/۰۱/۰۱" onchange="smSetRange(this.value,null)" style="max-width:125px;font-size:12px"><input value="${esc(view.smToJ||'')}" placeholder="تا: ۱۴۰۴/۱۲/۲۹" onchange="smSetRange(null,this.value)" style="max-width:125px;font-size:12px">`:''}
+    <span style="font-size:11px;color:var(--tx2)">│ دوره: ${esc(W.label)} (مقایسه با دوره قبل)</span></div>`;
   // نمودار روند
   const pts=smSeries(b,view.smMode,view.smMetric);
   const MODES=[['d','روزانه'],['w','هفتگی'],['m','ماهیانه'],['q','فصلی'],['y','سالانه']];
@@ -10044,6 +10057,75 @@ function smdashHTML(){
     h+=tbl('📦 تعداد فروش به تفکیک کالا',arr,[['کالا',x=>smNameOf(x.pid),'text-align:right'],['تعداد',x=>`<b>${x.qty.toLocaleString('fa-IR')}</b>`],['مبلغ',x=>money(x.amt)]],true);}
   else if(K==='sales'){let arr=cur.slice().sort((a,b2)=>(b2.d||'').localeCompare(a.d||''));
     h+=tbl('💰 فاکتورهای این دوره',arr,[['تاریخ',x=>x.d?esc(iso2jstr(x.d)):'—','text-align:right'],['مشتری',x=>smNameOf(x.cust)],['مبلغ',x=>money(x.amt)],['سود',x=>`<span style="color:${x.profit<0?'var(--bad)':'var(--ok)'}">${money(x.profit)}</span>`]],true);}
+  // ================= 🧊 گزارش آبشاری: سال ← ماه ← روز ← سند =================
+  {
+    const _MN=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+    const yg={};
+    H.filter(x=>x.d).forEach(x=>{
+      const j=g2j(...x.d.split('-').map(Number));
+      const Y=yg[j[0]]||(yg[j[0]]={amt:0,profit:0,n:0,m:{}});Y.amt+=x.amt;Y.profit+=x.profit;Y.n++;
+      const M=Y.m[j[1]]||(Y.m[j[1]]={amt:0,profit:0,n:0,d:{}});M.amt+=x.amt;M.profit+=x.profit;M.n++;
+      const D=M.d[j[2]]||(M.d[j[2]]={amt:0,profit:0,n:0,list:[]});D.amt+=x.amt;D.profit+=x.profit;D.n++;D.list.push(x);
+    });
+    const years=Object.keys(yg).sort((a,b2)=>b2-a);
+    const totAll=years.reduce((a,y)=>a+yg[y].amt,0)||1;
+    const bar=(v,t)=>`<div style="display:inline-block;height:9px;background:var(--ac);border-radius:3px;width:${Math.max(3,Math.round(v/t*90))}px;vertical-align:middle;margin-inline-end:5px"></div>${(v/t*100).toLocaleString('fa-IR',{maximumFractionDigits:1})}٪`;
+    let ch='';
+    years.forEach(y=>{
+      const Y=yg[y],openY=view.smCasY===y;
+      ch+=`<tr style="cursor:pointer;font-weight:700" onclick="view.smCasY=view.smCasY==='${y}'?null:'${y}';view.smCasM=null;render()"><td style="text-align:right">${openY?'▾':'◂'} 📆 سال ${(+y).toLocaleString('fa-IR',{useGrouping:false})}</td><td>${money(Y.amt)}</td><td style="color:${Y.profit<0?'var(--bad)':'var(--ok)'}">${money(Y.profit)}</td><td>${Y.n.toLocaleString('fa-IR')}</td><td dir="ltr" style="text-align:left">${bar(Y.amt,totAll)}</td></tr>`;
+      if(openY)Object.keys(Y.m).sort((a,b2)=>b2-a).forEach(m=>{
+        const M=Y.m[m],km=y+'-'+m,openM=view.smCasM===km;
+        ch+=`<tr style="cursor:pointer;background:var(--bg3)" onclick="view.smCasM=view.smCasM==='${km}'?null:'${km}';render()"><td style="text-align:right;padding-inline-start:26px">${openM?'▾':'◂'} ${_MN[m-1]}</td><td>${money(M.amt)}</td><td style="color:${M.profit<0?'var(--bad)':'var(--ok)'}">${money(M.profit)}</td><td>${M.n.toLocaleString('fa-IR')}</td><td dir="ltr" style="text-align:left">${bar(M.amt,Y.amt||1)}</td></tr>`;
+        if(openM)Object.keys(M.d).sort((a,b2)=>b2-a).forEach(dd=>{
+          const D=M.d[dd];
+          ch+=`<tr style="background:var(--bg2)"><td style="text-align:right;padding-inline-start:48px">${(+dd).toLocaleString('fa-IR')} ${_MN[m-1]}</td><td>${money(D.amt)}</td><td style="color:${D.profit<0?'var(--bad)':'var(--ok)'}">${money(D.profit)}</td><td>${D.n.toLocaleString('fa-IR')}</td><td></td></tr>`;
+          D.list.forEach(x=>{ch+=`<tr style="background:var(--bg2);cursor:pointer;font-size:11.5px;color:var(--tx2)" onclick="go('rec','${x.e}','${x.id}')"><td style="text-align:right;padding-inline-start:66px">↳ ${x.e==='invoice'?'🧾':'🛒'} ${smNameOf(x.cust)||'—'}</td><td>${money(x.amt)}</td><td>${money(x.profit)}</td><td>۱</td><td></td></tr>`;});
+        });
+      });
+    });
+    h+=`<div class="sec"><h3>🧊 گزارش آبشاری فروش <span style="font-size:11px;color:var(--tx2);font-weight:400">— روی سال/ماه کلیک کنید تا لایهٔ بعدی باز شود (کل تاریخچه)</span></h3>
+      ${years.length?`<div class="tblwrap" style="max-height:460px;overflow:auto"><table><thead><tr><th style="text-align:right">دوره</th><th>فروش</th><th>سود</th><th>تعداد سند</th><th dir="ltr" style="text-align:left">سهم</th></tr></thead><tbody>${ch}</tbody></table></div>`:'<div class="empty">فروش تاریخ‌داری ثبت نشده</div>'}</div>`;
+  }
+  // ================= 🔍 گزارش موردی: مشتری / کالا / فروشنده / کانال =================
+  {
+    view.smCaseT=view.smCaseT||'cust';
+    const CT=[['cust','🛍️ مشتری'],['prod','📦 کالا'],['seller','🧑‍💼 فروشنده'],['chan','🛒 کانال']];
+    const pool=view.smCaseT==='cust'?byE('customer'):view.smCaseT==='prod'?byE('product'):view.smCaseT==='seller'?byE('hr'):byE('gateway').concat(byE('channel'));
+    const cq=(view.smCaseQ||'').trim();
+    const selId=view.smCaseId&&recs[view.smCaseId]?view.smCaseId:null;
+    h+=`<div class="sec"><h3>🔍 گزارش موردی</h3>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+        ${CT.map(([k,n])=>`<button class="btn ${k===view.smCaseT?'':'gh'} sm" onclick="view.smCaseT='${k}';view.smCaseId=null;view.smCaseQ='';render()">${n}</button>`).join('')}
+        <input data-search="smcase" value="${esc(cq)}" placeholder="🔎 نام را بنویسید…" oninput="view.smCaseQ=this.value;view.smCaseId=null;clearTimeout(window._smcT);window._smcT=setTimeout(render,250)" style="max-width:220px">
+        <label style="display:flex;gap:5px;align-items:center;font-size:11.5px;cursor:pointer"><input type="checkbox" ${view.smCaseAll?'checked':''} onchange="view.smCaseAll=this.checked;render()"> کل تاریخچه (نه فقط دورهٔ انتخابی)</label>
+      </div>`;
+    if(!selId&&cq.length>=1){
+      const hits=pool.filter(x=>(x.d.title||'').includes(cq)).slice(0,15);
+      h+=hits.length?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${hits.map(x=>`<button class="btn gh sm" onclick="view.smCaseId='${x.id}';render()">${esc(x.d.title||'—')}</button>`).join('')}</div>`:`<div class="empty" style="padding:10px">موردی با این نام پیدا نشد</div>`;
+    }
+    if(selId){
+      const inPer=x=>view.smCaseAll?true:(x.d&&x.d>=W.from&&x.d<=W.to);
+      let rows=[],cols;
+      if(view.smCaseT==='prod'){
+        rows=L.filter(x=>x.pid===selId&&x.d&&inPer(x)).sort((a,b2)=>(b2.d||'').localeCompare(a.d||''));
+        cols=[['تاریخ',x=>esc(iso2jstr(x.d)),'text-align:right'],['مشتری',x=>smNameOf(x.cust)||'—'],['تعداد',x=>x.qty.toLocaleString('fa-IR')],['مبلغ',x=>money(x.amt)],['سود',x=>`<span style="color:${x.profit<0?'var(--bad)':'var(--ok)'}">${money(x.profit)}</span>`]];
+      }else{
+        const kf=view.smCaseT==='cust'?'cust':view.smCaseT==='seller'?'seller':'chan';
+        rows=H.filter(x=>x[kf]===selId&&x.d&&inPer(x)).sort((a,b2)=>(b2.d||'').localeCompare(a.d||''));
+        cols=[['تاریخ',x=>esc(iso2jstr(x.d)),'text-align:right'],['مشتری',x=>smNameOf(x.cust)||'—'],['مبلغ',x=>money(x.amt)],['سود',x=>`<span style="color:${x.profit<0?'var(--bad)':'var(--ok)'}">${money(x.profit)}</span>`],['سند',x=>`<button class="btn gh sm" onclick="go('rec','${x.e}','${x.id}')">↗ باز کردن</button>`]];
+      }
+      const tAmt2=rows.reduce((a,x)=>a+(x.amt||0),0),tProf=rows.reduce((a,x)=>a+(x.profit||0),0),tQty=rows.reduce((a,x)=>a+(x.qty||0),0);
+      h+=`<div class="comp" style="margin-bottom:10px">
+        <div class="chip">📌 ${esc(recs[selId].d.title||'—')} <b style="cursor:pointer;margin-inline-start:6px" onclick="view.smCaseId=null;render()">✕</b></div>
+        <div class="chip">جمع فروش: <b>${money(tAmt2)}</b></div>
+        <div class="chip">جمع سود: <b style="color:${tProf<0?'var(--bad)':'var(--ok)'}">${money(tProf)}</b></div>
+        ${tQty?`<div class="chip">تعداد کالا: <b>${tQty.toLocaleString('fa-IR')}</b></div>`:''}
+        <div class="chip">تعداد ردیف: <b>${rows.length.toLocaleString('fa-IR')}</b></div></div>
+      ${rows.length?`<div class="tblwrap" style="max-height:420px;overflow:auto"><table><thead><tr>${cols.map(c=>`<th style="${c[2]||''}">${c[0]}</th>`).join('')}</tr></thead><tbody>${rows.slice(0,300).map(x=>`<tr>${cols.map(c=>`<td style="${c[2]||''}">${c[1](x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`:'<div class="empty" style="padding:12px">در این بازه فروشی برای این مورد ثبت نشده</div>'}`;
+    }
+    h+=`</div>`;
+  }
   return h;
 }
 window.smdashHTML=smdashHTML;
