@@ -276,11 +276,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.07</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.09</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.07</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.09</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -613,7 +613,7 @@ customer:{ic:'🛍️',n:'مشتریان کسب‌وکار',grp:'CRM و مشتر
  {k:'balance',n:'مانده حساب (+ طلب / − بدهی)',t:NUM},
  {k:'lastbuy',n:'آخرین خرید',t:DAT},
  {k:'returns',n:'تعداد کالای مرجوعی',t:NUM},
- {k:'returnAmt',n:'مبلغ مرجوعی (تومان)',t:NUM},
+ {k:'returnAmt',n:'مبلغ مرجوعی (ریال)',t:NUM},
  {k:'inactiveReason',n:'علت عدم خرید (برای مشتری غیرفعال)',t:SEL,o:['قیمت بالا','کیفیت','رفتن به رقیب','خدمات پس از فروش','نیاز نداشت','دور بودن','نامشخص']},
  {k:'satBuy',n:'رضایت از خرید (۰ تا ۱۰۰)',t:NUM},
  {k:'satResp',n:'رضایت از پاسخگویی (۰ تا ۱۰۰)',t:NUM},
@@ -632,7 +632,7 @@ crm:{ic:'🧑‍🤝‍🧑',n:'CRM | ذینفعان',grp:'CRM و مشتریان
  {k:'last',n:'آخرین تماس',t:DAT},{k:'next',n:'پیگیری بعدی',t:DAT},
  {k:'code',n:'کد سپیدار / تفصیل (برای ایمپورت)',t:TXT},
  {k:'scountry',n:'🌍 کشور (برای تأمین‌کننده)',t:TXT},
- {k:'climit',n:'💳 حد اعتبار می‌دهد (تومان)',t:NUM},
+ {k:'climit',n:'💳 حد اعتبار می‌دهد (ریال)',t:NUM},
  {k:'payterm',n:'⏳ مهلت پرداخت (روز)',t:NUM},
  {k:'ontime',n:'🚚 تحویل به‌موقع (٪ ۰ تا ۱۰۰)',t:NUM},
  {k:'squality',n:'⭐ کیفیت کالا/خدمت (۱ تا ۵)',t:NUM},
@@ -748,9 +748,9 @@ payslip:{ic:'🧾',n:'فیش حقوقی',grp:'پرسنل و سازمان',f:[
  {k:'title',n:'عنوان فیش (مثلاً حقوق مرداد ۱۴۰۵)',t:TXT},
  {k:'person',n:'کارمند',t:REL,r:'hr',s:1},
  {k:'month',n:'ماه (مثلاً 1405/05)',t:TXT},
- {k:'base',n:'حقوق پایه (تومان)',t:NUM},
+ {k:'base',n:'حقوق پایه (ریال)',t:NUM},
  {k:'othr',n:'ساعت اضافه‌کاری',t:NUM},
- {k:'otrate',n:'نرخ هر ساعت اضافه‌کاری (تومان)',t:NUM},
+ {k:'otrate',n:'نرخ هر ساعت اضافه‌کاری (ریال)',t:NUM},
  {k:'housing',n:'حق مسکن',t:NUM},
  {k:'food',n:'بن خواربار',t:NUM},
  {k:'child',n:'حق اولاد',t:NUM},
@@ -768,7 +768,7 @@ sepdoc:{ic:'⚖️',n:'اسناد حسابداری (سپیدار)',grp:'مالی
  {k:'date',n:'تاریخ سند',t:DAT},
  {k:'party',n:'طرف حساب',t:TXT},
  {k:'pcode',n:'کد طرف حساب',t:TXT},
- {k:'amount',n:'مبلغ (تومان)',t:NUM},
+ {k:'amount',n:'مبلغ (ریال)',t:NUM},
  {k:'qty',n:'تعداد کالا',t:NUM},
  {k:'mstat',n:'وضعیت تطبیق',t:SEL,o:SEP_MSTAT},
  {k:'minv',n:'سند عملیاتی: فاکتور',t:REL,r:'invoice',s:1},
@@ -989,7 +989,7 @@ whmove:{ic:'↔️',n:'انتقال بین انبارها',grp:'کالا و ان
  {k:'date',n:'تاریخ خروج',t:DAT},
  {k:'rdate',n:'تاریخ تحویل',t:DAT},
  {k:'carrier',n:'حمل‌کننده / راننده',t:TXT},
- {k:'cost',n:'هزینه حمل (تومان)',t:NUM},
+ {k:'cost',n:'هزینه حمل (ریال)',t:NUM},
  {k:'note',n:'توضیح',t:LNG}],
  cols:['title','product','qty','from','to','status'],comp:'whmoveBrief'},
 whcount:{ic:'📋',n:'انبارگردانی و اصلاح موجودی',grp:'کالا و انبار',f:[
@@ -1008,12 +1008,12 @@ product:{ic:'📦',n:'کالا و خدمات',grp:'کالا و انبار',f:[
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'grp',n:'گروه کالا',t:SEL,o:['عمومی','دیجیتال','پوشاک','خوراکی','خدمات','مواد اولیه']},
  {k:'unit',n:'واحد',t:TXT},
- {k:'buy',n:'قیمت خرید واحد (تومان)',t:NUM},
- {k:'sell',n:'قیمت فروش واحد (تومان)',t:NUM},
+ {k:'buy',n:'قیمت خرید واحد (ریال)',t:NUM},
+ {k:'sell',n:'قیمت فروش واحد (ریال)',t:NUM},
  {k:'stock0',n:'موجودی اولیه',t:NUM},
  {k:'minstock',n:'حداقل موجودی (هشدار)',t:NUM},
  {k:'lead',n:'⏱ زمان تدارک/واردات (روز)',t:NUM},
- {k:'dref',n:'🏠 قیمت مرجع خرید داخلی واحد (تومان) — برای مقایسه با واردات',t:NUM},
+ {k:'dref',n:'🏠 قیمت مرجع خرید داخلی واحد (ریال) — برای مقایسه با واردات',t:NUM},
  {k:'sku',n:'کد SKU (شناسه یکتای مدل/رنگ/نسخه)',t:TXT},
  {k:'model',n:'مدل',t:TXT},
  {k:'color',n:'رنگ',t:TXT},
@@ -1030,7 +1030,7 @@ product:{ic:'📦',n:'کالا و خدمات',grp:'کالا و انبار',f:[
  {k:'status',n:'وضعیت',t:SEL,o:['آمادهٔ ارسال','در مسیر','تحویل شد','برگشتی','لغو']},
  {k:'date',n:'تاریخ ارسال',t:DAT},
  {k:'addr',n:'آدرس تحویل',t:TXT},
- {k:'cod',n:'مبلغ دریافت در محل (تومان)',t:NUM},
+ {k:'cod',n:'مبلغ دریافت در محل (ریال)',t:NUM},
  {k:'note',n:'یادداشت',t:LNG}],
  cols:['title','customer','courier','status','date'],comp:'delivBrief'},
  rfq:{ic:'⚖️',n:'استعلام قیمت (چندتأمین‌کننده)',grp:'کالا و انبار',sub:1,f:[
@@ -1069,7 +1069,7 @@ sale:{ic:'🛒',n:'فروش سریع (تک‌کالا)',grp:'مدیریت کسب
  {k:'title',n:'شرح فروش / شماره فاکتور',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'product',n:'کالا',t:REL,r:'product',s:1},
- {k:'qty',n:'تعداد',t:NUM},{k:'price',n:'قیمت واحد (تومان)',t:NUM},
+ {k:'qty',n:'تعداد',t:NUM},{k:'price',n:'قیمت واحد (ریال)',t:NUM},
  {k:'extra',n:'هزینه‌های جانبی (حمل و…)',t:NUM},
  {k:'customer',n:'مشتری',t:REL,r:'customer',s:1},
  {k:'seller',n:'فروشنده (برای تارگت)',t:REL,r:'hr',s:1},
@@ -1085,10 +1085,10 @@ purchase:{ic:'🚚',n:'خرید سریع (تک‌کالا)',grp:'مدیریت ک
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'product',n:'کالا',t:REL,r:'product',s:1},
  {k:'qty',n:'تعداد',t:NUM},{k:'price',n:'قیمت واحد',t:NUM},
- {k:'cur',n:'💱 ارز خرید',t:SEL,o:['تومان','ریال','دلار','یورو','درهم']},
- {k:'fx',n:'نرخ تسعیر واحد به تومان (اختیاری)',t:NUM},
+ {k:'cur',n:'💱 ارز خرید',t:SEL,o:['ریال','دلار','یورو','درهم']},
+ {k:'fx',n:'نرخ تسعیر واحد به ریال (اختیاری)',t:NUM},
  {k:'origin',n:'🌍 منشأ خرید',t:SEL,o:['داخلی','خارجی']},
- {k:'extra',n:'هزینه‌های جانبی به تومان (حمل، گمرک و…)',t:NUM},
+ {k:'extra',n:'هزینه‌های جانبی به ریال (حمل، گمرک و…)',t:NUM},
  {k:'supplier',n:'تامین‌کننده',t:REL,r:'crm',s:1},
  {k:'wh',n:'🏬 انبارِ ورود کالا',t:REL,r:'whouse',s:1},
  {k:'kind',n:'نوع',t:SEL,o:['نقدی','اعتباری']},
@@ -1100,7 +1100,7 @@ channel:{ic:'📣',n:'کانال‌ها و تبلیغات',grp:'فروش',f:[
  {k:'title',n:'نام کانال',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'kind',n:'نوع',t:SEL,o:['کانال فروش','تبلیغات','ارتباط با مشتری','لجستیک']},
- {k:'cost',n:'هزینه ماهانه (تومان)',t:NUM},
+ {k:'cost',n:'هزینه ماهانه (ریال)',t:NUM},
  {k:'link',n:'لینک',t:URLF},
  {k:'note',n:'توضیح',t:TXT}],
  cols:['title','biz','kind','cost']},
@@ -1120,10 +1120,10 @@ invoice:{ic:'🧾',n:'فاکتور و پیش‌فاکتور',grp:'فروش',sub:
  {k:'payterms',n:'شرح شرایط پرداخت',t:LNG},
  {k:'delivterms',n:'🚚 شرایط تحویل',t:LNG},
  {k:'validto',n:'⏳ اعتبار پیش‌فاکتور تا',t:DAT},
- {k:'disc',n:'تخفیف کل فاکتور (تومان)',t:NUM},
+ {k:'disc',n:'تخفیف کل فاکتور (ریال)',t:NUM},
  {k:'taxpct',n:'مالیات بر ارزش افزوده ٪',t:NUM},
- {k:'ship',n:'هزینه ارسال/بسته‌بندی (تومان)',t:NUM},
- {k:'paid',n:'مبلغ پرداخت‌شده (تومان)',t:NUM},
+ {k:'ship',n:'هزینه ارسال/بسته‌بندی (ریال)',t:NUM},
+ {k:'paid',n:'مبلغ پرداخت‌شده (ریال)',t:NUM},
  {k:'gateway',n:'درگاه/مارکت‌پلیس فروش',t:REL,r:'gateway',s:1},
  {k:'acode',n:'کد حسابداری درآمد (اختیاری)',t:REL,r:'acct',s:1},
  {k:'note',n:'توضیحات',t:LNG}],
@@ -1134,8 +1134,8 @@ invline:{sub:1,ic:'➖',n:'ردیف فاکتور',grp:'فروش',sub:1,f:[
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'product',n:'کالا/خدمت',t:REL,r:'product',s:1},
  {k:'qty',n:'تعداد',t:NUM},
- {k:'price',n:'قیمت واحد (تومان)',t:NUM},
- {k:'ldisc',n:'تخفیف این ردیف (تومان)',t:NUM}],
+ {k:'price',n:'قیمت واحد (ریال)',t:NUM},
+ {k:'ldisc',n:'تخفیف این ردیف (ریال)',t:NUM}],
  cols:['title','invoice','qty','price'],comp:'invLineBrief'},
 saletarget:{ic:'🎯',n:'تارگت فروش',grp:'عملکرد و تارگت',f:[
  {k:'title',n:'عنوان تارگت',t:TXT},
@@ -1148,7 +1148,7 @@ saletarget:{ic:'🎯',n:'تارگت فروش',grp:'عملکرد و تارگت',f
  {k:'ptype',n:'دوره',t:SEL,o:['روزانه','هفتگی','ماهانه','فصلی','سالانه']},
  {k:'from',n:'از تاریخ',t:DAT},
  {k:'to',n:'تا تاریخ',t:DAT},
- {k:'tamount',n:'🎯 تارگت مبلغی (تومان)',t:NUM},
+ {k:'tamount',n:'🎯 تارگت مبلغی (ریال)',t:NUM},
  {k:'tqty',n:'🎯 تارگت تعدادی',t:NUM},
  {k:'members',n:'👥 اعضای تیم برای امتیاز عملکرد (افزودن دستی)',t:REL,r:'hr'},
  {k:'kpi',n:'📐 شاخص عملکردِ ثبتِ امتیاز (خالی = خودکار)',t:REL,r:'perfkpi',s:1},
@@ -1186,17 +1186,17 @@ purchinv:{ic:'🧾',n:'فاکتور خرید',grp:'کالا و انبار',f:[
  {k:'title',n:'شماره / شرح فاکتور خرید',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'supplier',n:'تامین‌کننده',t:REL,r:'crm',s:1},
- {k:'cur',n:'💱 ارز فاکتور',t:SEL,o:['تومان','ریال','دلار','یورو','درهم']},
- {k:'fx',n:'نرخ تسعیر واحد به تومان (اختیاری)',t:NUM},
+ {k:'cur',n:'💱 ارز فاکتور',t:SEL,o:['ریال','دلار','یورو','درهم']},
+ {k:'fx',n:'نرخ تسعیر واحد به ریال (اختیاری)',t:NUM},
  {k:'origin',n:'🌍 منشأ خرید',t:SEL,o:['داخلی','خارجی']},
  {k:'wh',n:'🏬 انبارِ ورود کالا',t:REL,r:'whouse',s:1},
  {k:'status',n:'وضعیت',t:SEL,o:['پیش‌نویس','ثبت شده','تسویه شده','باطل']},
  {k:'date',n:'تاریخ',t:DAT},
  {k:'due',n:'تاریخ سررسید',t:DAT},
- {k:'disc',n:'تخفیف کل (تومان)',t:NUM},
+ {k:'disc',n:'تخفیف کل (ریال)',t:NUM},
  {k:'taxpct',n:'مالیات بر ارزش افزوده ٪',t:NUM},
- {k:'ship',n:'هزینه حمل/گمرک (تومان)',t:NUM},
- {k:'paid',n:'مبلغ پرداخت‌شده (تومان)',t:NUM},
+ {k:'ship',n:'هزینه حمل/گمرک (ریال)',t:NUM},
+ {k:'paid',n:'مبلغ پرداخت‌شده (ریال)',t:NUM},
  {k:'note',n:'توضیحات',t:LNG}],
  cols:['title','supplier','status','date'],comp:'pinvBrief'},
 purchline:{ic:'➕',n:'ردیف خرید',grp:'کالا و انبار',sub:1,f:[
@@ -1205,8 +1205,8 @@ purchline:{ic:'➕',n:'ردیف خرید',grp:'کالا و انبار',sub:1,f:[
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'product',n:'کالا/خدمت',t:REL,r:'product',s:1},
  {k:'qty',n:'تعداد',t:NUM},
- {k:'price',n:'قیمت واحد (تومان)',t:NUM},
- {k:'ldisc',n:'تخفیف این ردیف (تومان)',t:NUM}],
+ {k:'price',n:'قیمت واحد (ریال)',t:NUM},
+ {k:'ldisc',n:'تخفیف این ردیف (ریال)',t:NUM}],
  cols:['title','purchinv','qty','price'],comp:'pinvLineBrief'},
 settle:{ic:'📂',n:'آرشیو دریافت/پرداخت‌ها',grp:'مالی',f:[
  {k:'title',n:'شرح',t:TXT},
@@ -1216,7 +1216,7 @@ settle:{ic:'📂',n:'آرشیو دریافت/پرداخت‌ها',grp:'مالی'
  {k:'supplier',n:'تامین‌کننده',t:REL,r:'crm',s:1},
  {k:'invoice',n:'بابت فاکتور فروش (اختیاری)',t:REL,r:'invoice',s:1},
  {k:'purchinv',n:'بابت فاکتور خرید (اختیاری)',t:REL,r:'purchinv',s:1},
- {k:'amount',n:'مبلغ (تومان)',t:NUM},
+ {k:'amount',n:'مبلغ (ریال)',t:NUM},
  {k:'method',n:'روش',t:SEL,o:['نقد','کارت','انتقال بانکی','چک']},
  {k:'account',n:'🏦 صندوق/حساب',t:REL,r:'account',s:1},
  {k:'date',n:'تاریخ',t:DAT},
@@ -1232,7 +1232,7 @@ payday:{ic:'💸',n:'فرم حواله روزانه',grp:'مالی',sub:1,f:[
 account:{ic:'🏦',n:'صندوق و حساب بانکی',grp:'مدیریت کسب و کار',f:[
  {k:'title',n:'نام حساب / صندوق',t:TXT},
  {k:'kind',n:'نوع',t:SEL,o:['صندوق نقدی','حساب بانکی','کیف پول / درگاه','حساب ارزی']},
- {k:'cur',n:'ارز',t:SEL,o:['تومان','ریال','دلار','یورو','درهم']},
+ {k:'cur',n:'ارز',t:SEL,o:['ریال','دلار','یورو','درهم']},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'bank',n:'نام بانک',t:TXT},
  {k:'accno',n:'شماره حساب / کارت',t:TXT},
@@ -1246,7 +1246,7 @@ acctx:{ic:'💸',n:'تراکنش صندوق/بانک',grp:'مدیریت کسب �
  {k:'kind',n:'نوع تراکنش',t:SEL,o:['واریز / درآمد','برداشت / هزینه','انتقال به حساب دیگر','خرید ارز','فروش ارز','واریز اولیه / سرمایه','اصلاح موجودی']},
  {k:'amount',n:'مبلغ (به ارز حساب)',t:NUM},
  {k:'toaccount',n:'حساب مقصد (برای انتقال)',t:REL,r:'account',s:1},
- {k:'rate',n:'نرخ تسعیر (تومان به ازای هر واحد ارز)',t:NUM},
+ {k:'rate',n:'نرخ تسعیر (ریال به ازای هر واحد ارز)',t:NUM},
  {k:'cat',n:'دستهٔ درآمد/هزینه',t:TXT},
  {k:'date',n:'تاریخ',t:DAT},
  {k:'note',n:'توضیح',t:LNG}],
@@ -1575,7 +1575,7 @@ bsc:{ic:'⚖️',n:'استراتژی و اهداف (BSC)',grp:'استراتژی 
  {k:'start',n:'مقدار شروع',t:NUM},
  {k:'target',n:'مقدار هدف',t:NUM},
  {k:'current',n:'مقدار فعلی',t:NUM},
- {k:'unit',n:'واحد سنجش',t:SEL,o:['تومان','میلیون تومان','میلیارد تومان','دلار','درصد','تعداد','نفر','کیلووات','مگاوات']},
+ {k:'unit',n:'واحد سنجش',t:SEL,o:['ریال','میلیون ریال','میلیارد ریال','دلار','درصد','تعداد','نفر','کیلووات','مگاوات']},
  {k:'manual',n:'درصد تحقق دستی (هدف کیفی)',t:NUM},
  {k:'crit',n:'معیار موفقیت',t:LNG},
  {k:'initiative',n:'برنامه‌های اجرایی (پروژه‌ها)',t:REL,r:'project'},
@@ -1667,7 +1667,7 @@ expense:{ic:'🧾',n:'هزینه‌های عملیاتی',grp:'مالی',f:[
  {k:'title',n:'شرح هزینه',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'cat',n:'سرفصل',t:SEL,o:['حقوق و دستمزد','عیدی و پاداش','سنوات','بیمه (سهم کارفرما/بیکاری/تکمیلی)','پورسانت فروش','ایاب و ذهاب','آموزش کارکنان','سایر هزینه‌های کارکنان','اجاره','پذیرایی','تعمیر و نگهداری','آب و برق','ملزومات و نوشت‌افزار','پست و تلفن','اداری و متفرقه','حمل و انبارداری','وانت و توزیع','تبلیغات و مارکتینگ','هزینه سایت و پلتفرم','گارانتی','هدایا','سفر و ماموریت','ضایعات','تخفیف و رندینگ','بسته‌بندی','کارمزد درگاه/مارکت‌پلیس','نرم‌افزار و اشتراک','مرجوعی و خسارت','استهلاک','مالی (بهره/کارمزد بانکی)','جریمه دیرکرد']},
- {k:'amount',n:'مبلغ (تومان)',t:NUM},
+ {k:'amount',n:'مبلغ (ریال)',t:NUM},
  {k:'date',n:'تاریخ',t:DAT},
  {k:'acode',n:'کد حسابداری (از کدینگ حساب‌ها — اختیاری)',t:REL,r:'acct',s:1},
  {k:'eproject',n:'پروژه EPCF (در صورت مربوط بودن)',t:REL,r:'eproject',s:1},
@@ -1692,9 +1692,9 @@ pfsettle:{ic:'📂',n:'آرشیو تسویه پلتفرم‌ها',grp:'مدیر�
  {k:'gateway',n:'درگاه/مارکت‌پلیس',t:REL,r:'gateway',s:1},
  {k:'from',n:'بازه فروش — از تاریخ',t:DAT},
  {k:'to',n:'بازه فروش — تا تاریخ',t:DAT},
- {k:'gross',n:'فروش دوره طبق گزارش پلتفرم (تومان)',t:NUM},
- {k:'fee',n:'کارمزد و کسورات پلتفرم (تومان)',t:NUM},
- {k:'paid',n:'مبلغ واریزی (تومان)',t:NUM},
+ {k:'gross',n:'فروش دوره طبق گزارش پلتفرم (ریال)',t:NUM},
+ {k:'fee',n:'کارمزد و کسورات پلتفرم (ریال)',t:NUM},
+ {k:'paid',n:'مبلغ واریزی (ریال)',t:NUM},
  {k:'account',n:'🏦 صندوق/حساب واریز',t:REL,r:'account',s:1},
  {k:'paydate',n:'تاریخ واریز (قطعی یا اعلامی)',t:DAT},
  {k:'status',n:'وضعیت',t:STA,o:['در انتظار واریز','واریز شده','اختلاف دارد']},
@@ -1724,7 +1724,7 @@ plfin:{ic:'💰',n:'سود و زیان تفصیلی (از حسابداری)',grp
  {k:'company',n:'شرکت',t:REL,r:'company',s:1},
  {k:'jy',n:'سال شمسی',t:NUM},
  {k:'jm',n:'دوره',t:SEL,o:['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند','کل سال']},
- {k:'unit',n:'واحد مبالغ',t:SEL,o:['ریال','تومان']},
+ {k:'unit',n:'واحد مبالغ',t:SEL,o:['ریال','ریال']},
  {k:'note',n:'توضیح',t:LNG}],
  cols:['title','biz','jy','jm'],comp:'plfinBrief'},
 kpival:{ic:'🎯',n:'ثبت KPI فروش (دوره‌ای)',grp:'مدیریت کسب و کار',sub:1,f:[
@@ -1783,7 +1783,7 @@ widdef:{ic:'🧱',n:'ویجت داشبرد',grp:'مدیریت کسب و کار',
  {k:'src',n:'منبع داده',t:SEL,o:['شاخص من (ساختارساز)','جمع فیلد عددی یک بخش','میانگین فیلد عددی یک بخش','شمارش رکوردهای یک بخش','فرمول روی فیلدهای بخش']},
  {k:'mdef',n:'شاخص (اگر منبع = ساختارساز)',t:REL,r:'mdef',s:1},
  {k:'ent',n:'نام بخش (مثل: هزینه‌های عملیاتی)',t:TXT},
- {k:'fld',n:'نام فیلد عددی (مثل: مبلغ (تومان))',t:TXT},
+ {k:'fld',n:'نام فیلد عددی (مثل: مبلغ (ریال))',t:TXT},
  {k:'grpf',n:'تفکیک بر اساس فیلد (برای دایره‌ای/جدول — مثل: سرفصل)',t:TXT},
  {k:'fx',n:'فرمول (روی فیلدهای هر رکورد، مثل: [تعداد]×[قیمت واحد])',t:TXT},
  {k:'target',n:'هدف (برای گیج)',t:NUM},
@@ -1797,7 +1797,7 @@ waste:{ic:'🗑',n:'ضایعات و خروج از انبار',grp:'کالا و �
  {k:'product',n:'کالا',t:REL,r:'product',s:1},
  {k:'wh',n:'🏬 انبار',t:REL,r:'whouse',s:1},
  {k:'qty',n:'تعداد',t:NUM},
- {k:'recover',n:'مبلغ فروش/بازیافت (تومان) — فقط برای نوع فروش',t:NUM},
+ {k:'recover',n:'مبلغ فروش/بازیافت (ریال) — فقط برای نوع فروش',t:NUM},
  {k:'reason',n:'علت (برای ضایعات)',t:SEL,o:['خرابی/آسیب فیزیکی','شکستگی','آب‌دیدگی','انقضا','افت کیفیت','سرقت/مفقودی','سایر']},
  {k:'outuse',n:'🎁 مصرف (برای خروج بدون فروش)',t:SEL,o:['هدیه به مشتری','نمونه بازاریابی/تستر','مصرف داخلی','جایزه/پاداش کارکنان','اهدا/خیریه','گارانتی و جبران خسارت','سایر']},
  {k:'to',n:'دریافت‌کننده / مقصد (اختیاری)',t:TXT},
@@ -1811,7 +1811,7 @@ pbudget:{ic:'🎛️',n:'بودجه و کنترل بودجه',grp:'مالی',f:[
  {k:'cats',n:'سرفصل‌های هزینه (برای بودجهٔ هزینه‌ای — خالی = همه)',t:MUL,o:['حقوق و دستمزد','بیمه','پورسانت فروش','آموزش کارکنان','اجاره','پذیرایی','تعمیر و نگهداری','آب و برق','ملزومات و نوشت‌افزار','پست و تلفن','اداری و متفرقه','حمل و انبارداری','وانت و توزیع','تبلیغات و مارکتینگ','هزینه سایت و پلتفرم','گارانتی','هدایا','سفر و ماموریت','ضایعات','بسته‌بندی','کارمزد درگاه/مارکت‌پلیس','نرم‌افزار و اشتراک','استهلاک','مالی (بهره/کارمزد بانکی)']},
  {k:'from',n:'از تاریخ',t:DAT},
  {k:'to',n:'تا تاریخ',t:DAT},
- {k:'amount',n:'مبلغ مصوب (تومان)',t:NUM},
+ {k:'amount',n:'مبلغ مصوب (ریال)',t:NUM},
  {k:'owner',n:'مسئول بودجه',t:REL,r:'hr',s:1},
  {k:'note',n:'توضیح',t:LNG}],
  cols:['title','biz','kind','amount','from','to'],comp:'budgetBrief'},
@@ -1823,7 +1823,7 @@ eproject:{ic:'🏗️',n:'پروژه EPCF',grp:'EPCF',f:[
  {k:'client',n:'کارفرما',t:REL,r:'crm',s:1},
  {k:'kind',n:'نوع قرارداد',t:SEL,o:['EPCF','EPC','PC','EP','E (مهندسی)','C (اجرا)']},
  {k:'cval',n:'مبلغ قرارداد',t:NUM},
- {k:'curr',n:'ارز',t:SEL,o:['تومان','دلار','یورو','درهم','یوان']},
+ {k:'curr',n:'ارز',t:SEL,o:['ریال','دلار','یورو','درهم','یوان']},
  {k:'start',n:'تاریخ شروع',t:DAT},
  {k:'finish',n:'تاریخ پایان برنامه‌ای',t:DAT},
  {k:'status',n:'وضعیت',t:SEL,o:['مناقصه/پیشنهاد','در حال اجرا','تعلیق','تحویل موقت','تحویل قطعی','بسته شده']},
@@ -1868,7 +1868,7 @@ emr:{ic:'📦',n:'اقلام خرید (P) — MR/PO',grp:'EPCF',f:[
  {k:'kind',n:'مرحله سند',t:SEL,o:['درخواست خرید (MR)','استعلام (RFQ)','سفارش خرید (PO)']},
  {k:'supplier',n:'سازنده / تامین‌کننده',t:REL,r:'crm',s:1},
  {k:'amount',n:'مبلغ',t:NUM},
- {k:'curr',n:'ارز',t:SEL,o:['تومان','دلار','یورو','درهم','یوان']},
+ {k:'curr',n:'ارز',t:SEL,o:['ریال','دلار','یورو','درهم','یوان']},
  {k:'status',n:'وضعیت',t:SEL,o:['در تهیه','استعلام','سفارش شده','در حال ساخت','بازرسی','حمل','ترخیص گمرک','تحویل سایت','لغو']},
  {k:'pdel',n:'موعد تحویل برنامه‌ای',t:DAT},
  {k:'adel',n:'تحویل واقعی',t:DAT},
@@ -1881,7 +1881,7 @@ econtract:{ic:'📜',n:'قراردادهای پروژه',grp:'EPCF',f:[
  {k:'party',n:'طرف قرارداد',t:REL,r:'crm',s:1},
  {k:'kind',n:'نوع',t:SEL,o:['قرارداد اصلی کارفرما','پیمانکار جزء','مشاور','تامین‌کننده','الحاقیه']},
  {k:'amount',n:'مبلغ',t:NUM},
- {k:'curr',n:'ارز',t:SEL,o:['تومان','دلار','یورو','درهم','یوان']},
+ {k:'curr',n:'ارز',t:SEL,o:['ریال','دلار','یورو','درهم','یوان']},
  {k:'sdate',n:'تاریخ امضا',t:DAT},
  {k:'status',n:'وضعیت',t:SEL,o:['پیش‌نویس','فعال','خاتمه','فسخ']},
  {k:'file',n:'فایل قرارداد',t:FIL}],
@@ -1945,7 +1945,7 @@ efin:{ic:'🏦',n:'تامین مالی و تضامین (F)',grp:'EPCF',f:[
  {k:'kind',n:'نوع',t:SEL,o:['تسهیلات بانکی','LC (اعتبار اسنادی)','ضمانتنامه شرکت در مناقصه','ضمانتنامه پیش‌پرداخت','ضمانتنامه حسن انجام کار','ضمانتنامه استرداد کسور','بیمه‌نامه','فاینانس خارجی']},
  {k:'bank',n:'بانک / موسسه',t:REL,r:'bank',s:1},
  {k:'amount',n:'مبلغ',t:NUM},
- {k:'curr',n:'ارز',t:SEL,o:['تومان','دلار','یورو','درهم','یوان']},
+ {k:'curr',n:'ارز',t:SEL,o:['ریال','دلار','یورو','درهم','یوان']},
  {k:'rate',n:'نرخ / کارمزد (٪)',t:NUM},
  {k:'sdate',n:'تاریخ صدور',t:DAT},
  {k:'due',n:'سررسید / انقضا',t:DAT},
@@ -1969,7 +1969,7 @@ cboq:{ic:'📏',n:'متره و برآورد (BOQ)',grp:'ساخت و ساز',f:[
  {k:'chap',n:'فصل',t:SEL,o:['تخریب و خاکی','فونداسیون','اسکلت بتنی','اسکلت فلزی','سقف','دیوارچینی و سفت‌کاری','نازک‌کاری','تاسیسات مکانیکی','تاسیسات برقی','آسانسور','نما','محوطه‌سازی']},
  {k:'unit',n:'واحد',t:SEL,o:['مترمکعب','مترمربع','مترطول','کیلوگرم','تن','عدد','مقطوع','نفرروز']},
  {k:'qty',n:'مقدار برآورد',t:NUM},
- {k:'uprice',n:'بهای واحد برآورد (تومان)',t:NUM},
+ {k:'uprice',n:'بهای واحد برآورد (ریال)',t:NUM},
  {k:'done',n:'مقدار انجام‌شده',t:NUM},
  {k:'acost',n:'هزینه واقعی تجمعی (اختیاری)',t:NUM},
  {k:'csub',n:'پیمانکار مجری',t:REL,r:'csub',s:1}],
@@ -2024,7 +2024,7 @@ clabor:{ic:'⛏️',n:'دستمزد روزمزد کارگاه',grp:'ساخت و 
  {k:'eproject',n:'پروژه',t:REL,r:'eproject',s:1},
  {k:'trade',n:'تخصص',t:SEL,o:['کارگر ساده','بنا','آرماتوربند','قالب‌بند','جوشکار','برقکار','لوله‌کش','کاشی‌کار','گچ‌کار','سنگ‌کار','نقاش','اپراتور ماشین‌آلات']},
  {k:'mandays',n:'نفرروز',t:NUM},
- {k:'rate',n:'دستمزد روزانه (تومان)',t:NUM},
+ {k:'rate',n:'دستمزد روزانه (ریال)',t:NUM},
  {k:'cblock',n:'محل کار',t:REL,r:'cblock',s:1},
  {k:'date',n:'تاریخ',t:DAT}],
  cols:['title','eproject','trade','mandays','rate','date'],comp:'claborBrief'},
@@ -2033,7 +2033,7 @@ cmach:{ic:'🚜',n:'ماشین‌آلات کارگاه',grp:'ساخت و ساز'
  {k:'eproject',n:'پروژه',t:REL,r:'eproject',s:1},
  {k:'own',n:'مالکیت',t:SEL,o:['استیجاری ساعتی','استیجاری روزانه','ملکی']},
  {k:'hours',n:'کارکرد (ساعت یا روز)',t:NUM},
- {k:'rate',n:'نرخ هر ساعت/روز (تومان)',t:NUM},
+ {k:'rate',n:'نرخ هر ساعت/روز (ریال)',t:NUM},
  {k:'oper',n:'اپراتور',t:TXT},
  {k:'date',n:'تاریخ',t:DAT},
  {k:'note',n:'شرح کار',t:TXT}],
@@ -2055,8 +2055,8 @@ token:{ic:'🪙',n:'طرح انتشار توکن',grp:'توکن‌سازی',f:[
  {k:'kind',n:'نوع توکن',t:SEL,o:['مالکیتی (سهم از دارایی)','درآمدی (سهم از سود)','بدهی/صکوک (بازده ثابت)','کاربردی (حق استفاده)']},
  {k:'total',n:'تعداد کل توکن',t:NUM},
  {k:'tokshare',n:'سهم پروژه که توکنیزه شده (٪)',t:NUM},
- {k:'p0',n:'قیمت اسمی/پایه هر توکن (تومان)',t:NUM},
- {k:'p100',n:'قیمت هدف در تکمیل پروژه (تومان)',t:NUM},
+ {k:'p0',n:'قیمت اسمی/پایه هر توکن (ریال)',t:NUM},
+ {k:'p100',n:'قیمت هدف در تکمیل پروژه (ریال)',t:NUM},
  {k:'feepct',n:'کارمزد ناشر در معاملات (٪)',t:NUM},
  {k:'minbuy',n:'حداقل خرید (تعداد)',t:NUM},
  {k:'lockup',n:'دوره قفل فروش (روز)',t:NUM},
@@ -2081,7 +2081,7 @@ tokentx:{ic:'🔁',n:'معاملات توکن',grp:'توکن‌سازی',f:[
  {k:'buyer',n:'خریدار / دریافت‌کننده',t:REL,r:'tokenholder',s:1},
  {k:'qty',n:'تعداد توکن',t:NUM},
  {k:'price',n:'قیمت هر توکن (برای توزیع سود: مبلغ هر توکن)',t:NUM},
- {k:'fee',n:'کارمزد ناشر (تومان)',t:NUM},
+ {k:'fee',n:'کارمزد ناشر (ریال)',t:NUM},
  {k:'date',n:'تاریخ',t:DAT}],
  cols:['title','token','kind','qty','price','date'],comp:'tokTxBrief'},
 tokenloan:{ic:'🏦',n:'وام بانکی با وثیقه توکن',grp:'توکن‌سازی',f:[
@@ -2102,8 +2102,8 @@ tokenins:{ic:'🛡️',n:'بیمه‌نامه‌های توکن/پروژه',grp:
  {k:'token',n:'توکن',t:REL,r:'token',s:1},
  {k:'insurer',n:'شرکت بیمه',t:REL,r:'crm',s:1},
  {k:'cover',n:'نوع پوشش',t:SEL,o:['تضمین تکمیل پروژه','اصل سرمایه توکن‌داران','حوادث و آتش‌سوزی کارگاه','مسئولیت ناشر','تمام خطر پیمانکاری (CAR)']},
- {k:'amount',n:'سقف پوشش (تومان)',t:NUM},
- {k:'premium',n:'حق بیمه (تومان)',t:NUM},
+ {k:'amount',n:'سقف پوشش (ریال)',t:NUM},
+ {k:'premium',n:'حق بیمه (ریال)',t:NUM},
  {k:'from',n:'از تاریخ',t:DAT},
  {k:'to',n:'تا تاریخ',t:DAT},
  {k:'status',n:'وضعیت',t:SEL,o:['فعال','منقضی','خسارت در جریان','باطل']}],
@@ -3829,7 +3829,7 @@ function _dualUnRows(){
   return out.sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
 }
 window.dualCsv=function(){
-  const rows=[['نوع سند','عنوان','تاریخ','طرف حساب','کد تفصیل','مبلغ (تومان)','وضعیت'],..._dualUnRows()];
+  const rows=[['نوع سند','عنوان','تاریخ','طرف حساب','کد تفصیل','مبلغ (ریال)','وضعیت'],..._dualUnRows()];
   const csv='﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\r\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
@@ -4070,7 +4070,7 @@ function swfHTML(){
       return `
       <div style="flex-basis:100%;border-top:1px dashed var(--line);padding-top:8px">
         <b style="font-size:12px">💰 اعلام قیمت فروش (مدیر فروش)</b>
-        <div class="tblwrap" style="margin-top:6px"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالا</th><th>تعداد</th><th>قیمت واحد (تومان)</th><th>جمع ردیف</th></tr></thead><tbody>
+        <div class="tblwrap" style="margin-top:6px"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالا</th><th>تعداد</th><th>قیمت واحد (ریال)</th><th>جمع ردیف</th></tr></thead><tbody>
         ${lines.map(l=>{const pid=relIds(l,'product')[0];const pr=+l.d.price||0;const q2=+l.d.qty||0;
           return `<tr><td style="text-align:right">${esc((pid&&recs[pid]&&recs[pid].d.title)||l.d.title||'—')} <span style="font-size:10px;color:var(--tx2)">(تمام‌شده: ${money(invCostOf(pid))})</span></td><td style="text-align:center">${q2.toLocaleString('fa-IR')}</td><td><input inputmode="numeric" dir="ltr" value="${pr||''}" onchange="wfSetPrice('${l.id}',this.value)" placeholder="قیمت فروش…" style="max-width:140px;text-align:left"></td><td style="white-space:nowrap">${money(pr*q2)}</td></tr>`;}).join('')}
         </tbody></table></div>
@@ -4202,7 +4202,7 @@ function loyaldashHTML(){
   const setC=(k)=>`onchange="saveLoyCfg({${k}:+this.value||0});render()"`;
   return `<div class="sec"><h3>💎 باشگاه مشتریان</h3>
     <div class="row" style="margin-bottom:8px">
-      <div><label>هر چند تومان خرید = ۱ امتیاز</label><input type="number" value="${+cfg.per||100000}" ${setC('per')}></div>
+      <div><label>هر چند ریال خرید = ۱ امتیاز</label><input type="number" value="${+cfg.per||100000}" ${setC('per')}></div>
       <div><label>آستانهٔ نقره‌ای (امتیاز)</label><input type="number" value="${+cfg.t1||50}" ${setC('t1')}></div>
       <div><label>آستانهٔ طلایی</label><input type="number" value="${+cfg.t2||200}" ${setC('t2')}></div>
       <div><label>آستانهٔ الماس</label><input type="number" value="${+cfg.t3||500}" ${setC('t3')}></div>
@@ -5296,21 +5296,21 @@ function msLight(m){
 }
 window.msLight=msLight;
 function saleAmt(s){return (s.d.qty||0)*(s.d.price||0)+(s.d.extra||0);}
-/* ===== 💱 موتور چندارزی خرید — همه‌چیز به تومان تبدیل می‌شود ===== */
-const CUR=['تومان','ریال','دلار','یورو','درهم'];
+/* ===== 💱 موتور چندارزی خرید — همه‌چیز به ریال تبدیل می‌شود ===== */
+const CUR=['ریال','دلار','یورو','درهم'];
 const CUR_FXKEY={'دلار':'usd','یورو':'eur','درهم':'aed'};
-function curRate(unit){ // تومانِ معادلِ ۱ واحد ارز
-  if(!unit||unit==='تومان')return 1; if(unit==='ریال')return 0.1;
+function curRate(unit){ // ریالِ معادلِ ۱ واحد ارز (مبنای کل سیستم: ریال)
+  if(!unit||unit==='\u062a\u0648\u0645\u0627\u0646'||unit==='ریال')return 1;
   const m=recs[MO],fx=(m&&!m.del&&m.d._fx)||{};
   return +fx[CUR_FXKEY[unit]]||0;
 }
-function curMul(rec){const u=rec&&rec.d&&rec.d.cur;if(!u||u==='تومان')return 1;if(u==='ریال')return 0.1;return (+rec.d.fx||curRate(u))||1;}
-function puUnitToman(x){return (+x.d.price||0)*curMul(x);} // قیمت واحدِ خرید به تومان
+function curMul(rec){const u=rec&&rec.d&&rec.d.cur;if(!u||u==='\u062a\u0648\u0645\u0627\u0646'||u==='ریال')return 1;return (+rec.d.fx||curRate(u))||1;}
+function puUnitToman(x){return (+x.d.price||0)*curMul(x);} // قیمت واحدِ خرید به ریال
 function setFxCur(unit){ // ویرایش نرخ تسعیر یک ارز
   if(!isAdmin()){alert('فقط ادمین می‌تواند نرخ ارز را تنظیم کند');return;}
   const key=CUR_FXKEY[unit];if(!key)return;
   const cur=(recs[MO]&&recs[MO].d._fx&&recs[MO].d._fx[key])||'';
-  const v=prompt('نرخ تسعیر «'+unit+'» به تومان:',cur);if(v===null)return;
+  const v=prompt('نرخ تسعیر «'+unit+'» به ریال:',cur);if(v===null)return;
   const n=Number(faNum(String(v)).replace(/[,،٬\s]/g,''));if(!n){alert('عدد معتبر وارد کنید');return;}
   const m=recs[MO]||{id:MO,e:'_opts',d:{}};m.d={...m.d,_fx:{...(m.d._fx||{}),[key]:n}};m.u=Date.now();m.del=false;put(m);
 }
@@ -5511,15 +5511,15 @@ function payslipPrint(id){
   .hd{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #111;padding-bottom:8px}</style></head><body>
   <div class="hd"><h2>🧾 فیش حقوقی — ${esc(nm)}</h2><div>${esc(r.d.month||'')}</div></div>
   <p>کارمند: <b>${esc(hr?hr.d.title:'—')}</b> │ سمت: ${esc(hr?hr.d.role||'—':'—')} │ عنوان: ${esc(r.d.title||'—')}</p>
-  <table><tr><th colspan="2">مزایا (تومان)</th></tr>
+  <table><tr><th colspan="2">مزایا (ریال)</th></tr>
     ${row('حقوق پایه',r.d.base)}
     ${x.otAmt?row('اضافه‌کاری ('+Number(r.d.othr||0).toLocaleString('fa-IR')+' ساعت)',x.otAmt):''}
     ${row('حق مسکن',r.d.housing)}${row('بن خواربار',r.d.food)}${row('حق اولاد',r.d.child)}${row('پاداش / سایر',r.d.bonus)}
     <tr class="net"><td>جمع مزایا</td><td style="text-align:left">${x.gross.toLocaleString('fa-IR')}</td></tr></table>
-  <table><tr><th colspan="2">کسورات (تومان)</th></tr>
+  <table><tr><th colspan="2">کسورات (ریال)</th></tr>
     ${row('بیمه (سهم کارمند)',r.d.ins)}${row('مالیات',r.d.tax)}${row('سایر کسورات',r.d.other)}
     <tr class="net"><td>جمع کسورات</td><td style="text-align:left">${x.ded.toLocaleString('fa-IR')}</td></tr></table>
-  <table><tr class="net"><td>💵 خالص پرداختی</td><td style="text-align:left;font-size:16px">${x.net.toLocaleString('fa-IR')} تومان</td></tr></table>
+  <table><tr class="net"><td>💵 خالص پرداختی</td><td style="text-align:left;font-size:16px">${x.net.toLocaleString('fa-IR')} ریال</td></tr></table>
   <p style="font-size:11px;color:#555">تاریخ صدور: ${esc(iso2jstr(today()))} │ ${r.d.paid?'✅ پرداخت شده':'⏳ در انتظار پرداخت'}</p>
   <script>window.print();<\/script></body></html>`);
   w.document.close();
@@ -6110,19 +6110,20 @@ function pinvLinesOf(pid){
 function pinvLineAmt(l){return Math.max(0,(l.d.qty||0)*(l.d.price||0)-(l.d.ldisc||0));}
 function pinvCalc(p){
   const lines=pinvLinesOf(p.id);
-  const mul=curMul(p); // 💱 تبدیل ارزِ فاکتور به تومان (قیمت ردیف‌ها و تخفیف به ارز فاکتور فرض می‌شوند)
+  const mul=curMul(p); // 💱 تبدیل ارزِ فاکتور به ریال (قیمت ردیف‌ها و تخفیف به ارز فاکتور فرض می‌شوند)
   const sub=lines.reduce((a,l)=>a+pinvLineAmt(l),0)*mul;
   const disc=(p.d.disc||0)*mul;const base=Math.max(0,sub-disc);
-  const tax=Math.round(base*((p.d.taxpct||0)/100));const ship=(p.d.ship||0); // هزینه حمل/گمرک به تومان
+  const tax=Math.round(base*((p.d.taxpct||0)/100));const ship=(p.d.ship||0); // هزینه حمل/گمرک به ریال
   const total=base+tax+ship;const paid=p.d.paid||0;
-  return {count:lines.length,sub,disc,base,tax,ship,total,paid,due:Math.max(0,total-paid),mul,cur:p.d.cur||'تومان'};
+  return {count:lines.length,sub,disc,base,tax,ship,total,paid,due:Math.max(0,total-paid),mul,cur:p.d.cur||'ریال'};
 }
 function pinvBrief(p){const c=pinvCalc(p);const voided=p.d.status==='باطل';const open=c.due>0&&!voided;
-  return {label:'مبلغ کل'+(open?' │ مانده':'')+(voided?' │ باطل':''),v:money(c.total)+(open?' │ '+money(c.due):''),bad:open||voided};}
+  const curTag=c.cur&&c.cur!=='ریال'?' (تبدیل از '+c.cur+' به ریال)':'';
+  return {label:'مبلغ کل'+curTag+(open?' │ مانده':'')+(voided?' │ باطل':''),v:money(c.total)+(open?' │ '+money(c.due):''),bad:open||voided};}
 function pinvLineBrief(l){return {label:'مبلغ ردیف',v:money(pinvLineAmt(l))};}
 window.pinvBrief=pinvBrief;window.pinvLineBrief=pinvLineBrief;
 let pinvDraft=null;
-function pinvNewDraft(){pinvDraft={desc:'',biz:'',supplier:'',cur:'تومان',fx:'',origin:'داخلی',paymode:'نقدی',paidAmt:'',vdate:today(),due:'',disc:'',taxpct:'',ship:'',note:'',lines:[{product:'',qty:'1',price:'',ldisc:''}]};}
+function pinvNewDraft(){pinvDraft={desc:'',biz:'',supplier:'',cur:'ریال',fx:'',origin:'داخلی',paymode:'نقدی',paidAmt:'',vdate:today(),due:'',disc:'',taxpct:'',ship:'',note:'',lines:[{product:'',qty:'1',price:'',ldisc:''}]};}
 function pinvAddLine(){pinvDraft.lines.push({product:'',qty:'1',price:'',ldisc:''});render();}
 function pinvDelLine(i){pinvDraft.lines.splice(i,1);if(!pinvDraft.lines.length)pinvAddLine();render();}
 function pinvSetLine(i,k,v){pinvDraft.lines[i][k]=v;
@@ -6130,11 +6131,11 @@ function pinvSetLine(i,k,v){pinvDraft.lines[i][k]=v;
   render();}
 function pinvSetHead(k,v){pinvDraft[k]=v;if(k==='biz')render();}
 function pinvTotalsDraft(){
-  const mul=curMul({d:{cur:pinvDraft.cur,fx:pinvDraft.fx}}); // 💱 ارز فاکتور خرید → تومان
+  const mul=curMul({d:{cur:pinvDraft.cur,fx:pinvDraft.fx}}); // 💱 ارز فاکتور خرید → ریال
   const sub=pinvDraft.lines.reduce((a,l)=>a+Math.max(0,(+l.qty||0)*(+l.price||0)-(+l.ldisc||0)),0)*mul;
   const disc=(+pinvDraft.disc||0)*mul;const base=Math.max(0,sub-disc);
   const tax=Math.round(base*((+pinvDraft.taxpct||0)/100));const ship=+pinvDraft.ship||0;
-  return {sub,disc,base,tax,ship,total:base+tax+ship,mul,cur:pinvDraft.cur||'تومان'};
+  return {sub,disc,base,tax,ship,total:base+tax+ship,mul,cur:pinvDraft.cur||'ریال'};
 }
 function pinvSave(status){
   const valid=pinvDraft.lines.filter(l=>l.product&&(+l.qty||0)>0);
@@ -6145,7 +6146,7 @@ function pinvSave(status){
   const _ppaid=pinvDraft.paymode==='نقدی'?_ptot:pinvDraft.paymode==='بخشی'?Math.min(_ptot,+faNum(String(pinvDraft.paidAmt||0)).replace(/[,،٬\s]/g,'')||0):0;
   put({id:pid,e:'purchinv',d:{title:pinvDraft.desc||('خرید '+num),biz:pinvDraft.biz?[pinvDraft.biz]:[],
     supplier:pinvDraft.supplier?[pinvDraft.supplier]:[],status:status||'ثبت شده',
-    cur:pinvDraft.cur||'تومان',fx:+pinvDraft.fx||null,origin:pinvDraft.origin||'داخلی',
+    cur:pinvDraft.cur||'ریال',fx:+pinvDraft.fx||null,origin:pinvDraft.origin||'داخلی',
     date:{s:pinvDraft.vdate},due:pinvDraft.due?{s:pinvDraft.due}:null,
     disc:+pinvDraft.disc||0,taxpct:+pinvDraft.taxpct||0,ship:+pinvDraft.ship||0,paid:_ppaid,note:pinvDraft.note},u:Date.now()});
   valid.forEach(l=>{const p=recs[l.product];
@@ -6243,7 +6244,7 @@ window.pdSeedBanks=function(){
   PAYDAY_BANKS.forEach(([t,b,no])=>{
     const exists=byE('account').some(a=>_pdDigits(a.d.accno)===_pdDigits(no));
     if(exists)return;
-    put({id:uid(),e:'account',d:{title:t+(t.includes(no)?'':' '+no),kind:'حساب بانکی',cur:'تومان',bank:b,accno:no,_by:myEmail()},u:Date.now()});n++;
+    put({id:uid(),e:'account',d:{title:t+(t.includes(no)?'':' '+no),kind:'حساب بانکی',cur:'ریال',bank:b,accno:no,_by:myEmail()},u:Date.now()});n++;
   });
   alert(n?('🏦 '+n.toLocaleString('fa-IR')+' حساب بانکی از فرم اضافه شد'):'همهٔ حساب‌های فرم قبلاً ثبت شده‌اند');
 };
@@ -6323,7 +6324,7 @@ window.pdImportXlsx=function(inp){
       if(mode==='bank'){
         const amt=num(row[4]);
         let acc=pdFindAcc(c1);
-        if(!acc){const nid=uid();put({id:nid,e:'account',d:{title:c1,kind:'حساب بانکی',cur:'تومان',accno:_pdDigits(c1).slice(-16),_by:myEmail()},u:Date.now()});acc=recs[nid];balNew++;}
+        if(!acc){const nid=uid();put({id:nid,e:'account',d:{title:c1,kind:'حساب بانکی',cur:'ریال',accno:_pdDigits(c1).slice(-16),_by:myEmail()},u:Date.now()});acc=recs[nid];balNew++;}
         const cur=bankBal(acc.id),diff=amt-cur;
         if(Math.abs(diff)>0.5){
           put({id:uid(),e:'acctx',d:{title:'به‌روزرسانی موجودی از فرم اکسل '+iso2jstr(today()),
@@ -6541,9 +6542,9 @@ function settlenewHTML(){
       <div><label ${lbl}>کسب‌وکار</label><select onchange="settleSetHead('biz',this.value)"><option value="">—</option>${byE('business').map(x=>`<option value="${x.id}" ${x.id===settleDraft.biz?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></div>
       ${party}
       ${openInv}
-      <div><label ${lbl}>مبلغ (تومان)</label><input inputmode="numeric" value="${settleDraft.amount||''}" oninput="settleDraft.amount=this.value" placeholder="۰"></div>
+      <div><label ${lbl}>مبلغ (ریال)</label><input inputmode="numeric" value="${settleDraft.amount||''}" oninput="settleDraft.amount=this.value" placeholder="۰"></div>
       <div><label ${lbl}>روش</label><select onchange="settleDraft.method=this.value">${['نقد','کارت','انتقال بانکی','چک'].map(m=>`<option ${m===settleDraft.method?'selected':''}>${m}</option>`).join('')}</select></div>
-      <div><label ${lbl}>🏦 صندوق/حساب مقصد</label><select onchange="settleDraft.account=this.value">${(()=>{const acc=byE('account').filter(a=>!settleDraft.biz||relIds(a,'biz').includes(settleDraft.biz)||!relIds(a,'biz').length);return `<option value="">— (فقط طلب/بدهی)</option>`+acc.map(a=>`<option value="${a.id}" ${a.id===settleDraft.account?'selected':''}>${esc(a.d.title)} (${a.d.cur||'تومان'})</option>`).join('');})()}</select></div>
+      <div><label ${lbl}>🏦 صندوق/حساب مقصد</label><select onchange="settleDraft.account=this.value">${(()=>{const acc=byE('account').filter(a=>!settleDraft.biz||relIds(a,'biz').includes(settleDraft.biz)||!relIds(a,'biz').length);return `<option value="">— (فقط طلب/بدهی)</option>`+acc.map(a=>`<option value="${a.id}" ${a.id===settleDraft.account?'selected':''}>${esc(a.d.title)} (${a.d.cur||'ریال'})</option>`).join('');})()}</select></div>
       <div><label ${lbl}>تاریخ</label><input value="${esc(settleDraft.vdate||'')}" oninput="settleDraft.vdate=this.value" placeholder="۱۴۰۴/۰۴/۲۵"></div>
     </div>
     <div style="margin-top:10px"><label ${lbl}>توضیح</label><input value="${esc(settleDraft.note||'')}" oninput="settleDraft.note=this.value" placeholder="اختیاری"></div>
@@ -6670,7 +6671,7 @@ function cashFlows(biz,ch){
   return out;
 }
 /* ===== 🏦 صندوق و بانک — چند‌حسابی، ریالی و ارزی، با سود تسعیر ===== */
-function acctCurFactor(cur){if(!cur||cur==='تومان')return 1;if(cur==='ریال')return 0.1;return curRate(cur)||0;}
+function acctCurFactor(cur){if(!cur||cur==='\u062a\u0648\u0645\u0627\u0646'||cur==='ریال')return 1;return curRate(cur)||0;}
 function acctSign(kind){if(['واریز / درآمد','خرید ارز','واریز اولیه / سرمایه','اصلاح موجودی'].includes(kind))return 1;
   if(['برداشت / هزینه','فروش ارز','انتقال به حساب دیگر'].includes(kind))return -1;return 0;}
 function acctTxsOf(accId){ // همهٔ تراکنش‌های مؤثر بر یک حساب (acctx + settle + انتقال ورودی)
@@ -6692,24 +6693,24 @@ function acctAvgRate(accId){const a=recs[accId];if(!a)return 0;let u=0,t=0;
   byE('acctx').filter(x=>relIds(x,'account')[0]===accId&&x.d.kind==='خرید ارز').forEach(x=>{const q=+x.d.amount||0,r=+x.d.rate||curRate(a.d.cur);u+=q;t+=q*r;});
   if(+a.d.open){u+=+a.d.open;t+=(+a.d.open)*curRate(a.d.cur);} // موجودی اولیه به نرخ روز به‌عنوان بهای تمام‌شده
   return u>0?t/u:curRate(a.d.cur);}
-function acctToman(accId){const a=recs[accId];if(!a)return 0;const bal=bankBal(accId);const cur=a.d.cur||'تومان';
-  if(cur==='تومان')return bal;if(cur==='ریال')return bal/10;return bal*(curRate(cur)||acctAvgRate(accId));}
-function acctFX(accId){const a=recs[accId];if(!a)return null;const cur=a.d.cur;if(cur==='تومان'||cur==='ریال')return null;
+function acctToman(accId){const a=recs[accId];if(!a)return 0;const bal=bankBal(accId);const cur=a.d.cur||'ریال';
+  if(cur==='\u062a\u0648\u0645\u0627\u0646'||cur==='ریال')return bal;return bal*(curRate(cur)||acctAvgRate(accId));}
+function acctFX(accId){const a=recs[accId];if(!a)return null;const cur=a.d.cur;if(!cur||cur==='\u062a\u0648\u0645\u0627\u0646'||cur==='ریال')return null;
   let realized=0;const avg=acctAvgRate(accId);
   byE('acctx').filter(x=>relIds(x,'account')[0]===accId&&x.d.kind==='فروش ارز').sort((p,q)=>(ds(p.d.date)||'').localeCompare(ds(q.d.date)||'')).forEach(x=>{const q=+x.d.amount||0,r=+x.d.rate||curRate(cur);realized+=q*(r-avg);});
   const bal=bankBal(accId);const curR=curRate(cur)||avg;const unreal=bal*(curR-avg);
   return {avg,curR,realized,unreal,bal};}
-function acctBrief(a){const cur=a.d.cur||'تومان';const bal=bankBal(a.id);const tm=acctToman(a.id);
-  return {label:'موجودی',v:bal.toLocaleString('fa-IR')+' '+cur+(cur!=='تومان'?' ≈ '+money(tm):''),bad:bal<0};}
+function acctBrief(a){const cur=a.d.cur||'ریال';const bal=bankBal(a.id);const tm=acctToman(a.id);
+  return {label:'موجودی',v:bal.toLocaleString('fa-IR')+' '+cur+(cur!=='ریال'?' ≈ '+money(tm):''),bad:bal<0};}
 window.acctBrief=acctBrief;
 function acctxBrief(t){const s=acctSign(t.d.kind);return {label:t.d.kind,v:(s<0?'−':'+')+(+t.d.amount||0).toLocaleString('fa-IR'),bad:s<0};}
 window.acctxBrief=acctxBrief;
 function acctTemplate(){loadXLSX().then(()=>{const rows=[['نام حساب / صندوق','نوع','ارز','نام بانک','شماره حساب / کارت','موجودی اولیه (به ارز حساب)','تاریخ موجودی اولیه'],
-  ['صندوق فروشگاه','صندوق نقدی','تومان','','','50000000','1404/01/01'],['حساب ملت','حساب بانکی','تومان','ملت','6037...','120000000','1404/01/01'],['حساب دلاری','حساب ارزی','دلار','','','2000','1404/01/01']];
+  ['صندوق فروشگاه','صندوق نقدی','ریال','','','50000000','1404/01/01'],['حساب ملت','حساب بانکی','ریال','ملت','6037...','120000000','1404/01/01'],['حساب دلاری','حساب ارزی','دلار','','','2000','1404/01/01']];
   const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:24},{wch:16},{wch:10},{wch:14},{wch:20},{wch:22},{wch:16}];
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'حساب‌ها');XLSX.writeFile(wb,'قالب-صندوق-بانک.xlsx');});}
 window.acctTemplate=acctTemplate;
-function pfTemplate(){loadXLSX().then(()=>{const rows=[['شرح (مثل: تسویه دیجی‌کالا نیمه اول مرداد)','کسب‌وکار','درگاه/مارکت‌پلیس','بازه فروش — از تاریخ','بازه فروش — تا تاریخ','فروش دوره طبق گزارش پلتفرم (تومان)','کارمزد و کسورات پلتفرم (تومان)','مبلغ واریزی (تومان)','تاریخ واریز (قطعی یا اعلامی)','وضعیت'],
+function pfTemplate(){loadXLSX().then(()=>{const rows=[['شرح (مثل: تسویه دیجی‌کالا نیمه اول مرداد)','کسب‌وکار','درگاه/مارکت‌پلیس','بازه فروش — از تاریخ','بازه فروش — تا تاریخ','فروش دوره طبق گزارش پلتفرم (ریال)','کارمزد و کسورات پلتفرم (ریال)','مبلغ واریزی (ریال)','تاریخ واریز (قطعی یا اعلامی)','وضعیت'],
   ['تسویه دیجی‌کالا نیمه اول مرداد','','دیجی‌کالا','1404/05/01','1404/05/15','120000000','12000000','0','1404/05/25','در انتظار واریز'],
   ['تسویه اسنپ‌مارکت مرداد','','اسنپ‌مارکت','1404/05/01','1404/05/31','80000000','6400000','73600000','1404/06/10','واریز شده']];
   const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=rows[0].map(()=>({wch:20}));
@@ -6734,24 +6735,24 @@ function bankdashHTML(){
     ${can('c','acctx')?`<button class="btn sm" onclick="openRec('acctx')">💸 تراکنش</button>`:''}</div>`;
   if(!accs.length){h+=`<div class="empty">هنوز صندوق/حسابی تعریف نشده. «➕ حساب جدید» را بزن یا «📥 اکسل حساب» را وارد کن. برای هر صندوق نقدی یا حساب بانکی (ریالی یا ارزی) یک حساب بساز.</div>`;return h;}
   h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-bottom:6px">
-    ${card('💰 موجودی کل (تومان)',money(totToman),totToman<0)}
+    ${card('💰 موجودی کل (ریال)',money(totToman),totToman<0)}
     ${card('🏦 تعداد حساب',accs.length.toLocaleString('fa-IR'),false,fxAccts.length?fxAccts.length.toLocaleString('fa-IR')+' حساب ارزی':'')}
     ${fxAccts.length?card('💱 سود تسعیر محقق‌شده',money(fxReal),fxReal<0,'از خرید/فروش ارز'):''}
     ${fxAccts.length?card('📊 سود/زیان تسعیر بالقوه',money(fxUnreal),fxUnreal<0,'ارزیابی به نرخ روز'):''}
   </div>`;
   // کارت هر حساب (آبشاری)
   h+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:6px">`;
-  accs.forEach(a=>{const cur=a.d.cur||'تومان';const bal=bankBal(a.id);const tm=acctToman(a.id);const on=view.bkSel===a.id;const fx=acctFX(a.id);
+  accs.forEach(a=>{const cur=a.d.cur||'ریال';const bal=bankBal(a.id);const tm=acctToman(a.id);const on=view.bkSel===a.id;const fx=acctFX(a.id);
     h+=`<div onclick="view.bkSel=${on?'null':`'${a.id}'`};render()" style="cursor:pointer;background:var(--cd);border:1px solid ${on?'var(--ac)':'var(--bd)'};border-radius:14px;padding:12px;box-shadow:0 3px 10px rgba(0,0,0,.1)">
-      <div style="display:flex;align-items:center;gap:7px"><span style="font-size:18px">${kicon(a.d.kind)}</span><b style="flex:1;font-size:12.5px">${esc(a.d.title||'حساب')}</b>${cur!=='تومان'?`<span class="tag" style="font-size:9px">${cur}</span>`:''}</div>
+      <div style="display:flex;align-items:center;gap:7px"><span style="font-size:18px">${kicon(a.d.kind)}</span><b style="flex:1;font-size:12.5px">${esc(a.d.title||'حساب')}</b>${cur!=='ریال'?`<span class="tag" style="font-size:9px">${cur}</span>`:''}</div>
       ${a.d.bank?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">${esc(a.d.bank)}${a.d.accno?' · '+esc(a.d.accno):''}</div>`:''}
       <div style="font-size:19px;font-weight:900;margin-top:6px;color:${bal<0?'var(--bad)':'var(--tx)'}">${bal.toLocaleString('fa-IR')} <span style="font-size:11px;color:var(--tx2)">${cur}</span></div>
-      ${cur!=='تومان'?`<div style="font-size:11px;color:var(--tx2)">≈ ${money(tm)}</div>`:''}
+      ${cur!=='ریال'?`<div style="font-size:11px;color:var(--tx2)">≈ ${money(tm)}</div>`:''}
       ${fx?`<div style="font-size:10px;margin-top:3px;color:${fx.unreal>=0?'#16c784':'#ff3b30'}">تسعیر بالقوه: ${money(fx.unreal)} · میانگین خرید ${Math.round(fx.avg).toLocaleString('fa-IR')}</div>`:''}
       <div style="font-size:9.5px;color:var(--ac);margin-top:4px">${on?'▾ بستن گردش':'◂ کلیک = گردش حساب'}</div></div>`;});
   h+=`</div>`;
   // گردش حسابِ انتخابی
-  if(view.bkSel&&recs[view.bkSel]){const a=recs[view.bkSel];const cur=a.d.cur||'تومان';const rows=acctTxsOf(a.id);
+  if(view.bkSel&&recs[view.bkSel]){const a=recs[view.bkSel];const cur=a.d.cur||'ریال';const rows=acctTxsOf(a.id);
     h+=`<div class="sec" style="border:1px solid var(--ac)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
       <b style="flex:1">🏦 گردش حساب: ${esc(a.d.title||'')} <span style="font-weight:400;color:var(--tx2);font-size:11px">(${cur})</span></b>
       <button class="btn gh sm" onclick="openRec('account','${a.id}')">✏️ ویرایش حساب</button>
@@ -6766,7 +6767,7 @@ function bankdashHTML(){
     ${['همه','ماه','فصل','سال'].map(p=>`<button class="btn ${per===p?'':'gh'} sm" onclick="view.bkPer='${p}';render()">${p==='همه'?'کل دوره':p==='ماه'?'۳۰ روز':p==='فصل'?'۹۰ روز':'۱ سال'}</button>`).join('')}</div>
     <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">حساب</th><th>ارز</th><th>واریز دوره</th><th>برداشت دوره</th><th>خالص دوره</th><th>مانده فعلی</th></tr></thead><tbody>
     ${accs.map(a=>{const rows=acctTxsOf(a.id).filter(r=>!from||(r.d&&r.d>=from));const inn=rows.filter(r=>r.amt>0).reduce((s,r)=>s+r.amt,0),out=rows.filter(r=>r.amt<0).reduce((s,r)=>s-r.amt,0);const net=inn-out;
-      return `<tr><td style="text-align:right">${kicon(a.d.kind)} ${esc(a.d.title||'')}</td><td style="text-align:center">${a.d.cur||'تومان'}</td><td style="text-align:center;color:var(--ok)">${inn?inn.toLocaleString('fa-IR'):'—'}</td><td style="text-align:center;color:var(--bad)">${out?out.toLocaleString('fa-IR'):'—'}</td><td style="text-align:center;font-weight:700;color:${net<0?'var(--bad)':'var(--ok)'}">${net.toLocaleString('fa-IR')}</td><td style="text-align:center;font-weight:800">${bankBal(a.id).toLocaleString('fa-IR')}</td></tr>`;}).join('')}
+      return `<tr><td style="text-align:right">${kicon(a.d.kind)} ${esc(a.d.title||'')}</td><td style="text-align:center">${a.d.cur||'ریال'}</td><td style="text-align:center;color:var(--ok)">${inn?inn.toLocaleString('fa-IR'):'—'}</td><td style="text-align:center;color:var(--bad)">${out?out.toLocaleString('fa-IR'):'—'}</td><td style="text-align:center;font-weight:700;color:${net<0?'var(--bad)':'var(--ok)'}">${net.toLocaleString('fa-IR')}</td><td style="text-align:center;font-weight:800">${bankBal(a.id).toLocaleString('fa-IR')}</td></tr>`;}).join('')}
     </tbody></table></div><div style="font-size:10.5px;color:var(--tx2);margin-top:6px">دریافت/پرداختِ ثبت‌شده در «طلب و بدهی» اگر «صندوق/حساب»‌شان انتخاب شده باشد، اینجا هم مانده را کم/زیاد می‌کنند و به‌صورت خودکار به طلب/بدهی وصل‌اند.</div></div>`;
   return h;
 }
@@ -6930,13 +6931,13 @@ function pinvnewHTML(){
     <div><label ${lbl}>تامین‌کننده 🔍</label><input list="dl_pinvsupp" value="${esc(suppName)}" placeholder="بنویس تا جستجو شود…" onchange="pinvPickSupp(this.value)">
       <datalist id="dl_pinvsupp">${supp.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>
       <datalist id="dl_pinvprod">${prodDlOpts(prods)}</datalist></div>
-    <div><label ${lbl}>💱 ارز فاکتور</label><select onchange="pinvSetHead('cur',this.value);render()">${CUR.map(c=>`<option ${c===(pinvDraft.cur||'تومان')?'selected':''}>${c}</option>`).join('')}</select></div>
-    ${pinvDraft.cur&&pinvDraft.cur!=='تومان'&&pinvDraft.cur!=='ریال'?`<div><label ${lbl}>نرخ تسعیر به تومان ${curRate(pinvDraft.cur)?`(پیش‌فرض ${curRate(pinvDraft.cur).toLocaleString('fa-IR')})`:''}</label><input inputmode="numeric" value="${esc(pinvDraft.fx||'')}" oninput="pinvDraft.fx=this.value;render()" placeholder="${curRate(pinvDraft.cur)||'نرخ روز'}"></div>`:''}
+    <div><label ${lbl}>💱 ارز فاکتور</label><select onchange="pinvSetHead('cur',this.value);render()">${CUR.map(c=>`<option ${c===(pinvDraft.cur||'ریال')?'selected':''}>${c}</option>`).join('')}</select></div>
+    ${pinvDraft.cur&&pinvDraft.cur!=='ریال'&&pinvDraft.cur!=='ریال'?`<div><label ${lbl}>نرخ تسعیر به ریال ${curRate(pinvDraft.cur)?`(پیش‌فرض ${curRate(pinvDraft.cur).toLocaleString('fa-IR')})`:''}</label><input inputmode="numeric" value="${esc(pinvDraft.fx||'')}" oninput="pinvDraft.fx=this.value;render()" placeholder="${curRate(pinvDraft.cur)||'نرخ روز'}"></div>`:''}
     <div><label ${lbl}>🌍 منشأ خرید</label><select onchange="pinvSetHead('origin',this.value)"><option ${pinvDraft.origin==='داخلی'?'selected':''}>داخلی</option><option ${pinvDraft.origin==='خارجی'?'selected':''}>خارجی</option></select></div>
     <div><label ${lbl}>شماره/شرح</label><input value="${esc(pinvDraft.desc)}" oninput="pinvDraft.desc=this.value" placeholder="خودکار"></div>
     <div><label ${lbl}>تاریخ</label><input value="${esc(pinvDraft.vdate||'')}" oninput="pinvDraft.vdate=this.value" placeholder="۱۴۰۴/۰۴/۲۵"></div>
     <div><label ${lbl}>💳 وضعیت پرداخت</label><select onchange="pinvDraft.paymode=this.value;render()"><option ${pinvDraft.paymode==='نقدی'?'selected':''}>نقدی</option><option ${pinvDraft.paymode==='اعتباری'?'selected':''}>اعتباری (نسیه)</option><option ${pinvDraft.paymode==='بخشی'?'selected':''}>پرداخت بخشی</option></select></div>
-    ${pinvDraft.paymode==='بخشی'?`<div><label ${lbl}>مبلغ پرداختی (تومان)</label><input inputmode="numeric" dir="ltr" value="${esc(pinvDraft.paidAmt||'')}" oninput="pinvDraft.paidAmt=this.value" placeholder="۰"></div>`:''}
+    ${pinvDraft.paymode==='بخشی'?`<div><label ${lbl}>مبلغ پرداختی (ریال)</label><input inputmode="numeric" dir="ltr" value="${esc(pinvDraft.paidAmt||'')}" oninput="pinvDraft.paidAmt=this.value" placeholder="۰"></div>`:''}
     <div><label ${lbl}>سررسید</label><input value="${esc(pinvDraft.due||'')}" oninput="pinvDraft.due=this.value" placeholder="اختیاری"></div>
   </div>
   <div class="tblwrap"><table><thead><tr><th>#</th><th>کالا/خدمت</th><th>تعداد</th><th>قیمت واحد</th><th>تخفیف ردیف</th><th>مبلغ</th><th></th></tr></thead><tbody>`;
@@ -7607,7 +7608,7 @@ function invnewHTML(){
     <div><label ${lbl}>شماره/شرح</label><input value="${esc(invDraft.desc)}" oninput="invDraft.desc=this.value" placeholder="خودکار"></div>
     <div><label ${lbl}>تاریخ صدور</label><div style="display:flex;gap:4px"><input id="inv_vdate" value="${esc(invDraft.vdate&&/^\d{4}-/.test(invDraft.vdate)?iso2jstr(invDraft.vdate):invDraft.vdate||'')}" oninput="invDraft.vdate=this.value" placeholder="۱۴۰۴/۰۴/۲۵" style="flex:1"><button type="button" class="btn gh sm" style="padding:4px 8px" onclick="openJcal('inv_vdate')">📅</button></div></div>
     ${invDraft.kind==='پیش‌فاکتور'?'':`<div><label ${lbl}>💳 وضعیت دریافت</label><select onchange="invDraft.paymode=this.value;render()"><option ${invDraft.paymode==='نقدی'?'selected':''}>نقدی</option><option ${invDraft.paymode==='اعتباری'?'selected':''}>اعتباری (نسیه)</option><option ${invDraft.paymode==='بخشی'?'selected':''}>دریافت بخشی</option></select></div>
-    ${invDraft.paymode==='بخشی'?`<div><label ${lbl}>مبلغ دریافتی (تومان)</label><input inputmode="numeric" dir="ltr" value="${esc(invDraft.paidAmt||'')}" oninput="invDraft.paidAmt=this.value" placeholder="۰"></div>`:''}
+    ${invDraft.paymode==='بخشی'?`<div><label ${lbl}>مبلغ دریافتی (ریال)</label><input inputmode="numeric" dir="ltr" value="${esc(invDraft.paidAmt||'')}" oninput="invDraft.paidAmt=this.value" placeholder="۰"></div>`:''}
     <div><label ${lbl}>سررسید ${invDraft.paymode!=='نقدی'?'(اعتبار)':''}</label><input value="${esc(invDraft.due||'')}" oninput="invDraft.due=this.value" placeholder="اختیاری"></div>`}
   </div>
   ${invDraft.kind==='پیش‌فاکتور'?`
@@ -8543,7 +8544,7 @@ function mydBuilderHTML(){
       <div><label>ترتیب</label><input inputmode="numeric" value="${esc(String(d.ord||''))}" oninput="mydDraft.ord=this.value" placeholder="۱" style="max-width:80px"></div>
     </div>
     ${needFx&&ek?`<div style="margin-top:10px"><label>۵) فرمول — روی چیپ فیلدها بزن تا اضافه شود، بعد با + − × ÷ ترکیب کن</label>
-      <input id="myd_fx" dir="ltr" value="${esc(d.fx)}" oninput="mydDraft.fx=this.value" placeholder="[تعداد] × [قیمت واحد (تومان)]">
+      <input id="myd_fx" dir="ltr" value="${esc(d.fx)}" oninput="mydDraft.fx=this.value" placeholder="[تعداد] × [قیمت واحد (ریال)]">
       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px">${numFields.map(f=>`<span class="tag" style="cursor:pointer" onclick="mydFxAdd('${esc(f.n)}')">＋ ${esc(f.n)}</span>`).join('')||'<span style="font-size:11px;color:var(--tx2)">این بخش فیلد عددی ندارد</span>'}</div>
       <div style="font-size:10.5px;color:var(--tx2);margin-top:4px">فرمول برای هر رکورد حساب و بعد جمع می‌شود │ از رابطه هم می‌شود: [فروشنده.سهمیه]</div></div>`:''}
     <div style="margin-top:12px;display:flex;gap:8px">
@@ -8604,7 +8605,7 @@ const MYD_TPL=[
   mk:did=>{const m=mydEnsureMdef('فروش فاکتوری','فاکتورها — فروش خالص','');
    return [{title:'فروش فاکتوری ماهانه',wtype:'📊 میله‌ای ماهانه',src:'شاخص من (ساختارساز)',mdef:[m],size:'بزرگ',ord:5}];}},
  {k:'sale_quick',n:'🛒 فروش ماهانه (از فروش سریع)',need:'sale',
-  mk:did=>[{title:'فروش سریع ماهانه',wtype:'📊 میله‌ای ماهانه',src:'فرمول روی فیلدهای بخش',ent:'فروش سریع (تک‌کالا)',fx:'[تعداد] * [قیمت واحد (تومان)]',size:'بزرگ',ord:6}]},
+  mk:did=>[{title:'فروش سریع ماهانه',wtype:'📊 میله‌ای ماهانه',src:'فرمول روی فیلدهای بخش',ent:'فروش سریع (تک‌کالا)',fx:'[تعداد] * [قیمت واحد (ریال)]',size:'بزرگ',ord:6}]},
  {k:'exp_pie',n:'🧾 هزینه‌ها به تفکیک سرفصل',need:'expense',
   mk:did=>[{title:'ترکیب هزینه‌ها',wtype:'🥧 دایره‌ای (تفکیک)',src:'جمع فیلد عددی یک بخش',ent:'هزینه‌های عملیاتی',fld:'amount',grpf:'cat',size:'متوسط',ord:7},
            {title:'روند ماهانه هزینه‌ها',wtype:'📈 خطی ماهانه',src:'جمع فیلد عددی یک بخش',ent:'هزینه‌های عملیاتی',fld:'amount',size:'متوسط',ord:8}]},
@@ -8980,18 +8981,18 @@ function efqmTotal(list){ // جمع از ۱۰۰۰ + سطح بلوغ (مطابق 
   const lvl=got>=700?'🌍 عملکرد پیشروی جهانی (+۷۰۰)':got>=500?'⭐ عملکرد متعالی (+۵۰۰)':got>=300?'✅ عملکرد خوب (+۳۰۰)':'🧱 عملکرد پایه‌ای';
   return {got,covered,per,lvl};
 }
-/* --- 💱 نرخ تسعیر ارز (تومان ↔ دلار) --- */
+/* --- 💱 نرخ تسعیر ارز (ریال ↔ دلار) --- */
 function fxRate(){const m=recs[MO];return (m&&!m.del&&m.d._fx&&m.d._fx.usd)||null;}
 function setFx(){
   if(!isAdmin()){alert('فقط ادمین');return;}
-  const v=prompt('نرخ دلار به تومان:',fxRate()||'');if(v===null)return;
+  const v=prompt('نرخ دلار به ریال:',fxRate()||'');if(v===null)return;
   const n=Number(faNum(v).replace(/[,،٬\s]/g,''));if(!n){alert('عدد معتبر وارد کنید');return;}
   const m=recs[MO]||{id:MO,e:'_opts',d:{}};m.d={...m.d,_fx:{usd:n}};m.u=Date.now();m.del=false;put(m);
 }
-function money(n){ // مبنا: تومان؛ معادل دلار در صورت تنظیم نرخ
+function money(n){ // مبنا: ریال؛ معادل دلار در صورت تنظیم نرخ
   if(n==null||isNaN(n))return '—';
   const fx=fxRate();
-  return abbrN(n)+' ت'+(fx?' ≈ $'+Math.round(n/fx).toLocaleString('fa-IR'):'');
+  return abbrN(n)+' ریال'+(fx?' ≈ $'+Math.round(n/fx).toLocaleString('fa-IR'):'');
 }
 /* ═══════════ موتور ISO 31000:2018 (مادر-۲۶۶) ═══════════ */
 const RM_P={'قطعی':5,'محتمل':4,'ممکن':3,'بعید':2,'نادر':1};
@@ -9285,8 +9286,8 @@ const QOPS=[
  {k:'pay',ic:'📤',n:'پرداخت به تامین‌کننده',need:'settle'},
 ];
 function qkNum(v){return +faNum(String(v??'')).replace(/[,٬\s]/g,'')||0;}
-function qkReset(op){qd={op:op||(qd&&qd.op)||'sale',prod:'',prodId:'',qty:'1',price:'',cust:'',custId:'',supp:'',suppId:'',cat:'اجاره',amount:'',method:'نقد',title:'',acct:'',acctCur:'تومان',date:iso2jstr(today())};}
-function qkPickAcct(v){if(qd){qd.acct=v;const a=v&&recs[v];qd.acctCur=a?(a.d.cur||'تومان'):'تومان';}render();}
+function qkReset(op){qd={op:op||(qd&&qd.op)||'sale',prod:'',prodId:'',qty:'1',price:'',cust:'',custId:'',supp:'',suppId:'',cat:'اجاره',amount:'',method:'نقد',title:'',acct:'',acctCur:'ریال',date:iso2jstr(today())};}
+function qkPickAcct(v){if(qd){qd.acct=v;const a=v&&recs[v];qd.acctCur=a?(a.d.cur||'ریال'):'ریال';}render();}
 function qkSetOp(op){qkReset(op);render();}
 function qkField(k,v){if(qd)qd[k]=v;}
 function qkPickProd(v){qd.prod=v;const p=byE('product').find(x=>(x.d.title||'').trim()===v.trim());qd.prodId=p?p.id:'';
@@ -9297,7 +9298,7 @@ function qkAcctSelect(){
   const accs=byE('account').filter(a=>!gBiz()||relIds(a,'biz').includes(gBiz())||!relIds(a,'biz').length);
   const kic=k=>k==='صندوق نقدی'?'💵':k==='حساب بانکی'?'🏦':k==='حساب ارزی'?'💱':'👛';
   if(!accs.length)return `<select disabled style="opacity:.6"><option>— هیچ صندوق/حسابی تعریف نشده —</option></select>`;
-  return `<select onchange="qkPickAcct(this.value)"><option value="">— فقط طلب/بدهی (بدون حساب) —</option>${accs.map(a=>`<option value="${a.id}" ${a.id===qd.acct?'selected':''}>${kic(a.d.kind)} ${esc(a.d.title)} (${a.d.cur||'تومان'})</option>`).join('')}</select>`;
+  return `<select onchange="qkPickAcct(this.value)"><option value="">— فقط طلب/بدهی (بدون حساب) —</option>${accs.map(a=>`<option value="${a.id}" ${a.id===qd.acct?'selected':''}>${kic(a.d.kind)} ${esc(a.d.title)} (${a.d.cur||'ریال'})</option>`).join('')}</select>`;
 }
 window.qkPickAcct=qkPickAcct;
 function qkAttachDomain(d,e){
@@ -9359,7 +9360,7 @@ function quickaddHTML(){
       <div>${L('کالا / خدمت 🔍')}<input id="qk_first" list="qk_prods" value="${esc(qd.prod)}" placeholder="بنویس تا جستجو شود…" onchange="qkPickProd(this.value)">
         <datalist id="qk_prods">${byE('product').map(p=>`<option value="${esc(p.d.title||'')}">`).join('')}</datalist></div>
       <div>${L('تعداد')}<input inputmode="numeric" value="${esc(qd.qty)}" oninput="qkField('qty',this.value)" style="text-align:center"></div>
-      <div>${L('قیمت واحد (تومان)')}<input id="qk_price" inputmode="numeric" value="${esc(qd.price)}" oninput="qkField('price',this.value)" dir="ltr"></div>
+      <div>${L('قیمت واحد (ریال)')}<input id="qk_price" inputmode="numeric" value="${esc(qd.price)}" oninput="qkField('price',this.value)" dir="ltr"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
       <div>${L('مشتری (اختیاری) 🔍')}<input list="qk_custs" value="${esc(qd.cust)}" placeholder="بنویس تا جستجو شود…" onchange="qkPickCust(this.value)">
@@ -9370,14 +9371,14 @@ function quickaddHTML(){
     const cats=(E.expense.f.find(f=>f.k==='cat')||{}).o||[];
     form=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div>${L('سرفصل هزینه')}<select id="qk_first" onchange="qkField('cat',this.value)">${cats.map(c=>`<option ${c===qd.cat?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
-      <div>${L('مبلغ (تومان)')}<input inputmode="numeric" value="${esc(qd.amount)}" oninput="qkField('amount',this.value)" dir="ltr"></div>
+      <div>${L('مبلغ (ریال)')}<input inputmode="numeric" value="${esc(qd.amount)}" oninput="qkField('amount',this.value)" dir="ltr"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
       <div>${L('شرح (اختیاری)')}<input value="${esc(qd.title)}" oninput="qkField('title',this.value)" placeholder="مثل: اجاره تیرماه"></div>
       ${dateRow}
     </div>`;
   } else if(qd.op==='receive'){
-    const cur=qd.acctCur||'تومان';
+    const cur=qd.acctCur||'ریال';
     form=`<div style="display:grid;grid-template-columns:2fr 1fr;gap:10px">
       <div>${L('مشتری 🔍')}<input id="qk_first" list="qk_custs2" value="${esc(qd.cust)}" placeholder="بنویس تا جستجو شود…" onchange="qkPickCust(this.value)">
         <datalist id="qk_custs2">${byE('customer').map(c=>`<option value="${esc(c.d.title||'')}">`).join('')}</datalist></div>
@@ -9389,7 +9390,7 @@ function quickaddHTML(){
       ${dateRow}
     </div>`;
   } else if(qd.op==='pay'){
-    const cur=qd.acctCur||'تومان';
+    const cur=qd.acctCur||'ریال';
     form=`<div style="display:grid;grid-template-columns:2fr 1fr;gap:10px">
       <div>${L('تامین‌کننده 🔍')}<input id="qk_first" list="qk_supps" value="${esc(qd.supp)}" placeholder="بنویس تا جستجو شود…" onchange="qkPickSupp(this.value)">
         <datalist id="qk_supps">${byE('crm').map(c=>`<option value="${esc(c.d.title||'')}">`).join('')}</datalist></div>
@@ -9950,7 +9951,7 @@ function ceoDaySums(biz){ // جمع رو‌زانه فروش/بها — یک‌�
 }
 function ceoRange(biz,from,to,k){const D=ceoDaySums(biz);let s=0;for(const d in D){if(from&&d<from)continue;if(to&&d>to)continue;s+=D[d][k];}return s;}
 function ceoAgg(lines){const m={};lines.forEach(L=>{const a=m[L.pid]||(m[L.pid]={q:0,rev:0,cogs:0,last:''});a.q+=L.q;a.rev+=L.rev;a.cogs+=L.cogs;if(L.date>a.last)a.last=L.date;});return m;}
-/* 📒 سودآوری بر اساس «سود و زیان رسمیِ حسابداری» (plfin) برای همان دورهٔ داشبورد — همه به تومان */
+/* 📒 سودآوری بر اساس «سود و زیان رسمیِ حسابداری» (plfin) برای همان دورهٔ داشبورد — همه به ریال */
 function ceoAcctAgg(biz,MODE,JY,JN,toIso){
   const FM=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
   const sumMonths=(y,mis)=>{const v={};let n=0;mis.forEach(mi=>{const a=plAgg(biz,y,FM[mi]);if(a.n){finLines().forEach(l=>{v[l.k]=(v[l.k]||0)+(a.v[l.k]||0);});n+=a.n;}});return {c:plfinCalc(v),n};};
@@ -10991,7 +10992,7 @@ function puRow(r,ref){ // غنی‌سازی ردیف whRows با تحلیل خر
   const wStart=_isoAdd(ref,-365), wEnd=_isoAdd(ref,-275); // پنجرهٔ ۹۰روزهٔ «آیندهٔ پارسال» = تقاضای فصلیِ پیش‌رو
   const seasonal=sales.filter(x=>{const d=ds(x.d.date);return d&&d>=wStart&&d<=wEnd;}).reduce((a,x)=>a+(+x.d.qty||0),0);
   const purs=purchasesOf(p.id).slice().sort((a,b)=>(ds(b.d.date)||'').localeCompare(ds(a.d.date)||''));
-  const lastBuy=purs[0]?{price:puUnitToman(purs[0])+((+purs[0].d.extra||0)/(+purs[0].d.qty||1)),date:ds(purs[0].d.date),cur:purs[0].d.cur||'تومان'}:null;
+  const lastBuy=purs[0]?{price:puUnitToman(purs[0])+((+purs[0].d.extra||0)/(+purs[0].d.qty||1)),date:ds(purs[0].d.date),cur:purs[0].d.cur||'ریال'}:null;
   const targetDays=lead+30;
   const reorderNeed=Math.max(0,Math.ceil(r.avgDaily*targetDays)-r.st);
   const minNeed=Math.max(0,(+p.d.minstock||0)-r.st);
@@ -11006,7 +11007,7 @@ function puRow(r,ref){ // غنی‌سازی ردیف whRows با تحلیل خر
   else if(r.st>0&&r.avgDaily<=0){act='hold';reason='موجودی بدون فروش اخیر';}
   return {...r,lead,seasonal,lastBuy,buyQ,reorderNeed,minNeed,seasonalNeed,act,reason};
 }
-function puValueSeries(b){ // مبلغ خرید ماهانه (تومان) — ۱۲ ماه اخیر
+function puValueSeries(b){ // مبلغ خرید ماهانه (ریال) — ۱۲ ماه اخیر
   const inB=x=>!b||relIds(x,'biz').includes(b)||!relIds(x,'biz').length;
   const by={};byE('purchase').forEach(x=>{if(!inB(x))return;const d=ds(x.d.date);if(!d)return;
     const [gy,gm,gd]=d.split('-').map(Number);const j=g2j(gy,gm,gd);const k=j[0]*100+j[1];
@@ -11086,7 +11087,7 @@ function supdashHTML(){
     <div style="font-size:10.5px;color:var(--tx2);margin-top:8px">امتیاز کل (۰–۱۰۰) = ۴۰٪ قیمت (نسبت به میانگین بازارِ همان کالا، خودکار از خریدها) + ۳۵٪ تحویل به‌موقع + ۲۵٪ حد اعتبار/مهلت پرداخت + جایزهٔ کیفیت. روی هر ردیف بزن تا ویرایش کنی.</div></div>`;
   h+=`<div class="sec" style="border:1px dashed var(--line)"><div style="font-weight:800;font-size:12.5px;margin-bottom:5px">📥 راهنمای ورود اکسل تأمین‌کنندگان</div>
     <div style="font-size:11.5px;color:var(--tx2);line-height:1.9">فایل اکسل/CSV با این ستون‌ها بساز (سطر اول = عنوان ستون‌ها). سیستم خودکار تشخیص می‌دهد:<br>
-    <b>نام</b> · <b>نوع رابطه</b> (بنویس «تامین‌کننده») · <b>🌍 کشور (برای تأمین‌کننده)</b> · <b>💳 حد اعتبار می‌دهد (تومان)</b> · <b>⏳ مهلت پرداخت (روز)</b> · <b>🚚 تحویل به‌موقع (٪ ۰ تا ۱۰۰)</b> · <b>⭐ کیفیت کالا/خدمت (۱ تا ۵)</b> · تلفن سازمان · ایمیل سازمان<br>
+    <b>نام</b> · <b>نوع رابطه</b> (بنویس «تامین‌کننده») · <b>🌍 کشور (برای تأمین‌کننده)</b> · <b>💳 حد اعتبار می‌دهد (ریال)</b> · <b>⏳ مهلت پرداخت (روز)</b> · <b>🚚 تحویل به‌موقع (٪ ۰ تا ۱۰۰)</b> · <b>⭐ کیفیت کالا/خدمت (۱ تا ۵)</b> · تلفن سازمان · ایمیل سازمان<br>
     شاخصِ «قیمت» را وارد نکن؛ خودکار از دادهٔ خریدها محاسبه می‌شود.</div></div>`;
   return h;
 }
@@ -11096,7 +11097,7 @@ function pudashHTML(){
   const ref=whRefDate(b);
   const rows=whRows(b).map(r=>puRow(r,ref));
   const inB=x=>!b||relIds(x,'biz').includes(b)||!relIds(x,'biz').length;
-  const purs=byE('purchase').filter(inB).map(x=>({amt:purchAmt(x),d:ds(x.d.date),kind:x.d.kind||'نقدی',origin:x.d.origin||'داخلی',cur:x.d.cur||'تومان',settled:!!x.d.settled,sup:relIds(x,'supplier')[0]||'',x}));
+  const purs=byE('purchase').filter(inB).map(x=>({amt:purchAmt(x),d:ds(x.d.date),kind:x.d.kind||'نقدی',origin:x.d.origin||'داخلی',cur:x.d.cur||'ریال',settled:!!x.d.settled,sup:relIds(x,'supplier')[0]||'',x}));
   const y0=_isoAdd(ref,-365), y1=_isoAdd(ref,-730);
   const spend365=purs.filter(e=>e.d&&e.d>=y0).reduce((a,e)=>a+e.amt,0);
   const spendPrev=purs.filter(e=>e.d&&e.d>=y1&&e.d<y0).reduce((a,e)=>a+e.amt,0);
@@ -11155,14 +11156,14 @@ function pudashHTML(){
   if(!rec.length)rec.push(['✅','وضعیت مطلوب','در حال حاضر هشدار خرید بحرانی‌ای نیست؛ روند را پایش کن.','']);
   // پنل جزئیات آبشاری
   let detail='';const K=view.puCard;
-  if(K==='spend')detail=tbl([['کالا',pn,'right'],['آخرین خرید',r=>r.lastBuy?money(r.lastBuy.price)+(r.lastBuy.cur!=='تومان'?' ('+r.lastBuy.cur+')':''):'—'],['تاریخ',r=>r.lastBuy?esc(iso2jstr(r.lastBuy.date)):'—'],['بهای تمام‌شده',r=>money(r.cost)],['موجودی',r=>r.st.toLocaleString('fa-IR')]],rows.filter(r=>r.lastBuy).sort((a,b)=>(b.lastBuy.date||'').localeCompare(a.lastBuy.date||'')).slice(0,20));
+  if(K==='spend')detail=tbl([['کالا',pn,'right'],['آخرین خرید',r=>r.lastBuy?money(r.lastBuy.price)+(r.lastBuy.cur!=='ریال'?' ('+r.lastBuy.cur+')':''):'—'],['تاریخ',r=>r.lastBuy?esc(iso2jstr(r.lastBuy.date)):'—'],['بهای تمام‌شده',r=>money(r.cost)],['موجودی',r=>r.st.toLocaleString('fa-IR')]],rows.filter(r=>r.lastBuy).sort((a,b)=>(b.lastBuy.date||'').localeCompare(a.lastBuy.date||'')).slice(0,20));
   else if(K==='credit')detail=tbl([['فاکتور خرید',o=>esc(o.v.d.title||'—'),'right'],['تأمین‌کننده',o=>esc((relIds(o.v,'supplier')[0]&&recs[relIds(o.v,'supplier')[0]]?recs[relIds(o.v,'supplier')[0]].d.title:'—'))],['سررسید',o=>esc(iso2jstr(o.due))],['مانده',o=>money(o.c.due)]],dueSoon.sort((a,b)=>(a.due||'').localeCompare(b.due||'')))+`<div style="font-size:11px;color:var(--tx2);margin-top:6px">کل بدهی خرید تسویه‌نشده: <b>${money(openCredit)}</b></div>`;
   else if(K==='excess')detail=tbl([['کالا',pn,'right'],['موجودی',r=>r.st.toLocaleString('fa-IR')],['ارزش',r=>money(r.val)],['سن ماندگاری',r=>r.ageDays.toLocaleString('fa-IR')+' روز'],['پوشش',r=>r.avgDaily>0?Math.round(r.cover).toLocaleString('fa-IR')+' روز':'∞'],['علت',r=>esc(r.reason)]],excess.sort((a,b)=>b.val-a.val).slice(0,25));
   else if(K==='buy')detail=tbl([['کالا',pn,'right'],['موجودی',r=>r.st.toLocaleString('fa-IR')],['فروش روزانه',r=>r.avgDaily.toLocaleString('fa-IR',{maximumFractionDigits:1})],['پوشش',r=>r.avgDaily>0?`<b style="color:${r.cover<r.lead?'var(--bad)':'var(--tx)'}">${Math.round(r.cover).toLocaleString('fa-IR')}</b>`:'∞'],['تدارک',r=>r.lead.toLocaleString('fa-IR')+'ر'],['🛒 پیشنهاد خرید',r=>`<b style="color:var(--ac)">${r.buyQ.toLocaleString('fa-IR')}</b>`],['برآورد هزینه',r=>money(r.buyQ*r.cost)],['علت',r=>esc(r.reason)]],toBuy.slice(0,30));
   else if(K==='hold')detail=tbl([['کالا',pn,'right'],['موجودی',r=>r.st.toLocaleString('fa-IR')],['ارزش',r=>money(r.val)],['پوشش',r=>r.avgDaily>0?Math.round(r.cover).toLocaleString('fa-IR')+' روز':'∞'],['علت',r=>esc(r.reason)]],holdItems.sort((a,b)=>b.val-a.val).slice(0,25));
   else if(K==='season')detail=tbl([['کالا',pn,'right'],['تقاضای ۹۰روز پیش‌رو (پارسال)',r=>r.seasonal.toLocaleString('fa-IR')],['موجودی',r=>r.st.toLocaleString('fa-IR')],['کسری فصلی',r=>`<b style="color:var(--ac)">${r.seasonalNeed.toLocaleString('fa-IR')}</b>`],['تدارک',r=>r.lead.toLocaleString('fa-IR')+'ر'],['اقدام',r=>r.lead>=45?'زودتر بخر':'به‌موقع بخر']],seasonItems.slice(0,25))+`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">مبنا: فروش همین بازهٔ ۹۰روزه در سال گذشته. اگر تدارک طولانی است، خرید را جلو بینداز و مرحله‌ای انجام بده.</div>`;
   else if(K==='deadprice')detail=tbl([['کالا',pn,'right'],['موجودی',r=>r.st.toLocaleString('fa-IR')],['بهای تمام‌شده (سربه‌سر)',r=>money(r.cost)],['آخرین قیمت فروش',r=>money(+r.p.d.sell||0)],['قیمت پیشنهادی (بی‌ضرر)',r=>{const floor=Math.round(r.cost*1.03);return `<b style="color:${(+r.p.d.sell||0)<r.cost?'var(--bad)':'var(--ok)'}">${money(floor)}</b>`;}],['ارزش آزادشونده',r=>money(r.val)]],deadPrice.sort((a,b)=>b.val-a.val).slice(0,25))+`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">قیمت پیشنهادی = بهای تمام‌شده + ۳٪ (حداقل بی‌ضرر). اگر آخرین قیمت فروش زیر بهای تمام‌شده است (قرمز)، فروش با آن قیمت زیان‌ده است.</div>`;
-  else if(K==='cur')detail=tbl([['ارز',e=>esc(e.cur),'right'],['تعداد خرید',e=>e.n.toLocaleString('fa-IR')],['مبلغ (معادل تومان)',e=>money(e.amt)],['سهم',e=>Math.round(e.amt/(spend365||1)*100).toLocaleString('fa-IR')+'٪']],curArr)+`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">نرخ‌های تسعیر فعلی: ${['دلار','یورو','درهم'].map(u=>u+' '+(curRate(u)?curRate(u).toLocaleString('fa-IR'):'—')).join(' · ')} — <a onclick="setFxCur('دلار')" style="color:var(--ac);cursor:pointer">💱 دلار</a> · <a onclick="setFxCur('یورو')" style="color:var(--ac);cursor:pointer">یورو</a> · <a onclick="setFxCur('درهم')" style="color:var(--ac);cursor:pointer">درهم</a></div>`;
+  else if(K==='cur')detail=tbl([['ارز',e=>esc(e.cur),'right'],['تعداد خرید',e=>e.n.toLocaleString('fa-IR')],['مبلغ (معادل ریال)',e=>money(e.amt)],['سهم',e=>Math.round(e.amt/(spend365||1)*100).toLocaleString('fa-IR')+'٪']],curArr)+`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">نرخ‌های تسعیر فعلی: ${['دلار','یورو','درهم'].map(u=>u+' '+(curRate(u)?curRate(u).toLocaleString('fa-IR'):'—')).join(' · ')} — <a onclick="setFxCur('دلار')" style="color:var(--ac);cursor:pointer">💱 دلار</a> · <a onclick="setFxCur('یورو')" style="color:var(--ac);cursor:pointer">یورو</a> · <a onclick="setFxCur('درهم')" style="color:var(--ac);cursor:pointer">درهم</a></div>`;
   else if(K==='origin'){
     // مقایسهٔ خودکار واردات با مرجع داخلی
     const impRows=rows.filter(r=>purchasesOf(r.p.id).some(x=>x.d.origin==='خارجی')&&(+r.p.d.dref||0)>0).map(r=>{
@@ -11224,7 +11225,7 @@ function pudashHTML(){
   </div>`;
   if(detail)h+=`<div class="sec" style="margin-bottom:10px;border:1px solid var(--ac)"><div style="display:flex;margin-bottom:6px"><b style="flex:1">جزئیات</b><button class="btn gh sm" onclick="view.puCard=null;render()">✕ بستن</button></div>${detail}</div>`;
   // روند خرید
-  h+=`<div class="sec"><div style="font-weight:800;margin-bottom:6px">📈 روند مبلغ خرید ماهانه (معادل تومان)</div>${whAreaSVG(pts)}</div>`;
+  h+=`<div class="sec"><div style="font-weight:800;margin-bottom:6px">📈 روند مبلغ خرید ماهانه (معادل ریال)</div>${whAreaSVG(pts)}</div>`;
   if(!rows.length&&!purs.length)h=`<div class="tools"><b>🚚 داشبورد مدیریت خرید</b></div><div class="empty">هنوز داده‌ای برای خرید ثبت نشده — «🧾 ثبت فاکتور خرید» یا «خرید سریع» را وارد کن.</div>`;
   return h;
 }
@@ -13148,15 +13149,16 @@ function prodBuyHist(pid,n){
     const inv=recs[relIds(l,'purchinv')[0]];if(!inv||inv.del)return;
     if((inv.d.status||'')==='باطل')return;
     const sid=relIds(inv,'supplier')[0];
+    let mul=1;try{mul=curMul(inv);}catch(e){}
     out.push({t:inv.u||0,date:dOf(inv,'date'),sup:sid&&recs[sid]?recs[sid].d.title:'—',
-      qty:+l.d.qty||0,price:+l.d.price||0,doc:inv.d.title||'فاکتور خرید'});
+      qty:+l.d.qty||0,price:(+l.d.price||0)*mul,doc:(inv.d.title||'فاکتور خرید')+(mul!==1?' ('+(inv.d.cur||'')+')':'')});
   });
   byE('purchase').forEach(x=>{
     if(x.d._pinv)return; // آینهٔ فاکتور خرید — خودِ فاکتور بالا شمرده شده
     if(relIds(x,'product')[0]!==pid)return;
     const sid=relIds(x,'supplier')[0];
     out.push({t:x.u||0,date:dOf(x,'date'),sup:sid&&recs[sid]?recs[sid].d.title:'—',
-      qty:+x.d.qty||0,price:+x.d.price||0,doc:x.d.title||'خرید سریع'});
+      qty:+x.d.qty||0,price:puUnitToman(x),doc:(x.d.title||'خرید سریع')+((x.d.cur&&x.d.cur!=='ریال')?' ('+x.d.cur+')':'')});
   });
   return out.sort((a,b)=>(b.t||0)-(a.t||0)).slice(0,n);
 }
@@ -13255,7 +13257,7 @@ function quotenewHTML(){
         <datalist id="pq_pdl">${prodDlOpts(byE('product'))}</datalist></div>
       <div><label ${lbl}>نام تأمین‌کننده 🔍</label><input id="pq_sup" list="pq_sdl" placeholder="جستجو یا نام جدید…">
         <datalist id="pq_sdl">${sups.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist></div>
-      <div><label ${lbl}>قیمت خرید (تومان)</label><input id="pq_price" inputmode="numeric" dir="ltr" placeholder="۰"></div>
+      <div><label ${lbl}>قیمت خرید (ریال)</label><input id="pq_price" inputmode="numeric" dir="ltr" placeholder="۰"></div>
       <div><label ${lbl}>شرایط تحویل</label><input id="pq_lead" placeholder="مثلاً: ۳ روزه، درب انبار"></div>
       <div><label ${lbl}>شرایط پرداخت</label><input id="pq_settle" placeholder="مثلاً: نقدی / چک یک‌ماهه"></div>
     </div>
@@ -13304,7 +13306,7 @@ function priceIntelHTML(pid){
         <div><label style="font-size:10.5px;color:var(--tx2)">کالا 🔍</label><input id="pq_prod" list="pq_pdl" value="${esc(recs[pid].d.title||'')}" placeholder="جستجو یا نام کالای جدید…">
           <datalist id="pq_pdl">${prodDlOpts(byE('product'))}</datalist></div>
         <div><label style="font-size:10.5px;color:var(--tx2)">کد کالا (SKU)</label><input id="pq_code" value="${esc(String(recs[pid].d.sku||''))}" placeholder="SKU / کد" dir="ltr"></div>
-        <div><label style="font-size:10.5px;color:var(--tx2)">قیمت استعلامی (تومان)</label><input id="pq_price" inputmode="numeric" dir="ltr" placeholder="۰"></div>
+        <div><label style="font-size:10.5px;color:var(--tx2)">قیمت استعلامی (ریال)</label><input id="pq_price" inputmode="numeric" dir="ltr" placeholder="۰"></div>
         <div><label style="font-size:10.5px;color:var(--tx2)">تاریخ استعلام</label><div style="display:flex;gap:4px"><input id="pq_date" value="${iso2jstr(today())}" style="flex:1" dir="ltr"><button type="button" class="btn gh sm" style="padding:4px 8px" onclick="openJcal('pq_date')">📅</button></div></div>
         <div><label style="font-size:10.5px;color:var(--tx2)">تأمین‌کننده 🔍</label><input id="pq_sup" list="pq_sdl" placeholder="جستجو یا نام جدید…">
           <datalist id="pq_sdl">${sups.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist></div>
@@ -17210,7 +17212,7 @@ const CFA_TOC={'سطح ۱':{'روش‌های کمی':[
 
 const CFA_DEEP={'سطح ۱':{'روش‌های کمی':[
 {sec:[
-['۱. نرخ بهره چیست و چرا مهم است؟','تصور کنید دوستی از شما ۱۰۰ میلیون تومان قرض می‌خواهد و قول می‌دهد یک سال بعد پس بدهد. آیا حاضرید همان ۱۰۰ میلیون را پس بگیرید؟ قطعاً نه — چون در این یک سال هم قیمت‌ها بالا رفته، هم می‌توانستید با این پول کار دیگری بکنید، هم ممکن بود دوستتان اصلاً پس ندهد. مبلغ اضافه‌ای که بابت این‌ها طلب می‌کنید، همان «بهره» است و نسبت آن به اصل پول، «نرخ بهره». پس نرخ بهره در واقع قیمتِ زمان است: قیمت جابه‌جا کردن پول بین امروز و آینده. حالا نکته مهم: همین یک عدد، بسته به اینکه کجا ایستاده‌اید، سه اسم مختلف پیدا می‌کند. اسم اول «نرخ بازده موردنیاز» است: کمترین سودی که باید به شما بدهند تا حاضر شوید پول‌تان را جایی بگذارید — کمتر از آن، نه. اسم دوم «نرخ تنزیل» است: وقتی می‌خواهید بدانید ۱۰۰ میلیونی که قرار است دو سال دیگر به دست‌تان برسد، امروز چقدر می‌ارزد، با همین نرخ آن را کوچک می‌کنید و به امروز برمی‌گردانید. اسم سوم «هزینه فرصت» است: وقتی پول را در گزینه‌ای می‌گذارید، سودِ بهترین گزینه‌ی دیگری که رهایش کردید (مثلاً سپرده ۲۳٪) از دست‌تان رفته؛ پس هر سرمایه‌گذاری باید دست‌کم از این عدد بهتر باشد وگرنه عملاً ضرر کرده‌اید. این سه اسم، یک چیزند از سه زاویه — و در همه فرمول‌های این فصل، حرف r همین است.',
+['۱. نرخ بهره چیست و چرا مهم است؟','تصور کنید دوستی از شما ۱۰۰ میلیون ریال قرض می‌خواهد و قول می‌دهد یک سال بعد پس بدهد. آیا حاضرید همان ۱۰۰ میلیون را پس بگیرید؟ قطعاً نه — چون در این یک سال هم قیمت‌ها بالا رفته، هم می‌توانستید با این پول کار دیگری بکنید، هم ممکن بود دوستتان اصلاً پس ندهد. مبلغ اضافه‌ای که بابت این‌ها طلب می‌کنید، همان «بهره» است و نسبت آن به اصل پول، «نرخ بهره». پس نرخ بهره در واقع قیمتِ زمان است: قیمت جابه‌جا کردن پول بین امروز و آینده. حالا نکته مهم: همین یک عدد، بسته به اینکه کجا ایستاده‌اید، سه اسم مختلف پیدا می‌کند. اسم اول «نرخ بازده موردنیاز» است: کمترین سودی که باید به شما بدهند تا حاضر شوید پول‌تان را جایی بگذارید — کمتر از آن، نه. اسم دوم «نرخ تنزیل» است: وقتی می‌خواهید بدانید ۱۰۰ میلیونی که قرار است دو سال دیگر به دست‌تان برسد، امروز چقدر می‌ارزد، با همین نرخ آن را کوچک می‌کنید و به امروز برمی‌گردانید. اسم سوم «هزینه فرصت» است: وقتی پول را در گزینه‌ای می‌گذارید، سودِ بهترین گزینه‌ی دیگری که رهایش کردید (مثلاً سپرده ۲۳٪) از دست‌تان رفته؛ پس هر سرمایه‌گذاری باید دست‌کم از این عدد بهتر باشد وگرنه عملاً ضرر کرده‌اید. این سه اسم، یک چیزند از سه زاویه — و در همه فرمول‌های این فصل، حرف r همین است.',
 ['یک نرخ، سه نام — بسته به جایگاه شما::r = نرخ بازده موردنیاز = نرخ تنزیل = هزینهٔ فرصت'],
 'سپرده امن بانکی ۲۳٪ می‌دهد. کسی طرحی با سود ۲۰٪ به شما پیشنهاد می‌کند. با اینکه ۲۰٪ «سود» است، از دید اقتصادی ۳ واحد ضرر کرده‌اید — چون بهترین گزینه جایگزین‌تان بیشتر می‌داد.'],
 ['۲. نرخ بهره از چه اجزایی ساخته می‌شود؟','هیچ نرخی در بازار از آسمان نیامده؛ مثل یک ساختمان، طبقه‌به‌طبقه ساخته می‌شود. طبقه اول و پایه همه‌چیز، «نرخ واقعی بدون ریسک» است: پاداش خالصِ صبر کردن در دنیایی خیالی که نه تورم دارد نه خطری — یعنی فقط بابت اینکه مصرف امروزتان را عقب انداختید. طبقه دوم «جبران تورم» است: وقتی پول را قرض می‌دهید، موقع پس گرفتن با آن کمتر می‌شود خرید کرد؛ وام‌دهنده باید این کاهش قدرت خرید را هم جبران کند. جمع این دو طبقه را «نرخ اسمی بدون ریسک» می‌نامند — نرخی که مثلاً اوراق دولتی معتبر می‌دهد. از اینجا به بعد، هر خطری که بپذیرید، یک طبقه «صرف ریسک» (یعنی پاداش اضافه بابت آن خطر) روی ساختمان اضافه می‌شود. سه صرف اصلی: «صرف نکول» — احتمال اینکه بدهکار اصلاً پول را پس ندهد؛ هرچه اعتبارش پایین‌تر، این طبقه بلندتر. «صرف نقدشوندگی» — اگر مجبور شوید ورقه را سریع بفروشید و خریدار کم باشد، باید تخفیف بدهید؛ این ریسک هم پاداش می‌خواهد. «صرف سررسید» — ابزار بلندمدت‌تر نسبت به تغییر نرخ‌ها حساس‌تر است و ریسک قیمتی بیشتری دارد. این تجزیه دو کاربرد عملی دارد: هم می‌توانید نرخ منصفانه یک ابزار جدید را طبقه‌به‌طبقه بسازید، هم برعکس، از اختلاف دو نرخ در بازار اندازه یک صرف را بیرون بکشید.',
@@ -17218,13 +17220,13 @@ const CFA_DEEP={'سطح ۱':{'روش‌های کمی':[
 'اوراق دولتی ۵ ساله ۲۴٪ می‌دهد و اوراق یک شرکت با همان سررسید ۲۹٪. یعنی بازار، جمعِ صرف نکول و نقدشوندگی آن شرکت را ۵ واحد درصد قیمت‌گذاری کرده است.'],
 ['۳. بازده دوره نگهداری (HPR): اولین و مهم‌ترین فرمول','ساده‌ترین سؤال هر سرمایه‌گذار: «در این مدت چند درصد گیرم آمد؟» جواب، «بازده دوره نگهداری» یا HPR است. منطقش این است: هر چه به دست آورده‌اید را تقسیم کنید بر آنچه اول گذاشتید. به‌دست‌آورده‌ها دو تکه دارد: یکی تغییر قیمت (به قیمت فروش P₁ نسبت به قیمت خرید P₀) و یکی دریافتی‌های نقدی وسط راه مثل سود تقسیمی سهم یا کوپن اوراق (D). دو هشدار مهم: اول، HPR به طول دوره کاری ندارد؛ ۱۰٪ در سه ماه با ۱۰٪ در دو سال زمین تا آسمان فرق دارد، پس قبل از مقایسه دو سرمایه‌گذاری باید هر دو را به یک بازه زمانی مشترک ببرید (در بخش ۶ یاد می‌گیریم). دوم، سود نقدی را جا نیندازید؛ رایج‌ترین خطای مبتدی‌ها همین است و باعث می‌شود بازده واقعی‌شان را کمتر از واقع گزارش کنند.',
 ['بازده دورهٔ نگهداری — P₀ قیمت خرید، P₁ قیمت فروش، D سود نقدی دریافتی::HPR = {P_{1} − P_{0} + D|P_{0}}'],
-'سهمی را ۱٬۰۰۰ تومان خریدید، ۵۰ تومان سود نقدی گرفتید و ۱٬۱۵۰ فروختید: HPR = (۱۱۵۰−۱۰۰۰+۵۰)÷۱۰۰۰ = ۲۰٪. اگر سود نقدی را فراموش می‌کردید، به‌اشتباه ۱۵٪ گزارش می‌دادید.'],
+'سهمی را ۱٬۰۰۰ ریال خریدید، ۵۰ ریال سود نقدی گرفتید و ۱٬۱۵۰ فروختید: HPR = (۱۱۵۰−۱۰۰۰+۵۰)÷۱۰۰۰ = ۲۰٪. اگر سود نقدی را فراموش می‌کردید، به‌اشتباه ۱۵٪ گزارش می‌دادید.'],
 ['۴. میانگین حسابی و هندسی: دو سؤال متفاوت، دو جواب متفاوت','حالا فرض کنید بازده چند سال را دارید و می‌خواهید یک عدد «نماینده» بگویید. قبل از هر محاسبه‌ای باید بدانید دقیقاً چه می‌پرسید، چون دو سؤال متفاوت، دو میانگین متفاوت می‌خواهند. سؤال اول: «برای سال آینده چه بازدهی انتظار داشته باشم؟» جواب: میانگین حسابی — همان میانگین معمولی که در مدرسه یاد گرفتید: همه را جمع کنید، تقسیم بر تعداد. برای پیش‌بینی یک سالِ منفرد، این بهترین برآورد است. سؤال دوم: «پول من در این سال‌ها واقعاً با چه سرعتی رشد کرد؟» اینجا میانگین حسابی جواب غلط می‌دهد، چون رشد پول «ضربی» است نه جمعی: هر سال، بازده روی نتیجه سال قبل می‌نشیند. برای این سؤال باید «میانگین هندسی» گرفت: ضریب رشد هر سال (یعنی ۱+R) را در هم ضرب کنید، ریشه n-اُم بگیرید، و یک واحد کم کنید. یک قانون همیشگی: میانگین هندسی هرگز از حسابی بزرگ‌تر نمی‌شود، و فاصله این دو تقریباً برابر نصفِ واریانس بازده‌هاست. اسم این پدیده «کشش نوسان» است: نوسان، حتی وقتی میانگین حسابی ثابت است، از رشد مرکب ثروت می‌دزدد. برای همین از دو صندوق با میانگین حسابی یکسان، آنکه کم‌نوسان‌تر است در بلندمدت ثروت بیشتری می‌سازد.',
 ['میانگین حسابی — جمع بازده‌ها تقسیم بر تعداد::R̄ = {R_{1} + R_{2} + … + R_{n}|n}','میانگین هندسی — نرخ رشد مرکب واقعی ثروت::R_{G} = [ (1+R_{1})(1+R_{2})…(1+R_{n}) ]^{1/n} − 1','فاصلهٔ دو میانگین — کشش نوسان::R_{G} ≈ R̄ − {σ^{2}|2}'],
 'دو سال با بازده +۶۰٪ و −۳۰٪: میانگین حسابی ۱۵٪ است، اما هندسی = √(۱٫۶×۰٫۷) − ۱ ≈ ۵٫۸٪. ثروت شما واقعاً سالی ۵٫۸٪ رشد کرده، نه ۱۵٪.'],
-['۵. میانگین هارمونیک و راز خرید پله‌ای','میانگین هارمونیک اسم ترسناکی دارد ولی برای یک موقعیت کاملاً ملموس ساخته شده: وقتی هر دوره «مبلغ پولی ثابتی» از یک دارایی می‌خرید — مثلاً هر ماه ۱۰ میلیون تومان سهم، به هر قیمتی که بود. در این حالت، قیمت تمام‌شده‌ی هر واحدِ شما دقیقاً میانگین هارمونیک قیمت‌هاست، نه میانگین معمولی. چرا قیمت تمام‌شده کمتر از میانگین معمولی درمی‌آید؟ چون وقتی مبلغ ثابت می‌گذارید، در ماه‌های ارزان به‌طور خودکار تعداد بیشتری واحد می‌خرید و در ماه‌های گران تعداد کمتری — یعنی قیمت‌های پایین در میانگینِ شما وزن بیشتری می‌گیرند. این دقیقاً مزیت ریاضیِ «خرید پله‌ای» است که بدون هیچ پیش‌بینی بازاری، خودکار عمل می‌کند. ترتیب سه میانگین را هم به خاطر بسپارید که برای هر مجموعه عدد مثبت برقرار است: هارمونیک ≤ هندسی ≤ حسابی.',
+['۵. میانگین هارمونیک و راز خرید پله‌ای','میانگین هارمونیک اسم ترسناکی دارد ولی برای یک موقعیت کاملاً ملموس ساخته شده: وقتی هر دوره «مبلغ پولی ثابتی» از یک دارایی می‌خرید — مثلاً هر ماه ۱۰ میلیون ریال سهم، به هر قیمتی که بود. در این حالت، قیمت تمام‌شده‌ی هر واحدِ شما دقیقاً میانگین هارمونیک قیمت‌هاست، نه میانگین معمولی. چرا قیمت تمام‌شده کمتر از میانگین معمولی درمی‌آید؟ چون وقتی مبلغ ثابت می‌گذارید، در ماه‌های ارزان به‌طور خودکار تعداد بیشتری واحد می‌خرید و در ماه‌های گران تعداد کمتری — یعنی قیمت‌های پایین در میانگینِ شما وزن بیشتری می‌گیرند. این دقیقاً مزیت ریاضیِ «خرید پله‌ای» است که بدون هیچ پیش‌بینی بازاری، خودکار عمل می‌کند. ترتیب سه میانگین را هم به خاطر بسپارید که برای هر مجموعه عدد مثبت برقرار است: هارمونیک ≤ هندسی ≤ حسابی.',
 ['میانگین هارمونیک قیمت‌ها — X₁ تا Xₙ قیمت‌های خرید در هر دوره::X̄_{H} = {n|Σ {1|X_{i}}}'],
-'دو ماه، هر ماه ۱۰ میلیون خرید؛ قیمت‌ها ۱٬۰۰۰ و ۲٬۰۰۰ تومان: ماه اول ۱۰٬۰۰۰ واحد و ماه دوم ۵٬۰۰۰ واحد خریدید. قیمت تمام‌شده = ۲۰ میلیون ÷ ۱۵٬۰۰۰ ≈ ۱٬۳۳۳ تومان — همان هارمونیک؛ در حالی که میانگین معمولی قیمت‌ها ۱٬۵۰۰ بود.'],
+'دو ماه، هر ماه ۱۰ میلیون خرید؛ قیمت‌ها ۱٬۰۰۰ و ۲٬۰۰۰ ریال: ماه اول ۱۰٬۰۰۰ واحد و ماه دوم ۵٬۰۰۰ واحد خریدید. قیمت تمام‌شده = ۲۰ میلیون ÷ ۱۵٬۰۰۰ ≈ ۱٬۳۳۳ ریال — همان هارمونیک؛ در حالی که میانگین معمولی قیمت‌ها ۱٬۵۰۰ بود.'],
 ['۶. سالانه‌سازی: بازده‌ها را هم‌مقیاس کنید','بازده ۵٪ سه‌ماهه بهتر است یا ۱۸٪ سالانه؟ تا وقتی این دو را به یک بازه مشترک نبرید، قابل مقایسه نیستند. راهش «مرکب کردن» است، نه ضرب ساده: چون سود هر دوره، خودش در دوره بعد سود می‌سازد. پس بازده دوره را به شکل (۱+R) بنویسید و به توان تعداد دوره‌ها در سال برسانید. یک هشدار جدی: سالانه‌سازی فرض می‌کند آن بازده تکرارشدنی است. بازده استثنایی دو هفته‌ای را سالانه کردن، یک عدد نمایشی و گمراه‌کننده می‌سازد. در کنار این، «بازده مرکب پیوسته» را هم بشناسید: لگاریتم طبیعی (۱+HPR). خاصیت قشنگش این است که بین دوره‌ها جمع‌پذیر است (بازده کل = جمع بازده‌های لگاریتمی) و به همین دلیل در مدل‌سازی مالی زیاد به کار می‌رود.',
 ['سالانه‌سازی — m تعداد دورهٔ هم‌طول در یک سال::R_{سالانه} = (1 + R_{دوره})^{m} − 1','بازده مرکب پیوسته — لگاریتم طبیعی ضریب رشد::r_{cc} = ln(1 + HPR) = ln( {P_{1}|P_{0}} )'],
 'بازده ۵٪ سه‌ماهه: سالانه = ۱٫۰۵⁴ − ۱ = ۲۱٫۶٪ — پس از ۱۸٪ سالانه بهتر است. ضرب ساده (۲۰٪) اثر مرکب را جا می‌انداخت.'],
@@ -17252,13 +17254,13 @@ qz:[
 {sec:[
 ['۱. یک اصل برای همهٔ دارایی‌ها','این ماژول بر یک اصل واحد بنا شده است: ارزش منصفانهٔ هر دارایی مالی برابر است با ارزش فعلی جریان‌های نقدی آیندهٔ آن، تنزیل‌شده با نرخی که متناسب با ریسک همان جریان‌هاست. این جمله متر مشترکی است که با آن اوراق بدهی، سهام، ملک اجاره‌ای و حتی کل یک شرکت سنجیده می‌شود. دو عملیات پایه دارد: «مرکب‌کردن» که پول امروز را به آینده می‌برد و «تنزیل» که جریان آینده را به امروز برمی‌گرداند. هر مدلی که در ادامه می‌بینید — از قیمت‌گذاری اوراق تا مدل رشد گوردون — حالت خاصی از همین یک رابطه است؛ تنها الگوی جریان‌های نقدی عوض می‌شود.',
 ['رابطهٔ بنیادی ارزش فعلی و ارزش آتی — t تعداد دوره، r نرخ تنزیل::FV_{t} = PV (1 + r)^{t}','تنزیل (خواندن معکوس همان رابطه)::PV = {FV_{t}|(1 + r)^{t}}'],
-'۱۰۰ میلیون تومان با نرخ ۲۰٪ پس از دو سال: ۱۰۰ × (۱٫۲)² = ۱۴۴ میلیون. برعکس، ۱۴۴ میلیونِ دو سال بعد با همین نرخ، امروز دقیقاً ۱۰۰ میلیون می‌ارزد.'],
+'۱۰۰ میلیون ریال با نرخ ۲۰٪ پس از دو سال: ۱۰۰ × (۱٫۲)² = ۱۴۴ میلیون. برعکس، ۱۴۴ میلیونِ دو سال بعد با همین نرخ، امروز دقیقاً ۱۰۰ میلیون می‌ارزد.'],
 ['۲. ابزارهای درآمد ثابت: از تنزیلی تا کوپن‌دار','ابزارهای بدهی را می‌توان با الگوی جریان نقدی‌شان طبقه‌بندی کرد. «ابزار تنزیلی» فقط یک پرداخت در سررسید دارد؛ امروز ارزان‌تر از مبلغ اسمی خریده می‌شود و تفاوت، همان بهره است. «ابزار کوپن‌دار» در هر دوره بهره‌ای ثابت (کوپن) می‌پردازد و در سررسید اصل مبلغ را برمی‌گرداند؛ ارزش آن، جمعِ ارزش فعلی تک‌تک کوپن‌ها به‌علاوهٔ ارزش فعلی مبلغ اسمی است. «اقساط مساوی» (مانند وام رهنی) اصل و بهره را در پرداخت‌های برابر ترکیب می‌کند. و «دائمی» (perpetuity) کوپنی است که هرگز تمام نمی‌شود — سهام ممتاز نمونهٔ نزدیک به آن است — و ارزش فعلی آن سادهٔ کوپن تقسیم بر نرخ است. نکتهٔ مفهومی مهم: قیمت اوراق و نرخ بازار در جهت عکس هم حرکت می‌کنند؛ اگر پس از انتشار، نرخ موردنیاز بازار بالا برود، قیمت ورقهٔ موجود پایین می‌آید تا خریدار جدید همان بازده بازار را به دست آورد.',
 ['ارزش ابزار تنزیلی (یک پرداخت در سررسید)::PV = {FV|(1 + r)^{N}}','ارزش ابزار کوپن‌دار — PMT کوپن هر دوره، FV مبلغ اسمی::PV = Σ_{t=1}^{N} {PMT|(1+r)^{t}} + {FV|(1+r)^{N}}','ارزش ابزار دائمی (کوپن بی‌پایان)::PV = {PMT|r}'],
 'ورقه‌ای با کوپن سالانه ۲۰۰ و اسمی ۱٬۰۰۰ و سررسید ۲ سال، با نرخ ۲۰٪: PV = ۲۰۰÷۱٫۲ + ۱٬۲۰۰÷۱٫۴۴ = ۱۶۶٫۷ + ۸۳۳٫۳ = ۱٬۰۰۰ — چون کوپن با نرخ بازار برابر است، قیمت برابر اسمی درمی‌آید.'],
 ['۳. سهام: از سود ثابت تا مدل رشد گوردون','سهام هم با همان اصل قیمت‌گذاری می‌شود؛ جریان نقدی سهام‌دار، سود تقسیمی است. سه حالت استاندارد وجود دارد. حالت اول، سود تقسیمی ثابت: سهم مانند یک ابزار دائمی است و ارزش آن سود تقسیم بر نرخ موردنیاز است. حالت دوم، رشد ثابت: اگر سود تقسیمی هر سال با نرخ ثابت g رشد کند، به «مدل رشد گوردون» می‌رسیم که ارزش را برابر سود سال آینده تقسیم بر (r − g) می‌داند. دو هشدار حیاتی دارد: صورت کسر D₁ است، یعنی سود «سال آینده» — سود امسال را باید یک بار در (1+g) ضرب کنید؛ و مدل فقط وقتی معناست که r بزرگ‌تر از g باشد. هرچه g به r نزدیک‌تر شود، مخرج کوچک‌تر و ارزش به‌شدت به مفروضات حساس می‌شود. حالت سوم، رشد دومرحله‌ای: سال‌های نخست رشد سریع را جدا تنزیل می‌کنید و برای دورهٔ بلوغ، یک «ارزش پایانی» با مدل گوردون می‌سازید و آن را هم به امروز برمی‌گردانید.',
 ['سود تقسیمی ثابت (سهم مانند ابزار دائمی)::P_{0} = {D|r}','مدل رشد گوردون — D₁ سود سال آینده، g نرخ رشد ثابت (r > g)::P_{0} = {D_{0}(1+g)|r − g} = {D_{1}|r − g}','رشد دومرحله‌ای — ارزش پایانی در سال n با مدل گوردون::P_{0} = Σ_{t=1}^{n} {D_{t}|(1+r)^{t}} + {P_{n}|(1+r)^{n}} ، P_{n} = {D_{n+1}|r − g}'],
-'سهمی امسال ۵۰۰ تومان سود داده، رشد باثبات ۱۵٪ و نرخ موردنیاز ۲۵٪: D₁ = ۵۰۰ × ۱٫۱۵ = ۵۷۵ و ارزش = ۵۷۵ ÷ (۰٫۲۵ − ۰٫۱۵) = ۵٬۷۵۰ تومان. اگر اشتباهاً D₀ را می‌گذاشتید، ۵٬۰۰۰ به دست می‌آمد.'],
+'سهمی امسال ۵۰۰ ریال سود داده، رشد باثبات ۱۵٪ و نرخ موردنیاز ۲۵٪: D₁ = ۵۰۰ × ۱٫۱۵ = ۵۷۵ و ارزش = ۵۷۵ ÷ (۰٫۲۵ − ۰٫۱۵) = ۵٬۷۵۰ ریال. اگر اشتباهاً D₀ را می‌گذاشتید، ۵٬۰۰۰ به دست می‌آمد.'],
 ['۴. مهندسی معکوس: بازده و رشد ضمنی','رابطهٔ ارزش‌گذاری را می‌توان برعکس هم خواند: به‌جای آنکه از نرخ به قیمت برسید، از قیمتِ مشاهده‌شدهٔ بازار بپرسید چه انتظاری در آن پنهان است. برای ابزار درآمد ثابت، «بازده ضمنی» نرخی است که ارزش فعلی جریان‌های وعده‌داده‌شده را دقیقاً برابر قیمت بازار می‌کند — همان بازده تا سررسید (YTM). برای سهامِ با رشد ثابت، جابه‌جایی جبری مدل گوردون دو ابزار کاربردی می‌دهد: بازده موردانتظار ضمنی برابر است با بازده سود تقسیمی به‌علاوهٔ نرخ رشد؛ و رشد ضمنی برابر است با نرخ موردنیاز منهای بازده سود تقسیمی. فایدهٔ عملی این است که اختلاف‌نظر با بازار عددی می‌شود: «بازار در این قیمت، رشد ۱۸٪ را فرض کرده؛ تحلیل من ۱۵٪ است» — و این مبنای تصمیم خرید یا فروش است.',
 ['بازده موردانتظار ضمنی سهام با رشد ثابت::r = {D_{1}|P_{0}} + g','نرخ رشد ضمنی در قیمت بازار::g = r − {D_{1}|P_{0}}'],
 'قیمت بازار سهمی ۴٬۰۰۰ و سود سال آیندهٔ آن ۲۰۰ است؛ با نرخ موردنیاز ۲۰٪، رشد ضمنی بازار = ۰٫۲۰ − (۲۰۰ ÷ ۴٬۰۰۰) = ۰٫۲۰ − ۰٫۰۵ = ۱۵٪.'],
@@ -17666,7 +17668,7 @@ qz:[
 'اگر سود خالص ثابت بماند ولی «سود جامع» به‌خاطر زیان تسعیر ارز به‌شدت پایین‌تر باشد، ریسک ارزی بزرگی زیر پوست شرکت پنهان است که سود خالص آن را نشان نمی‌دهد.'],
 ['۳. سود هر سهم (EPS): پایه و تقلیل‌یافته','برای سهام‌دار، سود سرانه مهم‌تر از سود کل است. «EPS پایه» سود خالصِ در دسترس سهام عادی (سود خالص منهای سود سهام ممتاز) تقسیم بر «میانگین موزون تعداد سهام عادی» در دوره است — نکتهٔ فنی مهم، وزن‌دهی به زمان انتشار سهام جدید و بازخرید است. «EPS تقلیل‌یافته» بدترین حالت را نشان می‌دهد: فرض می‌کند همهٔ اوراق قابل‌تبدیل (اوراق و سهام ممتاز قابل‌تبدیل) و اختیارهای خرید سهام کارکنان که «در وجه» هستند، تبدیل/اعمال شوند و تعداد سهام را بالا ببرند؛ همیشه کوچک‌تر یا مساوی EPS پایه است. تحلیل‌گر EPS تقلیل‌یافته را مبنا می‌گیرد چون ریسک واقعیِ رقیق‌شدن مالکیت را منعکس می‌کند. برای اوراق قابل‌تبدیل، «روش اگر-تبدیل‌شود» و برای اختیارها «روش سهام خزانه» به کار می‌رود.',
 ['EPS پایه — P_ممتاز سود سهام ممتاز::EPS_{پایه} = {سود خالص − P_{ممتاز}|میانگین موزون سهام عادی}'],
-'سود خالص ۱٬۱۰۰، سود ممتاز ۱۰۰ و میانگین موزون ۵۰۰ سهم: EPS پایه = (۱۱۰۰ − ۱۰۰) ÷ ۵۰۰ = ۲٫۰ تومان به ازای هر سهم.'],
+'سود خالص ۱٬۱۰۰، سود ممتاز ۱۰۰ و میانگین موزون ۵۰۰ سهم: EPS پایه = (۱۱۰۰ − ۱۰۰) ÷ ۵۰۰ = ۲٫۰ ریال به ازای هر سهم.'],
 ['۴. جمع‌بندی اجرایی','چهار انضباط تحلیل سود و زیان: (۱) کیفیت و پایداری درآمد را با روش شناسایی و تفکیک اصیل/واسط بسنجید. (۲) سود عملیاتی را مبنای مقایسهٔ بین شرکت‌ها بگیرید، نه سود خالصی که ساختار بدهی و مالیات آلوده‌اش کرده. (۳) اقلام یک‌باره را جدا کنید و برای پیش‌بینی فقط بخش مستمر را ببینید؛ سود جامع را برای ریسک‌های پنهان چک کنید. (۴) EPS تقلیل‌یافته را مبنا بگیرید تا اثر رقیق‌شدن آتی را دست‌کم نگیرید.',null,null]],
 ex:'مثال جامع حل‌شده — شرکتی این ارقام را دارد: فروش ⟨۱۰٬۰۰۰⟩، بهای تمام‌شده ⟨۶٬۰۰۰⟩، هزینهٔ فروش و اداری ⟨۲٬۰۰۰⟩، سود یک‌بارهٔ فروش زمین ⟨۵۰۰⟩، هزینهٔ بهره ⟨۴۰۰⟩، نرخ مالیات ⟨۲۰٪⟩، سود سهام ممتاز ⟨۱۰۰⟩ و میانگین موزون ⟨۱٬۰۰۰⟩ سهم عادی. (الف) سود ناخالص = ⟨۱۰٬۰۰۰ − ۶٬۰۰۰ = ۴٬۰۰۰⟩ و حاشیهٔ ناخالص ⟨۴۰٪⟩. (ب) سود عملیاتیِ «پایدار» (بدون سود یک‌بارهٔ زمین) = ⟨۴٬۰۰۰ − ۲٬۰۰۰ = ۲٬۰۰۰⟩، حاشیهٔ عملیاتی ⟨۲۰٪⟩ — این مبنای مقایسه و پیش‌بینی است. (ج) سود خالص گزارش‌شده: سود پیش از مالیات = ⟨۲٬۰۰۰ + ۵۰۰ − ۴۰۰ = ۲٬۱۰۰⟩، مالیات ⟨۴۲۰⟩، سود خالص ⟨۱٬۶۸۰⟩. اما سود خالصِ «مستمر» با حذف اثر پس از مالیاتِ زمین (⟨۵۰۰ × ۰٫۸ = ۴۰۰⟩) برابر ⟨۱٬۲۸۰⟩ است — تحلیل‌گر برای پیش‌بینی از ۱٬۲۸۰ استفاده می‌کند نه ۱٬۶۸۰. (د) EPS پایه = ⟨(۱٬۶۸۰ − ۱۰۰) ÷ ۱٬۰۰۰ = ۱٫۵۸⟩؛ و اگر ⟨۲۰۰⟩ اختیار خرید «در وجه» با روش سهام خزانه معادل ⟨۵۰⟩ سهم افزوده بسازد، EPS تقلیل‌یافته ≈ ⟨(۱٬۵۸۰) ÷ ۱٬۰۵۰ = ۱٫۵۰⟩ — عددی که سهام‌دار باید مبنا بگیرد.',
 mist:['ثبت کل مبلغ فروش به‌عنوان درآمد در حالی که شرکت واسط/کارگزار است (باید فقط کارمزد باشد).','مقایسهٔ شرکت‌ها با سود خالص به‌جای سود عملیاتی که از ساختار تأمین مالی و مالیات پاک است.','لحاظ‌کردن اقلام یک‌باره در پیش‌بینی سود آینده.','استفاده از تعداد سهام پایان دوره به‌جای میانگین موزون در محاسبهٔ EPS.','گزارش EPS پایه به‌جای تقلیل‌یافته و دست‌کم‌گرفتن ریسک رقیق‌شدن.','نادیده‌گرفتن سود جامع و ریسک‌های پنهانی مانند زیان تسعیر ارز.'],
@@ -21717,7 +21719,7 @@ window.qlabRun=function(kind){
     h=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
       ${[['وزن سهام',(we*100).toFixed(1)+'٪'],['وزن بدهی',(wd*100).toFixed(1)+'٪'],['هزینه بدهی پس از مالیات',(rd*(1-tax)).toFixed(2)+'٪'],['WACC',wacc.toFixed(2)+'٪']].map(([t2,v2])=>`<div class="sec" style="text-align:center;padding:10px"><div style="font-size:11px;color:var(--tx2)">${t2}</div><div style="font-size:15.5px;font-weight:800;margin-top:2px;color:${t2==='WACC'?'#ecd98f':'var(--tx)'}">${v2}</div></div>`).join('')}
     </div><div class="sec" style="margin-top:8px;border-inline-start:3px solid var(--ac)"><b style="font-size:12px">🧠 تحلیل مشاور (ماژول ۶ — ساختار سرمایه)</b><div style="font-size:12px;line-height:2.2;margin-top:4px">
-      ${roic!=null?(roic>wacc?'🟢 ROIC ('+roic.toFixed(1)+'٪) > WACC ('+wacc.toFixed(1)+'٪) — شرکت به ازای هر تومان سرمایه، ارزش می‌سازد (اسپرد '+(roic-wacc).toFixed(1)+' واحد).':'🔴 ROIC ('+roic.toFixed(1)+'٪) < WACC ('+wacc.toFixed(1)+'٪) — رشد با این بازده، نابودگر ارزش است؛ اول بازده را درست کن بعد رشد.'):'ℹ️ اگر ROIC را هم بدهی، آزمون ارزش‌آفرینی (ROIC در برابر WACC) را انجام می‌دهم.'}
+      ${roic!=null?(roic>wacc?'🟢 ROIC ('+roic.toFixed(1)+'٪) > WACC ('+wacc.toFixed(1)+'٪) — شرکت به ازای هر ریال سرمایه، ارزش می‌سازد (اسپرد '+(roic-wacc).toFixed(1)+' واحد).':'🔴 ROIC ('+roic.toFixed(1)+'٪) < WACC ('+wacc.toFixed(1)+'٪) — رشد با این بازده، نابودگر ارزش است؛ اول بازده را درست کن بعد رشد.'):'ℹ️ اگر ROIC را هم بدهی، آزمون ارزش‌آفرینی (ROIC در برابر WACC) را انجام می‌دهم.'}
       ${wd>0.6?'<div>🟡 وزن بدهی '+(wd*100).toFixed(0)+'٪ — سپر مالیاتی داری ولی به ناحیه هزینه درماندگی مالی نزدیکی؛ نوسان سود عملیاتی را بسنج.</div>':''}
       <div>📐 قاعده: نرخ تنزیل پروژه‌های هم‌ریسک با شرکت = همین WACC؛ پروژه پرریسک‌تر نرخ بالاتر می‌خواهد.</div></div></div>`;
   }
@@ -24846,7 +24848,7 @@ function invdashHTML(){
       <div style="margin-top:10px"><button class="btn sm" onclick="qlabRun('beneish')">🧮 محاسبه M-Score</button></div>
       <div id="ql_out" style="margin-top:10px"></div></div>`;
     if(K==='altman')h+=`<div class="sec"><h3>🏦 Z-Score آلتمن — ریسک ورشکستگی</h3>
-      <div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px">اعداد صورت مالی را با واحد یکسان (مثلاً میلیون تومان) وارد کن. ارزش بازار حقوق مالکانه = قیمت سهم × تعداد سهام (شرکت غیربورسی: ارزش دفتری).</div>
+      <div style="font-size:10.5px;color:var(--tx2);margin-bottom:8px">اعداد صورت مالی را با واحد یکسان (مثلاً میلیون ریال) وارد کن. ارزش بازار حقوق مالکانه = قیمت سهم × تعداد سهام (شرکت غیربورسی: ارزش دفتری).</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px">
         <div><label ${lbl}>سرمایه در گردش</label><input id="al_wc" dir="ltr" inputmode="numeric"></div>
         <div><label ${lbl}>سود انباشته</label><input id="al_re" dir="ltr" inputmode="numeric"></div>
@@ -26038,7 +26040,7 @@ function finAddLine(){if(!isAdmin()){alert('فقط ادمین');return;}
   const k='x_'+Date.now().toString(36);
   const m=recs[MO]||{id:MO,e:'_opts',d:{}};m.d={...m.d,_plx:[...finExtra(),{k,n,sec}]};m.u=Date.now();m.del=false;put(m);render();}
 window.finAddLine=finAddLine;
-function plToman(v,unit){return unit==='تومان'?v:v/10;} // مبنای اپ: تومان (ریال÷۱۰)
+function plToman(v,unit){return unit==='\u062a\u0648\u0645\u0627\u0646'?v*10:v;} // مبنای اپ: ریال (ردیف‌های قدیمیِ ریالی ×۱۰)
 function plfinCalc(v){v=v||{};const val=k=>+v[k]||0;const L=finLines();
   let netSales=0,otherInc=0,cogs=0,opex=0,tax=0;
   L.forEach(l=>{const x=val(l.k);if(l.sec==='rev'){if(l.ns)netSales+=x;else otherInc+=x;}else if(l.sec==='cogs')cogs+=x;else if(l.sec==='opex')opex+=x;else if(l.sec==='tax')tax+=x;});
@@ -26051,7 +26053,7 @@ function plfinBrief(r){const c=plfinCalc(r.d.v);const u=r.d.unit||'ریال';ret
 window.plfinBrief=plfinBrief;
 function plfinRecs(biz,jy){return byE('plfin').filter(r=>(!biz||relIds(r,'biz').includes(biz))&&(!jy||+r.d.jy===jy));}
 function plYears(biz){const s=new Set();plfinRecs(biz).forEach(r=>{if(+r.d.jy)s.add(+r.d.jy);});return [...s].sort((a,b)=>a-b);}
-/* تجمیع مبالغِ خطوط برای یک بازه (ماه خاص یا کل سال) — همه به تومان */
+/* تجمیع مبالغِ خطوط برای یک بازه (ماه خاص یا کل سال) — همه به ریال */
 function plAgg(biz,jy,jm){ // jm=ماه یا 'کل سال'
   const recs2=plfinRecs(biz,jy).filter(r=>jm==='کل سال'?(r.d.jm!=='کل سال'):(r.d.jm===jm));
   // اگر «کل سال»‌ای دستی ثبت شده و ماهی نیست، از همان استفاده کن
@@ -26136,7 +26138,7 @@ function finFormHTML(){
     <div><label ${lbl}>کسب‌وکار</label><select onchange="finDraft.biz=this.value"><option value="">—</option>${byE('business').map(x=>`<option value="${x.id}" ${x.id===d.biz?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></div>
     <div><label ${lbl}>سال شمسی</label><input inputmode="numeric" dir="ltr" value="${d.jy||''}" oninput="finDraft.jy=this.value" placeholder="1404"></div>
     <div><label ${lbl}>دوره</label><select onchange="finDraft.jm=this.value">${['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند','کل سال'].map(m=>`<option ${m===d.jm?'selected':''}>${m}</option>`).join('')}</select></div>
-    <div><label ${lbl}>واحد مبالغ</label><select onchange="finDraft.unit=this.value;document.getElementById('fin_tot').innerHTML=finTotHTML(plfinCalc(finDraft.v),this.value)"><option ${d.unit==='ریال'?'selected':''}>ریال</option><option ${d.unit==='تومان'?'selected':''}>تومان</option></select></div>
+    <div><label ${lbl}>واحد مبالغ</label><input value="ریال" disabled style="opacity:.7"></div>
   </div>
   <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px"><div style="flex:2;min-width:280px">${body}</div>
   <div style="flex:1;min-width:220px;position:sticky;top:0"><div style="font-weight:800;font-size:12.5px;margin:12px 0 6px">📊 محاسبهٔ زنده</div><div id="fin_tot" style="background:var(--bg3);border-radius:10px;padding:12px">${finTotHTML(plfinCalc(d.v),d.unit)}</div></div></div>
@@ -26185,7 +26187,7 @@ function finParseWB(wb,biz){const L=finLines();const nmap={};L.forEach(l=>nmap[_
       else put({id:uid(),e:'plfin',d:{title:jy+' '+mon,biz:biz?[biz]:[],jy,jm:mon,unit:'ریال',v},u:Date.now()});
       recCount++;});});
   return {recs:recCount,sheets,miss:[...miss]};}
-function settleTemplate(){loadXLSX().then(()=>{const rows=[['شرح','نوع','کسب‌وکار','مشتری','تامین‌کننده','مبلغ (تومان)','روش','تاریخ'],
+function settleTemplate(){loadXLSX().then(()=>{const rows=[['شرح','نوع','کسب‌وکار','مشتری','تامین‌کننده','مبلغ (ریال)','روش','تاریخ'],
   ['نمونه: دریافت بابت فاکتور ۱۰۱','دریافت از مشتری','','نام مشتری','','5000000','کارت','1404/04/25'],
   ['نمونه: پرداخت به تامین‌کننده','پرداخت به تامین‌کننده','','','نام تامین‌کننده','8000000','انتقال بانکی','1404/04/26']];
   const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:30},{wch:20},{wch:16},{wch:18},{wch:18},{wch:16},{wch:14},{wch:14}];
@@ -26213,7 +26215,7 @@ function pldashHTML(){
       <label style="font-size:11px;color:var(--tx2)">کسب‌وکار:</label>
       <select id="fin_imp_biz" class="inp sm" style="width:auto"><option value="">${b&&recs[b]?esc(recs[b].d.title):'بدون کسب‌وکار'}</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select>
       <input type="file" accept=".xlsx,.xls" onchange="finImportFile(this)" style="font-size:12px">
-    </div><div style="font-size:10.5px;color:var(--tx2);margin-top:6px">هر شیت با نام سالِ شمسی (مثل 1404) و ستون‌های ماه خوانده می‌شود. مبالغ به «ریال» فرض می‌شوند و خودکار به تومان تبدیل می‌شوند. برای فرمت استاندارد، «📄 قالب اکسل» را بگیر.</div></div>`;
+    </div><div style="font-size:10.5px;color:var(--tx2);margin-top:6px">هر شیت با نام سالِ شمسی (مثل 1404) و ستون‌های ماه خوانده می‌شود. مبالغ به «ریال» فرض می‌شوند و خودکار به ریال تبدیل می‌شوند. برای فرمت استاندارد، «📄 قالب اکسل» را بگیر.</div></div>`;
   if(!years.length){h+=`<div class="empty">هنوز داده‌ای نیست. «📥 ورود اکسل» گزارش حسابداری را وارد کن یا «✍️ ورود دستی» را بزن.</div>`;return h;}
   // انتخاب سال/دوره/حالت
   h+=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
@@ -26260,20 +26262,20 @@ function pldashHTML(){
   const vcell=(d,warnAbove)=>d==null?'<span style="color:var(--tx2)">—</span>':`<b style="color:${Math.abs(d)>warnAbove?'#ff3b30':'#16c784'}">${d>=0?'+':''}${d.toLocaleString('fa-IR')}٪</b>`;
   const worst=Math.max(Math.abs(dSale||0),noPur?0:Math.abs(dCogs||0));
   h+=`<div class="sec" style="border:1px solid ${worst>5?'var(--warn)':'var(--ok)'}"><div style="font-weight:800;margin-bottom:6px">🔍 کنترل مغایرت دقیق با سیستم — سال ${yr}</div>
-    <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">قلم</th><th>سود و زیان (تومان)</th><th>سیستم عملیاتی (تومان)</th><th>مغایرت</th><th>وضعیت</th></tr></thead><tbody>
+    <div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th style="text-align:right">قلم</th><th>سود و زیان (ریال)</th><th>سیستم عملیاتی (ریال)</th><th>مغایرت</th><th>وضعیت</th></tr></thead><tbody>
       <tr><td style="text-align:right">فروش خالص</td><td style="text-align:center">${money(plNet)}</td><td style="text-align:center">${money(sysSale)}</td><td style="text-align:center">${vcell(dSale,5)}</td><td style="text-align:center">${dSale==null?'—':Math.abs(dSale)<=5?'✅ هم‌خوان':'⚠️ بررسی'}</td></tr>
       <tr><td style="text-align:right">بهای تمام‌شدهٔ کالای فروش‌رفته (FIFO)</td><td style="text-align:center">${money(plCogs)}</td><td style="text-align:center">${noPur?'<span style="color:var(--tx2)">داده خرید ناکافی</span>':money(sysCogs)}</td><td style="text-align:center">${noPur?'—':vcell(dCogs,5)}</td><td style="text-align:center">${noPur?'—':(Math.abs(dCogs)<=5?'✅ هم‌خوان':'⚠️ بررسی')}</td></tr>
       <tr style="font-weight:800"><td style="text-align:right">سود ناخالص</td><td style="text-align:center">${money(plGross)}</td><td style="text-align:center">${noPur?'—':money(sysGross)}</td><td style="text-align:center">${noPur?'—':vcell(dGross,8)}</td><td style="text-align:center">${noPur?'—':(Math.abs(dGross)<=8?'✅ هم‌خوان':'⚠️ بررسی')}</td></tr>
     </tbody></table></div>
     <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">«بهای تمام‌شدهٔ سیستم» با موتور FIFO محاسبه می‌شود: اول‌دورهٔ انبار + خریدهای همان سال − موجودی پایان دوره، به تفکیک هر فاکتور فروش. برای مقایسهٔ دقیق، خرید و فروش تراکنشی همان سال باید در سیستم ثبت شده باشد. مغایرت زیر ۵٪ (فروش/بها) یعنی دادهٔ عملیاتی و حسابداری هم‌خوان‌اند؛ مغایرت بالا یعنی فاکتور خرید/فروشی جا افتاده یا اضافه ثبت شده — همین‌جا کنترلش کن.${noPur?' <b style="color:var(--warn)">اکنون خرید تراکنشیِ کافی برای این سال ثبت نشده، پس بهای تمام‌شده قابل مقایسه نیست.</b>':''}</div></div>`;
   // ساختار هزینه (آبشاری)
-  const opexLines=finLines().filter(l=>l.sec==='opex').map(l=>({l,v:plToman(A.v[l.k]||0,'تومان')})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const opexLines=finLines().filter(l=>l.sec==='opex').map(l=>({l,v:plToman(A.v[l.k]||0,'ریال')})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
   const opexTot=opexLines.reduce((a,x)=>a+x.v,0)||1;
   h+=`<div class="sec"><div style="font-weight:800;margin-bottom:6px">🧾 ساختار هزینه‌های عملیاتی <span style="font-weight:400;color:var(--tx2);font-size:11px">(روی هر هزینه بزن تا روند ماهانه‌اش را ببینی)</span></div>
     ${opexLines.slice(0,12).map(x=>{const on=view.plCard===x.l.k;return `<div onclick="view.plCard=${on?'null':`'${x.l.k}'`};render()" style="cursor:pointer;margin:4px 0">
       <div style="display:flex;font-size:11.5px;margin-bottom:2px"><span style="flex:1">${esc(x.l.n)}</span><b>${money(x.v)}</b><span style="margin-inline-start:8px;color:var(--tx2)">${Math.round(x.v/opexTot*100).toLocaleString('fa-IR')}٪</span></div>
       <div style="height:9px;border-radius:5px;background:var(--bg3);overflow:hidden"><div style="height:100%;width:${(x.v/opexLines[0].v*100).toFixed(0)}%;background:${on?'var(--ac)':'#ff9f0a'}"></div></div>
-      ${on?`<div style="margin-top:6px;background:var(--bg);border-radius:8px;padding:8px">${plMultiLine([{name:esc(x.l.n),color:'#ff9f0a',pts:FMON.map(m=>plToman((plAgg(b,yr,m).v[x.l.k])||0,'تومان'))}],FMON.map(m=>m.slice(0,3)))}</div>`:''}</div>`;}).join('')||'<div class="empty">هزینه‌ای ثبت نشده</div>'}</div>`;
+      ${on?`<div style="margin-top:6px;background:var(--bg);border-radius:8px;padding:8px">${plMultiLine([{name:esc(x.l.n),color:'#ff9f0a',pts:FMON.map(m=>plToman((plAgg(b,yr,m).v[x.l.k])||0,'ریال'))}],FMON.map(m=>m.slice(0,3)))}</div>`:''}</div>`;}).join('')||'<div class="empty">هزینه‌ای ثبت نشده</div>'}</div>`;
   // روند ماهانهٔ سال جاری
   if(mode!=='month'){const mAgg=FMON.map(m=>plAgg(b,yr,m).calc);
     h+=`<div class="sec"><div style="font-weight:800;margin-bottom:6px">📈 روند ماهانهٔ ${yr}</div>${plMultiLine([{name:'جمع درآمد',color:'#3b82f6',pts:mAgg.map(x=>x.totalInc)},{name:'سود ناخالص',color:'#16c784',pts:mAgg.map(x=>x.gross)},{name:'سود خالص',color:'#f5a623',pts:mAgg.map(x=>x.net)}],FMON.map(m=>m.slice(0,3)))}</div>`;}
@@ -26287,7 +26289,7 @@ function pldashHTML(){
   if(gg!=null&&sg!=null&&gg<sg-5)rec.push(['📉','فشار حاشیه','درآمد '+sg.toLocaleString('fa-IR')+'٪ رشد کرده ولی سود ناخالص فقط '+gg.toLocaleString('fa-IR')+'٪؛ یعنی بهای تمام‌شده سریع‌تر بالا رفته — قیمت خرید/فروش را بازبینی کن.']);
   const lossM=mode!=='month'?FMON.filter(m=>plAgg(b,yr,m).n&&plAgg(b,yr,m).calc.pbt<0):[];
   if(lossM.length)rec.push(['🗓','ماه‌های زیان‌ده',lossM.length.toLocaleString('fa-IR')+' ماه سودِ قبل از مالیات منفی بوده: '+lossM.join('، ')+'؛ علت فصلی یا هزینهٔ استثنایی را بررسی کن.']);
-  const finCost=plToman(A.v.e_loan||0,'تومان')+plToman(A.v.e_penal||0,'تومان');
+  const finCost=plToman(A.v.e_loan||0,'ریال')+plToman(A.v.e_penal||0,'ریال');
   if(finCost>c.gross*0.15&&c.gross>0)rec.push(['🏦','هزینهٔ مالی سنگین','سود/کارمزد و جریمهٔ وام‌ها '+money(finCost)+' است؛ ساختار تأمین مالی و تسویهٔ به‌موقع وام‌ها را بازنگری کن.']);
   if(!rec.length)rec.push(['✅','وضعیت سالم','شاخص‌های مالی در محدودهٔ مطلوب‌اند؛ روند را پایش کن.']);
   h+=`<div class="sec" style="border:1px solid var(--ac)"><div style="font-weight:800;margin-bottom:6px">🧠 توصیه‌های مالی</div>
