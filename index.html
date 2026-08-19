@@ -276,11 +276,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.05</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.06</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.05</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.06</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -5321,10 +5321,9 @@ function saleTotal(s){const a=saleAmt(s);const open=s.d.kind==='اعتباری'&
     v:money(a)+(pr!=null?' │ '+money(pr):''),bad:open||(pr!=null&&pr<0)};}
 function purchTotal(s){const a=purchAmt(s);const open=s.d.kind==='اعتباری'&&!s.d.settled;
   return{label:'مبلغ کل'+(open?' │ تسویه نشده':''),v:money(a),bad:open};}
-function stockNow(p){ // تعدادی: اول دوره + خرید − فروش − ضایعات
-  const bought=purchasesOf(p.id).reduce((a,x)=>a+(x.d.qty||0),0);
-  const sold=salesOf(p.id).reduce((a,x)=>a+(x.d.qty||0),0);
-  return (p.d.stock0||0)+bought-sold-wasteQtyOf(p.id);
+function stockNow(p){ // تعدادی: از موتور واحد انبار (اول دوره + اسناد خرید/فروش + خرید/فروش سریع + ضایعات + جابجایی/شمارش)
+  const m=whQtyOf(p.id);
+  return Object.values(m).reduce((a,b)=>a+b,0);
 }
 /* --- موتور FIFO: ارزش انبار و بهای تمام‌شده/سود بر اساس لایه‌های خرید --- */
 function fifoCalc(p){
@@ -5338,7 +5337,7 @@ function _fifoCalcRaw(p){
   const layers=[];
   // تاریخ لایه اول دوره: اولین خرید یا تاریخ ثبت کالا (برای محاسبه سن ماندگاری)
   const buys=[];
-  purchasesOf(p.id).forEach(x=>{const q=+x.d.qty||0;if(q>0)buys.push({q,c:puUnitToman(x)+((+x.d.extra||0)/q),d:ds(x.d.date)||'',u:x.u||0});});
+  purchasesOf(p.id).forEach(x=>{if(x.d._pinv)return;/* 🛡 آینهٔ فاکتور خرید — ردیف سند جداگانه شمرده می‌شود */const q=+x.d.qty||0;if(q>0)buys.push({q,c:puUnitToman(x)+((+x.d.extra||0)/q),d:ds(x.d.date)||'',u:x.u||0});});
   byE('purchline').forEach(l=>{                                  // 🧾 ردیف‌های فاکتور خرید هم لایهٔ بهای تمام‌شده‌اند
     if(relIds(l,'product')[0]!==p.id)return;
     const inv=recs[relIds(l,'purchinv')[0]];if(!inv||inv.del)return;
@@ -5356,7 +5355,7 @@ function _fifoCalcRaw(p){
   // مصرف لایه‌ها با فروش‌ها به ترتیب تاریخ
   let profit=0,cogs=0,shortage=0;const bySale={};
   const sells=[];
-  salesOf(p.id).forEach(s2=>sells.push({id:s2.id,q:+s2.d.qty||0,price:+s2.d.price||0,extra:+s2.d.extra||0,d:ds(s2.d.date)||'',u:s2.u||0}));
+  salesOf(p.id).forEach(s2=>{if(s2.d._inv)return;/* 🛡 آینهٔ فاکتور فروش */sells.push({id:s2.id,q:+s2.d.qty||0,price:+s2.d.price||0,extra:+s2.d.extra||0,d:ds(s2.d.date)||'',u:s2.u||0});});
   byE('invline').forEach(l=>{                                    // 🧾 ردیف‌های فاکتور فروش هم مصرف‌کنندهٔ لایه‌ها هستند
     if(relIds(l,'product')[0]!==p.id)return;
     const inv=recs[relIds(l,'invoice')[0]];if(!inv||inv.del)return;
@@ -10406,8 +10405,8 @@ function whQtyOf(pid){
   const add=(w,q)=>{if(!q)return;m[w||'']=(m[w||'']||0)+q;};
   if(p&&!p.del){
     if(+p.d.stock0)add(whDefault(relIds(p,'biz')[0]||''),+p.d.stock0);  // موجودی اولیه → انبار پیش‌فرض
-    purchasesOf(pid).forEach(x=>add(whOf(x),+x.d.qty||0));
-    salesOf(pid).forEach(x=>add(whOf(x),-(+x.d.qty||0)));
+    purchasesOf(pid).forEach(x=>{if(x.d._pinv)return;add(whOf(x),+x.d.qty||0);});
+    salesOf(pid).forEach(x=>{if(x.d._inv)return;add(whOf(x),-(+x.d.qty||0));});
     wasteOf(pid).forEach(x=>add(whOf(x),-(+x.d.qty||0)));
   }
   // 🧾 فاکتور خرید (ردیف‌ها) → ورود به انبار (به‌جز پیش‌نویس/باطل)
@@ -12928,6 +12927,7 @@ function prodBuyHist(pid,n){
       qty:+l.d.qty||0,price:+l.d.price||0,doc:inv.d.title||'فاکتور خرید'});
   });
   byE('purchase').forEach(x=>{
+    if(x.d._pinv)return; // آینهٔ فاکتور خرید — خودِ فاکتور بالا شمرده شده
     if(relIds(x,'product')[0]!==pid)return;
     const sid=relIds(x,'supplier')[0];
     out.push({t:x.u||0,date:dOf(x,'date'),sup:sid&&recs[sid]?recs[sid].d.title:'—',
