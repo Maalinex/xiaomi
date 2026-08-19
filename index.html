@@ -280,11 +280,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.01</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.02</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.01</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.02</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1025,7 +1025,7 @@ product:{ic:'📦',n:'کالا و خدمات',grp:'کالا و انبار',f:[
  {k:'warranty',n:'گارانتی',t:TXT},
  {k:'minmargin',n:'حداقل حاشیه سود هدف (٪)',t:NUM},
  {k:'cover',n:'تصویر',t:FIL,img:1}],
- cols:['title','biz','grp','sell'],comp:'productStat'},
+ cols:['title','sku','biz','grp','sell'],comp:'productStat'},
  delivery:{ic:'🛵',n:'ارسال و توزیع',grp:'فروش',f:[
  {k:'title',n:'شرح ارسال',t:TXT},
  {k:'invoice',n:'فاکتور مرتبط',t:REL,r:'invoice',s:1},
@@ -6693,9 +6693,9 @@ window.pinvPickSupp=pinvPickSupp;
 function pinvPickProd(i,name){
   name=(name||'').trim();
   if(!name){pinvSetLine(i,'product','');return;}
-  const p2=byE('product').find(x=>(x.d.title||'').trim()===name);
+  const p2=prodByNameOrSku(name);
   if(p2)pinvSetLine(i,'product',p2.id);
-  else{alert('کالای «'+name+'» پیدا نشد');render();}
+  else{alert('کالای «'+name+'» با نام یا کد پیدا نشد');render();}
 }
 window.pinvPickProd=pinvPickProd;
 function pinvnewHTML(){
@@ -6711,7 +6711,7 @@ function pinvnewHTML(){
     <div><label ${lbl}>کسب‌وکار</label><select onchange="pinvSetHead('biz',this.value)"><option value="">—</option>${byE('business').map(x=>`<option value="${x.id}" ${x.id===pinvDraft.biz?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></div>
     <div><label ${lbl}>تامین‌کننده 🔍</label><input list="dl_pinvsupp" value="${esc(suppName)}" placeholder="بنویس تا جستجو شود…" onchange="pinvPickSupp(this.value)">
       <datalist id="dl_pinvsupp">${supp.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>
-      <datalist id="dl_pinvprod">${prods.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist></div>
+      <datalist id="dl_pinvprod">${prodDlOpts(prods)}</datalist></div>
     <div><label ${lbl}>💱 ارز فاکتور</label><select onchange="pinvSetHead('cur',this.value);render()">${CUR.map(c=>`<option ${c===(pinvDraft.cur||'تومان')?'selected':''}>${c}</option>`).join('')}</select></div>
     ${pinvDraft.cur&&pinvDraft.cur!=='تومان'&&pinvDraft.cur!=='ریال'?`<div><label ${lbl}>نرخ تسعیر به تومان ${curRate(pinvDraft.cur)?`(پیش‌فرض ${curRate(pinvDraft.cur).toLocaleString('fa-IR')})`:''}</label><input inputmode="numeric" value="${esc(pinvDraft.fx||'')}" oninput="pinvDraft.fx=this.value;render()" placeholder="${curRate(pinvDraft.cur)||'نرخ روز'}"></div>`:''}
     <div><label ${lbl}>🌍 منشأ خرید</label><select onchange="pinvSetHead('origin',this.value)"><option ${pinvDraft.origin==='داخلی'?'selected':''}>داخلی</option><option ${pinvDraft.origin==='خارجی'?'selected':''}>خارجی</option></select></div>
@@ -7338,12 +7338,22 @@ function invPickCust(name){
   else{alert('مشتری «'+name+'» پیدا نشد — از لیست پیشنهادی انتخاب کن یا اول در «مشتریان کسب‌وکار» بسازش');render();}
 }
 window.invPickCust=invPickCust;
+function prodByNameOrSku(name){ // 🏷 یافتن کالا با نام یا کد کالا (SKU)
+  name=(name||'').trim();if(!name)return null;
+  const nl=name.toLowerCase();
+  return byE('product').find(x=>(x.d.title||'').trim()===name)
+      ||byE('product').find(x=>String(x.d.sku||'').trim().toLowerCase()===nl)||null;
+}
+function prodDlOpts(prods){ // گزینه‌های جستجو: هم نام (با نمایش کد) هم خود کد
+  return prods.map(x=>`<option value="${esc(x.d.title||'')}">${x.d.sku?'🏷 '+esc(x.d.sku):''}</option>`+
+    (x.d.sku?`<option value="${esc(x.d.sku)}">${esc(x.d.title||'')}</option>`:'')).join('');
+}
 function invPickProd(i,name){
   name=(name||'').trim();
   if(!name){invSetLine(i,'product','');return;}
-  const p=byE('product').find(x=>(x.d.title||'').trim()===name);
+  const p=prodByNameOrSku(name);
   if(p)invSetLine(i,'product',p.id);
-  else{alert('کالای «'+name+'» پیدا نشد — از لیست پیشنهادی انتخاب کن');render();}
+  else{alert('کالای «'+name+'» با نام یا کد پیدا نشد — از لیست پیشنهادی انتخاب کن');render();}
 }
 window.invPickProd=invPickProd;
 function invnewHTML(){
@@ -7371,7 +7381,7 @@ function invnewHTML(){
     <div><label ${lbl}>کسب‌وکار</label><select onchange="invSetHead('biz',this.value)"><option value="">—</option>${byE('business').map(x=>`<option value="${x.id}" ${x.id===invDraft.biz?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></div>
     <div><label ${lbl}>مشتری 🔍 <a href="#" style="font-size:10.5px;color:var(--ac);text-decoration:none" onclick="view.qc=!view.qc;render();return false">＋ مشتری جدید</a></label><input list="dl_invcust" value="${esc(custName)}" placeholder="بنویس تا جستجو شود…" onchange="invPickCust(this.value)">
       <datalist id="dl_invcust">${custs.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>
-      <datalist id="dl_invprod">${prods.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>
+      <datalist id="dl_invprod">${prodDlOpts(prods)}</datalist>
       ${view.qc?`<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap"><input id="qc_nm" placeholder="نام مشتری جدید" style="max-width:150px;font-size:12px"><input id="qc_ph" placeholder="تلفن (اختیاری)" style="max-width:120px;font-size:12px" dir="ltr"><button type="button" class="btn sm" onclick="invQuickCust()">ثبت</button></div>`:''}</div>
     <div><label ${lbl}>👤 فروشنده / فرد <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('seller',this.value)"><option value="">—</option>${sellers.map(x=>{const u=orguOf(x);return `<option value="${x.id}" ${x.id===invDraft.seller?'selected':''}>${esc(x.d.title)}${u?' · '+esc(u):''}</option>`;}).join('')}</select>
       ${invDraft.seller&&recs[invDraft.seller]?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">واحد/تیم فرد: ${esc(orguOf(recs[invDraft.seller])||'—')}</div>`:''}</div>
@@ -12934,7 +12944,7 @@ function buyHistHTML(pid,compact){
   const tbl=`<div class="tw"><table style="font-size:12px"><thead><tr><th>تاریخ</th><th style="text-align:right">تأمین‌کننده</th><th>تعداد</th><th>قیمت واحد</th><th>سند</th></tr></thead><tbody>${rows}</tbody></table></div>
     <div style="font-size:11px;color:var(--tx2);margin-top:4px">کمترین قیمت: <b style="color:var(--ok)">${isFinite(mn)?money(mn):'—'}</b> │ بیشترین: <b>${money(mx)}</b></div>`;
   return compact?`<div style="border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:8px 0;background:var(--bg2)">
-    <b style="font-size:12px">🛒 ${esc(recs[pid].d.title||'')} — ${fmtN(h.length)} خرید اخیر</b>${tbl}</div>`:
+    <b style="font-size:12px">🛒 ${esc(recs[pid].d.title||'')}${recs[pid].d.sku?` <span style="color:var(--ac);font-weight:400" dir="ltr">🏷 ${esc(recs[pid].d.sku)}</span>`:''} — ${fmtN(h.length)} خرید اخیر</b>${tbl}</div>`:
     `<div class="sec"><h3>🛒 سوابق خرید این کالا (${fmtN(h.length)} مورد آخر)</h3>${tbl}</div>`;
 }
 function draftBuyHist(lines){
@@ -12975,8 +12985,8 @@ window.prodQuickQuote=function(pid){
   if(!supN){alert('نام تأمین‌کننده را وارد کنید');return;}
   const date=g('pq_date')||iso2jstr(today());
   const lead=g('pq_lead'), settle=g('pq_settle'), code=g('pq_code');
-  // 📦 کالا: یافتن با نام؛ اگر جدید بود همان‌جا با کد ساخته می‌شود
-  let prod=byE('product').find(x=>(x.d.title||'').trim()===pn);
+  // 📦 کالا: یافتن با نام یا کد؛ اگر جدید بود همان‌جا با کد ساخته می‌شود
+  let prod=prodByNameOrSku(pn);
   if(!prod){
     if(!confirm('کالای «'+pn+'» در سیستم نیست — به‌عنوان کالای جدید'+(code?' با کد «'+code+'»':'')+' ثبت شود؟'))return;
     const npid=uid();put({id:npid,e:'product',d:{title:pn,sku:code||'',_by:myEmail()},u:Date.now()});prod=recs[npid];
@@ -13026,13 +13036,13 @@ function priceIntelHTML(pid){
     <td>${esc(x.settle||'—')}</td>
     <td>${esc(x.dj||'—')}</td>
     <td style="font-size:11px;color:var(--tx2)">${esc(x.rfqTitle)}</td></tr>`).join('');
-  return `<div class="sec"><h3>🧠 تحلیل قیمت و تأمین — استعلام‌ها و تصمیم خرید/فروش</h3>
+  return `<div class="sec"><h3>🧠 تحلیل قیمت و تأمین — استعلام‌ها و تصمیم خرید/فروش${recs[pid].d.sku?` <span style="font-size:11px;color:var(--ac)" dir="ltr">🏷 ${esc(recs[pid].d.sku)}</span>`:''}</h3>
     ${chips.length?`<div class="comp" style="margin-bottom:10px">${chips.join('')}</div>`:''}
     ${can('c','rfq')?`<div style="background:var(--bg3);border-radius:10px;padding:10px;margin-bottom:8px">
       <b style="font-size:12px">＋ ثبت استعلام جدید</b>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:8px">
         <div><label style="font-size:10.5px;color:var(--tx2)">کالا 🔍</label><input id="pq_prod" list="pq_pdl" value="${esc(recs[pid].d.title||'')}" placeholder="جستجو یا نام کالای جدید…">
-          <datalist id="pq_pdl">${byE('product').map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist></div>
+          <datalist id="pq_pdl">${prodDlOpts(byE('product'))}</datalist></div>
         <div><label style="font-size:10.5px;color:var(--tx2)">کد کالا <span style="opacity:.7">(فقط برای کالای جدید)</span></label><input id="pq_code" placeholder="SKU / کد" dir="ltr"></div>
         <div><label style="font-size:10.5px;color:var(--tx2)">قیمت استعلامی (تومان)</label><input id="pq_price" inputmode="numeric" dir="ltr" placeholder="۰"></div>
         <div><label style="font-size:10.5px;color:var(--tx2)">تاریخ استعلام</label><div style="display:flex;gap:4px"><input id="pq_date" value="${iso2jstr(today())}" style="flex:1" dir="ltr"><button type="button" class="btn gh sm" style="padding:4px 8px" onclick="openJcal('pq_date')">📅</button></div></div>
@@ -13052,6 +13062,7 @@ function recHTML(e,id){
   if(!canSee(e))return `<div class="empty">دسترسی شما به این بخش محدود شده است</div>`;
   let h=`<div class="crumb"><a onclick="goBack()">→ بازگشت</a> / <a onclick="go('list','${e}')">${def.ic} ${def.n}</a> / <span>${esc(r.d.title||'—')}</span></div>`;
   h+=`<div class="rhead"><h2>${def.ic} ${esc(r.d.title||'—')}</h2>
+    ${e==='product'&&r.d.sku?`<span class="tag" dir="ltr" style="font-size:12px;color:var(--ac);border:1px solid var(--line);border-radius:8px;padding:2px 8px">🏷 ${esc(r.d.sku)}</span>`:''}
     <span style="flex:1"></span>
     ${e==='booknote'&&!relIds(r,'idea').length&&can('c','idea')?`<button class="btn gh sm" onclick="noteToIdea('${id}')">💡 تبدیل به ایده</button>`:''}
     ${e==='invoice'?`<button class="btn gh sm" onclick="invPrint('${id}')">🖨️ چاپ / PDF</button>`:''}
