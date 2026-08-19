@@ -276,11 +276,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.14</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.16</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.14</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.16</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -6220,20 +6220,51 @@ function suppPayable(sid){ // بدهی ما به تامین‌کننده — ا�
 /* ═══ 🧩 فرآیندساز — ادمین گردش فرم‌ها را گرافیکی تعریف می‌کند و کارتابل هر نفر خودکار ساخته می‌شود ═══ */
 const BP_WROLES=['فروشنده','مدیر فروش','کارمند حسابداری','مدیر مالی','مدیر ارشد'];
 const BP_ACTS=['📝 فرم را پر می‌کند','✅ بررسی و تأیید می‌کند','📎 مدرک پیوست می‌کند','💸 پرداخت/اجرا می‌کند','🗄 بایگانی می‌کند'];
-function bpWhoName(w){
+function bpStarterHr(x){return (x&&x.d&&x.d.starterHr)||_meHr()||'';}
+function bpMgrOf(hrId){return hrId&&recs[hrId]?relIds(recs[hrId],'manager')[0]||'':'';}
+function bpUnitHeadOf(hrId){
+  const u=hrId&&recs[hrId]?relIds(recs[hrId],'orgu')[0]:'';
+  return u&&recs[u]?relIds(recs[u],'head')[0]||'':'';
+}
+function bpWhoName(w,x){
   if(!w)return '—';
-  if(w.kind==='person')return (w.v&&recs[w.v]&&recs[w.v].d.title)||'فرد؟';
+  const nm=id=>id&&recs[id]?recs[id].d.title:'';
+  if(w.kind==='person')return nm(w.v)||'فرد؟';
+  if(w.kind==='starter'){const st=x?bpStarterHr(x):'';return 'شروع‌کننده'+(st&&nm(st)?' ('+nm(st)+')':'');}
+  if(w.kind==='mgr'){const m=x?bpMgrOf(bpStarterHr(x)):'';return 'مدیر مستقیمِ شروع‌کننده'+(m&&nm(m)?' ('+nm(m)+')':'');}
+  if(w.kind==='unitmgr'){const m=x?bpUnitHeadOf(bpStarterHr(x)):'';return 'مسئول واحدِ شروع‌کننده'+(m&&nm(m)?' ('+nm(m)+')':'');}
+  if(w.kind==='unit')return 'اعضای واحد '+(nm(w.v)||'؟');
+  if(w.kind==='any')return 'هر کاربر';
   return w.v||'—';
 }
-function bpWhoMatch(w){
+function bpWhoMatch(w,x){
   if(isAdmin())return true;
   if(!w)return false;
+  const me=_meHr();
   if(w.kind==='wrole')return myWrole()===w.v;
   if(w.kind==='role')return myRole()===w.v;
-  if(w.kind==='person')return _meHr()===w.v;
+  if(w.kind==='person')return me===w.v;
+  if(w.kind==='any')return !isPending();
+  if(w.kind==='starter')return me&&me===bpStarterHr(x);
+  if(w.kind==='mgr'){const st=bpStarterHr(x);return me&&me===bpMgrOf(st);}
+  if(w.kind==='unitmgr'){const st=bpStarterHr(x);return me&&me===bpUnitHeadOf(st);}
+  if(w.kind==='unit'){
+    if(!me||!w.v||!recs[w.v])return false;
+    const u=recs[w.v];
+    return relIds(u,'head').includes(me)||relIds(u,'members').includes(me)
+      ||(recs[me]&&relIds(recs[me],'orgu').includes(w.v));
+  }
   return false;
 }
 function _bpMut(id,fn){const r=recs[id];if(!r||r.del)return;fn(r);r.u=Date.now();put(r);}
+const BP_FORM_KEYS=['invoice','purchinv','payday','settle','leave','letter','rfq','doc','meeting','bizcontract','task','customer','crm','product','delivery'];
+function bpFormOpts(cur){
+  const opts=[`<option value="" ${!cur?'selected':''}>— بدون فرم (فقط گردش تأیید/یادداشت)</option>`];
+  BP_FORM_KEYS.forEach(k=>{if(E[k])opts.push(`<option value="${k}" ${cur===k?'selected':''}>${E[k].ic} ${esc(E[k].n)}</option>`);});
+  Object.entries(E).forEach(([k,d])=>{if(!BP_FORM_KEYS.includes(k)&&d.grp&&GROUPS.includes(d.grp)&&!d.sub)opts.push(`<option value="${k}" ${cur===k?'selected':''}>${d.ic} ${esc(d.n)}</option>`);});
+  return opts.join('');
+}
+function bpFormLabel(k){return k&&E[k]?E[k].ic+' '+E[k].n:'';}
 window.bpDefNew=function(){
   if(!isAdmin()){alert('فقط ادمین می‌تواند فرآیند تعریف کند');return;}
   const id=uid();
@@ -6246,7 +6277,7 @@ window.bpStepDel=function(id,i){_bpMut(id,r=>{const st=r.d.steps.slice();st.spli
 window.bpStepMove=function(id,i,d2){_bpMut(id,r=>{const st=r.d.steps.slice();const j=i+d2;if(j<0||j>=st.length)return;const t=st[i];st[i]=st[j];st[j]=t;r.d.steps=st;});};
 window.bpStepSet=function(id,i,k,v){_bpMut(id,r=>{
   const st=r.d.steps.slice();const x={...st[i]};
-  if(k==='whokind')x.who={kind:v,v:v==='wrole'?'مدیر فروش':v==='role'?'مدیر':(byE('hr')[0]||{}).id||''};
+  if(k==='whokind')x.who={kind:v,v:v==='wrole'?'مدیر فروش':v==='role'?'مدیر':v==='person'?((byE('hr')[0]||{}).id||''):v==='unit'?((byE('orgunit')[0]||{}).id||''):''};
   else if(k==='whov')x.who={...x.who,v};
   else x[k]=v;
   st[i]=x;r.d.steps=st;});};
@@ -6259,24 +6290,39 @@ window.bpStart=function(defId){
   const d=recs[defId];if(!d)return;
   const steps=d.d.steps||[];
   if(!steps.length){alert('این فرآیند مرحله‌ای ندارد');return;}
-  if(!bpWhoMatch(steps[0].who)){alert('شروع این فرآیند با «'+bpWhoName(steps[0].who)+'» است');return;}
+  if(!bpWhoMatch(steps[0].who,null)){alert('شروع این فرآیند با «'+bpWhoName(steps[0].who)+'» است');return;}
   const t=((document.getElementById('bpnew_'+defId)||{}).value||'').trim();
   if(!t){alert('عنوان سند را بنویسید (مثلاً: تأیید پرداخت ۱۴۰۵/۰۵/۲۷)');return;}
+  // 📋 فرم مرتبط: اتصال به رکورد موجود یا ساخت رکورد جدیدِ همان فرم
+  const fk=d.d.form||'';let recId='',_bpLinked=false;
+  if(fk&&E[fk]){
+    const ln=((document.getElementById('bplink_'+defId)||{}).value||'').trim();
+    if(ln){
+      const ex=byE(fk).find(x=>(x.d.title||'').trim()===ln);
+      if(!ex){alert('رکوردی از «'+E[fk].n+'» با این عنوان پیدا نشد — خالی بگذارید تا فرم جدید ساخته شود');return;}
+      recId=ex.id;_bpLinked=true;
+    }else{
+      if(!can('c',fk)){alert('شما اجازهٔ ساخت «'+E[fk].n+'» را ندارید');return;}
+      recId=uid();
+      put({id:recId,e:fk,d:{title:t,_by:myEmail()},u:Date.now()});
+    }
+  }
   const id=uid();
-  put({id,e:'wfitem',d:{title:t,def:[defId],step:0,status:'در جریان',
-    log:[{t:Date.now(),by:myEmail(),act:'▶️ شروع فرآیند: '+(d.d.title||'')}],_by:myEmail()},u:Date.now()});
+  put({id,e:'wfitem',d:{title:t,def:[defId],step:0,status:'در جریان',form:fk,rec:recId?[recId]:[],starterHr:_meHr()||'',
+    log:[{t:Date.now(),by:myEmail(),act:'▶️ شروع فرآیند: '+(d.d.title||'')+(fk?' │ فرم: '+bpFormLabel(fk):'')}],_by:myEmail()},u:Date.now()});
+  if(recId&&!_bpLinked){go('rec',fk,recId);return;}
   render();
 };
 function bpItemDef(x){const d=recs[relIds(x,'def')[0]];return d&&!d.del?d:null;}
 window.bpAdvance=function(id){
   const x=recs[id];if(!x)return;const d=bpItemDef(x);if(!d)return;
   const steps=d.d.steps||[];const i=+x.d.step||0;
-  if(!bpWhoMatch(steps[i]&&steps[i].who)){alert('این مرحله با «'+bpWhoName(steps[i]&&steps[i].who)+'» است');return;}
+  if(!bpWhoMatch(steps[i]&&steps[i].who,x)){alert('این مرحله با «'+bpWhoName(steps[i]&&steps[i].who,x)+'» است');return;}
   const note=((document.getElementById('bpn_'+id)||{}).value||'').trim();
   _bpMut(id,r=>{
     const done=(steps[i]&&steps[i].name)||('مرحله '+(i+1));
     if(i>=steps.length-1){r.d={...r.d,status:'بایگانی'};r.d.log=[...(r.d.log||[]),{t:Date.now(),by:myEmail(),act:'✅ '+done+' — پایان و بایگانی',note}];}
-    else{const nx=steps[i+1];r.d={...r.d,step:i+1};r.d.log=[...(r.d.log||[]),{t:Date.now(),by:myEmail(),act:'✅ '+done+' ← ارسال به '+bpWhoName(nx.who),note}];}
+    else{const nx=steps[i+1];r.d={...r.d,step:i+1};r.d.log=[...(r.d.log||[]),{t:Date.now(),by:myEmail(),act:'✅ '+done+' ← ارسال به '+bpWhoName(nx.who,r),note}];}
   });
 };
 window.bpBack=function(id){
@@ -6301,10 +6347,14 @@ window.bpDownload=function(id){
 };
 function bpStepCardHTML(defId,st,i,total,editable){
   const hrs=byE('hr');
-  const whoOpts=st.who&&st.who.kind==='person'
+  const kind=(st.who&&st.who.kind)||'wrole';
+  const noVal=['mgr','unitmgr','starter','any'].includes(kind);
+  const whoOpts=kind==='person'
     ?hrs.map(h=>`<option value="${h.id}" ${st.who.v===h.id?'selected':''}>${esc(h.d.title||'—')}</option>`).join('')
-    :st.who&&st.who.kind==='role'
+    :kind==='role'
     ?ROLES.filter(r=>r!=='ادمین').map(r=>`<option ${st.who.v===r?'selected':''}>${r}</option>`).join('')
+    :kind==='unit'
+    ?byE('orgunit').map(u=>`<option value="${u.id}" ${st.who&&st.who.v===u.id?'selected':''}>${esc(u.d.title||'—')}</option>`).join('')
     :BP_WROLES.map(r=>`<option ${st.who&&st.who.v===r?'selected':''}>${r}</option>`).join('');
   if(!editable)return `<div style="min-width:170px;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:10px 12px;box-shadow:0 3px 10px rgba(30,60,110,.06)">
     <div style="font-size:10px;color:var(--ac);font-weight:800">مرحله ${(i+1).toLocaleString('fa-IR')}</div>
@@ -6319,11 +6369,16 @@ function bpStepCardHTML(defId,st,i,total,editable){
       <button class="btn bad sm" style="padding:1px 6px" onclick="bpStepDel('${defId}',${i})">✕</button></div>
     <input value="${esc(st.name||'')}" onchange="bpStepSet('${defId}',${i},'name',this.value)" placeholder="نام مرحله (مثلاً: فرم تأیید پرداخت)" style="margin-top:4px;font-size:12px">
     <div style="display:flex;gap:4px;margin-top:4px">
-      <select onchange="bpStepSet('${defId}',${i},'whokind',this.value)" style="font-size:11px;max-width:92px">
-        <option value="wrole" ${!st.who||st.who.kind==='wrole'?'selected':''}>نقش فروش</option>
-        <option value="role" ${st.who&&st.who.kind==='role'?'selected':''}>نقش سیستم</option>
-        <option value="person" ${st.who&&st.who.kind==='person'?'selected':''}>فرد مشخص</option></select>
-      <select onchange="bpStepSet('${defId}',${i},'whov',this.value)" style="font-size:11px;flex:1">${whoOpts}</select></div>
+      <select onchange="bpStepSet('${defId}',${i},'whokind',this.value)" style="font-size:11px;max-width:118px">
+        <option value="mgr" ${kind==='mgr'?'selected':''}>👤 مدیر مستقیمِ شروع‌کننده</option>
+        <option value="unitmgr" ${kind==='unitmgr'?'selected':''}>🧩 مسئول واحدِ شروع‌کننده</option>
+        <option value="starter" ${kind==='starter'?'selected':''}>↩ خود شروع‌کننده</option>
+        <option value="unit" ${kind==='unit'?'selected':''}>🧩 اعضای یک واحد</option>
+        <option value="wrole" ${kind==='wrole'?'selected':''}>🔁 نقش گردش فروش</option>
+        <option value="role" ${kind==='role'?'selected':''}>🛡 نقش سیستم</option>
+        <option value="person" ${kind==='person'?'selected':''}>👤 فرد مشخص</option>
+        <option value="any" ${kind==='any'?'selected':''}>👥 هر کاربر</option></select>
+      ${noVal?'':`<select onchange="bpStepSet('${defId}',${i},'whov',this.value)" style="font-size:11px;flex:1">${whoOpts}</select>`}</div>
     <select onchange="bpStepSet('${defId}',${i},'act',this.value)" style="margin-top:4px;font-size:11px;width:100%">${BP_ACTS.map(a=>`<option ${st.act===a?'selected':''}>${a}</option>`).join('')}</select>
     <input value="${esc(st.desc||'')}" onchange="bpStepSet('${defId}',${i},'desc',this.value)" placeholder="توضیح (اختیاری)" style="margin-top:4px;font-size:11px"></div>`;
 }
@@ -6340,7 +6395,7 @@ function bpChainHTML(defId,steps,editable){
 function bpItemCardHTML(x){
   const d=bpItemDef(x);if(!d)return'';
   const steps=d.d.steps||[];const i=Math.min(+x.d.step||0,steps.length-1);
-  const cur=steps[i]||{};const mine=x.d.status==='در جریان'&&bpWhoMatch(cur.who);
+  const cur=steps[i]||{};const mine=x.d.status==='در جریان'&&bpWhoMatch(cur.who,x);
   const dots=steps.map((st,k)=>`<span title="${esc(st.name||'')}" style="font-size:12px;color:${k<i||x.d.status==='بایگانی'?'var(--ok)':k===i&&x.d.status==='در جریان'?'var(--ac)':'var(--line)'}">●</span>`).join('<span style="color:var(--line)">—</span>');
   const stCol=x.d.status==='بایگانی'?'var(--ok)':x.d.status==='لغو'?'var(--tx2)':'var(--ac)';
   const lg=(x.d.log||[]);
@@ -6348,15 +6403,16 @@ function bpItemCardHTML(x){
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <b>📄 ${esc(x.d.title||'—')}</b>
       <span class="tag" style="font-size:10px">${esc(d.d.title||'')}</span>
-      <span class="tag" style="color:${stCol};font-weight:700">${x.d.status==='در جریان'?esc((cur.name||'')+' — نزد '+bpWhoName(cur.who)):esc(x.d.status)}</span>
+      <span class="tag" style="color:${stCol};font-weight:700">${x.d.status==='در جریان'?esc((cur.name||'')+' — نزد '+bpWhoName(cur.who,x)):esc(x.d.status)}</span>
       <span style="flex:1"></span><span dir="ltr">${dots}</span>
       ${x.d.file?`<button class="btn gh sm" onclick="bpDownload('${x.id}')">📎 ${esc(x.d.file.name||'پیوست')}</button>`:''}
+      ${x.d.form&&relIds(x,'rec')[0]&&recs[relIds(x,'rec')[0]]?`<button class="btn sm" onclick="go('rec','${x.d.form}','${relIds(x,'rec')[0]}')">${E[x.d.form]?E[x.d.form].ic:'📋'} باز کردن فرم</button>`:''}
     </div>
     ${lg.length?`<div style="font-size:10.5px;color:var(--tx2);margin-top:5px">${lg.slice(-3).map(l=>`${esc(l.act)} — ${esc(l.by||'')}${l.note?' («'+esc(l.note)+'»)':''}`).join(' ⟵ ')}</div>`:''}
     ${mine?`<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center">
       <input id="bpn_${x.id}" placeholder="یادداشت (اختیاری)" style="max-width:200px;font-size:12px">
       ${(cur.act||'').includes('📎')?`<label class="btn gh sm" style="cursor:pointer">📎 پیوست<input type="file" style="display:none" onchange="bpUpload('${x.id}',this)"></label>`:''}
-      <button class="btn sm" onclick="bpAdvance('${x.id}')">✅ ${esc(cur.name||'انجام شد')}${(+x.d.step||0)>=steps.length-1?' — پایان و بایگانی':' ← ارسال به '+esc(bpWhoName((steps[(+x.d.step||0)+1]||{}).who))}</button>
+      <button class="btn sm" onclick="bpAdvance('${x.id}')">✅ ${esc(cur.name||'انجام شد')}${(+x.d.step||0)>=steps.length-1?' — پایان و بایگانی':' ← ارسال به '+esc(bpWhoName((steps[(+x.d.step||0)+1]||{}).who,x))}</button>
       ${(+x.d.step||0)>0?`<button class="btn gh sm" onclick="bpBack('${x.id}')">↩ برگشت به قبلی</button>`:''}
       <button class="btn gh sm" onclick="bpStop('${x.id}','لغو')">⛔ لغو</button>
     </div>`:''}
@@ -6366,7 +6422,7 @@ function bpmHTML(){
   const tab=view.bpTab||'me';
   const defs=byE('wfdef');
   const items=byE('wfitem');
-  const mine=items.filter(x=>{if(x.d.status!=='در جریان')return false;const d=bpItemDef(x);if(!d)return false;const st=(d.d.steps||[])[+x.d.step||0];return bpWhoMatch(st&&st.who)&&!isAdmin()||isAdmin()&&bpWhoMatch(st&&st.who);});
+  const mine=items.filter(x=>{if(x.d.status!=='در جریان')return false;const d=bpItemDef(x);if(!d)return false;const st=(d.d.steps||[])[+x.d.step||0];return bpWhoMatch(st&&st.who,x);});
   const act=items.filter(x=>x.d.status==='در جریان');
   const arch=items.filter(x=>x.d.status!=='در جریان').sort((a,b)=>(b.u||0)-(a.u||0));
   const T=(k,l,n)=>`<button class="btn ${tab===k?'sm':'gh sm'}" onclick="view.bpTab='${k}';render()">${l}${n?` <span class="c">${n.toLocaleString('fa-IR')}</span>`:''}</button>`;
@@ -6382,22 +6438,25 @@ function bpmHTML(){
     if(sel){
       h+=`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
         <input value="${esc(sel.d.title||'')}" onchange="bpDefSet('${sel.id}','title',this.value)" placeholder="نام فرآیند (مثلاً: تأیید پرداخت روزانه)" style="max-width:280px;font-weight:700">
+        <span style="font-size:12px">📋 فرم مرتبط: <select onchange="bpDefSet('${sel.id}','form',this.value)" style="max-width:230px;font-size:12px">${bpFormOpts(sel.d.form||'')}</select></span>
         <label style="display:flex;gap:5px;align-items:center;font-size:12px;cursor:pointer"><input type="checkbox" ${sel.d.active?'checked':''} onchange="bpDefSet('${sel.id}','active',this.checked?1:0)"> فعال</label>
         <button class="btn gh sm" onclick="bpStepAdd('${sel.id}')">➕ مرحله</button>
         <button class="btn bad sm" onclick="bpDefDel('${sel.id}')">🗑 حذف فرآیند</button></div>
       ${bpChainHTML(sel.id,sel.d.steps||[],true)}
-      <p style="font-size:11px;color:var(--tx2)">هر کارت یک مرحله است: نام فرم/کار، چه کسی انجام می‌دهد و چه عملی. با فلش‌های ▶◀ ترتیب را جابجا کنید — سند بعد از آخرین مرحله خودکار بایگانی می‌شود.</p>`;
+      <p style="font-size:11px;color:var(--tx2)">مسئول هر مرحله می‌تواند «نسبی» باشد — مثلاً «مدیر مستقیمِ شروع‌کننده»: یک فرآیند مرخصی کافی است و هر کارمندی که شروع کند، سند خودکار به مدیر خودش می‌رود. «📋 فرم مرتبط» تعیین می‌کند این فرآیند روی کدام فرم واقعی سیستم کار می‌کند — هنگام شروع، همان فرم ساخته/متصل می‌شود و هر نفر در مرحلهٔ خودش با «باز کردن فرم» روی آن کار می‌کند. هر کارت یک مرحله است: نام کار، چه کسی و چه عملی. با ▶◀ ترتیب را جابجا کنید — بعد از آخرین مرحله سند خودکار بایگانی می‌شود.</p>`;
     }
     h+=`</div>`;
   }
   if(tab==='me'||tab==='all'){
     // شروع سند جدید از فرآیندهای فعال
-    const startables=defs.filter(d=>d.d.active&&(d.d.steps||[]).length&&(isAdmin()||bpWhoMatch(d.d.steps[0].who)));
+    const startables=defs.filter(d=>d.d.active&&(d.d.steps||[]).length&&(isAdmin()||bpWhoMatch(d.d.steps[0].who,null)));
     if(startables.length)h+=`<div class="sec"><h3>▶️ شروع سند جدید</h3>${startables.map(d=>`
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0">
-        <b style="font-size:12.5px;min-width:160px">🧩 ${esc(d.d.title||'—')}</b>
-        <input id="bpnew_${d.id}" placeholder="عنوان سند…" style="max-width:230px;font-size:12px">
-        <button class="btn sm" onclick="bpStart('${d.id}')">▶️ شروع</button>
+        <b style="font-size:12.5px;min-width:160px">🧩 ${esc(d.d.title||'—')}${d.d.form&&E[d.d.form]?` <span class="tag" style="font-size:10px">${bpFormLabel(d.d.form)}</span>`:''}</b>
+        <input id="bpnew_${d.id}" placeholder="عنوان سند…" style="max-width:210px;font-size:12px">
+        ${d.d.form&&E[d.d.form]?`<input id="bplink_${d.id}" list="bpdl_${d.id}" placeholder="🔗 اتصال به ${esc(E[d.d.form].n)} موجود (اختیاری)" style="max-width:230px;font-size:11.5px">
+          <datalist id="bpdl_${d.id}">${byE(d.d.form).slice(0,300).map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>`:''}
+        <button class="btn sm" onclick="bpStart('${d.id}')">▶️ شروع${d.d.form?' و باز کردن فرم':''}</button>
         <span style="font-size:10.5px;color:var(--tx2)">${(d.d.steps||[]).map(s2=>esc(bpWhoName(s2.who))).join(' ⟵ ')}</span>
       </div>`).join('')}</div>`;
     const list=tab==='me'?mine:act;
