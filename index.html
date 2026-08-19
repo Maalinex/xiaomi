@@ -88,7 +88,7 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
 /* modal */
 #ovl{position:fixed;inset:0;background:rgba(23,43,77,.45);display:none;align-items:flex-start;justify-content:center;z-index:50;overflow:auto;padding:24px 12px}
 #ovl.show{display:flex}
-#modal{background:rgba(20,24,21,.88);backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);border:1px solid var(--line);border-radius:18px;width:100%;max-width:680px;padding:20px;box-shadow:0 30px 80px rgba(30,60,110,.10)}
+#modal{background:#fff;border:1px solid var(--line);border-radius:18px;width:100%;max-width:680px;padding:20px;box-shadow:0 30px 80px rgba(30,60,110,.18)}
 #modal h3{margin-bottom:4px}
 .mrow{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
 .mrow .full{grid-column:1/-1}
@@ -102,8 +102,8 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 #modal.shake{animation:shake .35s}
 #draftbar{position:fixed;bottom:16px;right:50%;transform:translateX(50%);z-index:90;display:none;
-  background:rgba(20,24,21,.96);border:1px solid rgba(61,123,255,.4);border-radius:12px;padding:10px 14px;
-  box-shadow:0 14px 40px rgba(23,43,77,.45);font-size:12.5px;align-items:center;gap:10px}
+  background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;
+  box-shadow:0 14px 40px rgba(30,60,110,.16);font-size:12.5px;align-items:center;gap:10px}
 #draftbar.show{display:flex}
 .relbox .tag{cursor:pointer}
 .rellist{border:1px solid var(--line);border-radius:8px;margin-top:4px;max-height:180px;overflow:auto;background:var(--bg)}
@@ -144,8 +144,7 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
 .tools input{max-width:260px}
 /* jalali calendar picker */
 #jcal{position:fixed;z-index:80;width:262px;padding:12px;border-radius:14px;display:none;
-  background:rgba(18,22,19,.97);backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);
-  border:1px solid rgba(61,123,255,.3);box-shadow:0 18px 50px rgba(30,60,110,.10)}
+  background:#fff;border:1px solid var(--line);box-shadow:0 18px 50px rgba(30,60,110,.18)}
 #calpop{position:fixed;inset:0;background:rgba(23,43,77,.45);display:none;align-items:center;justify-content:center;z-index:70;padding:20px 12px}
 #calpop.show{display:flex}
 #calpop .cpcard{width:100%;max-width:420px;background:var(--bg2);border:1px solid rgba(61,123,255,.28);border-radius:18px;padding:18px;box-shadow:0 22px 60px rgba(30,60,110,.10)}
@@ -169,12 +168,10 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
 #jcal .jmode{width:100%;margin-top:8px;font-size:11.5px}
 /* reminders */
 #remind{position:fixed;top:56px;left:14px;z-index:65;width:280px;padding:14px;border-radius:16px;display:none;
-  background:rgba(18,22,19,.95);backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);
-  border:1px solid rgba(61,123,255,.28);box-shadow:0 18px 50px rgba(23,43,77,.45)}
+  background:#fff;border:1px solid var(--line);box-shadow:0 18px 50px rgba(30,60,110,.16)}
 #remind.show{display:block}
 #mycal{position:fixed;top:56px;left:14px;z-index:65;width:320px;padding:14px;border-radius:16px;display:none;
-  background:rgba(18,22,19,.95);backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);
-  border:1px solid rgba(61,123,255,.28);box-shadow:0 18px 50px rgba(23,43,77,.45)}
+  background:#fff;border:1px solid var(--line);box-shadow:0 18px 50px rgba(30,60,110,.16)}
 #mycal.show{display:block}
 #imp{position:fixed;top:4%;left:50%;transform:translateX(-50%);z-index:75;width:min(880px,95vw);max-height:90vh;overflow:auto;padding:16px;border-radius:16px;display:none;
   background:rgba(18,22,19,.97);backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);
@@ -205,8 +202,7 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
 @media(max-width:760px){.calcell{min-height:56px}.calev{display:none}.calcell .cnt{display:block;font-size:10px;color:var(--ac)}}
 /* pomodoro */
 #pomo{position:fixed;bottom:18px;left:18px;z-index:60;width:235px;padding:16px;border-radius:18px;text-align:center;
-  background:rgba(18,22,19,.93);backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);
-  border:1px solid rgba(61,123,255,.28);box-shadow:0 18px 50px rgba(23,43,77,.45);display:none}
+  background:#fff;border:1px solid var(--line);box-shadow:0 18px 50px rgba(30,60,110,.16);display:none}
 #pomo.show{display:block}
 #pomo_time{font-size:44px;font-weight:800;color:#2f6bff;font-variant-numeric:tabular-nums;letter-spacing:1px}
 #pomo .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ac);margin:0 2px}
@@ -280,11 +276,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.03</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.04</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.03</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.04</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -13014,7 +13010,7 @@ window.prodQuickQuote=function(pid){
   else if(prod.id!==pid){try{go('rec','product',prod.id);}catch(e){render();}}
 };
 window.quoteCodePick=function(v){const p=prodByNameOrSku(v);if(p){const el=document.getElementById('pq_prod');if(el)el.value=p.d.title||'';}};
-window.quoteNamePick=function(v){const p=prodByNameOrSku(v);if(p&&p.d.sku){const el=document.getElementById('pq_code');if(el&&!el.value)el.value=p.d.sku;}};
+window.quoteNamePick=function(v){const p=prodByNameOrSku(v);if(p){const el=document.getElementById('pq_code');if(el)el.value=String(p.d.sku||'');}};
 function quotenewHTML(){
   const sups=byE('crm');
   const lbl='style="font-size:10.5px;color:var(--tx2)"';
@@ -13082,7 +13078,7 @@ function priceIntelHTML(pid){
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:8px">
         <div><label style="font-size:10.5px;color:var(--tx2)">کالا 🔍</label><input id="pq_prod" list="pq_pdl" value="${esc(recs[pid].d.title||'')}" placeholder="جستجو یا نام کالای جدید…">
           <datalist id="pq_pdl">${prodDlOpts(byE('product'))}</datalist></div>
-        <div><label style="font-size:10.5px;color:var(--tx2)">کد کالا <span style="opacity:.7">(فقط برای کالای جدید)</span></label><input id="pq_code" placeholder="SKU / کد" dir="ltr"></div>
+        <div><label style="font-size:10.5px;color:var(--tx2)">کد کالا (SKU)</label><input id="pq_code" value="${esc(String(recs[pid].d.sku||''))}" placeholder="SKU / کد" dir="ltr"></div>
         <div><label style="font-size:10.5px;color:var(--tx2)">قیمت استعلامی (تومان)</label><input id="pq_price" inputmode="numeric" dir="ltr" placeholder="۰"></div>
         <div><label style="font-size:10.5px;color:var(--tx2)">تاریخ استعلام</label><div style="display:flex;gap:4px"><input id="pq_date" value="${iso2jstr(today())}" style="flex:1" dir="ltr"><button type="button" class="btn gh sm" style="padding:4px 8px" onclick="openJcal('pq_date')">📅</button></div></div>
         <div><label style="font-size:10.5px;color:var(--tx2)">تأمین‌کننده 🔍</label><input id="pq_sup" list="pq_sdl" placeholder="جستجو یا نام جدید…">
