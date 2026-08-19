@@ -276,11 +276,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.11</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.13</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.11</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.13</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -3016,7 +3016,6 @@ const VIEWS_ACL=[
  ['dash','🎛️ اتاق کنترل (بخش سازمانی داخل میز کار)'],
  ['dash_stats','🎛️ ↳ کارت‌های آماری سازمان'],
  ['dash_alerts','🎛️ ↳ هشدارهای کاری'],
- ['quickadd','⚡ ثبت سریع'],
  ['ceodash','🧭 داشبورد مدیریت'],
  ['cal','📅 تقویم'],['charts','📊 نمودارها و شاخص‌ها'],
  ['mydash','📐 داشبوردهای شخصی'],['mbuilder','🧩 ساختارساز شاخص‌ها'],
@@ -9075,7 +9074,7 @@ const PROGFN={taskProg,projectProg,growthProg,habitPct,bookProg,courseProg,msPro
 // دسترسی امن: اگر تابعی ثبت نشده بود، به‌جای کرش صفر برگردان
 function progOf(key,r){const f=PROGFN[key];return f?f(r):0;}
 function avg(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:0;}
-function fmtN(n){return n==null||isNaN(n)?'—':Number(n).toLocaleString('fa-IR');}
+function fmtN(n){return n==null||isNaN(n)?'—':Number(n).toLocaleString('fa-IR',{maximumFractionDigits:2});}
 /* --- تاریخ شمسی --- */
 function g2j(gy,gm,gd){var g_d_m=[0,31,59,90,120,151,181,212,243,273,304,334];var jy=(gy<=1600)?0:979;gy-=(gy<=1600)?621:1600;var gy2=(gm>2)?(gy+1):gy;var days=(365*gy)+(~~((gy2+3)/4))-(~~((gy2+99)/100))+(~~((gy2+399)/400))-80+gd+g_d_m[gm-1];jy+=33*(~~(days/12053));days%=12053;jy+=4*(~~(days/1461));days%=1461;jy+=~~((days-1)/365);if(days>365)days=(days-1)%365;var jm=(days<186)?1+~~(days/31):7+~~((days-186)/30);var jd=1+((days<186)?(days%31):((days-186)%30));return[jy,jm,jd];}
 function j2g(jy,jm,jd){var gy=(jy<=979)?621:1600;jy-=(jy<=979)?0:979;var days=(365*jy)+((~~(jy/33))*8)+(~~(((jy%33)+3)/4))+78+jd+((jm<7)?(jm-1)*31:((jm-7)*30)+186);gy+=400*(~~(days/146097));days%=146097;if(days>36524){gy+=100*(~~(--days/36524));days%=36524;if(days>=365)days++;}gy+=4*(~~(days/1461));days%=1461;gy+=~~((days-1)/365);if(days>365)days=(days-1)%365;var gd=days+1;var sal_a=[0,31,((gy%4===0&&gy%100!==0)||(gy%400===0))?29:28,31,30,31,30,31,31,30,31,30,31];var gm;for(gm=0;gm<13&&gd>sal_a[gm];gm++)gd-=sal_a[gm];return[gy,gm,gd];}
@@ -9125,7 +9124,7 @@ function today(){return new Date().toISOString().slice(0,10);}
   };
   document.addEventListener('focusin',e=>{
     const t=e.target;
-    if(t&&t.tagName==='INPUT'&&(t.type==='number'||t.dataset.thou))_numWrap(t);
+    if(t&&t.tagName==='INPUT'&&(t.type==='number'||t.dataset.thou||['numeric','decimal'].includes(t.getAttribute('inputmode'))))_numWrap(t);
   },true);
 })();
 
@@ -9428,9 +9427,6 @@ function bizMenuHTML(){
   const it=(type,label,onclick,cond)=>cond?`<div class="nav-i ${view.type===type?'on':''}" onclick="${onclick}">${label}</div>`:'';
   const sec=(title,body)=>body?`<div class="nav-sub">${title}</div>${body}`:'';
   let h='';
-  // ⚡ ثبت سریع (بالای همه)
-  h+=sec('⚡ ثبت سریع',
-    it('quickadd','⚡ مرکز ثبت سریع',"go('quickadd')",canSee('invoice')||canSee('sale')||canSee('expense')||canSee('settle')));
   // 1️⃣ داشبرد مدیریت
   h+=sec('📊 داشبرد مدیریت',
     it('ceodash','🧭 داشبورد مدیریت کسب‌وکار',"go('ceodash')",(canSee('invoice')||canSee('product')||canSee('purchinv')))
@@ -9517,7 +9513,6 @@ function nav(){
   const el=document.getElementById('nav');
   if(isPending()){el.innerHTML='';return;}
   let h=`<div class="nav-i ${view.type==='me'?'on':''}" onclick="go('me')">🗂️ میز کار من</div>`;
-  if(canSee('invoice')||canSee('sale')||canSee('expense')||canSee('settle'))h+=`<div class="nav-i ${view.type==='quickadd'?'on':''}" onclick="go('quickadd')">⚡ ثبت سریع</div>`;
   if((canSee('invoice')||canSee('product')||canSee('purchinv'))&&canView('ceodash'))h+=`<div class="nav-i ${view.type==='ceodash'?'on':''}" onclick="go('ceodash')">🧭 داشبورد مدیریت</div>`;
   if(canSee('leave')&&canView('lvreq'))h+=`<div class="nav-i ${view.type==='lvreq'?'on':''}" onclick="go('lvreq')">🌴 درخواست مرخصی</div>`;
   if(canSee('letter')&&canView('cartable')){const _ac=aprCount();h+=`<div class="nav-i ${view.type==='cartable'?'on':''}" onclick="go('cartable')">📨 کارتابل نامه‌ها${_ac?` <span class="c" style="background:var(--warn);color:#000">${_ac.toLocaleString('fa-IR')}</span>`:''}</div>`;}
@@ -13655,10 +13650,10 @@ function meHTML(){
 const CH={blue:'#b48a1e',aqua:'#2f9e6e',yellow:'#d9a441',violet:'#8a7fd6',red:'#d95f55',good:'#3fae7c',muted:'#98a096',grid:'#2c2f2a',ink:'#ece7d9',ink2:'#96a09a'};
 function abbrN(n){
   const a=Math.abs(n);
-  if(a>=1e9)return (n/1e9).toLocaleString('fa-IR',{maximumFractionDigits:1})+' میلیارد';
-  if(a>=1e6)return (n/1e6).toLocaleString('fa-IR',{maximumFractionDigits:1})+' میلیون';
-  if(a>=1e3)return (n/1e3).toLocaleString('fa-IR',{maximumFractionDigits:0})+' هزار';
-  return n.toLocaleString('fa-IR');
+  if(a>=1e9)return (n/1e9).toLocaleString('fa-IR',{maximumFractionDigits:2})+' میلیارد';
+  if(a>=1e6)return (n/1e6).toLocaleString('fa-IR',{maximumFractionDigits:2})+' میلیون';
+  if(a>=1e3)return (n/1e3).toLocaleString('fa-IR',{maximumFractionDigits:2})+' هزار';
+  return n.toLocaleString('fa-IR',{maximumFractionDigits:2});
 }
 function gaugeSVG(pct,size){ // گیج نیم‌دایره کوچک (مثل BSC Designer)
   pct=Math.max(0,Math.min(100,Math.round(pct||0)));
