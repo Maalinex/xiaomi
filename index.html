@@ -276,11 +276,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.04</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.05</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.04</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.05</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -13026,7 +13026,7 @@ function quotenewHTML(){
       <div><label ${lbl}>تاریخ استعلام</label><div style="display:flex;gap:4px"><input id="pq_date" value="${iso2jstr(today())}" style="flex:1" dir="ltr"><button type="button" class="btn gh sm" style="padding:4px 8px" onclick="openJcal('pq_date')">📅</button></div></div>
       <div><label ${lbl}>کد کالا 🔍</label><input id="pq_code" list="pq_cdl" dir="ltr" placeholder="جستجوی کد…" onchange="quoteCodePick(this.value)">
         <datalist id="pq_cdl">${byE('product').filter(x=>x.d.sku).map(x=>`<option value="${esc(String(x.d.sku))}">${esc(x.d.title||'')}</option>`).join('')}</datalist></div>
-      <div><label ${lbl}>نام کالا 🔍 <span style="opacity:.7">(اگر جدید بود همان‌جا ساخته می‌شود)</span></label><input id="pq_prod" list="pq_pdl" placeholder="جستجو یا نام کالای جدید…" onchange="quoteNamePick(this.value)">
+      <div><label ${lbl}>نام کالا 🔍</label><input id="pq_prod" list="pq_pdl" placeholder="جستجو یا نام کالای جدید…" onchange="quoteNamePick(this.value)">
         <datalist id="pq_pdl">${prodDlOpts(byE('product'))}</datalist></div>
       <div><label ${lbl}>نام تأمین‌کننده 🔍</label><input id="pq_sup" list="pq_sdl" placeholder="جستجو یا نام جدید…">
         <datalist id="pq_sdl">${sups.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist></div>
