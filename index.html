@@ -276,11 +276,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.09</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.10</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.09</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.10</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -27925,7 +27925,7 @@ function bulkDel(e){
   const n=dels.length;
   const scope=(view.q||'').trim()||Object.values(view.cf||{}).some(Boolean)||view.flt||gBiz()?'فیلترشده‌ی فعلی':'همه';
   if(!confirm('⚠️ '+n.toLocaleString('fa-IR')+' رکورد ('+scope+' در این لیست) حذف شود؟\nاگر فقط بخشی را می‌خواهید، اول با جستجو یا «فیلتر ستونی» لیست را محدود کنید و بعد این دکمه را بزنید.'))return;
-  if(n>50){const t=prompt('برای تایید نهایی، کلمه «حذف» را بنویسید:');if(t!=='حذف'){alert('لغو شد');return;}}
+  if(n>50&&!confirm('⚠️ تأیید دوم: '+n.toLocaleString('fa-IR')+' مورد برای همیشه حذف می‌شوند و قابل بازگشت نیستند.\nمطمئن هستید؟'))return;
   const now=Date.now();
   dels.forEach(id=>{const r=recs[id];
     if(AUDIT_ENTS.includes(e))r.d._log=(r.d._log||[]).concat([{t:now,by:myEmail(),c:['🗑 حذف گروهی']}]).slice(-40);
@@ -27966,7 +27966,7 @@ function bulkDelSel(e){
   const n=dels.length;
   const names=dels.slice(0,6).map(id=>'• '+(((recs[id].d||{}).title)||'بی‌نام')).join('\n');
   if(!confirm('⚠️ '+n.toLocaleString('fa-IR')+' مورد انتخاب‌شده حذف شود؟\n\n'+names+(n>6?'\n… و '+(n-6).toLocaleString('fa-IR')+' مورد دیگر':'')))return;
-  if(n>50){const t=prompt('برای تایید نهایی، کلمه «حذف» را بنویسید:');if(t!=='حذف'){alert('لغو شد');return;}}
+  if(n>50&&!confirm('⚠️ تأیید دوم: '+n.toLocaleString('fa-IR')+' مورد برای همیشه حذف می‌شوند و قابل بازگشت نیستند.\nمطمئن هستید؟'))return;
   const now=Date.now();
   dels.forEach(id=>{const r=recs[id];
     if(AUDIT_ENTS.includes(e))r.d._log=(r.d._log||[]).concat([{t:now,by:myEmail(),c:['🗑 حذف گروهی (انتخابی)']}]).slice(-40);
