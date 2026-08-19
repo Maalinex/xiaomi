@@ -276,11 +276,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.17</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.18</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.17</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.18</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -599,6 +599,7 @@ evt:{ic:'🗒️',n:'وقایع و پیگیری‌ها',grp:'پرسنل و سا�
  {k:'subjT',n:'موضوع',t:TXT}],
  cols:['etype','title','subjT','when'],comp:'evtBrief'},
 customer:{ic:'🛍️',n:'مشتریان کسب‌وکار',grp:'CRM و مشتریان',f:[
+ {k:'credit',n:'💳 سقف اعتبار (ریال) — ۰ یعنی بدون محدودیت',t:NUM},
  {k:'title',n:'نام مشتری',t:TXT},
  {k:'code',n:'کد مشتری',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
@@ -1003,6 +1004,30 @@ whcount:{ic:'📋',n:'انبارگردانی و اصلاح موجودی',grp:'ک
  {k:'reason',n:'علت اختلاف',t:SEL,o:['کسری/سرقت','اضافیِ ثبت‌نشده','خطای ثبت سند','آسیب و ضایعات','سایر']},
  {k:'note',n:'توضیح',t:LNG}],
  cols:['title','wh','product','counted','status'],comp:'whcountBrief'},
+preq:{ic:'🙋',n:'درخواست خرید',grp:'کالا و انبار',f:[
+ {k:'title',n:'شرح درخواست',t:TXT},
+ {k:'product',n:'کالا',t:REL,r:'product',s:1},
+ {k:'qty',n:'تعداد موردنیاز',t:NUM},
+ {k:'needdate',n:'تاریخ نیاز',t:DAT},
+ {k:'orgu',n:'واحد درخواست‌کننده',t:REL,r:'orgunit',s:1},
+ {k:'status',n:'وضعیت',t:SEL,o:['باز','تبدیل به سفارش','لغو']},
+ {k:'reason',n:'دلیل / توضیح',t:LNG}],
+ cols:['title','product','qty','status']},
+po:{ic:'📑',n:'سفارش خرید',grp:'کالا و انبار',f:[
+ {k:'title',n:'شماره / شرح سفارش',t:TXT},
+ {k:'supplier',n:'تامین‌کننده',t:REL,r:'crm',s:1},
+ {k:'date',n:'تاریخ سفارش',t:DAT},
+ {k:'ddate',n:'تاریخ تحویل موردانتظار',t:DAT},
+ {k:'status',n:'وضعیت',t:SEL,o:['باز','فاکتور شد','لغو']},
+ {k:'note',n:'توضیح',t:LNG}],
+ cols:['title','supplier','date','status']},
+pricelist:{ic:'🏷️',n:'لیست قیمت فروش',grp:'فروش',f:[
+ {k:'title',n:'نام لیست قیمت',t:TXT},
+ {k:'active',n:'فعال',t:CHK},
+ {k:'from',n:'اعتبار از',t:DAT},
+ {k:'to',n:'اعتبار تا',t:DAT},
+ {k:'note',n:'توضیح',t:LNG}],
+ cols:['title','active','from','to']},
 product:{ic:'📦',n:'کالا و خدمات',grp:'کالا و انبار',f:[
  {k:'title',n:'نام کالا/خدمت',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
@@ -1186,6 +1211,7 @@ purchinv:{ic:'🧾',n:'فاکتور خرید',grp:'کالا و انبار',f:[
  {k:'title',n:'شماره / شرح فاکتور خرید',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'supplier',n:'تامین‌کننده',t:REL,r:'crm',s:1},
+ {k:'po',n:'📑 سفارش خرید مرتبط',t:REL,r:'po',s:1},
  {k:'cur',n:'💱 ارز فاکتور',t:SEL,o:['ریال','دلار','یورو','درهم']},
  {k:'fx',n:'نرخ تسعیر واحد به ریال (اختیاری)',t:NUM},
  {k:'origin',n:'🌍 منشأ خرید',t:SEL,o:['داخلی','خارجی']},
@@ -4007,6 +4033,8 @@ window.wfMgrSend=function(id){ // 🛡 مدیر فروش بدون اعلام ق�
   const lines=invLinesOf(id);
   if(!lines.length){alert('این پیش‌فاکتور ردیف کالا ندارد — از فروشنده بخواهید اصلاح کند');return;}
   if(lines.some(l=>!(+l.d.price>0))){alert('💰 قیمت فروش همهٔ ردیف‌ها را اعلام کنید');return;}
+  const _blMin=lines.filter(l=>{const pid=relIds(l,'product')[0];const pl=pid?plPriceOf(pid):null;return pl&&pl.min>0&&(+l.d.price||0)<pl.min;});
+  if(_blMin.length&&!confirm('⚠️ '+_blMin.length.toLocaleString('fa-IR')+' ردیف زیر «حداقل مجاز لیست قیمت» است.\nبا مسئولیت خودتان ادامه می‌دهید؟'))return;
   const r=recs[id];
   if(!relIds(r,'wh')[0]){alert('🏬 انبار خروج کالا را انتخاب کنید');return;}
   if(!r.d.mgrdelok){alert('✅ ابتدا «تأیید شرایط تحویل» را بزنید');return;}
@@ -4083,7 +4111,8 @@ function swfHTML(){
         <b style="font-size:12px">💰 اعلام قیمت فروش (مدیر فروش)</b>
         <div class="tblwrap" style="margin-top:6px"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالا</th><th>تعداد</th><th>قیمت واحد (ریال)</th><th>جمع ردیف</th></tr></thead><tbody>
         ${lines.map(l=>{const pid=relIds(l,'product')[0];const pr=+l.d.price||0;const q2=+l.d.qty||0;
-          return `<tr><td style="text-align:right">${esc((pid&&recs[pid]&&recs[pid].d.title)||l.d.title||'—')} <span style="font-size:10px;color:var(--tx2)">(تمام‌شده: ${money(invCostOf(pid))})</span></td><td style="text-align:center">${q2.toLocaleString('fa-IR')}</td><td><input inputmode="numeric" dir="ltr" value="${pr||''}" onchange="wfSetPrice('${l.id}',this.value)" placeholder="قیمت فروش…" style="max-width:140px;text-align:left"></td><td style="white-space:nowrap">${money(pr*q2)}</td></tr>`;}).join('')}
+          const _pl=pid?plPriceOf(pid):null;
+          return `<tr><td style="text-align:right">${esc((pid&&recs[pid]&&recs[pid].d.title)||l.d.title||'—')} <span style="font-size:10px;color:var(--tx2)">(تمام‌شده: ${money(invCostOf(pid))}${_pl?' │ مصوب: '+money(_pl.price)+(_pl.min?' │ حداقل: '+money(_pl.min):''):''})</span></td><td style="text-align:center">${q2.toLocaleString('fa-IR')}</td><td><input inputmode="numeric" dir="ltr" value="${pr||''}" onchange="wfSetPrice('${l.id}',this.value)" placeholder="قیمت فروش…" style="max-width:140px;text-align:left"></td><td style="white-space:nowrap">${money(pr*q2)}</td></tr>`;}).join('')}
         </tbody></table></div>
         <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:8px;font-size:12px">
           <span>🏬 انبار خروج: <select onchange="wfSetWh('${id2}',this.value)" style="max-width:180px"><option value="">— انتخاب —</option>${whs.map(x=>`<option value="${x.id}" ${x.id===curWh?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></span>
@@ -6163,6 +6192,12 @@ function pinvSave(status){
   valid.forEach(l=>{const p=recs[l.product];
     put({id:uid(),e:'purchline',d:{title:(p&&p.d&&p.d.title)||'',purchinv:[pid],product:[l.product],
       biz:pinvDraft.biz?[pinvDraft.biz]:[],qty:+l.qty||0,price:+l.price||0,ldisc:+l.ldisc||0},u:Date.now()});});
+  if(pinvDraft.po&&recs[pinvDraft.po]){
+    const pr=recs[pid];pr.d={...pr.d,po:[pinvDraft.po]};pr.u=Date.now();put(pr);
+    const poR=recs[pinvDraft.po];
+    const allDone=(poR.d.lines||[]).every(l=>poInvoicedQty(poR.id,l.product)>=(+l.qty||0));
+    if(allDone){poR.d={...poR.d,status:'فاکتور شد'};poR.u=Date.now();put(poR);}
+  }
   if((status||'ثبت شده')==='ثبت شده')try{postPurch(pid,true);}catch(e){}
   pinvDraft=null;go('rec','purchinv',pid);
 }
@@ -7779,7 +7814,7 @@ function invNewDraft(){invDraft={desc:'',biz:'',customer:'',seller:'',orgu:'',ki
 function invAddLine(){invDraft.lines.push({product:'',qty:'1',price:'',ldisc:''});render();}
 function invDelLine(i){invDraft.lines.splice(i,1);if(!invDraft.lines.length)invAddLine();render();}
 function invSetLine(i,k,v){invDraft.lines[i][k]=v;
-  if(k==='product'&&v){const p=recs[v];if(p&&p.d&&!(+invDraft.lines[i].price))invDraft.lines[i].price=String(p.d.sell||'');}
+  if(k==='product'&&v){const p=recs[v];if(p&&p.d&&!(+invDraft.lines[i].price)){const pl=plPriceOf(v);invDraft.lines[i].price=String((pl&&pl.price)||p.d.sell||'');}}
   render();}
 function invSetHead(k,v){invDraft[k]=v;if(k==='biz')render();}
 function invTotalsDraft(){
@@ -7805,6 +7840,19 @@ function invSave(status){
   const valid=invDraft.lines.filter(l=>l.product&&(+l.qty||0)>0);
   if(!valid.length){alert('حداقل یک ردیف با کالا و تعداد لازم است');return;}
   if(!invDraft.customer&&!confirm('مشتری انتخاب نشده است. ادامه می‌دهید؟'))return;
+  // 💳 سقف اعتبار مشتری
+  if(invDraft.customer&&recs[invDraft.customer]){
+    const _cr=+recs[invDraft.customer].d.credit||0;
+    const _tot=invTotalsDraft().total;
+    if(_cr>0&&_tot>0){
+      const _due=custReceivable(invDraft.customer);
+      if(_due+_tot>_cr){
+        const msg='💳 سقف اعتبار مشتری پر است:\nبدهی فعلی: '+money(_due)+'\nاین سند: '+money(_tot)+'\nسقف: '+money(_cr);
+        if(!isAdmin()&&myWrole()!=='مدیر فروش'&&myWrole()!=='مدیر ارشد'){alert(msg+'\n\nثبت مجاز نیست — از مدیر فروش بخواهید اقدام کند.');return;}
+        if(!confirm(msg+'\n\nبا مسئولیت خودتان ادامه می‌دهید؟'))return;
+      }
+    }
+  }
   // ⚠️ فروش زیر بهای تمام‌شده
   let _blcFlag=null,_blcAp=[];
   if(!_wf){
@@ -7907,7 +7955,9 @@ function invnewHTML(){
     <div><label ${lbl}>مشتری 🔍 <a href="#" style="font-size:10.5px;color:var(--ac);text-decoration:none" onclick="view.qc=!view.qc;render();return false">＋ مشتری جدید</a></label><input list="dl_invcust" value="${esc(custName)}" placeholder="بنویس تا جستجو شود…" onchange="invPickCust(this.value)">
       <datalist id="dl_invcust">${custs.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>
       <datalist id="dl_invprod">${prodDlOpts(prods)}</datalist>
-      ${view.qc?`<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap"><input id="qc_nm" placeholder="نام مشتری جدید" style="max-width:150px;font-size:12px"><input id="qc_ph" placeholder="تلفن (اختیاری)" style="max-width:120px;font-size:12px" dir="ltr"><button type="button" class="btn sm" onclick="invQuickCust()">ثبت</button></div>`:''}</div>
+      ${view.qc?`<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap"><input id="qc_nm" placeholder="نام مشتری جدید" style="max-width:150px;font-size:12px"><input id="qc_ph" placeholder="تلفن (اختیاری)" style="max-width:120px;font-size:12px" dir="ltr"><button type="button" class="btn sm" onclick="invQuickCust()">ثبت</button></div>`:''}
+      ${(()=>{if(!invDraft.customer||!recs[invDraft.customer])return'';const cr=+recs[invDraft.customer].d.credit||0;if(!cr)return'';const du=custReceivable(invDraft.customer);const ok=du<cr;
+        return `<div style="font-size:10.5px;margin-top:4px;color:${ok?'var(--tx2)':'var(--bad)'}">💳 اعتبار: بدهی ${money(du)} از سقف ${money(cr)}${ok?'':' — سقف پر است!'}</div>`;})()}</div>
     <div><label ${lbl}>👤 فروشنده / فرد <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('seller',this.value)"><option value="">—</option>${sellers.map(x=>{const u=orguOf(x);return `<option value="${x.id}" ${x.id===invDraft.seller?'selected':''}>${esc(x.d.title)}${u?' · '+esc(u):''}</option>`;}).join('')}</select>
       ${invDraft.seller&&recs[invDraft.seller]?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">واحد/تیم فرد: ${esc(orguOf(recs[invDraft.seller])||'—')}</div>`:''}</div>
     <div><label ${lbl}>🧩 واحد / تیم <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('orgu',this.value)"><option value="">— (خودکار از فرد)</option>${byE('orgunit').map(u=>`<option value="${u.id}" ${u.id===invDraft.orgu?'selected':''}>${esc(unitPath(u.id))}</option>`).join('')}</select></div>
@@ -13324,6 +13374,7 @@ function listHTML(e){
     ${can('c',e)?`<button class="btn" onclick="openRec('${e}')">＋ افزودن</button>`:''}
     ${can('c',e)?`<button class="btn gh sm" onclick="impOpen('${e}')" title="ورود گروهی داده از فایل اکسل یا CSV">📥 ورود از اکسل</button>`:''}
     ${can('d',e)&&rows.length?(view.selMode?`<button class="btn gh sm" onclick="bulkSelCancel()">✕ لغو انتخاب</button>`:`<button class="btn bad sm" onclick="bulkSelStart('${e}')" title="کنار هر مورد یک چک‌باکس می‌آید؛ فقط موارد تیک‌خورده حذف می‌شوند">🗑 حذف گروهی</button>`):''}
+    <div style="flex-basis:100%">${rptBarHTML(e)}</div>
     <input data-search="listq" placeholder="🔍 جستجو در همه فیلدها…" value="${esc(q)}" oninput="listSearch(this.value)">
     <span style="color:var(--tx2);font-size:12px">${rows.length.toLocaleString('fa-IR')} مورد</span></div>
   <div class="tools" style="margin-top:-4px">
@@ -13542,6 +13593,152 @@ window.prodQuickQuote=function(pid){
   if(view.type==='quotenew'){view.qsaved=(prod.d.title||'')+(prod.d.sku?' 🏷 '+prod.d.sku:'');render();}
   else if(prod.id!==pid){try{go('rec','product',prod.id);}catch(e){render();}}
 };
+/* ═══ 📑 زنجیرهٔ تدارکات: درخواست خرید ← سفارش خرید ← فاکتور خرید ═══ */
+window.preqToPo=function(id){
+  const r=recs[id];if(!r||r.del)return;
+  const pid=relIds(r,'product')[0];
+  const poId=uid();
+  put({id:poId,e:'po',d:{title:'سفارش از درخواست: '+(r.d.title||''),date:{s:today()},status:'باز',
+    lines:pid?[{product:pid,qty:+r.d.qty||1,price:0}]:[],preq:[id],_by:myEmail()},u:Date.now()});
+  r.d={...r.d,status:'تبدیل به سفارش'};r.u=Date.now();put(r);
+  go('rec','po',poId);
+};
+function _poMut(id,fn){const r=recs[id];if(!r||r.del)return;fn(r);r.u=Date.now();put(r);}
+window.poLineAdd=function(id){
+  const pn=((document.getElementById('pol_p')||{}).value||'').trim();
+  const q=Number(String(faNum((document.getElementById('pol_q')||{}).value||''))
+    .replace(/[٬,\s]/g,''))||0;
+  const pr=Number(String(faNum((document.getElementById('pol_pr')||{}).value||''))
+    .replace(/[٬,\s]/g,''))||0;
+  const p=prodByNameOrSku(pn);
+  if(!p){alert('کالا را از فهرست انتخاب کنید');return;}
+  if(!(q>0)){alert('تعداد را وارد کنید');return;}
+  _poMut(id,r=>{r.d.lines=[...(r.d.lines||[]),{product:p.id,qty:q,price:pr}];});
+};
+window.poLineDel=function(id,i){_poMut(id,r=>{const L=r.d.lines.slice();L.splice(i,1);r.d.lines=L;});};
+function poInvoicedQty(poId,pid){ // چقدر از این کالای سفارش، فاکتور شده؟
+  let q=0;
+  byE('purchinv').forEach(v=>{
+    if(relIds(v,'po')[0]!==poId||v.d.status==='باطل')return;
+    pinvLinesOf(v.id).forEach(l=>{if(relIds(l,'product')[0]===pid)q+=+l.d.qty||0;});
+  });
+  return q;
+}
+window.poToPinv=function(id){ // 🧾 ساخت فاکتور خرید از سفارش (پیش‌پر)
+  const r=recs[id];if(!r)return;
+  pinvNewDraft();
+  pinvDraft.supplier=relIds(r,'supplier')[0]||'';
+  pinvDraft.desc='فاکتور سفارش '+(r.d.title||'');
+  pinvDraft.po=id;
+  pinvDraft.lines=(r.d.lines||[]).map(l=>({product:l.product,qty:String(Math.max(0,(+l.qty||0)-poInvoicedQty(id,l.product))||l.qty),price:String(l.price||''),ldisc:''}));
+  if(!pinvDraft.lines.length)pinvDraft.lines=[{product:'',qty:'1',price:'',ldisc:''}];
+  go('pinvnew');
+};
+function poSection(r){
+  const lines=r.d.lines||[];
+  const open=r.d.status==='باز';
+  let h=`<div class="sec"><h3>📦 اقلام سفارش</h3>`;
+  if(open&&can('u','po'))h+=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:var(--bg3);border-radius:10px;padding:8px;margin-bottom:8px">
+    <input id="pol_p" list="pol_dl" placeholder="🔍 کالا…" style="max-width:190px;font-size:12px"><datalist id="pol_dl">${prodDlOpts(byE('product'))}</datalist>
+    <input id="pol_q" inputmode="numeric" placeholder="تعداد" style="max-width:80px;font-size:12px" dir="ltr">
+    <input id="pol_pr" inputmode="numeric" placeholder="قیمت توافقی (اختیاری)" style="max-width:150px;font-size:12px" dir="ltr">
+    <button class="btn sm" onclick="poLineAdd('${r.id}')">➕ ردیف</button></div>`;
+  h+=lines.length?`<div class="tblwrap"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالا</th><th>سفارش</th><th>فاکتورشده</th><th>در راه</th><th>قیمت توافقی</th>${open?'<th></th>':''}</tr></thead><tbody>
+    ${lines.map((l,i)=>{const inv=poInvoicedQty(r.id,l.product);const rem=Math.max(0,(+l.qty||0)-inv);
+      return `<tr><td style="text-align:right">${l.product&&recs[l.product]?esc(recs[l.product].d.title):'—'}</td>
+      <td>${(+l.qty||0).toLocaleString('fa-IR')}</td><td style="color:var(--ok)">${inv.toLocaleString('fa-IR')}</td>
+      <td style="color:${rem>0?'var(--warn)':'var(--tx2)'}">${rem.toLocaleString('fa-IR')}</td>
+      <td>${l.price?money(l.price):'—'}</td>
+      ${open?`<td><button class="btn bad sm" onclick="poLineDel('${r.id}',${i})">✕</button></td>`:''}</tr>`;}).join('')}
+    </tbody></table></div>`:'<div class="hint">هنوز قلمی ثبت نشده.</div>';
+  const totalRem=lines.reduce((a,l)=>a+Math.max(0,(+l.qty||0)-poInvoicedQty(r.id,l.product)),0);
+  if(open&&lines.length)h+=`<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+    <button class="btn sm" onclick="poToPinv('${r.id}')">🧾 ثبت فاکتور خرید از این سفارش</button>
+    ${totalRem===0?`<span style="font-size:12px;color:var(--ok)">✅ همهٔ اقلام فاکتور شده — می‌توانید وضعیت را «فاکتور شد» کنید</span>`:`<span style="font-size:11.5px;color:var(--tx2)">📦 ${totalRem.toLocaleString('fa-IR')} قلم در راه</span>`}</div>`;
+  return h+`</div>`;
+}
+/* ═══ 🏷️ لیست قیمت فروش ═══ */
+function plActiveList(){
+  const t=today();
+  return byE('pricelist').filter(p=>p.d.active&&(!ds(p.d.from)||ds(p.d.from)<=t)&&(!ds(p.d.to)||ds(p.d.to)>=t))
+    .sort((a,b)=>(b.u||0)-(a.u||0))[0]||null;
+}
+function plPriceOf(pid){
+  const pl=plActiveList();if(!pl)return null;
+  const l=(pl.d.lines||[]).find(x=>x.product===pid);
+  return l?{price:+l.price||0,min:+l.min||0,list:pl}:null;
+}
+window.plLineAdd=function(id){
+  const pn=((document.getElementById('pll_p')||{}).value||'').trim();
+  const pr=Number(String(faNum((document.getElementById('pll_pr')||{}).value||'')).replace(/[٬,\s]/g,''))||0;
+  const mn=Number(String(faNum((document.getElementById('pll_mn')||{}).value||'')).replace(/[٬,\s]/g,''))||0;
+  const p=prodByNameOrSku(pn);
+  if(!p){alert('کالا را از فهرست انتخاب کنید');return;}
+  if(!(pr>0)){alert('قیمت مصوب را وارد کنید');return;}
+  _poMut(id,r=>{r.d.lines=[...(r.d.lines||[]).filter(x=>x.product!==p.id),{product:p.id,price:pr,min:mn}];});
+};
+window.plLineDel=function(id,i){_poMut(id,r=>{const L=r.d.lines.slice();L.splice(i,1);r.d.lines=L;});};
+function plSection(r){
+  const lines=r.d.lines||[];
+  let h=`<div class="sec"><h3>🏷️ قیمت‌های مصوب این لیست</h3>`;
+  if(can('u','pricelist'))h+=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:var(--bg3);border-radius:10px;padding:8px;margin-bottom:8px">
+    <input id="pll_p" list="pll_dl" placeholder="🔍 کالا…" style="max-width:190px;font-size:12px"><datalist id="pll_dl">${prodDlOpts(byE('product'))}</datalist>
+    <input id="pll_pr" inputmode="numeric" placeholder="قیمت مصوب" style="max-width:130px;font-size:12px" dir="ltr">
+    <input id="pll_mn" inputmode="numeric" placeholder="حداقل مجاز (اختیاری)" style="max-width:150px;font-size:12px" dir="ltr">
+    <button class="btn sm" onclick="plLineAdd('${r.id}')">➕ ثبت قیمت</button></div>`;
+  h+=lines.length?`<div class="tblwrap"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالا</th><th>قیمت مصوب</th><th>حداقل مجاز</th><th></th></tr></thead><tbody>
+    ${lines.map((l,i)=>`<tr><td style="text-align:right">${l.product&&recs[l.product]?esc(recs[l.product].d.title):'—'}</td>
+      <td><b>${money(l.price)}</b></td><td>${l.min?money(l.min):'—'}</td>
+      <td><button class="btn bad sm" onclick="plLineDel('${r.id}',${i})">✕</button></td></tr>`).join('')}
+    </tbody></table></div>`:'<div class="hint">قیمتی ثبت نشده — کالا و قیمت مصوب را از فرم بالا اضافه کنید.</div>';
+  return h+`<p style="font-size:11px;color:var(--tx2);margin-top:6px">وقتی لیست «فعال» و در بازهٔ اعتبار باشد، قیمت فروش در فاکتورها خودکار از همین لیست پر می‌شود و مدیر فروش قیمت مصوب/حداقل را هنگام قیمت‌گذاری می‌بیند.</p></div>`;
+}
+/* ═══ 💾 گزارش‌های ذخیره‌شده ═══ */
+function rptAll(){const m=recs[MO];return (m&&!m.del&&m.d._reports)||[];}
+function rptSaveList(list){const m=recs[MO]||{id:MO,e:'_opts',d:{}};m.d={...m.d,_reports:list};m.u=Date.now();m.del=false;put(m);}
+window.rptSave=function(e){
+  const nm=((document.getElementById('rpt_nm')||{}).value||'').trim();
+  if(!nm){alert('نام گزارش را بنویسید');return;}
+  rptSaveList([...rptAll(),{id:uid(),e,name:nm,q:view.q||'',cf:view.cf||{},sort:view.sort||null,sortDir:view.sortDir||1,grp:view.grp||null,by:myEmail()}]);
+  view.rptBox=0;render();
+};
+window.rptOpen=function(id){
+  const r=rptAll().find(x=>x.id===id);if(!r)return;
+  view={type:'list',e:r.e,q:r.q,cf:r.cf,sort:r.sort,sortDir:r.sortDir,grp:r.grp,page:0};render();
+};
+window.rptDel=function(id){
+  const r=rptAll().find(x=>x.id===id);
+  if(!r)return;
+  if(r.by!==myEmail()&&!isAdmin()){alert('فقط سازنده یا ادمین');return;}
+  rptSaveList(rptAll().filter(x=>x.id!==id));render();
+};
+function rptBarHTML(e){
+  const mine=rptAll().filter(r=>r.e===e);
+  return `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0">
+    ${mine.map(r=>`<span class="tag" style="cursor:pointer;padding:4px 9px;font-size:11.5px" onclick="rptOpen('${r.id}')">💾 ${esc(r.name)} <b style="color:var(--bad)" onclick="event.stopPropagation();rptDel('${r.id}')">✕</b></span>`).join('')}
+    ${view.rptBox?`<input id="rpt_nm" placeholder="نام گزارش…" style="max-width:150px;font-size:11.5px"><button class="btn sm" onclick="rptSave('${e}')">ثبت</button><button class="btn gh sm" onclick="view.rptBox=0;render()">✕</button>`
+      :`<button class="btn gh sm" onclick="view.rptBox=1;render()" title="فیلتر/جستجو/مرتب‌سازی فعلی این لیست را با یک نام ذخیره کن">💾 ذخیرهٔ گزارش</button>`}
+  </div>`;
+}
+/* ═══ 💬 یادداشت روی هر رکورد ═══ */
+window.recChatSend=function(e,id){
+  const el=document.getElementById('rc_txt');const txt=((el||{}).value||'').trim();
+  if(!txt)return;
+  const r=recs[id];if(!r)return;
+  window._wfActing=1;
+  try{r.d={...r.d,_chat:[...(r.d._chat||[]),{t:Date.now(),by:myEmail(),txt}]};r.u=Date.now();put(r);}finally{window._wfActing=0;}
+};
+function recChatHTML(e,id){
+  const r=recs[id];if(!r)return'';
+  const ch=r.d._chat||[];
+  return `<div class="sec"><h3>💬 یادداشت‌ها و گفتگو <span class="c">${ch.length.toLocaleString('fa-IR')}</span></h3>
+    ${ch.length?`<div style="max-height:260px;overflow:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+      ${ch.slice(-30).map(m=>`<div style="background:var(--bg3);border-radius:10px;padding:7px 11px;font-size:12.5px">
+        <div style="font-size:10px;color:var(--tx2)">${esc(m.by||'')} · ${new Date(m.t).toLocaleString('fa-IR')}</div>${esc(m.txt)}</div>`).join('')}</div>`:''}
+    <div style="display:flex;gap:6px"><input id="rc_txt" placeholder="یادداشت برای همکاران…" style="flex:1;font-size:12.5px" onkeydown="if(event.key==='Enter')recChatSend('${e}','${id}')">
+    <button class="btn sm" onclick="recChatSend('${e}','${id}')">ارسال</button></div>
+  </div>`;
+}
 window.quoteCodePick=function(v){const p=prodByNameOrSku(v);if(p){const el=document.getElementById('pq_prod');if(el)el.value=p.d.title||'';}};
 window.quoteNamePick=function(v){const p=prodByNameOrSku(v);if(p){const el=document.getElementById('pq_code');if(el)el.value=String(p.d.sku||'');}};
 function quotenewHTML(){
@@ -13733,6 +13930,10 @@ function recHTML(e,id){
   if(e==='product')h+=buyHistHTML(id)+priceIntelHTML(id);
   if(e==='rfq')h+=rfqSection(r);
   if(e==='doc')h+=docSection(r);
+  if(e==='po')h+=poSection(r);
+  if(e==='pricelist')h+=plSection(r);
+  if(e==='preq'&&r.d.status==='باز'&&can('c','po'))h+=`<div class="sec"><button class="btn sm" onclick="preqToPo('${id}')">📑 تبدیل به سفارش خرید</button></div>`;
+  h+=recChatHTML(e,id);
   if(can('d',e,r))h+=`<div style="margin:8px 0 24px"><button class="btn bad sm" onclick="delFromPage('${e}','${id}')">🗑 حذف این مورد</button></div>`;
   return h;
 }
@@ -13873,6 +14074,7 @@ function meHTML(){
         <div style="font-size:10.5px;color:var(--tx2);margin-top:6px">✅ تیک زدن همین‌جا وضعیت تسک را «Done» می‌کند و مستقیم در امتیاز عملکرد شما اثر می‌گذارد.</div>`;
     }
     return x+`</div>`;})();
+  {const rps=rptAll();if(rps.length)h+=`<div class="sec"><h3>📌 گزارش‌های ذخیره‌شده</h3><div style="display:flex;gap:6px;flex-wrap:wrap">${rps.map(r2=>`<button class="btn gh sm" onclick="rptOpen('${r2.id}')">💾 ${esc(r2.name)} <span style="opacity:.6;font-size:10px">${E[r2.e]?E[r2.e].n:''}</span></button>`).join('')}</div></div>`;}
   h+=`<div style="font-size:11px;color:var(--tx2);background:var(--bg2);border:1px dashed var(--line);border-radius:9px;padding:8px 11px;margin-bottom:10px">🗂️ این میز کار فقط کارهای <b>سپرده‌شده به شخص شما</b> را نشان می‌دهد${canView('dash')?' — کارهای کلی سازمان و همهٔ تسک‌های سیستم در «🎛️ اتاق کنترل سازمان» پایین همین صفحه است.':'.'}</div>`;
   // ⚖️ اهداف BSC تحت مسئولیت من — با زنجیره کامل پاسخ‌گویی
   if(myBsc.length){
