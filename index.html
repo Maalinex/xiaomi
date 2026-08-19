@@ -276,11 +276,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.18</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.19</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.18</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.19</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -6599,8 +6599,18 @@ function pdSel(){
 }
 window.pdNew=function(){
   const id=uid();
-  put({id,e:'payday',d:{title:'حواله '+iso2jstr(today()),date:{s:today()},status:'پیش‌نویس',lines:[],log:[],_by:myEmail()},u:Date.now()});
+  const n=byE('payday').filter(x=>ds(x.d.date)===today()).length;
+  put({id,e:'payday',d:{title:'حواله '+iso2jstr(today())+(n?' ('+(n+1).toLocaleString('fa-IR')+')':''),date:{s:today()},status:'پیش‌نویس',lines:[],log:[],_by:myEmail()},u:Date.now()});
   view.pdSel=id;render();
+};
+window.pdDelForm=function(id){ // 🗑 حذف فرم حواله — تأیید داخل صفحه
+  const r=recs[id];if(!r||r.del)return;
+  if(!pdCanPrep()&&!isAdmin()){setSync('err','اجازه ندارید');return;}
+  if(r.d.status==='پرداخت شد'&&!isAdmin()){setSync('err','فرم پرداخت‌شده را فقط ادمین می‌تواند حذف کند');return;}
+  if(view._pdDel!==id){view._pdDel=id;render();return;}
+  view._pdDel=null;
+  r.del=true;r.u=Date.now();put(r);
+  view.pdSel=null;setSync('ok','🗑 فرم حواله حذف شد');render();
 };
 function _pdMut(id,fn){const r=recs[id];if(!r||r.del)return;fn(r);r.u=Date.now();put(r);}
 window.pdAddLine=function(id){_pdMut(id,r=>{r.d.lines=[...(r.d.lines||[]),{supN:'',sup:'',amount:0,bank:'',note:''}];});};
@@ -6616,12 +6626,13 @@ window.pdSend=function(id){
   const L=(r.d.lines||[]).filter(l=>l.supN&&l.amount>0);
   if(!L.length){alert('حداقل یک ردیف با تأمین‌کننده و مبلغ لازم است');return;}
   if(L.some(l=>!l.bank)){alert('🏦 برای همهٔ ردیف‌ها «از حساب» را انتخاب کنید');return;}
+  let _newSup=0;
   for(const l of L){
     if(!l.sup){
-      if(!confirm('تأمین‌کنندهٔ «'+l.supN+'» در سیستم نیست — ثبت شود؟'))return;
-      const nsid=uid();put({id:nsid,e:'crm',d:{title:l.supN,rel:'تامین‌کننده',_by:myEmail()},u:Date.now()});l.sup=nsid;
+      const nsid=uid();put({id:nsid,e:'crm',d:{title:l.supN,rel:'تامین‌کننده',_by:myEmail()},u:Date.now()});l.sup=nsid;_newSup++;
     }
   }
+  if(_newSup)setSync('ok','🏭 '+_newSup.toLocaleString('fa-IR')+' تأمین‌کنندهٔ جدید ثبت شد');
   _pdMut(id,r2=>{r2.d.lines=L;r2.d.status='در انتظار تأیید';pdLog(r2,'📨 ارسال برای تأیید مدیریت');});
 };
 window.pdApprove=function(id){
@@ -6637,9 +6648,10 @@ window.pdReject=function(id){
 window.pdReopen=function(id){_pdMut(id,r=>{r.d.status='پیش‌نویس';pdLog(r,'✏️ بازگشایی برای اصلاح');});};
 window.pdPay=function(id){
   const r=recs[id];if(!r)return;
-  if(r.d.status!=='تأییدشده'){alert('ابتدا باید فرم توسط مدیریت تأیید شود');return;}
-  if(!pdCanPrep()){alert('🛡 ثبت پرداخت فقط توسط واحد مالی');return;}
-  if(!confirm('💸 '+(r.d.lines||[]).length.toLocaleString('fa-IR')+' پرداخت ثبت می‌شود؛ مانده بانک‌ها و بدهی تأمین‌کنندگان خودکار به‌روز می‌شوند. ادامه؟'))return;
+  if(r.d.status!=='تأییدشده'){setSync('err','ابتدا باید فرم توسط مدیریت تأیید شود');return;}
+  if(!pdCanPrep()){setSync('err','🛡 ثبت پرداخت فقط توسط واحد مالی');return;}
+  if(view._pdPay!==id){view._pdPay=id;render();return;}
+  view._pdPay=null;
   (r.d.lines||[]).forEach(l=>{
     if(l.paid||!l.sup||!(l.amount>0))return;
     put({id:uid(),e:'settle',d:{title:'حواله روزانه — '+(recs[l.sup]?recs[l.sup].d.title:l.supN),
@@ -6710,8 +6722,8 @@ function paydashHTML(){
   h+=`<div class="sec"><h3>💸 حواله‌های پرداختنی
     ${r?`<span class="tag" style="color:${stCol};font-weight:700">${esc(st)}</span>`:''}
     <span style="flex:1"></span>
-    ${pdCanPrep()&&(!r||ds(r.d.date)!==today())?`<button class="btn sm" onclick="pdNew()">➕ فرم حواله امروز</button>`:''}</h3>`;
-  if(!r){h+=`<div class="hint">فرمی ثبت نشده — «➕ فرم حواله امروز» را بزنید یا فایل اکسل را بارگذاری کنید.</div></div>`;}
+    ${pdCanPrep()?`<button class="btn sm" onclick="pdNew()">➕ فرم حواله جدید</button>`:''}</h3>`;
+  if(!r){h+=`<div class="hint">فرمی ثبت نشده — «➕ فرم حواله جدید» را بزنید یا فایل اکسل را بارگذاری کنید.</div></div>`;}
   else{
     const L=r.d.lines||[];let totPay=0;
     h+=`<div style="font-size:12px;color:var(--tx2);margin-bottom:8px">📋 ${esc(r.d.title||'')} │ گردش: مدیر مالی تنظیم می‌کند ← مدیریت تأیید می‌کند ← مالی پرداخت را ثبت می‌کند (مانده بانک و بدهی تأمین‌کننده خودکار به‌روز می‌شود)</div>
@@ -6736,8 +6748,13 @@ function paydashHTML(){
       ${canEdit?`<button class="btn sm" onclick="pdSend('${r.id}')">📨 ارسال برای تأیید مدیریت</button>`:''}
       ${st==='در انتظار تأیید'&&pdCanApprove()?`<button class="btn sm" onclick="pdApprove('${r.id}')">✅ تأیید و صدور مجوز پرداخت</button>
         <button class="btn gh sm" onclick="pdReject('${r.id}')">⛔ رد (برگشت برای اصلاح)</button>`:''}
-      ${st==='تأییدشده'&&pdCanPrep()?`<button class="btn sm" onclick="pdPay('${r.id}')">💸 ثبت پرداخت‌ها و به‌روزرسانی مانده‌ها</button>`:''}
+      ${st==='تأییدشده'&&pdCanPrep()?(view._pdPay===r.id
+        ?`<b style="color:var(--ac);font-size:12px">💸 ${(r.d.lines||[]).length.toLocaleString('fa-IR')} پرداخت ثبت و مانده‌ها به‌روز می‌شوند — مطمئن هستید؟</b><button class="btn sm" onclick="pdPay('${r.id}')">✅ بله، ثبت کن</button><button class="btn gh sm" onclick="view._pdPay=null;render()">انصراف</button>`
+        :`<button class="btn sm" onclick="pdPay('${r.id}')">💸 ثبت پرداخت‌ها و به‌روزرسانی مانده‌ها</button>`):''}
       ${st==='رد شده'&&pdCanPrep()?`<button class="btn sm" onclick="pdReopen('${r.id}')">✏️ اصلاح فرم</button>`:''}
+      ${(pdCanPrep()||isAdmin())?(view._pdDel===r.id
+        ?`<b style="color:var(--bad);font-size:12px">⚠️ فرم برای همیشه حذف می‌شود — مطمئن هستید؟</b><button class="btn bad sm" onclick="pdDelForm('${r.id}')">🗑 بله، حذف</button><button class="btn gh sm" onclick="view._pdDel=null;render()">انصراف</button>`
+        :`<button class="btn gh sm" onclick="pdDelForm('${r.id}')">🗑 حذف فرم</button>`):''}
     </div>
     ${(r.d.log||[]).length?`<div style="font-size:10.5px;color:var(--tx2);margin-top:8px">${r.d.log.slice(-5).map(x=>`${esc(x.act)} — ${esc(x.by||'')}${x.note?' («'+esc(x.note)+'»)':''}`).join(' ⟵ ')}</div>`:''}
     </div>`;
@@ -13934,7 +13951,9 @@ function recHTML(e,id){
   if(e==='pricelist')h+=plSection(r);
   if(e==='preq'&&r.d.status==='باز'&&can('c','po'))h+=`<div class="sec"><button class="btn sm" onclick="preqToPo('${id}')">📑 تبدیل به سفارش خرید</button></div>`;
   h+=recChatHTML(e,id);
-  if(can('d',e,r))h+=`<div style="margin:8px 0 24px"><button class="btn bad sm" onclick="delFromPage('${e}','${id}')">🗑 حذف این مورد</button></div>`;
+  if(can('d',e,r))h+=view._delC===id
+    ?`<div style="margin:8px 0 24px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border:2px solid var(--bad);border-radius:12px;padding:9px 13px;background:rgba(240,86,74,.06)"><b style="color:var(--bad);font-size:12.5px">⚠️ این مورد برای همیشه حذف می‌شود — مطمئن هستید؟</b><button class="btn bad sm" onclick="delFromPage('${e}','${id}')">🗑 بله، حذف کن</button><button class="btn gh sm" onclick="view._delC=null;render()">انصراف</button></div>`
+    :`<div style="margin:8px 0 24px"><button class="btn bad sm" onclick="delFromPage('${e}','${id}')">🗑 حذف این مورد</button></div>`;
   return h;
 }
 /* ================= میز کار من ================= */
@@ -27922,10 +27941,12 @@ function noteToIdea(noteId){
   go('rec','idea',ideaId);
 }
 function quickNote(){openRec('booknote');}
-function delFromPage(e,id){
-  if(!can('d',e,recs[id])){alert('اجازه حذف ندارید');return;}
-  if(!confirm('حذف شود؟'))return;
+function delFromPage(e,id){ // تأیید داخل صفحه — بدون پنجرهٔ مرورگر (که در PWA گاهی مسدود است)
+  if(!can('d',e,recs[id])){setSync('err','اجازه حذف ندارید');return;}
+  if(view._delC!==id){view._delC=id;render();return;}
+  view._delC=null;
   const r=recs[id];r.del=true;r.u=Date.now();put(r);
+  setSync('ok','🗑 حذف شد');
   go('list',e);
 }
 
