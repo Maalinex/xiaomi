@@ -280,11 +280,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.99</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.00</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 1.99</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.00</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -12936,8 +12936,82 @@ function buyHistHTML(pid,compact){
 function draftBuyHist(lines){
   const pids=[...new Set((lines||[]).map(l=>l.product).filter(Boolean))];
   if(!pids.length)return'';
-  const h=pids.map(p=>buyHistHTML(p,true)).join('');
+  const h=pids.map(p=>buyHistHTML(p,true)+quoteChipHTML(p)).join('');
   return h?`<div style="margin-top:10px">${h}</div>`:'';
+}
+/* ═══ 🧠 هوش قیمت: استعلام‌های نخریده + مقایسه با خریدهای واقعی ═══ */
+function prodQuotes(pid){
+  const out=[];
+  byE('rfq').forEach(r=>{
+    if(relIds(r,'product')[0]!==pid)return;
+    (r.d.offers||[]).forEach((o,i)=>{
+      out.push({t:r.u||0,d:new Date(r.u||Date.now()).toISOString().slice(0,10),
+        sup:o.sup,supName:o.sup&&recs[o.sup]?recs[o.sup].d.title:'—',
+        price:+o.price||0,lead:o.lead||'',rfq:r.id,rfqTitle:r.d.title||'',
+        won:r.d.winner===i,open:r.d.status!=='لغو'});
+    });
+  });
+  return out.filter(x=>x.open&&x.price>0).sort((a,b)=>a.price-b.price);
+}
+function quoteChipHTML(pid){ // خلاصهٔ یک‌خطی برای فرم‌های فاکتور/خرید
+  const q=prodQuotes(pid);if(!q.length)return'';
+  const best=q[0];
+  return `<div style="font-size:11.5px;margin:4px 0 8px;padding:6px 12px;border-radius:10px;background:rgba(47,107,255,.06);border:1px solid rgba(47,107,255,.2)">
+    ⚖️ بهترین استعلام «${esc(recs[pid].d.title||'')}»: <b style="color:var(--ac)">${money(best.price)}</b> از ${esc(best.supName)}${best.lead?' (تحویل: '+esc(best.lead)+')':''} │ ${q.length.toLocaleString('fa-IR')} پیشنهاد ثبت‌شده
+    <a href="#" style="color:var(--ac);text-decoration:none" onclick="go('rec','rfq','${best.rfq}');return false">↗ مشاهده استعلام</a></div>`;
+}
+window.prodQuickQuote=function(pid){
+  const sup=(document.getElementById('pq_sup')||{}).value||'';
+  const pr=Number(String(faNum(String((document.getElementById('pq_price')||{}).value||''))).replace(/[٬,\s]/g,''))||0;
+  const lead=(document.getElementById('pq_lead')||{}).value||'';
+  if(!sup){alert('تأمین‌کننده را انتخاب کنید');return;}
+  if(!(pr>0)){alert('قیمت استعلامی را وارد کنید');return;}
+  let r=byE('rfq').find(x=>relIds(x,'product')[0]===pid&&x.d.status!=='بسته — برنده انتخاب شد'&&x.d.status!=='لغو');
+  if(!r){
+    const rid=uid();
+    put({id:rid,e:'rfq',d:{title:'استعلام '+(recs[pid]&&recs[pid].d.title||''),product:[pid],status:'باز',offers:[],_by:myEmail()},u:Date.now()});
+    r=recs[rid];
+  }
+  r.d={...r.d,offers:[...(r.d.offers||[]),{sup,price:pr,lead}]};
+  r.u=Date.now();put(r);
+};
+function priceIntelHTML(pid){
+  if(!pid||!recs[pid])return'';
+  const q=prodQuotes(pid);
+  const buys=prodBuyHist(pid,5);
+  const lastBuy=buys[0]||null;
+  const cost=invCostOf(pid);
+  const sups=byE('crm');
+  const best=q[0]||null;
+  const avg=q.length?Math.round(q.reduce((a,x)=>a+x.price,0)/q.length):0;
+  const chips=[];
+  if(lastBuy&&lastBuy.price>0)chips.push(`<div class="chip">🛒 آخرین خرید: <b>${money(lastBuy.price)}</b> از ${esc(lastBuy.sup)}</div>`);
+  if(cost>0)chips.push(`<div class="chip">📊 بهای تمام‌شده (FIFO): <b>${money(cost)}</b></div>`);
+  if(best){
+    chips.push(`<div class="chip" style="border-color:var(--ok)">⚖️ بهترین استعلام: <b style="color:var(--ok)">${money(best.price)}</b> از ${esc(best.supName)}</div>`);
+    if(q.length>1)chips.push(`<div class="chip">میانگین ${q.length.toLocaleString('fa-IR')} پیشنهاد: <b>${money(avg)}</b></div>`);
+    const ref=lastBuy&&lastBuy.price>0?lastBuy.price:(cost>0?cost:0);
+    if(ref>0){
+      const df=(best.price-ref)/ref*100;
+      chips.push(`<div class="chip" style="border-color:${df<=0?'var(--ok)':'var(--warn)'}">${df<=0?'📉 بهترین استعلام '+Math.abs(df).toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪ ارزان‌تر از '+(lastBuy&&lastBuy.price>0?'آخرین خرید':'بهای تمام‌شده'):'📈 بهترین استعلام '+df.toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪ گران‌تر از '+(lastBuy&&lastBuy.price>0?'آخرین خرید':'بهای تمام‌شده')}</div>`);
+    }
+  }
+  const rows=q.slice(0,20).map(x=>`<tr style="cursor:pointer" onclick="go('rec','rfq','${x.rfq}')">
+    <td style="text-align:right;font-weight:700">${esc(x.supName)} ${x===best?'<span class="tag" style="color:var(--ok)">ارزان‌ترین</span>':''} ${x.won?'🏆':''}</td>
+    <td style="text-align:left">${money(x.price)}</td>
+    <td>${esc(x.lead||'—')}</td>
+    <td>${esc(iso2jstr(x.d)||'—')}</td>
+    <td style="font-size:11px;color:var(--tx2)">${esc(x.rfqTitle)}</td></tr>`).join('');
+  return `<div class="sec"><h3>🧠 تحلیل قیمت و تأمین — استعلام‌ها و تصمیم خرید/فروش</h3>
+    ${chips.length?`<div class="comp" style="margin-bottom:10px">${chips.join('')}</div>`:''}
+    ${can('c','rfq')?`<div style="display:grid;grid-template-columns:1fr 130px 110px auto;gap:8px;background:var(--bg3);border-radius:10px;padding:8px;margin-bottom:8px">
+      <select id="pq_sup"><option value="">— تأمین‌کننده —</option>${sups.map(x=>`<option value="${x.id}">${esc(x.d.title)}</option>`).join('')}</select>
+      <input id="pq_price" inputmode="numeric" dir="ltr" placeholder="قیمت استعلامی">
+      <input id="pq_lead" placeholder="زمان تحویل">
+      <button class="btn sm" onclick="prodQuickQuote('${pid}')">＋ ثبت استعلام</button></div>`:''}
+    ${q.length?`<div class="tblwrap"><table style="font-size:12px"><thead><tr><th style="text-align:right">تأمین‌کننده</th><th>قیمت واحد</th><th>تحویل</th><th>تاریخ ثبت</th><th>استعلام</th></tr></thead><tbody>${rows}</tbody></table></div>`
+      :`<div class="hint">هنوز استعلامی برای این کالا ثبت نشده — از فرم بالا اولین قیمت استعلامی را ثبت کنید تا هنگام تصمیم خرید/فروش کنار سوابق خرید دیده شود.</div>`}
+  </div>`;
 }
 function recHTML(e,id){
   const def=E[e], r=recs[id];
@@ -13043,7 +13117,7 @@ function recHTML(e,id){
       <span style="color:#ecd98f">${new Date(L.t).toLocaleString('fa-IR')}</span> · <b>${esc(L.by||'—')}</b>
       <div style="color:var(--tx2);margin-top:2px" dir="auto">${(L.c||[]).map(x=>esc(x)).join('<br>')}</div></div>`).join('')}</div>`;
   }
-  if(e==='product')h+=buyHistHTML(id);
+  if(e==='product')h+=buyHistHTML(id)+priceIntelHTML(id);
   if(e==='rfq')h+=rfqSection(r);
   if(e==='doc')h+=docSection(r);
   if(can('d',e,r))h+=`<div style="margin:8px 0 24px"><button class="btn bad sm" onclick="delFromPage('${e}','${id}')">🗑 حذف این مورد</button></div>`;
