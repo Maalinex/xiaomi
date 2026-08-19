@@ -280,11 +280,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.00</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.01</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.00</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.01</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -4308,7 +4308,9 @@ window.rfqAddOffer=function(id){
   const price=+document.getElementById('rfo_price').value||0;
   const lead=document.getElementById('rfo_lead').value;
   if(!sup||!price){alert('تأمین‌کننده و قیمت را وارد کن');return;}
-  const offers=(r.d.offers||[]).slice();offers.push({sup,price,lead,t:Date.now()});
+  const settle=(document.getElementById('rfo_settle')||{}).value||'';
+  const date=(document.getElementById('rfo_date')||{}).value||iso2jstr(today());
+  const offers=(r.d.offers||[]).slice();offers.push({sup,price,lead,settle,date,t:Date.now()});
   r.d={...r.d,offers};r.u=Date.now();put(r);
 };
 window.rfqWin=function(id,idx){
@@ -4328,18 +4330,20 @@ function rfqSection(r){
   const best=offers.length?Math.min(...offers.map(o=>+o.price||Infinity)):null;
   const sups=byE('crm');
   return `<div class="sec"><h3>⚖️ پیشنهادهای تأمین‌کنندگان</h3>
-    ${r.d.status!=='بسته — برنده انتخاب شد'?`<div style="display:grid;grid-template-columns:1fr 130px 110px auto;gap:8px;background:var(--bg3);border-radius:10px;padding:8px;margin-bottom:8px">
+    ${r.d.status!=='بسته — برنده انتخاب شد'?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;background:var(--bg3);border-radius:10px;padding:8px;margin-bottom:8px">
       <select id="rfo_sup"><option value="">— تأمین‌کننده —</option>${sups.map(x=>`<option value="${x.id}">${esc(x.d.title)}</option>`).join('')}</select>
       <input id="rfo_price" type="number" placeholder="قیمت واحد">
-      <input id="rfo_lead" placeholder="زمان تحویل">
+      <input id="rfo_lead" placeholder="نحوه تحویل">
+      <input id="rfo_settle" placeholder="نحوه تسویه">
+      <input id="rfo_date" placeholder="تاریخ (${iso2jstr(today())})" dir="ltr">
       <button class="btn sm" onclick="rfqAddOffer('${r.id}')">＋ ثبت پیشنهاد</button></div>`:''}
-    <table style="font-size:12px"><thead><tr><th style="text-align:right">تأمین‌کننده</th><th>قیمت واحد</th><th>جمع (${(+r.d.qty||1).toLocaleString('fa-IR')} عدد)</th><th>تحویل</th><th></th></tr></thead><tbody>
+    <table style="font-size:12px"><thead><tr><th style="text-align:right">تأمین‌کننده</th><th>قیمت واحد</th><th>جمع (${(+r.d.qty||1).toLocaleString('fa-IR')} عدد)</th><th>تحویل</th><th>تسویه</th><th></th></tr></thead><tbody>
     ${offers.sort((a,b)=>(+a.price||0)-(+b.price||0)).map(o=>{const sn=recs[o.sup]?recs[o.sup].d.title:'—';
       const isBest=(+o.price===best);const isWin=r.d.winner===o.i;
       return `<tr style="${isWin?'outline:1px solid var(--ok);':''}">
       <td style="text-align:right;font-weight:700">${esc(sn)} ${isBest?'<span class="tag" style="color:var(--ok)">ارزان‌ترین</span>':''} ${isWin?'🏆':''}</td>
-      <td>${money(+o.price||0)}</td><td>${money((+o.price||0)*(+r.d.qty||1))}</td><td>${esc(o.lead||'—')}</td>
-      <td>${r.d.status!=='بسته — برنده انتخاب شد'?`<button class="btn sm" onclick="rfqWin('${r.id}',${o.i})">🏆 انتخاب برنده</button>`:''}</td></tr>`;}).join('')||'<tr><td colspan="5" style="color:var(--tx2)">پیشنهادی ثبت نشده</td></tr>'}
+      <td>${money(+o.price||0)}</td><td>${money((+o.price||0)*(+r.d.qty||1))}</td><td>${esc(o.lead||'—')}</td><td>${esc(o.settle||'—')}</td>
+      <td>${r.d.status!=='بسته — برنده انتخاب شد'?`<button class="btn sm" onclick="rfqWin('${r.id}',${o.i})">🏆 انتخاب برنده</button>`:''}</td></tr>`;}).join('')||'<tr><td colspan="6" style="color:var(--tx2)">پیشنهادی ثبت نشده</td></tr>'}
     </tbody></table></div>`;
 }
 /* ═══ 🗄 مدیریت اسناد (DMS) ═══ */
@@ -12945,9 +12949,10 @@ function prodQuotes(pid){
   byE('rfq').forEach(r=>{
     if(relIds(r,'product')[0]!==pid)return;
     (r.d.offers||[]).forEach((o,i)=>{
-      out.push({t:r.u||0,d:new Date(r.u||Date.now()).toISOString().slice(0,10),
+      const raw=o.date||new Date(o.t||r.u||0).toISOString().slice(0,10);
+      out.push({t:o.t||r.u||0,dj:/^\d{4}-/.test(String(raw))?iso2jstr(raw):String(raw),
         sup:o.sup,supName:o.sup&&recs[o.sup]?recs[o.sup].d.title:'—',
-        price:+o.price||0,lead:o.lead||'',rfq:r.id,rfqTitle:r.d.title||'',
+        price:+o.price||0,lead:o.lead||'',settle:o.settle||'',rfq:r.id,rfqTitle:r.d.title||'',
         won:r.d.winner===i,open:r.d.status!=='لغو'});
     });
   });
@@ -12961,19 +12966,37 @@ function quoteChipHTML(pid){ // خلاصهٔ یک‌خطی برای فرم‌ه�
     <a href="#" style="color:var(--ac);text-decoration:none" onclick="go('rec','rfq','${best.rfq}');return false">↗ مشاهده استعلام</a></div>`;
 }
 window.prodQuickQuote=function(pid){
-  const sup=(document.getElementById('pq_sup')||{}).value||'';
-  const pr=Number(String(faNum(String((document.getElementById('pq_price')||{}).value||''))).replace(/[٬,\s]/g,''))||0;
-  const lead=(document.getElementById('pq_lead')||{}).value||'';
-  if(!sup){alert('تأمین‌کننده را انتخاب کنید');return;}
+  const g=id=>((document.getElementById(id)||{}).value||'').trim();
+  const pn=g('pq_prod');
+  if(!pn){alert('نام کالا را بنویسید یا از فهرست جستجو انتخاب کنید');return;}
+  const pr=Number(String(faNum(g('pq_price'))).replace(/[٬,\s]/g,''))||0;
   if(!(pr>0)){alert('قیمت استعلامی را وارد کنید');return;}
-  let r=byE('rfq').find(x=>relIds(x,'product')[0]===pid&&x.d.status!=='بسته — برنده انتخاب شد'&&x.d.status!=='لغو');
+  const supN=g('pq_sup');
+  if(!supN){alert('نام تأمین‌کننده را وارد کنید');return;}
+  const date=g('pq_date')||iso2jstr(today());
+  const lead=g('pq_lead'), settle=g('pq_settle'), code=g('pq_code');
+  // 📦 کالا: یافتن با نام؛ اگر جدید بود همان‌جا با کد ساخته می‌شود
+  let prod=byE('product').find(x=>(x.d.title||'').trim()===pn);
+  if(!prod){
+    if(!confirm('کالای «'+pn+'» در سیستم نیست — به‌عنوان کالای جدید'+(code?' با کد «'+code+'»':'')+' ثبت شود؟'))return;
+    const npid=uid();put({id:npid,e:'product',d:{title:pn,sku:code||'',_by:myEmail()},u:Date.now()});prod=recs[npid];
+  } else if(code&&!prod.d.sku){prod.d={...prod.d,sku:code};prod.u=Date.now();put(prod);}
+  // 🏭 تأمین‌کننده: یافتن با نام؛ اگر جدید بود ساخته می‌شود
+  let sup=byE('crm').find(x=>(x.d.title||'').trim()===supN);
+  if(!sup){
+    if(!confirm('تأمین‌کنندهٔ «'+supN+'» در سیستم نیست — ثبت شود؟'))return;
+    const nsid=uid();put({id:nsid,e:'crm',d:{title:supN,rel:'تامین‌کننده',_by:myEmail()},u:Date.now()});sup=recs[nsid];
+  }
+  // ⚖️ استعلامِ بازِ همان کالا: یافتن یا ساخت
+  let r=byE('rfq').find(x=>relIds(x,'product')[0]===prod.id&&x.d.status!=='بسته — برنده انتخاب شد'&&x.d.status!=='لغو');
   if(!r){
     const rid=uid();
-    put({id:rid,e:'rfq',d:{title:'استعلام '+(recs[pid]&&recs[pid].d.title||''),product:[pid],status:'باز',offers:[],_by:myEmail()},u:Date.now()});
+    put({id:rid,e:'rfq',d:{title:'استعلام '+(prod.d.title||''),product:[prod.id],status:'باز',offers:[],_by:myEmail()},u:Date.now()});
     r=recs[rid];
   }
-  r.d={...r.d,offers:[...(r.d.offers||[]),{sup,price:pr,lead}]};
+  r.d={...r.d,offers:[...(r.d.offers||[]),{sup:sup.id,price:pr,lead,settle,date,t:Date.now()}]};
   r.u=Date.now();put(r);
+  if(relIds(recs[pid]||{d:{}},'product')||prod.id!==pid){try{go('rec','product',prod.id);}catch(e){render();}}
 };
 function priceIntelHTML(pid){
   if(!pid||!recs[pid])return'';
@@ -13000,16 +13023,27 @@ function priceIntelHTML(pid){
     <td style="text-align:right;font-weight:700">${esc(x.supName)} ${x===best?'<span class="tag" style="color:var(--ok)">ارزان‌ترین</span>':''} ${x.won?'🏆':''}</td>
     <td style="text-align:left">${money(x.price)}</td>
     <td>${esc(x.lead||'—')}</td>
-    <td>${esc(iso2jstr(x.d)||'—')}</td>
+    <td>${esc(x.settle||'—')}</td>
+    <td>${esc(x.dj||'—')}</td>
     <td style="font-size:11px;color:var(--tx2)">${esc(x.rfqTitle)}</td></tr>`).join('');
   return `<div class="sec"><h3>🧠 تحلیل قیمت و تأمین — استعلام‌ها و تصمیم خرید/فروش</h3>
     ${chips.length?`<div class="comp" style="margin-bottom:10px">${chips.join('')}</div>`:''}
-    ${can('c','rfq')?`<div style="display:grid;grid-template-columns:1fr 130px 110px auto;gap:8px;background:var(--bg3);border-radius:10px;padding:8px;margin-bottom:8px">
-      <select id="pq_sup"><option value="">— تأمین‌کننده —</option>${sups.map(x=>`<option value="${x.id}">${esc(x.d.title)}</option>`).join('')}</select>
-      <input id="pq_price" inputmode="numeric" dir="ltr" placeholder="قیمت استعلامی">
-      <input id="pq_lead" placeholder="زمان تحویل">
-      <button class="btn sm" onclick="prodQuickQuote('${pid}')">＋ ثبت استعلام</button></div>`:''}
-    ${q.length?`<div class="tblwrap"><table style="font-size:12px"><thead><tr><th style="text-align:right">تأمین‌کننده</th><th>قیمت واحد</th><th>تحویل</th><th>تاریخ ثبت</th><th>استعلام</th></tr></thead><tbody>${rows}</tbody></table></div>`
+    ${can('c','rfq')?`<div style="background:var(--bg3);border-radius:10px;padding:10px;margin-bottom:8px">
+      <b style="font-size:12px">＋ ثبت استعلام جدید</b>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:8px">
+        <div><label style="font-size:10.5px;color:var(--tx2)">کالا 🔍</label><input id="pq_prod" list="pq_pdl" value="${esc(recs[pid].d.title||'')}" placeholder="جستجو یا نام کالای جدید…">
+          <datalist id="pq_pdl">${byE('product').map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist></div>
+        <div><label style="font-size:10.5px;color:var(--tx2)">کد کالا <span style="opacity:.7">(فقط برای کالای جدید)</span></label><input id="pq_code" placeholder="SKU / کد" dir="ltr"></div>
+        <div><label style="font-size:10.5px;color:var(--tx2)">قیمت استعلامی (تومان)</label><input id="pq_price" inputmode="numeric" dir="ltr" placeholder="۰"></div>
+        <div><label style="font-size:10.5px;color:var(--tx2)">تاریخ استعلام</label><div style="display:flex;gap:4px"><input id="pq_date" value="${iso2jstr(today())}" style="flex:1" dir="ltr"><button type="button" class="btn gh sm" style="padding:4px 8px" onclick="openJcal('pq_date')">📅</button></div></div>
+        <div><label style="font-size:10.5px;color:var(--tx2)">تأمین‌کننده 🔍</label><input id="pq_sup" list="pq_sdl" placeholder="جستجو یا نام جدید…">
+          <datalist id="pq_sdl">${sups.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist></div>
+        <div><label style="font-size:10.5px;color:var(--tx2)">نحوه تحویل</label><input id="pq_lead" placeholder="مثلاً: ۳ روزه، درب انبار"></div>
+        <div><label style="font-size:10.5px;color:var(--tx2)">نحوه تسویه</label><input id="pq_settle" placeholder="مثلاً: نقدی / چک یک‌ماهه"></div>
+      </div>
+      <div style="margin-top:8px"><button class="btn sm" onclick="prodQuickQuote('${pid}')">＋ ثبت استعلام</button></div>
+    </div>`:''}
+    ${q.length?`<div class="tblwrap"><table style="font-size:12px"><thead><tr><th style="text-align:right">تأمین‌کننده</th><th>قیمت واحد</th><th>تحویل</th><th>تسویه</th><th>تاریخ</th><th>استعلام</th></tr></thead><tbody>${rows}</tbody></table></div>`
       :`<div class="hint">هنوز استعلامی برای این کالا ثبت نشده — از فرم بالا اولین قیمت استعلامی را ثبت کنید تا هنگام تصمیم خرید/فروش کنار سوابق خرید دیده شود.</div>`}
   </div>`;
 }
