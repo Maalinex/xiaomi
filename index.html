@@ -280,11 +280,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.02</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.03</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.02</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.03</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1037,7 +1037,7 @@ product:{ic:'📦',n:'کالا و خدمات',grp:'کالا و انبار',f:[
  {k:'cod',n:'مبلغ دریافت در محل (تومان)',t:NUM},
  {k:'note',n:'یادداشت',t:LNG}],
  cols:['title','customer','courier','status','date'],comp:'delivBrief'},
- rfq:{ic:'⚖️',n:'استعلام قیمت (چندتأمین‌کننده)',grp:'کالا و انبار',f:[
+ rfq:{ic:'⚖️',n:'استعلام قیمت (چندتأمین‌کننده)',grp:'کالا و انبار',sub:1,f:[
  {k:'title',n:'موضوع استعلام',t:TXT},
  {k:'product',n:'کالا',t:REL,r:'product',s:1},
  {k:'qty',n:'تعداد موردنیاز',t:NUM},
@@ -3032,6 +3032,7 @@ const VIEWS_ACL=[
  ['pudash','🚚 داشبورد خرید'],
  ['supdash','🏭 تأمین‌کنندگان'],
  ['pinvnew','🧾 ثبت فاکتور خرید'],
+ ['quotenew','⚖️ ثبت استعلام'],
  ['perfdash','🎖️ داشبورد عملکرد'],
  ['targetdash','🎯 پایش تارگت فروش'],
  ['aligndash','🧭 همسویی عملکرد'],
@@ -3198,7 +3199,7 @@ window.openModcfg=openModcfg;window.toggleModule=toggleModule;window.saveBrand=s
 const VIEW_GRP={
  smdash:'فروش',invnew:'فروش',plreport:'فروش',distdash:'فروش',saleswf:'فروش',
  custdash:'CRM و مشتریان',loyaldash:'CRM و مشتریان',smsdash:'CRM و مشتریان',
- whdash:'کالا و انبار',pudash:'کالا و انبار',supdash:'کالا و انبار',pinvnew:'کالا و انبار',
+ whdash:'کالا و انبار',pudash:'کالا و انبار',supdash:'کالا و انبار',pinvnew:'کالا و انبار',quotenew:'کالا و انبار',
  perfdash:'عملکرد و تارگت',targetdash:'عملکرد و تارگت',aligndash:'عملکرد و تارگت',
  pldash:'مالی',bankdash:'مالی',arapdash:'مالی',settlenew:'مالی',chqdash:'مالی',sepfin:'مالی',sepdash:'مالی',dualdash:'مالی',pfdash:'مالی',
  lvreq:'پرسنل و سازمان',cartable:'پرسنل و سازمان'};
@@ -9275,6 +9276,7 @@ function wsMenu(g){
   if(g==='کالا و انبار')return (
     it('whdash','📦 داشبورد انبار',"go('whdash')",canSee('product')&&canView('whdash'))+
     it('pudash','🚚 داشبورد خرید',"go('pudash')",canSee('purchinv')&&canView('pudash'))+
+    it('quotenew','⚖️ ثبت استعلام',"view.qsaved=null;go('quotenew')",canSee('rfq')&&can('c','rfq')&&canView('quotenew'))+
     it('supdash','🏭 تأمین‌کنندگان',"go('supdash')",canSee('crm')&&canView('supdash'))+
     it('pinvnew','🧾 ثبت فاکتور خرید',"pinvDraft=null;go('pinvnew')",canSee('purchinv')&&can('c','purchinv')&&canView('pinvnew')));
   if(g==='عملکرد و تارگت')return (
@@ -9471,13 +9473,14 @@ function render(){
     view.type==='swotmap'?'🧭 بوم SWOT و PESTEL':
     view.type==='stratdash'?'🏛️ داشبورد استراتژیک هلدینگ':
     view.type==='bscmap'?'🗺️ نقشه استراتژی و BSC':
+    view.type==='quotenew'?'⚖️ ثبت استعلام':
     view.type==='bsccanvas'?'🧭 بوم استراتژی':
     view.type==='list'&&view.e==='invoice'&&view.ikind===INV_KIND_SALE?'🧾 گزارش فاکتورهای فروش':
     view.type==='list'&&view.e==='invoice'&&view.ikind===INV_KIND_PROF?'📝 گزارش پیش‌فاکتورها':
     view.type==='rec'?(E[view.e].ic+' '+(recs[view.id].d.title||E[view.e].n)):
     E[view.e].ic+' '+E[view.e].n;
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',invdash:'invdash',cfaacad:'invdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',sepdash:'sepdash',sepfin:'sepfin',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter'};
+  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',invdash:'invdash',cfaacad:'invdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',sepdash:'sepdash',sepfin:'sepfin',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -9487,6 +9490,7 @@ function render(){
     else if(view.type==='acl')c.innerHTML=aclHTML();
     else if(view.type==='schema')c.innerHTML=schemaHTML();
     else if(view.type==='impcenter')c.innerHTML=impcenterHTML();
+    else if(view.type==='quotenew')c.innerHTML=quotenewHTML();
     else if(view.type==='me')c.innerHTML=meHTML();
     else if(view.type==='myhub')c.innerHTML=myhubHTML();
     else if(view.type==='lvreq')c.innerHTML=lvreqHTML();
@@ -12986,7 +12990,7 @@ window.prodQuickQuote=function(pid){
   const date=g('pq_date')||iso2jstr(today());
   const lead=g('pq_lead'), settle=g('pq_settle'), code=g('pq_code');
   // 📦 کالا: یافتن با نام یا کد؛ اگر جدید بود همان‌جا با کد ساخته می‌شود
-  let prod=prodByNameOrSku(pn);
+  let prod=prodByNameOrSku(pn)||prodByNameOrSku(code);
   if(!prod){
     if(!confirm('کالای «'+pn+'» در سیستم نیست — به‌عنوان کالای جدید'+(code?' با کد «'+code+'»':'')+' ثبت شود؟'))return;
     const npid=uid();put({id:npid,e:'product',d:{title:pn,sku:code||'',_by:myEmail()},u:Date.now()});prod=recs[npid];
@@ -13006,8 +13010,43 @@ window.prodQuickQuote=function(pid){
   }
   r.d={...r.d,offers:[...(r.d.offers||[]),{sup:sup.id,price:pr,lead,settle,date,t:Date.now()}]};
   r.u=Date.now();put(r);
-  if(relIds(recs[pid]||{d:{}},'product')||prod.id!==pid){try{go('rec','product',prod.id);}catch(e){render();}}
+  if(view.type==='quotenew'){view.qsaved=(prod.d.title||'')+(prod.d.sku?' 🏷 '+prod.d.sku:'');render();}
+  else if(prod.id!==pid){try{go('rec','product',prod.id);}catch(e){render();}}
 };
+window.quoteCodePick=function(v){const p=prodByNameOrSku(v);if(p){const el=document.getElementById('pq_prod');if(el)el.value=p.d.title||'';}};
+window.quoteNamePick=function(v){const p=prodByNameOrSku(v);if(p&&p.d.sku){const el=document.getElementById('pq_code');if(el&&!el.value)el.value=p.d.sku;}};
+function quotenewHTML(){
+  const sups=byE('crm');
+  const lbl='style="font-size:10.5px;color:var(--tx2)"';
+  const all=[];
+  byE('rfq').forEach(r=>{const pid=relIds(r,'product')[0];
+    (r.d.offers||[]).forEach(o=>{all.push({t:o.t||r.u||0,date:o.date||'',pid,
+      pname:pid&&recs[pid]?recs[pid].d.title:'—',sku:pid&&recs[pid]?String(recs[pid].d.sku||''):'',
+      sup:o.sup&&recs[o.sup]?recs[o.sup].d.title:'—',price:+o.price||0,lead:o.lead||'',settle:o.settle||''});});});
+  all.sort((a,b)=>b.t-a.t);
+  return `<div class="sec"><h3>⚖️ ثبت استعلام قیمت</h3>
+    ${view.qsaved?`<div style="border:1px solid var(--ok);background:rgba(24,178,107,.08);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:12.5px;color:var(--ok)">✅ استعلام «${esc(view.qsaved)}» ثبت شد — می‌توانید استعلام بعدی را وارد کنید.</div>`:''}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px">
+      <div><label ${lbl}>تاریخ استعلام</label><div style="display:flex;gap:4px"><input id="pq_date" value="${iso2jstr(today())}" style="flex:1" dir="ltr"><button type="button" class="btn gh sm" style="padding:4px 8px" onclick="openJcal('pq_date')">📅</button></div></div>
+      <div><label ${lbl}>کد کالا 🔍</label><input id="pq_code" list="pq_cdl" dir="ltr" placeholder="جستجوی کد…" onchange="quoteCodePick(this.value)">
+        <datalist id="pq_cdl">${byE('product').filter(x=>x.d.sku).map(x=>`<option value="${esc(String(x.d.sku))}">${esc(x.d.title||'')}</option>`).join('')}</datalist></div>
+      <div><label ${lbl}>نام کالا 🔍 <span style="opacity:.7">(اگر جدید بود همان‌جا ساخته می‌شود)</span></label><input id="pq_prod" list="pq_pdl" placeholder="جستجو یا نام کالای جدید…" onchange="quoteNamePick(this.value)">
+        <datalist id="pq_pdl">${prodDlOpts(byE('product'))}</datalist></div>
+      <div><label ${lbl}>نام تأمین‌کننده 🔍</label><input id="pq_sup" list="pq_sdl" placeholder="جستجو یا نام جدید…">
+        <datalist id="pq_sdl">${sups.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist></div>
+      <div><label ${lbl}>قیمت خرید (تومان)</label><input id="pq_price" inputmode="numeric" dir="ltr" placeholder="۰"></div>
+      <div><label ${lbl}>شرایط تحویل</label><input id="pq_lead" placeholder="مثلاً: ۳ روزه، درب انبار"></div>
+      <div><label ${lbl}>شرایط پرداخت</label><input id="pq_settle" placeholder="مثلاً: نقدی / چک یک‌ماهه"></div>
+    </div>
+    <div style="margin-top:10px"><button class="btn" onclick="prodQuickQuote('')">＋ ثبت استعلام</button></div>
+  </div>
+  <div class="sec"><h3>🗒 آخرین استعلام‌های ثبت‌شده</h3>
+    ${all.length?`<div class="tblwrap" style="max-height:420px;overflow:auto"><table style="font-size:12px"><thead><tr><th>تاریخ</th><th style="text-align:right">کالا</th><th>کد</th><th style="text-align:right">تأمین‌کننده</th><th>قیمت خرید</th><th>تحویل</th><th>تسویه</th></tr></thead><tbody>
+    ${all.slice(0,50).map(x=>`<tr style="cursor:pointer" onclick="go('rec','product','${x.pid}')"><td>${esc(x.date||'—')}</td><td style="text-align:right;font-weight:700">${esc(x.pname)}</td><td dir="ltr">${esc(x.sku||'—')}</td><td style="text-align:right">${esc(x.sup)}</td><td>${money(x.price)}</td><td>${esc(x.lead||'—')}</td><td>${esc(x.settle||'—')}</td></tr>`).join('')}
+    </tbody></table></div>`:'<div class="hint">هنوز استعلامی ثبت نشده است — اولین را از فرم بالا وارد کنید.</div>'}
+  </div>`;
+}
+window.quotenewHTML=quotenewHTML;
 function priceIntelHTML(pid){
   if(!pid||!recs[pid])return'';
   const q=prodQuotes(pid);
