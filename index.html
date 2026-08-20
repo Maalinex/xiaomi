@@ -276,11 +276,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.19</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.20</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.19</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.20</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -10784,7 +10784,7 @@ function smdashHTML(){
     h+=`<div class="sec"><h3>🔍 گزارش موردی</h3>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
         ${CT.map(([k,n])=>`<button class="btn ${k===view.smCaseT?'':'gh'} sm" onclick="view.smCaseT='${k}';view.smCaseId=null;view.smCaseQ='';render()">${n}</button>`).join('')}
-        <input data-search="smcase" value="${esc(cq)}" placeholder="🔎 نام را بنویسید…" oninput="view.smCaseQ=this.value;view.smCaseId=null;clearTimeout(window._smcT);window._smcT=setTimeout(render,250)" style="max-width:220px">
+        <input data-search="smcase" value="${esc(view.smCaseQ||'')}" placeholder="🔎 نام را بنویسید…" oninput="view.smCaseQ=this.value;view.smCaseId=null;clearTimeout(window._smcT);window._smcT=setTimeout(render,250)" style="max-width:220px">
         <label style="display:flex;gap:5px;align-items:center;font-size:11.5px;cursor:pointer"><input type="checkbox" ${view.smCaseAll?'checked':''} onchange="view.smCaseAll=this.checked;render()"> کل تاریخچه (نه فقط دورهٔ انتخابی)</label>
       </div>`;
     if(!selId&&cq.length>=1){
@@ -13392,7 +13392,7 @@ function listHTML(e){
     ${can('c',e)?`<button class="btn gh sm" onclick="impOpen('${e}')" title="ورود گروهی داده از فایل اکسل یا CSV">📥 ورود از اکسل</button>`:''}
     ${can('d',e)&&rows.length?(view.selMode?`<button class="btn gh sm" onclick="bulkSelCancel()">✕ لغو انتخاب</button>`:`<button class="btn bad sm" onclick="bulkSelStart('${e}')" title="کنار هر مورد یک چک‌باکس می‌آید؛ فقط موارد تیک‌خورده حذف می‌شوند">🗑 حذف گروهی</button>`):''}
     <div style="flex-basis:100%">${rptBarHTML(e)}</div>
-    <input data-search="listq" placeholder="🔍 جستجو در همه فیلدها…" value="${esc(q)}" oninput="listSearch(this.value)">
+    <input data-search="listq" placeholder="🔍 جستجو در همه فیلدها…" value="${esc(view.q||'')}" oninput="listSearch(this.value)">
     <span style="color:var(--tx2);font-size:12px">${rows.length.toLocaleString('fa-IR')} مورد</span></div>
   <div class="tools" style="margin-top:-4px">
     <label style="font-size:11px;color:var(--tx2);margin:0">↕ مرتب‌سازی:</label>
