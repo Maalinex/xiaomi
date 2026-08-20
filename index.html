@@ -41,7 +41,8 @@ body{font-family:Vazirmatn,Tahoma,sans-serif;color:var(--tx);font-size:14px;
 #side .logo{padding:16px 14px;font-weight:800;font-size:16px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
 #nav{overflow-y:auto;flex:1;padding:8px}
 .nav-h{font-size:11.5px;color:var(--tx);font-weight:800;margin:14px 8px 4px}
-.navg::after{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-start:6px;background:var(--gdot,#c4cfde);vertical-align:middle}
+.navg .gic{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:14px;flex-shrink:0;background:var(--gdot,#8a96a8);box-shadow:var(--sh2)}
+.navg .pm{font-size:12px;color:var(--tx2);width:14px;text-align:center}
 .navg[data-g="فروش"]{--gdot:#0078D4}.navg[data-g="CRM و مشتریان"]{--gdot:#038387}.navg[data-g="کالا و انبار"]{--gdot:#CA5010}
 .navg[data-g="عملکرد و تارگت"]{--gdot:#744DA9}.navg[data-g="مالی"]{--gdot:#107C10}
 .navg[data-g="پرسنل و سازمان"]{--gdot:#E3008C}
@@ -287,11 +288,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.21</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.22</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.21</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.22</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -3097,6 +3098,7 @@ const VIEWS_ACL=[
  ['dualdash','🎛 کنترل دوگانه (حسابداری⇄عملیات)'],
  ['pfdash','🔄 تسویه درگاه‌ها'],
  ['impcenter','📥 مرکز ورود اکسل'],
+ ['basedash','🧰 اطلاعات پایه'],
  ['pomo','🍅 پومودورو'],
  ['layout','🧲 جابجایی چیدمان فیلدها (پیش‌فرض: فقط ادمین)'],
  ['seclayout','🧲 جابجایی المان‌های صفحات و داشبوردها (پیش‌فرض: فقط ادمین)']];
@@ -6712,6 +6714,24 @@ window.pdImportXlsx=function(inp){
   }catch(e){alert('خطا در خواندن فایل: '+e.message);}};
   rd.readAsArrayBuffer(f);
 };
+function basedashHTML(){ // 🧰 اطلاعات پایه — ثبت و ورود اکسل داده‌های بنیادی
+  const items=[['product','کالاها و خدمات'],['customer','مشتریان'],['crm','تأمین‌کنندگان و ذینفعان'],['whouse','انبارها'],['account','بانک‌ها و صندوق'],['hr','پرسنل'],['business','کسب‌وکارها'],['pricelist','لیست قیمت فروش']];
+  let h=`<div class="sec"><h3>🧰 اطلاعات پایه</h3>
+    <div class="hint" style="margin-bottom:12px">ابتدا داده‌های پایه را ثبت یا با اکسل وارد کنید — فاکتورها، حواله‌ها، استعلام‌ها و فرآیندها همه به همین‌ها تکیه می‌کنند.</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px">`;
+  items.forEach(([e,n])=>{if(!E[e]||!canSee(e))return;
+    const cnt=byE(e).length;
+    h+=`<div class="card"><div style="display:flex;gap:10px;align-items:center">
+      <span style="width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:20px;background:rgba(0,120,212,.10)">${E[e].ic}</span>
+      <div><b style="font-size:13px">${esc(n)}</b><div style="font-size:11px;color:${cnt?'var(--tx2)':'var(--warn)'}">${cnt?cnt.toLocaleString('fa-IR')+' رکورد':'هنوز خالی'}</div></div></div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+        ${can('c',e)?`<button class="btn sm" onclick="openRec('${e}')">＋ ثبت</button>`:''}
+        ${can('c',e)?`<button class="btn gh sm" onclick="impOpen('${e}')">📥 اکسل</button>`:''}
+        <button class="btn gh sm" onclick="go('list','${e}')">↗ لیست</button></div></div>`;});
+  h+=`</div></div>`;
+  return h;
+}
+window.basedashHTML=basedashHTML;
 function paydashHTML(){
   const accs=pdBankAccounts();
   const r=pdSel();
@@ -9532,9 +9552,10 @@ function navIsCol(g){ // بسته است؟ (پیش‌فرض: همه بسته، �
   if(g==='مدیریت کسب و کار')return false; // منوی اصلی کار روزانه — پیش‌فرض باز
   return g!==activeGrp();
 }
-function toggleGrp(g){
+function toggleGrp(g){ // 🪗 آکاردئونی: باز شدن یک گروه، بقیه را می‌بندد
   navCol=navCol||{};
-  navCol[g]=navIsCol(g)?0:1;
+  if(navIsCol(g)){allGroups().forEach(x=>{navCol[x]=x===g?0:1;});}
+  else navCol[g]=1;
   try{localStorage.setItem('xr_navcol',JSON.stringify(navCol));}catch(e){}
   nav();
 }
@@ -9913,6 +9934,7 @@ function nav(){
   <div class="nav-i ${view.type==='schema'?'on':''}" onclick="go('schema')">🧩 فیلدها و بخش‌ها</div>
   <div class="nav-i ${view.type==='backupdash'?'on':''}" onclick="go('backupdash')">💾 پشتیبان‌گیری و بازیابی</div>`;
   else if(!isPending())h+=`<div class="nav-i ${view.type==='backupdash'?'on':''}" onclick="go('backupdash')">🚨 حالت بحران (تغییرات من)</div>`;
+  if(!isPending()&&canView('basedash'))h+=`<div class="nav-i ${view.type==='basedash'?'on':''}" onclick="go('basedash')">🧰 اطلاعات پایه</div>`;
   if(!isPending()&&canView('impcenter'))h+=`<div class="nav-i ${view.type==='impcenter'?'on':''}" onclick="go('impcenter')">📥 مرکز ورود اکسل</div>`;
   // 🏢 انتخاب‌گر کسب‌وکار فعالِ سراسری (موقعیت قابل جابجایی: بالا / پایین / مخفی)
   if(bizSelPos()==='top')h+=bizSelectorHTML();
@@ -9953,9 +9975,12 @@ function nav(){
     if(!items)return; // گروه خالی (بدون دسترسی) اصلاً نمایش داده نشود
     const col=navIsCol(g);
     const gcount=ents.length;
+    const GRP_IC={'فروش':'🧾','CRM و مشتریان':'🤝','کالا و انبار':'📦','عملکرد و تارگت':'🎯','مالی':'💰','پرسنل و سازمان':'👥','بخش‌های سفارشی':'📁'};
     h+=`<div class="nav-h navg" data-g="${g}" onclick="toggleGrp(this.dataset.g)" title="${col?'باز کردن':'بستن'}">
-      <span class="pm">${col?'+':'−'}</span> ${esc(grpLabel(g))}
-      ${col?`<span class="c" style="opacity:.6">${gcount.toLocaleString('fa-IR')}</span>`:''}</div>`;
+      <span class="gic">${GRP_IC[g]||'📁'}</span>
+      <span style="flex:1">${esc(grpLabel(g))}</span>
+      ${col?`<span class="c" style="opacity:.6">${gcount.toLocaleString('fa-IR')}</span>`:''}
+      <span class="pm">${col?'‹':'⌄'}</span></div>`;
     if(!col)h+=items;
   });
   if(bizSelPos()==='bottom')h+=bizSelectorHTML();
@@ -10079,13 +10104,14 @@ function render(){
     view.type==='quotenew'?'⚖️ ثبت استعلام':
     view.type==='paydash'?'💸 حواله روزانه':
     view.type==='bpm'?'🧩 فرآیندهای کاری':
+    view.type==='basedash'?'🧰 اطلاعات پایه':
     view.type==='bsccanvas'?'🧭 بوم استراتژی':
     view.type==='list'&&view.e==='invoice'&&view.ikind===INV_KIND_SALE?'🧾 گزارش فاکتورهای فروش':
     view.type==='list'&&view.e==='invoice'&&view.ikind===INV_KIND_PROF?'📝 گزارش پیش‌فاکتورها':
     view.type==='rec'?(E[view.e].ic+' '+(recs[view.id].d.title||E[view.e].n)):
     E[view.e].ic+' '+E[view.e].n;
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',invdash:'invdash',cfaacad:'invdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',sepdash:'sepdash',sepfin:'sepfin',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',paydash:'paydash',bpm:'bpm'};
+  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',invdash:'invdash',cfaacad:'invdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',sepdash:'sepdash',sepfin:'sepfin',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',paydash:'paydash',bpm:'bpm',basedash:'basedash'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -10098,6 +10124,7 @@ function render(){
     else if(view.type==='quotenew')c.innerHTML=quotenewHTML();
     else if(view.type==='paydash')c.innerHTML=paydashHTML();
     else if(view.type==='bpm')c.innerHTML=bpmHTML();
+    else if(view.type==='basedash')c.innerHTML=basedashHTML();
     else if(view.type==='me')c.innerHTML=meHTML();
     else if(view.type==='myhub')c.innerHTML=myhubHTML();
     else if(view.type==='lvreq')c.innerHTML=lvreqHTML();
@@ -27916,14 +27943,14 @@ function usersHTML(){
   <p style="font-size:12px;color:var(--tx2);line-height:2">با این کار، همه کاربران به‌جز خودتان از لیست پاک می‌شوند. از آن پس هر کسی که وارد شود دوباره در حالت «در انتظار تایید» قرار می‌گیرد و تا وقتی شما نقش ندهید، هیچ داده‌ای نمی‌بیند — یعنی عملاً باید دوباره از صفر تایید/ثبت‌نام شوند. داده‌های ثبت‌شده حذف نمی‌شوند، فقط دسترسی افراد صفر می‌شود.</p>
   <button class="btn bad" onclick="resetUsers()">🧹 حذف همه کاربران به‌جز خودم</button>
   <p style="font-size:11px;color:var(--tx2);margin-top:10px">🔑 اگر می‌خواهید حساب ورود افراد هم کاملاً حذف شود (تا با رمز جدید از نو ثبت‌نام کنند)، در داشبورد Supabase → Authentication → Users آن‌ها را حذف کنید (حساب خودتان را نگه دارید). راهنمای کامل در فایل «راهنمای-نصب».</p></div>
-  <div class="sec"><h3>📋 شرح سطوح دسترسی</h3><div style="font-size:13px;color:var(--tx2);line-height:2.1">
-  <b style="color:var(--tx)">ادمین:</b> همه‌کاره + مدیریت کاربران و تنظیمات.<br>
-  <b style="color:var(--tx)">مدیرارشد:</b> ایجاد، ویرایش و حذف در همه بخش‌ها.<br>
-  <b style="color:var(--tx)">مدیر:</b> ایجاد و ویرایش همه بخش‌ها؛ حذف فقط مواردی که خودش ساخته.<br>
-  <b style="color:var(--tx)">معاون:</b> ایجاد و ویرایش همه بخش‌ها به‌جز مالی (حساب‌ها، تراکنش‌ها، بودجه، قراردادها — فقط مشاهده)؛ بدون حذف.<br>
-  <b style="color:var(--tx)">کارشناس ارشد:</b> ایجاد و ویرایش در پروژه‌ها، تسک‌ها، جلسات، ایده‌ها، KPI، CRM، مکاتبات و مرخصی‌ها؛ بقیه فقط مشاهده.<br>
-  <b style="color:var(--tx)">کارشناس:</b> ایجاد و ویرایش فقط تسک‌ها، ایده‌ها، KPI و مرخصی‌ها.<br>
-  <b style="color:var(--tx)">کاربر:</b> مشاهده همه‌چیز + ثبت مرخصی و ایده.</div></div>`;
+  <div class="sec"><h3>📋 ماتریس دسترسی نقش‌ها</h3>
+  <div class="tblwrap"><table style="font-size:12.5px"><thead><tr><th>نقش</th><th>مشاهده</th><th>ثبت / ویرایش</th><th>حذف</th><th>مدیریت کاربران و تنظیمات</th></tr></thead><tbody>
+    <tr><td><b>ادمین</b></td><td>همه</td><td>همه</td><td>همه</td><td>✓</td></tr>
+    <tr><td><b>مدیرارشد</b></td><td>همه</td><td>همه</td><td>همه</td><td>—</td></tr>
+    <tr><td><b>مدیر</b></td><td>همه (به‌جز مخفی‌شده‌ها)</td><td>همه بخش‌های مجاز</td><td>فقط ساخته‌های خودش</td><td>—</td></tr>
+    <tr><td><b>کارمند</b></td><td>بخش‌های کاری خودش (مالی و مدیریتی مخفی)</td><td>تسک، مرخصی، نامه، مشتری، پیش‌فاکتور و…</td><td>فقط ساخته‌های خودش</td><td>—</td></tr>
+  </tbody></table></div>
+  <p class="hint" style="margin-top:8px">جزئیات دقیق هر بخش/فیلد برای هر نقش یا کاربر خاص: «🛡️ سطوح دسترسی» │ نقش گردش فروش هر فرد: پروندهٔ HR او │ این قواعد در سرور (RLS) هم اعمال می‌شوند.</p></div>`;
   return h;
 }
 function resetUsers(){
