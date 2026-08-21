@@ -307,11 +307,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.30</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.32</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.30</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.32</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -5765,34 +5765,37 @@ function lvreqHTML(){
       <div style="background:var(--bg3);border-radius:12px;padding:10px 14px;border:1px solid ${b.left<3?'var(--bad)':'var(--ac)'}"><div style="font-size:11px;color:var(--tx2)">ماندهٔ مرخصی</div><div style="font-size:20px;font-weight:800;color:${b.left<0?'var(--bad)':'var(--ac)'}">${b.left.toLocaleString('fa-IR')} روز</div><div style="font-size:11px;color:var(--tx2)">معادل ${(b.left*LV_DAYH).toLocaleString('fa-IR')} ساعت (روزی ${LV_DAYH} ساعت)</div></div>
     </div>
     <div class="row" style="margin-bottom:8px">
-      <div><label>نوع مرخصی</label><select id="lv_kind"><option>استحقاقی</option><option>استعلاجی</option><option>بدون حقوق</option><option>ساعتی</option></select></div>
-      <div><label>تاریخ شروع</label><input id="lv_date" type="date" value="${today()}"></div>
-      <div><label>مدت (روز — برای ساعتی مثلاً 0.5)</label><input id="lv_days" type="number" value="1" step="0.5" min="0"></div>
-      <div id="lv_hwrap" style="display:none"><label>معادل ساعت</label><input id="lv_hours" type="number" placeholder="مثلاً 4" oninput="const d=(+this.value||0)/${LV_DAYH};document.getElementById('lv_days').value=Math.round(d*100)/100"></div>
+      <div><label>نوع مرخصی</label><select id="lv_kind" onchange="const h=this.value==='ساعتی';document.getElementById('lv_hwrap').style.display=h?'':'none';document.getElementById('lv_swrap').style.display=h?'':'none';document.getElementById('lv_dwrap').style.display=h?'none':'';if(h)document.getElementById('lv_days').value=''"><option>استحقاقی</option><option>استعلاجی</option><option>بدون حقوق</option><option>ساعتی</option></select></div>
+      <div><label>تاریخ شروع (شمسی)</label><div style="display:flex;gap:4px"><input id="lv_date" value="${iso2jstr(today()).replace(/\d/g,c=>'۰۱۲۳۴۵۶۷۸۹'[c])}" dir="ltr" placeholder="۱۴۰۵/۰۵/۳۰" style="flex:1"><button type="button" class="btn gh sm" style="padding:4px 8px" onclick="openJcal('lv_date')">📅</button></div></div>
+      <div id="lv_dwrap"><label>مدت (روز)</label><input id="lv_days" type="number" value="1" step="0.5" min="0"></div>
+      <div id="lv_swrap" style="display:none"><label>ساعت شروع</label><input id="lv_stime" placeholder="مثلاً ۱۰:۳۰" dir="ltr"></div>
+      <div id="lv_hwrap" style="display:none"><label>مدت (ساعت)</label><input id="lv_hours" type="number" step="0.5" min="0" placeholder="مثلاً 4" oninput="document.getElementById('lv_days').value=Math.round(((+this.value||0)/${LV_DAYH})*100)/100"></div>
       <div style="grid-column:1/-1"><label>توضیح / علت</label><textarea id="lv_note" rows="2" style="width:100%"></textarea></div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <button class="btn" onclick="lvreqSend()">📤 ارسال درخواست به مدیر</button>
       <span style="font-size:12px;color:var(--tx2)">${mgrName?'گیرنده: <b>'+esc(mgrName)+'</b> (مدیر مستقیم شما)':'⚠️ مدیر مستقیم در پروندهٔ HR شما تعیین نشده — درخواست برای همهٔ مدیران قابل‌مشاهده است'}</span>
     </div>
-    <script>document.getElementById('lv_kind').addEventListener('change',function(){document.getElementById('lv_hwrap').style.display=this.value==='ساعتی'?'':'none';});<\/script>
   </div>
   <div class="sec"><h3>🗂 درخواست‌های قبلی من</h3>
     <table><thead><tr><th>تاریخ ثبت</th><th>نوع</th><th>شروع</th><th>مدت</th><th>وضعیت</th></tr></thead><tbody>
-    ${mine.map(l=>`<tr><td>${fmtD(new Date(l.u||Date.now()).toISOString().slice(0,10))}</td><td>${esc(l.d.kind||'—')}</td><td>${fmtD(dOf(l,'range'))}</td><td>${(+l.d.days||0).toLocaleString('fa-IR')} روز</td><td>${st(l.d.appr)}</td></tr>`).join('')||'<tr><td colspan="5" style="color:var(--tx2)">درخواستی ثبت نشده</td></tr>'}
+    ${mine.map(l=>`<tr><td>${fmtD(new Date(l.u||Date.now()).toISOString().slice(0,10))}</td><td>${esc(l.d.kind||'—')}</td><td>${fmtD(dOf(l,'range'))}</td><td>${l.d.kind==='ساعتی'&&l.d.hours?(+l.d.hours).toLocaleString('fa-IR')+' ساعت':(+l.d.days||0).toLocaleString('fa-IR')+' روز'}</td><td>${st(l.d.appr)}</td></tr>`).join('')||'<tr><td colspan="5" style="color:var(--tx2)">درخواستی ثبت نشده</td></tr>'}
     </tbody></table></div>`;
 }
 window.lvreqSend=function(){
   const me=_meHr();if(!me)return;
   const hr=recs[me],mgr=relIds(hr,'manager')[0];
-  const days=+document.getElementById('lv_days').value||0;
   const kind=document.getElementById('lv_kind').value;
-  const date=document.getElementById('lv_date').value;
+  const hours=+((document.getElementById('lv_hours')||{}).value||0);
+  const stime=((document.getElementById('lv_stime')||{}).value||'').trim();
+  let days=+document.getElementById('lv_days').value||0;
+  if(kind==='ساعتی'){if(!hours){setSync('err','مدت مرخصی ساعتی را به ساعت وارد کن');return;}days=Math.round((hours/LV_DAYH)*100)/100;}
+  const date=parseJDate(document.getElementById('lv_date').value,'')||'';
   const note=document.getElementById('lv_note').value;
-  if(!days||!date){setSync('err','تاریخ و مدت را وارد کن');return;}
+  if(!days||!date){setSync('err','تاریخ (شمسی) و مدت را وارد کن');return;}
   const b=leaveBalance(me);
   if(kind==='استحقاقی'&&days>b.left){if(!window._lvOverOk){window._lvOverOk=1;setSync('err','مدت درخواست ('+days+' روز) از مانده ('+b.left+' روز) بیشتر است — اگر مطمئنی دوباره «ارسال» بزن');return;}window._lvOverOk=0;}
-  put({id:uid(),e:'leave',u:Date.now(),d:{title:'درخواست مرخصی '+(hr.d.title||''),kind,appr:LV_APPR[0],range:date,days,person:[me],approver:mgr?[mgr]:[],note}});
+  put({id:uid(),e:'leave',u:Date.now(),d:{title:'درخواست مرخصی '+(kind==='ساعتی'?'ساعتی ':'')+(hr.d.title||''),kind,appr:LV_APPR[0],range:date,days,hours:kind==='ساعتی'?hours:null,stime:kind==='ساعتی'?stime:null,person:[me],approver:mgr?[mgr]:[],note:(kind==='ساعتی'&&stime?('ساعت شروع: '+stime+(note?' — ':'')):'')+note}});
   setSync('ok','✅ درخواست ثبت شد و برای تأیید مدیر ارسال شد');
   render();
 };
