@@ -307,11 +307,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.28</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.29</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.28</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.29</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -3113,6 +3113,7 @@ const VIEWS_ACL=[
  ['settlenew','💵 ثبت دریافت/پرداخت'],
  ['chqdash','💳 تابلوی چک‌ها'],
  ['paydash','💸 حواله روزانه (پرداخت‌های تأییدی)'],
+ ['wfcenter','🗂 مرکز گردش کارها'],
  ['sepfin','🟦 حسابداری رسمی (سپیدار)'],
  ['sepdash','⚖️ تطبیق عملیات و حسابداری'],
  ['dualdash','🎛 کنترل دوگانه (حسابداری⇄عملیات)'],
@@ -3980,7 +3981,7 @@ function wfCan(act,r){
   if(act==='paySend'&&!wfIsSeller(r)&&!['ادمین','مدیر ارشد'].includes(w))return 'فقط فروشندهٔ همین سند می‌تواند اسناد پرداخت را ارسال کند';
   // 🛡 تفکیک وظایف: تأییدکننده نمی‌تواند فروشندهٔ همان سند باشد
   if(['mgrOk','finOk','issue'].includes(act)&&wfIsSeller(r)){
-    if(w==='ادمین')return confirm('⚠️ شما فروشندهٔ همین سند هستید. طبق تفکیک وظایف، تأیید سند خودتان مجاز نیست.\nبه‌عنوان ادمین با مسئولیت خودتان ادامه می‌دهید؟')?'':'BLOCK';
+    if(w==='ادمین'){if(!window._wfSelfOk){window._wfSelfOk=1;return '⚠️ شما فروشندهٔ همین سند هستید (تفکیک وظایف) — برای ادامه با مسئولیت ادمین، همان دکمه را دوباره بزن';}window._wfSelfOk=0;return '';}
     return 'تفکیک وظایف: نمی‌توانید سندی را که خودتان فروشنده‌اش هستید تأیید/صادر کنید';
   }
   // 🛡 تأیید مالی و صدور نباید توسط همان کسی باشد که تأیید مدیر فروش را زده
@@ -4001,12 +4002,13 @@ window.wfAct=function(id,act){
   const r=recs[id];if(!r)return;
   const gate=wfCan(act,r);
   if(gate==='BLOCK')return;
-  if(gate){alert('🛡 '+gate);return;}
+  if(gate){setSync('err','🛡 '+gate);return;}
+  if((act==='fix'||act==='void')&&!note.trim()){setSync('err','دلیل «'+(act==='fix'?'اصلاح':'ابطال')+'» الزامی است — در کادر توضیح بنویس تا بعدا قابل پیگیری باشد');return;}
   if(act==='mgrOk')wfSet(id,WF_ST.FIN,'✅ تأیید مدیر فروش — ارسال به مالی',note);
   else if(act==='finOk')wfSet(id,WF_ST.FINOK,'✅ تأیید مالی (موجودی/قیمت/سیاست)',note);
   else if(act==='mgrFwd')wfSet(id,WF_ST.SELL,'📨 اعلام تأیید به فروشنده',note);
   else if(act==='paySend'){
-    if(!r.d.payfile&&!note&&!confirm('سند پرداختی پیوست نشده — ادامه می‌دهی؟'))return;
+    if(!r.d.payfile&&!note){if(!window._wfPayOk){window._wfPayOk=1;setSync('err','سند پرداختی پیوست نشده — اگر مطمئنی همان دکمه را دوباره بزن');return;}window._wfPayOk=0;}
     wfSet(id,WF_ST.PAY,'💳 ارسال اسناد پرداخت به مالی (رونوشت: مدیر فروش)',note);
   }
   else if(act==='fix')wfSet(id,WF_ST.FIX,'✏️ برگشت برای اصلاح',note);
@@ -4127,6 +4129,111 @@ function wfCard(v,actions){
       ${actions}</div>`:''}
   </div>`;
 }
+/* ═══ 🛒 گردش خرید (درخواست ← مدیر ← مالی ← سفارش) ═══ */
+const PWF={MGR:'نزد مدیر تأیید',FIN:'نزد مالی (بودجه)',OK:'تأییدشده — آماده سفارش',FIX:'برگشت برای اصلاح',REJ:'رد شد',DONE:'سفارش صادر شد'};
+function hrByEmail(em){em=(em||'').toLowerCase();if(!em)return null;return byE('hr').find(h=>(h.d.email||'').toLowerCase()===em)||null;}
+function pwfIsReq(r){return (r.d._by||'').toLowerCase()===myEmail().toLowerCase();}
+function pwfIsMgrOf(r){ // آیا من مدیر مستقیم درخواست‌کننده‌ام؟
+  const h=hrByEmail(r.d._by);if(!h)return false;
+  const mgr=relIds(h,'manager')[0];return !!mgr&&[...myHRids()].includes(mgr);}
+function pwfCan(act,r){
+  const w=myWrole(),st=r.d.wfst;const SR=['مدیر ارشد','ادمین'];
+  if(act==='submit')return (!st||st===PWF.FIX)?'':'در این مرحله قابل ارسال نیست';
+  if(act==='mgrOk'){if(st!==PWF.MGR)return 'سند در مرحلهٔ تأیید مدیر نیست';
+    if(!(pwfIsMgrOf(r)||['مدیر خرید',...SR].includes(w)))return 'تأیید این مرحله با مدیر مستقیم درخواست‌کننده یا مدیر خرید است';
+    if(pwfIsReq(r)&&w!=='ادمین')return 'تفکیک وظایف: نمی‌توانید درخواست خودتان را تأیید کنید';return '';}
+  if(act==='finOk'){if(st!==PWF.FIN)return 'سند در مرحلهٔ مالی نیست';
+    if(!['کارمند حسابداری','مدیر مالی',...SR].includes(w))return 'تأیید بودجه با واحد مالی است';
+    if(pwfIsReq(r)&&w!=='ادمین')return 'تفکیک وظایف: نمی‌توانید درخواست خودتان را تأیید کنید';return '';}
+  if(act==='fix'||act==='rej'){if(![PWF.MGR,PWF.FIN].includes(st))return 'در این مرحله ممکن نیست';
+    if(!(pwfIsMgrOf(r)||['مدیر خرید','کارمند حسابداری','مدیر مالی',...SR].includes(w)))return 'اجازهٔ این اقدام را ندارید';return '';}
+  return 'اقدام ناشناخته';}
+window.pwfAct=function(id,act){
+  const r=recs[id];if(!r||r.del)return;
+  const note=((document.getElementById('pwfn_'+id)||{}).value||'').trim();
+  const err=pwfCan(act,r);if(err){setSync('err','🛡 '+err);return;}
+  if((act==='fix'||act==='rej')&&!note){setSync('err','دلیل «'+(act==='fix'?'اصلاح':'رد')+'» الزامی است — در کادر توضیح بنویس');return;}
+  window._wfActing=1;
+  try{
+    if(act==='submit'){r.d={...r.d,wfst:PWF.MGR,status:'باز'};wfLog(r,'📤 ارسال درخواست خرید برای تأیید مدیر',note);}
+    else if(act==='mgrOk'){r.d={...r.d,wfst:PWF.FIN};wfLog(r,'✅ تأیید مدیر — ارسال به مالی (بودجه)',note);}
+    else if(act==='finOk'){r.d={...r.d,wfst:PWF.OK};wfLog(r,'✅ تأیید مالی — آمادهٔ صدور سفارش',note);}
+    else if(act==='fix'){r.d={...r.d,wfst:PWF.FIX};wfLog(r,'✏️ برگشت برای اصلاح',note);}
+    else if(act==='rej'){r.d={...r.d,wfst:PWF.REJ,status:'لغو'};wfLog(r,'⛔ رد و بایگانی',note);}
+    r.u=Date.now();put(r);
+  }finally{window._wfActing=0;}
+  setSync('ok','✅ ثبت شد');render();};
+function pwfMine(){return byE('preq').filter(r=>{const st=r.d.wfst;if(!st)return false;
+  if(st===PWF.MGR)return !pwfCan('mgrOk',r);
+  if(st===PWF.FIN)return !pwfCan('finOk',r);
+  if(st===PWF.FIX)return pwfIsReq(r);
+  if(st===PWF.OK)return can('c','po')&&(pwfIsReq(r)||['مدیر خرید','ادمین','مدیر ارشد'].includes(myWrole()));
+  return false;});}
+/* ═══ 🕓 تایم‌لاین گردش (مشترک) ═══ */
+function wfTimelineHTML(r){
+  const lg=r.d.wflog||[];if(!lg.length)return '';
+  return `<div style="margin-top:10px"><b style="font-size:12px">🕓 گردش فعالیت‌ها</b><div style="margin-top:6px;border-inline-start:2px solid var(--line);padding-inline-start:12px;display:flex;flex-direction:column;gap:7px">${lg.slice().reverse().map(e=>`<div style="font-size:11.5px"><b>${esc(e.act||'')}</b> — ${esc(e.by||'')}${e.role?` <span style="color:var(--tx2)">(${esc(e.role)})</span>`:''} · <span style="color:var(--tx2)" dir="ltr">${new Date(e.t).toLocaleString('fa-IR')}</span>${e.note?`<div style="color:var(--tx2);margin-top:2px">💬 ${esc(e.note)}</div>`:''}</div>`).join('')}</div></div>`;}
+window.wfTimelineHTML=wfTimelineHTML;
+/* ═══ پنل گردش خرید روی رکورد درخواست ═══ */
+function preqWfPanel(r){
+  const id=r.id,st=r.d.wfst;
+  const col=st===PWF.REJ?'var(--bad)':(st===PWF.OK||st===PWF.DONE)?'var(--ok)':st===PWF.FIX?'var(--warn)':'var(--ac)';
+  const badge=st?`<span class="tag" style="font-weight:700;color:${col}">${esc(st)}</span>`:'<span class="tag">پیش‌نویس — هنوز ارسال نشده</span>';
+  let btns='';
+  if(!pwfCan('submit',r)&&(pwfIsReq(r)||isAdmin()||!r.d._by))btns+=`<button class="btn sm" onclick="pwfAct('${id}','submit')">📤 ارسال برای تأیید مدیر</button>`;
+  if(!pwfCan('mgrOk',r))btns+=`<button class="btn sm" onclick="pwfAct('${id}','mgrOk')">✅ تأیید مدیر — ارسال به مالی</button>`;
+  if(!pwfCan('finOk',r))btns+=`<button class="btn sm" onclick="pwfAct('${id}','finOk')">✅ تأیید مالی (بودجه)</button>`;
+  if(!pwfCan('fix',r))btns+=`<button class="btn gh sm" onclick="pwfAct('${id}','fix')">✏️ نیاز به اصلاح</button><button class="btn bad sm" onclick="pwfAct('${id}','rej')">⛔ رد</button>`;
+  const canPo=st===PWF.OK&&can('c','po');
+  return `<div class="sec"><h3>🔁 گردش خرید</h3>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${badge}<span style="font-size:11px;color:var(--tx2)">مسیر: درخواست‌کننده ← مدیر مستقیم / مدیر خرید ← مالی (بودجه) ← صدور سفارش</span></div>
+    ${btns?`<div style="margin-top:8px"><input id="pwfn_${id}" placeholder="توضیح / دلیل (برای اصلاح و رد الزامی)" style="width:100%;max-width:430px;font-size:12px"></div><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">${btns}</div>`:''}
+    ${canPo?`<div style="margin-top:8px"><button class="btn sm" onclick="preqToPo('${id}')">📑 صدور سفارش خرید</button></div>`:''}
+    ${st&&![PWF.OK,PWF.DONE].includes(st)&&can('c','po')?`<div class="hint" style="margin-top:6px">صدور سفارش فقط پس از «تأیید مالی» ممکن است</div>`:''}
+    ${wfTimelineHTML(r)}</div>`;}
+/* ═══ 🌴 کارتابل مرخصی من (مدیر) ═══ */
+function lvMine(){const my=[...myHRids()];return byE('leave').filter(l=>(l.d.appr||LV_APPR[0])===LV_APPR[0]&&!relIds(l,'person').some(p=>my.includes(p))&&(relIds(l,'approver').some(a=>my.includes(a))||(!relIds(l,'approver').length&&can('e','leave',l))));}
+function bpMineItems(){try{return byE('wfitem').filter(x=>{if(x.d.status!=='در جریان')return false;const d=bpItemDef(x);if(!d)return false;const st=(d.d.steps||[])[+x.d.step||0];return bpWhoMatch(st&&st.who,x);});}catch(e){return [];}}
+/* ═══ 🗂 مرکز گردش کارها ═══ */
+function wfcDays(u){return Math.floor((Date.now()-(u||Date.now()))/864e5);}
+function wfcRows(){
+  const rows=[];
+  byE('invoice').filter(v=>v.d.wfst&&v.d.wfst!=='—').forEach(v=>rows.push({flow:'🧾 گردش فروش',id:v.id,e:'invoice',t:v.d.title||'پیش‌فاکتور',st:v.d.wfst,done:[WF_ST.DONE,WF_ST.VOID].includes(v.d.wfst),rej:v.d.wfst===WF_ST.VOID,u:v.u,log:v.d.wflog||[]}));
+  byE('preq').filter(v=>v.d.wfst).forEach(v=>rows.push({flow:'🛒 گردش خرید',id:v.id,e:'preq',t:v.d.title||'درخواست خرید',st:v.d.wfst,done:[PWF.DONE,PWF.REJ].includes(v.d.wfst),rej:v.d.wfst===PWF.REJ,u:v.u,log:v.d.wflog||[]}));
+  byE('leave').forEach(v=>{const st=v.d.appr||LV_APPR[0];rows.push({flow:'🌴 گردش مرخصی',id:v.id,e:'leave',t:v.d.title||'مرخصی',st,done:st!==LV_APPR[0],rej:st===LV_APPR[2],u:v.u,log:v.d.wflog||[]});});
+  byE('wfitem').forEach(x=>{try{const d=bpItemDef(x);const steps=d?(d.d.steps||[]):[];const i=+x.d.step||0;const cur=steps[i]||{};
+    rows.push({flow:'🧩 '+(d?(d.d.title||'فرآیند'):'فرآیند'),id:x.id,e:'wfitem',t:x.d.title||'—',st:x.d.status==='در جریان'?((cur.name||'')+' — نزد '+bpWhoName(cur.who,x)):x.d.status,done:x.d.status!=='در جریان',rej:x.d.status==='لغو',u:x.u,log:x.d.log||[]});}catch(e){}});
+  return rows;}
+function wfcMineCnt(){try{return wfMine().length+pwfMine().length+lvMine().length+bpMineItems().length;}catch(e){return 0;}}
+function wfcenterHTML(){
+  const rows=wfcRows();
+  const act=rows.filter(r=>!r.done);
+  const stale=act.filter(r=>wfcDays(r.u)>=3);
+  const mineIds=new Set([...wfMine(),...pwfMine(),...lvMine(),...bpMineItems()].map(v=>v.id));
+  const mine=act.filter(r=>mineIds.has(r.id));
+  const month=Date.now()-30*864e5;
+  const doneM=rows.filter(r=>r.done&&!r.rej&&(r.u||0)>=month).length;
+  const rejM=rows.filter(r=>r.rej&&(r.u||0)>=month).length;
+  const arch=rows.filter(r=>r.done).sort((a,b)=>(b.u||0)-(a.u||0)).slice(0,40);
+  view.wfcTab=view.wfcTab||'mine';
+  const tile=(t,v,col)=>`<div class="sec" style="text-align:center;margin:0;padding:13px 10px"><div style="font-size:11px;color:var(--tx2)">${t}</div><div style="font-size:22px;font-weight:800;color:${col||'var(--tx)'}">${v.toLocaleString('fa-IR')}</div></div>`;
+  const rowH=r=>{const d=wfcDays(r.u);const col=r.rej?'var(--bad)':r.done?'var(--ok)':d>=7?'var(--bad)':d>=3?'var(--warn)':'var(--ac)';
+    const last=(r.log||[]).slice(-1)[0];
+    const open=r.e==='wfitem'?`go('bpm')`:r.e==='invoice'?`go('saleswf')`:`go('rec','${r.e}','${r.id}')`;
+    return `<tr style="cursor:pointer" onclick="${open}"><td style="white-space:nowrap">${r.flow}</td><td style="text-align:right">${esc(r.t)}</td><td style="color:${col};font-weight:700;white-space:nowrap">${esc(r.st)}</td><td style="white-space:nowrap">${r.done?'—':(d?d.toLocaleString('fa-IR')+' روز':'امروز')}${!r.done&&d>=3?' ⚠️':''}</td><td style="font-size:11px;color:var(--tx2)">${last?esc((last.act||'')+(last.note?' — '+last.note:'')).slice(0,90):''}</td></tr>`;};
+  const tbl=list=>`<div class="tblwrap"><table><thead><tr><th>گردش</th><th>عنوان</th><th>مرحله / وضعیت</th><th>در این مرحله</th><th>آخرین اقدام و دلیل</th></tr></thead><tbody>${list.map(rowH).join('')||'<tr><td colspan="5" style="color:var(--tx2)">موردی نیست</td></tr>'}</tbody></table></div>`;
+  const tab=(k,l)=>`<button class="btn ${view.wfcTab===k?'':'gh '}sm" onclick="view.wfcTab='${k}';render()">${l}</button>`;
+  const senior=isAdmin()||['مدیر ارشد','مدیر فروش','مدیر مالی','مدیر خرید'].includes(myWrole());
+  let body='';
+  if(view.wfcTab==='mine')body=tbl(act.filter(r=>mineIds.has(r.id)));
+  else if(view.wfcTab==='run')body=senior?tbl(act.slice().sort((a,b)=>(a.u||0)-(b.u||0))):'<div class="hint">نمایش همهٔ گردش‌های در جریان مخصوص مدیران است</div>';
+  else if(view.wfcTab==='stale')body=senior?tbl(stale.slice().sort((a,b)=>(a.u||0)-(b.u||0))):'<div class="hint">مخصوص مدیران</div>';
+  else body=tbl(arch);
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px">
+    ${tile('🧰 در کارتابل من',mine.length,'var(--ac)')}${tile('🔁 در جریان (کل)',act.length)}${tile('⏳ معطل ۳+ روز',stale.length,stale.length?'var(--warn)':'var(--ok)')}${tile('✅ تکمیل ۳۰ روز اخیر',doneM,'var(--ok)')}${tile('⛔ ردشده ۳۰ روز اخیر',rejM,rejM?'var(--bad)':'var(--tx)')}</div>
+  <div class="sec"><div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px">${tab('mine','🧰 کارتابل من')}${tab('run','🔁 همهٔ در جریان')}${tab('stale','⏳ معطل‌مانده‌ها')}${tab('arch','🗄 بایگانی + دلیل')}</div>${body}
+  <div class="hint" style="margin-top:8px">هر ردیف را بزن تا به خود سند بروی. «معطل» یعنی بیش از ۳ روز در یک مرحله مانده. تعریف فرآیندهای جدید در «🧩 فرآیندهای کاری» انجام می‌شود.</div></div>`;}
+window.wfcenterHTML=wfcenterHTML;window.wfcMineCnt=wfcMineCnt;window.pwfMine=pwfMine;window.lvMine=lvMine;
 function swfHTML(){
   const w=myWrole();
   if(!w)return `<div class="sec"><h3>🔁 گردش فروش</h3><div class="hint">⚠️ نقش شما در گردش فروش تعیین نشده — ادمین باید در پروندهٔ منابع انسانی شما فیلد «🔁 نقش در گردش فروش» را تنظیم کند (فروشنده / مدیر فروش / کارمند حسابداری / مدیر مالی / مدیر ارشد).</div></div>`;
@@ -5567,10 +5674,15 @@ function payslipBrief(r){
 }
 function lvApprove(id,ok){
   const r=recs[id];if(!r||r.del)return;
-  if(!can('e',r.e,r)){alert('اجازهٔ تأیید ندارید');return;}
+  if(!can('e',r.e,r)){setSync('err','اجازهٔ تأیید ندارید');return;}
+  const note=((document.getElementById('lvn_'+id)||{}).value||'').trim();
+  if(!ok&&!note){view._lvRej=id;render();return;} // ⛔ رد بدون دلیل ممنوع — کادر دلیل باز می‌شود
   const me=[...myHRids()][0];
-  r.d={...r.d,appr:ok?LV_APPR[1]:LV_APPR[2],approver:me?[me]:r.d.approver};
-  r.u=Date.now();put(r);
+  window._wfActing=1;
+  try{r.d={...r.d,appr:ok?LV_APPR[1]:LV_APPR[2],approver:me?[me]:r.d.approver,rejnote:ok?r.d.rejnote:note};
+    wfLog(r,ok?'✅ تأیید مرخصی':'⛔ رد مرخصی',note);
+    r.u=Date.now();put(r);}finally{window._wfActing=0;}
+  view._lvRej=null;setSync('ok',ok?'✅ مرخصی تأیید شد':'⛔ رد شد و دلیل ثبت شد');render();
 }
 function payslipPrint(id){
   const r=recs[id];if(!r||r.del)return;
@@ -5621,7 +5733,7 @@ function hrWorkHTML(r){
       ${lv.map(l=>`<tr><td style="text-align:right;cursor:pointer" onclick="go('rec','leave','${l.id}')">${esc(l.d.title||'—')}</td><td>${esc(l.d.kind||'—')}</td>
         <td>${esc(iso2jstr(dOf(l,'range'))||'—')}</td><td>${(+l.d.days||1).toLocaleString('fa-IR')}</td>
         <td>${l.d.appr===LV_APPR[1]?'✅':(l.d.appr===LV_APPR[2]?'❌':'⏳')} ${esc(l.d.appr||LV_APPR[0])}</td>
-        <td>${(l.d.appr||LV_APPR[0])===LV_APPR[0]&&can('e','leave',l)?`<button class="btn gh sm" onclick="event.stopPropagation();lvApprove('${l.id}',1)">✅</button><button class="btn gh sm" onclick="event.stopPropagation();lvApprove('${l.id}',0)">❌</button>`:''}</td></tr>`).join('')}
+        <td>${(l.d.appr||LV_APPR[0])===LV_APPR[0]&&can('e','leave',l)?(view._lvRej===l.id?`<input id="lvn_${l.id}" placeholder="دلیل رد (الزامی)" style="max-width:130px;font-size:11px" onclick="event.stopPropagation()"><button class="btn bad sm" onclick="event.stopPropagation();lvApprove('${l.id}',0)">⛔ ثبت رد</button><button class="btn gh sm" onclick="event.stopPropagation();view._lvRej=null;render()">انصراف</button>`:`<button class="btn gh sm" onclick="event.stopPropagation();lvApprove('${l.id}',1)">✅</button><button class="btn gh sm" onclick="event.stopPropagation();lvApprove('${l.id}',0)">❌</button>`):''}</td></tr>`).join('')}
       </tbody></table></div>`;
   }
   if(ps.length){
@@ -5677,11 +5789,11 @@ window.lvreqSend=function(){
   const kind=document.getElementById('lv_kind').value;
   const date=document.getElementById('lv_date').value;
   const note=document.getElementById('lv_note').value;
-  if(!days||!date){alert('تاریخ و مدت را وارد کن');return;}
+  if(!days||!date){setSync('err','تاریخ و مدت را وارد کن');return;}
   const b=leaveBalance(me);
-  if(kind==='استحقاقی'&&days>b.left&&!confirm('مدت درخواست ('+days+' روز) از ماندهٔ مرخصی ('+b.left+' روز) بیشتر است. ادامه می‌دهی؟'))return;
+  if(kind==='استحقاقی'&&days>b.left){if(!window._lvOverOk){window._lvOverOk=1;setSync('err','مدت درخواست ('+days+' روز) از مانده ('+b.left+' روز) بیشتر است — اگر مطمئنی دوباره «ارسال» بزن');return;}window._lvOverOk=0;}
   put({id:uid(),e:'leave',u:Date.now(),d:{title:'درخواست مرخصی '+(hr.d.title||''),kind,appr:LV_APPR[0],range:date,days,person:[me],approver:mgr?[mgr]:[],note}});
-  alert('✅ درخواست ثبت شد و برای تأیید مدیر ارسال شد.');
+  setSync('ok','✅ درخواست ثبت شد و برای تأیید مدیر ارسال شد');
   render();
 };
 /* کارهایی که منتظر تأیید من هستند */
@@ -5752,8 +5864,8 @@ function cartHTML(){
         <b>🌴 ${esc(l.d.title||'درخواست مرخصی')}</b>
         <span style="font-size:11px;color:var(--tx2)">${esc(l.d.kind||'')} │ از ${fmtD(dOf(l,'range'))} │ ${(+l.d.days||0).toLocaleString('fa-IR')} روز${(()=>{const p=relIds(l,'person')[0];const bb=p?leaveBalance(p):null;return bb?' │ ماندهٔ فعلی: '+bb.left.toLocaleString('fa-IR')+' روز':'';})()}</span>
         <span style="flex:1"></span>
-        <button class="btn sm" onclick="lvApprove('${l.id}',true);render()">✅ تأیید</button>
-        <button class="btn gh sm" onclick="lvApprove('${l.id}',false);render()">⛔ رد</button></div>
+        ${view._lvRej===l.id?`<input id="lvn_${l.id}" placeholder="دلیل رد (الزامی)" style="max-width:170px;font-size:11px"><button class="btn bad sm" onclick="lvApprove('${l.id}',false)">⛔ ثبت رد</button><button class="btn gh sm" onclick="view._lvRej=null;render()">انصراف</button>`:`<button class="btn sm" onclick="lvApprove('${l.id}',true)">✅ تأیید</button>
+        <button class="btn gh sm" onclick="lvApprove('${l.id}',false)">⛔ رد</button>`}</div>
       ${l.d.note?`<div style="font-size:12px;margin-top:5px;color:var(--tx2)">${esc(l.d.note)}</div>`:''}</div>`:
     row(l,`<button class="btn sm" onclick="letApprove('${l.id}',true)">✅ تأیید</button><button class="btn gh sm" onclick="letApprove('${l.id}',false)">⛔ رد</button>`)
    ).join('')||'<div class="hint">موردی در انتظار تأیید شما نیست.</div>';
@@ -9564,7 +9676,7 @@ try{const _sv=JSON.parse(localStorage.getItem('xr_view')||'null');
 /* 🪗 جمع‌شوندگی گروه‌های منو بر اساس موضوع */
 let navCol=null;
 try{navCol=JSON.parse(localStorage.getItem('xr_navcol')||'null');}catch(e){navCol=null;}
-const DASH_GRP={smdash:'فروش',saleswf:'فروش',invnew:'فروش',plreport:'فروش',distdash:'فروش',custdash:'CRM و مشتریان',loyaldash:'CRM و مشتریان',smsdash:'CRM و مشتریان',whdash:'کالا و انبار',pudash:'کالا و انبار',quotenew:'کالا و انبار',supdash:'کالا و انبار',pinvnew:'کالا و انبار',perfdash:'عملکرد و تارگت',targetdash:'عملکرد و تارگت',aligndash:'عملکرد و تارگت',pldash:'مالی',bankdash:'مالی',paydash:'مالی',arapdash:'مالی',chqdash:'مالی',dualdash:'مالی',pfdash:'مالی',bpm:'پرسنل و سازمان',sepdash:'کسب‌وکار ویژه',sepfin:'کسب‌وکار ویژه',gdash:'رشد شخصی',bizdash:'کسب‌وکار ویژه',findash:'مالی تخصصی (IFRS)',invdash:'سرمایه‌گذاری و ثروت',gldash:'حسابداری',glnew:'حسابداری',procmap:'فرآیندها (ISO)',riskdash:'سازمان',bscmap:'استراتژی و تعالی',bsccanvas:'استراتژی و تعالی'};
+const DASH_GRP={smdash:'فروش',saleswf:'فروش',invnew:'فروش',plreport:'فروش',distdash:'فروش',custdash:'CRM و مشتریان',loyaldash:'CRM و مشتریان',smsdash:'CRM و مشتریان',whdash:'کالا و انبار',pudash:'کالا و انبار',quotenew:'کالا و انبار',supdash:'کالا و انبار',pinvnew:'کالا و انبار',perfdash:'عملکرد و تارگت',targetdash:'عملکرد و تارگت',aligndash:'عملکرد و تارگت',pldash:'مالی',bankdash:'مالی',paydash:'مالی',arapdash:'مالی',chqdash:'مالی',dualdash:'مالی',pfdash:'مالی',bpm:'پرسنل و سازمان',wfcenter:'پرسنل و سازمان',sepdash:'کسب‌وکار ویژه',sepfin:'کسب‌وکار ویژه',gdash:'رشد شخصی',bizdash:'کسب‌وکار ویژه',findash:'مالی تخصصی (IFRS)',invdash:'سرمایه‌گذاری و ثروت',gldash:'حسابداری',glnew:'حسابداری',procmap:'فرآیندها (ISO)',riskdash:'سازمان',bscmap:'استراتژی و تعالی',bsccanvas:'استراتژی و تعالی'};
 function activeGrp(){ // گروهی که صفحه فعلی به آن تعلق دارد (همیشه باز نمایش داده می‌شود)
   if(view.type==='module')return view.flt||null;
   if(view.type==='mydash'&&view.mdSel){const _d=recs[view.mdSel];if(_d&&_d.d){const _g=_d.d.grp;return _g==='مدیریت کسب و کار'?'فروش':(_g==='سازمان'?'پرسنل و سازمان':_g);}}
@@ -9939,6 +10051,7 @@ function wsMenu(g){
     it('dualdash','🎛 کنترل دوگانه (حسابداری⇄عملیات)',"go('dualdash')",canSee('sepdoc')&&canView('dualdash'))+
     it('pfdash','🔄 تسویه درگاه‌ها',"go('pfdash')",canSee('pfsettle')&&canView('pfdash')));
   if(g==='پرسنل و سازمان')return (
+    (canView('wfcenter')?(()=>{const _n=wfcMineCnt();return `<div class="nav-i ${view.type==='wfcenter'?'on':''}" onclick="go('wfcenter')">🗂 مرکز گردش کارها${_n?` <span class="c" style="background:var(--ac);color:#fff">${_n.toLocaleString('fa-IR')}</span>`:''}</div>`;})():'')+
     it('bpm','🧩 فرآیندهای کاری',"go('bpm')",canView('bpm')));
   return '';
 }
@@ -10181,6 +10294,7 @@ function render(){
     view.type==='quotenew'?'⚖️ ثبت استعلام':
     view.type==='paydash'?'💸 حواله روزانه':
     view.type==='bpm'?'🧩 فرآیندهای کاری':
+    view.type==='wfcenter'?'🗂 مرکز گردش کارها':
     view.type==='basedash'?'🧰 اطلاعات پایه':
     view.type==='module'?((GRP_IC[view.flt]||'🧩')+' '+(view.flt||'ماژول')):
     view.type==='bsccanvas'?'🧭 بوم استراتژی':
@@ -10191,7 +10305,7 @@ function render(){
   const _mtEl=document.getElementById('mtabs');
   if(_mtEl){try{_mtEl.innerHTML=mtabsHTML();}catch(e){_mtEl.innerHTML='';}}
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',invdash:'invdash',cfaacad:'invdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',sepdash:'sepdash',sepfin:'sepfin',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',paydash:'paydash',bpm:'bpm',basedash:'basedash'};
+  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',invdash:'invdash',cfaacad:'invdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',sepdash:'sepdash',sepfin:'sepfin',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',paydash:'paydash',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -10204,6 +10318,7 @@ function render(){
     else if(view.type==='quotenew')c.innerHTML=quotenewHTML();
     else if(view.type==='paydash')c.innerHTML=paydashHTML();
     else if(view.type==='bpm')c.innerHTML=bpmHTML();
+    else if(view.type==='wfcenter')c.innerHTML=wfcenterHTML();
     else if(view.type==='basedash')c.innerHTML=basedashHTML();
     else if(view.type==='module')c.innerHTML=moduleHTML(view.flt);
     else if(view.type==='me')c.innerHTML=meHTML();
@@ -13740,11 +13855,12 @@ window.prodQuickQuote=function(pid){
 /* ═══ 📑 زنجیرهٔ تدارکات: درخواست خرید ← سفارش خرید ← فاکتور خرید ═══ */
 window.preqToPo=function(id){
   const r=recs[id];if(!r||r.del)return;
+  if(r.d.wfst!==PWF.OK&&!(isAdmin()&&!r.d.wfst)){setSync('err','🛡 صدور سفارش فقط پس از تأیید مالی در گردش خرید ممکن است');return;}
   const pid=relIds(r,'product')[0];
   const poId=uid();
   put({id:poId,e:'po',d:{title:'سفارش از درخواست: '+(r.d.title||''),date:{s:today()},status:'باز',
     lines:pid?[{product:pid,qty:+r.d.qty||1,price:0}]:[],preq:[id],_by:myEmail()},u:Date.now()});
-  r.d={...r.d,status:'تبدیل به سفارش'};r.u=Date.now();put(r);
+  window._wfActing=1;try{r.d={...r.d,status:'تبدیل به سفارش',wfst:r.d.wfst?PWF.DONE:r.d.wfst};wfLog(r,'📑 سفارش خرید صادر شد');r.u=Date.now();put(r);}finally{window._wfActing=0;}
   go('rec','po',poId);
 };
 function _poMut(id,fn){const r=recs[id];if(!r||r.del)return;fn(r);r.u=Date.now();put(r);}
@@ -14076,7 +14192,7 @@ function recHTML(e,id){
   if(e==='doc')h+=docSection(r);
   if(e==='po')h+=poSection(r);
   if(e==='pricelist')h+=plSection(r);
-  if(e==='preq'&&r.d.status==='باز'&&can('c','po'))h+=`<div class="sec"><button class="btn sm" onclick="preqToPo('${id}')">📑 تبدیل به سفارش خرید</button></div>`;
+  if(e==='preq')h+=preqWfPanel(r);
   h+=recChatHTML(e,id);
   if(can('d',e,r))h+=view._delC===id
     ?`<div style="margin:8px 0 24px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border:2px solid var(--bad);border-radius:12px;padding:9px 13px;background:rgba(240,86,74,.06)"><b style="color:var(--bad);font-size:12.5px">⚠️ این مورد برای همیشه حذف می‌شود — مطمئن هستید؟</b><button class="btn bad sm" onclick="delFromPage('${e}','${id}')">🗑 بله، حذف کن</button><button class="btn gh sm" onclick="view._delC=null;render()">انصراف</button></div>`
