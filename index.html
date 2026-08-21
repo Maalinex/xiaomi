@@ -307,11 +307,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.29</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.30</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.29</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.30</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -10022,8 +10022,9 @@ function wsMenu(g){
   if(g==='فروش')return (
     it('smdash','📈 داشبورد فروش',"go('smdash')",canSee('invoice')&&canView('smdash'))+
     (canSee('invoice')&&canView('saleswf')?(()=>{const _wc=wfCount();return `<div class="nav-i ${view.type==='saleswf'?'on':''}" onclick="go('saleswf')">🔁 گردش فروش${_wc?` <span class="c" style="background:var(--ac);color:#fff">${_wc.toLocaleString('fa-IR')}</span>`:''}</div>`;})():'')+
-    it('invnew','📝 صدور پیش‌فاکتور',"invDraft=null;window._invPf=1;go('invnew')",canSee('invoice')&&can('c','invoice')&&canView('invnew'))+
-    it('invnew','🧾 صدور فاکتور فروش',"invDraft=null;window._invPf=0;go('invnew')",canSee('invoice')&&can('c','invoice')&&canView('invnew'))+
+    (canSee('invoice')&&can('c','invoice')&&canView('invnew')?(()=>{const _pf=view.type==='invnew'&&((typeof invDraft!=='undefined'&&invDraft)?invDraft.kind==='پیش‌فاکتور':!!window._invPf);
+      return `<div class="nav-i ${view.type==='invnew'&&_pf?'on':''}" onclick="invDraft=null;window._invPf=1;go('invnew')">📝 صدور پیش‌فاکتور</div>
+      <div class="nav-i ${view.type==='invnew'&&!_pf?'on':''}" onclick="invDraft=null;window._invPf=0;go('invnew')">🧾 صدور فاکتور فروش</div>`;})():'')+
     it('plreport','💰 سود و زیان فروش',"go('plreport')",canSee('invoice')&&canView('plreport'))+
     it('distdash','🛵 داشبورد پخش و توزیع',"go('distdash')",canSee('delivery')&&canView('distdash')));
   if(g==='CRM و مشتریان')return (
