@@ -307,11 +307,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.32</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.33</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.32</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.33</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -28121,6 +28121,23 @@ function renGrp(g){
 window.renGrp=renGrp;
 
 /* ================= صفحه کاربران ================= */
+window.adminPwUI=function(em){if(!isAdmin()){setSync('err','فقط ادمین');return;}view._pwRst=em;view._pwDone=null;render();};
+window.adminPwGen=function(){const c='abcdefghjkmnpqrstuvwxyzACDEFGHJKLMNPQRSTUVWXYZ23456789';let p='';for(let i=0;i<10;i++)p+=c[Math.floor(Math.random()*c.length)];const el=document.getElementById('pw_new');if(el){el.value=p;}};
+window.adminPwDo=async function(em){
+  if(!isAdmin()){setSync('err','فقط ادمین');return;}
+  const p=((document.getElementById('pw_new')||{}).value||'').trim();
+  if(p.length<6){setSync('err','رمز باید حداقل ۶ کاراکتر باشد');return;}
+  if(!sb){setSync('err','اتصال سرور فعال نیست — بازنشانی رمز فقط در حالت آنلاین ممکن است');return;}
+  setSync('','در حال ثبت رمز جدید…');
+  try{
+    const {error}=await sb.rpc('admin_reset_password',{p_email:em,p_pass:p});
+    if(error)throw error;
+    view._pwRst=null;view._pwDone={em,p};setSync('ok','🔑 رمز جدید ثبت شد');render();
+  }catch(e){
+    const m=String(e&&e.message||e);
+    setSync('err',m.includes('admin_reset_password')||m.includes('function')?'تابع روی سرور نصب نیست — بخش جدید فایل maalinex-security.sql را یک‌بار در SQL Editor اجرا کن':'خطا: '+m);
+  }
+};
 function usersHTML(){
   const list=usersList();
   let h=`<div class="sec"><h3>👤 کاربران و سطح دسترسی</h3>
@@ -28138,9 +28155,20 @@ function usersHTML(){
         ${byE('hr').sort((a,b)=>(a.d.title||'').localeCompare(b.d.title||'','fa')).map(x=>`<option value="${x.id}" ${hrLinked===x.id?'selected':''}>${esc(x.d.title||'—')}</option>`).join('')}</select>
       ${emailMatch?`<div style="font-size:10.5px;color:var(--ok)">✓ از طریق ایمیل به «${esc(emailMatch.d.title)}» وصل است</div>`:''}
       ${!hrLinked&&!emailMatch?`<div style="font-size:10.5px;color:var(--tx2)">وصل کنید تا میز کارش پر شود</div>`:''}</td>
-      <td><button class="btn bad sm" onclick="rmUser(${i})">حذف</button></td></tr>`;
+      <td style="white-space:nowrap"><button class="btn gh sm" onclick="adminPwUI('${esc(u.email)}')">🔑 رمز</button> <button class="btn bad sm" onclick="rmUser(${i})">حذف</button></td></tr>`;
   });
   h+=`</tbody></table></div>
+  ${view._pwRst?`<div style="margin-top:10px;border:1px solid var(--ac);border-radius:12px;padding:12px 14px;background:var(--bg2)">
+    <b style="font-size:13px">🔑 رمز جدید برای <span dir="ltr">${esc(view._pwRst)}</span></b>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:8px">
+      <input id="pw_new" dir="ltr" style="max-width:170px" placeholder="حداقل ۶ کاراکتر">
+      <button class="btn gh sm" onclick="adminPwGen()">🎲 تولید رمز</button>
+      <button class="btn sm" onclick="adminPwDo('${esc(view._pwRst)}')">✅ ثبت رمز جدید</button>
+      <button class="btn gh sm" onclick="view._pwRst=null;render()">انصراف</button></div>
+    <div class="hint" style="margin-top:6px">بعد از ثبت، رمز را به کاربر اطلاع دهید. نشست‌های قبلی او به‌صورت خودکار خارج می‌شوند.</div></div>`:''}
+  ${view._pwDone?`<div style="margin-top:10px;border:1px solid var(--ok);border-radius:12px;padding:12px 14px;background:rgba(16,124,16,.06)">
+    ✅ رمز <b dir="ltr">${esc(view._pwDone.em)}</b> با موفقیت به <b dir="ltr" style="user-select:all;background:var(--bg3);padding:2px 8px;border-radius:6px">${esc(view._pwDone.p)}</b> تغییر کرد — همین حالا برایش بفرست (دیگر نمایش داده نمی‌شود).
+    <button class="btn gh sm" onclick="view._pwDone=null;render()">بستن</button></div>`:''}
   <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
     <input id="nu_email" dir="ltr" type="email" placeholder="email@example.com" style="max-width:240px">
     <select id="nu_role" style="max-width:160px">${aclRoles().map(r=>`<option>${r}</option>`).join('')}</select>

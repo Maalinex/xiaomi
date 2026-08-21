@@ -437,3 +437,39 @@ do $$ begin
 end $$;
 
 select '⚡ شتاب‌دهی سینک ۱.۹۴ اعمال شد ✅' as status;
+
+-- ═══════════════════════════════════════════════════════════
+-- 🔑 v2.33 — بازنشانی رمز کاربران توسط ادمین (داخل خود برنامه)
+-- این بخش را یک‌بار در SQL Editor اجرا کنید (سوپابیس ابری یا سرور داخلی)
+-- ═══════════════════════════════════════════════════════════
+create extension if not exists pgcrypto with schema extensions;
+
+create or replace function public.admin_reset_password(p_email text, p_pass text)
+returns text
+language plpgsql security definer
+set search_path = public, auth, extensions
+as $$
+declare v_uid uuid;
+begin
+  if not app_is_admin() then
+    raise exception 'فقط ادمین می‌تواند رمز کاربران را بازنشانی کند';
+  end if;
+  if length(coalesce(p_pass,'')) < 6 then
+    raise exception 'رمز باید حداقل ۶ کاراکتر باشد';
+  end if;
+  select id into v_uid from auth.users where lower(email)=lower(p_email);
+  if v_uid is null then
+    raise exception 'کاربری با این ایمیل در سیستم ورود ثبت نشده است';
+  end if;
+  update auth.users
+     set encrypted_password = extensions.crypt(p_pass, extensions.gen_salt('bf')),
+         updated_at = now()
+   where id = v_uid;
+  -- خروج نشست‌های قبلی این کاربر
+  delete from auth.refresh_tokens where user_id = v_uid::varchar;
+  return 'ok';
+end;
+$$;
+
+revoke all on function public.admin_reset_password(text,text) from public, anon;
+grant execute on function public.admin_reset_password(text,text) to authenticated;
