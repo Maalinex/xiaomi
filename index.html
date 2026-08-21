@@ -307,11 +307,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.27</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.28</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.27</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.28</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -4225,7 +4225,10 @@ function distdashHTML(){
       <td><span class="tag" style="${st==='تحویل شد'?'background:rgba(63,185,80,.2)':st==='برگشتی'?'background:rgba(248,81,73,.2)':''}">${esc(st)}</span></td>
       <td>${nxt?`<button class="btn sm" onclick="dlvSet('${d.id}','${nxt}')">➡ ${nxt}</button>`:''}
         ${st!=='برگشتی'&&st!=='تحویل شد'?`<button class="btn gh sm" onclick="dlvSet('${d.id}','برگشتی')">↩</button>`:''}</td></tr>`;};
-  return `<div class="sec"><h3>🛵 داشبورد پخش و توزیع
+  return `<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px">
+    ${canSee('delivery')?`<button class="btn gh sm" onclick="go('list','delivery')">🛵 لیست ارسال و توزیع <b>${menuCount('delivery').toLocaleString('fa-IR')}</b></button>`:''}
+    ${canSee('channel')?`<button class="btn gh sm" onclick="go('list','channel')">📣 کانال‌ها و تبلیغات <b>${menuCount('channel').toLocaleString('fa-IR')}</b></button>`:''}
+  </div><div class="sec"><h3>🛵 داشبورد پخش و توزیع
     <span style="flex:1"></span>
     ${can('c','delivery')?`<button class="btn sm" onclick="go('list','delivery')">＋ ارسال جدید / فهرست</button>`:''}</h3>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:10px">
@@ -8018,7 +8021,7 @@ function invnewHTML(){
   }
   h+=`<div class="sec"><h3>${invDraft.kind==='پیش‌فاکتور'?'📝 صدور پیش‌فاکتور — ارسال به گردش فروش':'🧾 صدور فاکتور'}</h3>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px">
-    <div><label ${lbl}>نوع سند</label><select onchange="invSetHead('kind',this.value)">${['فاکتور فروش','پیش‌فاکتور'].map(k=>`<option ${k===invDraft.kind?'selected':''}>${k}</option>`).join('')}</select></div>
+    <div><label ${lbl}>نوع سند</label><div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">${invDraft.kind==='پیش‌فاکتور'?'📝 پیش‌فاکتور':'🧾 فاکتور فروش'}</div></div>
     <div><label ${lbl}>کسب‌وکار</label><select onchange="invSetHead('biz',this.value)"><option value="">—</option>${byE('business').map(x=>`<option value="${x.id}" ${x.id===invDraft.biz?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></div>
     <div><label ${lbl}>مشتری 🔍 <a href="#" style="font-size:10.5px;color:var(--ac);text-decoration:none" onclick="view.qc=!view.qc;render();return false">＋ مشتری جدید</a></label><input list="dl_invcust" value="${esc(custName)}" placeholder="بنویس تا جستجو شود…" onchange="invPickCust(this.value)">
       <datalist id="dl_invcust">${custs.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>
@@ -9604,7 +9607,8 @@ function navSubSort(g,ents){ // ents: آرایه‌ی [k,v]
   const kept=ord.filter(k=>keys.includes(k));const rest=keys.filter(k=>!kept.includes(k));
   return kept.concat(rest).map(k=>ents.find(e=>e[0]===k));
 }
-function groupEnts(g){return Object.entries(E).filter(([k,v])=>v.grp===g&&!v.sub&&canSee(k));}
+const NAV_MERGED={pricelist:1,delivery:1,channel:1}; // 🧹 این لیست‌ها داخل داشبوردها ادغام شدند
+function groupEnts(g){return Object.entries(E).filter(([k,v])=>v.grp===g&&!v.sub&&!NAV_MERGED[k]&&canSee(k));}
 function moveSubItem(g,k,dir){
   const order=navSubSort(g,groupEnts(g)).map(e=>e[0]);
   const i=order.indexOf(k),j=i+dir;if(i<0||j<0||j>=order.length)return;
@@ -9908,7 +9912,6 @@ function wsMenu(g){
     (canSee('invoice')&&canView('saleswf')?(()=>{const _wc=wfCount();return `<div class="nav-i ${view.type==='saleswf'?'on':''}" onclick="go('saleswf')">🔁 گردش فروش${_wc?` <span class="c" style="background:var(--ac);color:#fff">${_wc.toLocaleString('fa-IR')}</span>`:''}</div>`;})():'')+
     it('invnew','📝 صدور پیش‌فاکتور',"invDraft=null;window._invPf=1;go('invnew')",canSee('invoice')&&can('c','invoice')&&canView('invnew'))+
     it('invnew','🧾 صدور فاکتور فروش',"invDraft=null;window._invPf=0;go('invnew')",canSee('invoice')&&can('c','invoice')&&canView('invnew'))+
-    (canSee('invoice')?invRow(INV_KIND_SALE,'فاکتورهای فروش','🧾')+invRow(INV_KIND_PROF,'پیش‌فاکتورها','📝'):'')+
     it('plreport','💰 سود و زیان فروش',"go('plreport')",canSee('invoice')&&canView('plreport'))+
     it('distdash','🛵 داشبورد پخش و توزیع',"go('distdash')",canSee('delivery')&&canView('distdash')));
   if(g==='CRM و مشتریان')return (
@@ -9942,7 +9945,7 @@ function wsMenu(g){
 const GRP_IC={'فروش':'🧾','CRM و مشتریان':'🤝','کالا و انبار':'📦','عملکرد و تارگت':'🎯','مالی':'💰','پرسنل و سازمان':'👥','بخش‌های سفارشی':'📁'};
 const GRP_COLOR={'فروش':'#0078D4','CRM و مشتریان':'#038387','کالا و انبار':'#CA5010','عملکرد و تارگت':'#744DA9','مالی':'#107C10','پرسنل و سازمان':'#E3008C','بخش‌های سفارشی':'#8764B8'};
 function mtItems(g){ // 🧩 همهٔ زیرمنوهای یک گروه به‌صورت چیپ
-  const ents=Object.entries(E).filter(([k,v])=>v.grp===g&&!v.sub&&canSee(k));
+  const ents=groupEnts(g);
   let items=wsMenu(g);
   navSubSort(g,ents).forEach(([k,v])=>{
     const on=(view.type==='list'||view.type==='rec')&&view.e===k&&(view.ikind===undefined||k!=='invoice');
@@ -10014,7 +10017,7 @@ function nav(){
   if(!isPending()&&canView('impcenter'))h+=`<div class="nav-i ${view.type==='impcenter'?'on':''}" onclick="go('impcenter')">📥 مرکز ورود اکسل</div>`;
   // 🏢 انتخاب‌گر کسب‌وکار فعالِ سراسری (موقعیت قابل جابجایی: بالا / پایین / مخفی)
   navGroupsOrdered().forEach(g=>{
-    const ents=Object.entries(E).filter(([k,v])=>v.grp===g&&!v.sub&&canSee(k)); // ردیف‌های داخلی (sub) در منو نمایش داده نمی‌شوند؛ گروه کسب‌وکار جدا رندر می‌شود
+    const ents=groupEnts(g); // ردیف‌های داخلی (sub) و لیست‌های ادغام‌شده در داشبورد، در منو نمایش داده نمی‌شوند
     let items='';
     items+=wsMenu(g);
     if(g==='رشد شخصی'&&canView('gdash'))items+=`<div class="nav-i ${view.type==='gdash'?'on':''}" onclick="go('gdash')">✨ داشبورد رشد</div>`;
@@ -10800,7 +10803,13 @@ function smdashHTML(){
   const card=(t,v,bad,sub)=>`<div class="sec" style="text-align:center;padding:13px 10px"><div style="font-size:11px;color:var(--tx2)">${t}</div><div style="font-size:18px;font-weight:800;margin-top:4px;color:${bad?'var(--bad)':'var(--tx)'}">${v}</div>${sub?`<div style="font-size:10px;color:var(--tx2);margin-top:3px">${sub}</div>`:''}</div>`;
   const kcard=(key,t,v,bad,sub)=>{const on=view.smCard===key;return `<div class="sec" style="text-align:center;padding:13px 10px;cursor:pointer;${on?'border:1px solid var(--ac)':''}" onclick="view.smCard=${on?'null':`'${key}'`};view.smQ='';render()"><div style="font-size:11px;color:var(--tx2)">${t} ▾</div><div style="font-size:18px;font-weight:800;margin-top:4px;color:${bad?'var(--bad)':'var(--tx)'}">${v}</div>${sub?`<div style="font-size:10px;color:var(--tx2);margin-top:3px">${sub}</div>`:''}</div>`;};
   const PER=[['d7','۷ روز'],['d30','۳۰ روز'],['m','ماه جاری'],['q','فصل جاری'],['y','امسال']];
-  let h=`<div class="tools"><b style="font-size:13px">💼 داشبورد مدیریت فروش${b&&recs[b]?' — '+esc(recs[b].d.title):' (همه)'}</b>
+  const _qa=`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px">
+    ${canSee('invoice')?`<button class="btn gh sm" onclick="invGo('${INV_KIND_SALE}')">🧾 فاکتورهای فروش <b>${invKindCount(INV_KIND_SALE).toLocaleString('fa-IR')}</b></button>
+    <button class="btn gh sm" onclick="invGo('${INV_KIND_PROF}')">📝 پیش‌فاکتورها <b>${invKindCount(INV_KIND_PROF).toLocaleString('fa-IR')}</b></button>`:''}
+    ${canSee('pricelist')?`<button class="btn gh sm" onclick="go('list','pricelist')">🏷️ لیست قیمت فروش <b>${menuCount('pricelist').toLocaleString('fa-IR')}</b></button>`:''}
+    ${canSee('channel')?`<button class="btn gh sm" onclick="go('list','channel')">📣 کانال‌ها و تبلیغات <b>${menuCount('channel').toLocaleString('fa-IR')}</b></button>`:''}
+  </div>`;
+  let h=_qa+`<div class="tools"><b style="font-size:13px">💼 داشبورد مدیریت فروش${b&&recs[b]?' — '+esc(recs[b].d.title):' (همه)'}</b>
     <span style="flex:1"></span>
     <select onchange="setGBiz(this.value)" style="max-width:160px"><option value="">همه کسب‌وکارها</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select>
     <button class="btn gh sm" onclick="invDraft=null;go('invnew')">🧾 فاکتور جدید</button>
