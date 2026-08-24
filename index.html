@@ -337,11 +337,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.36</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.38</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.36</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.38</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -3118,19 +3118,12 @@ const VIEWS_ACL=[
  ['ceodash','📊 داشبورد: مدیریت کسب‌وکار'],
  ['gldash','📊 داشبورد: دفتر کل و صورت‌های مالی'],
  ['findash','📊 داشبورد: مالی تخصصی (IFRS)'],
- ['invdash','📊 داشبورد: سرمایه‌گذاری'],
- ['portdash','📊 داشبورد: پورتفوی پروژه‌ها'],
- ['epcfdash','📊 داشبورد: EPCF'],
- ['agiledash','📊 داشبورد: Agile'],
- ['tokendash','📊 داشبورد: توکن'],
- ['cdash','📊 داشبورد: ساخت‌وساز'],
  ['riskdash','📊 داشبورد: ریسک (ISO 31000)'],
  ['stratdash','📊 داشبورد: استراتژیک هلدینگ'],
  ['bscmap','📊 داشبورد: نقشه استراتژی و BSC'],
  ['bsccanvas','📊 داشبورد: بوم استراتژی'],
  ['swotmap','📊 داشبورد: بوم SWOT / PESTEL'],
  ['procmap','📊 داشبورد: نقشه فرآیندها (ISO)'],
- ['gdash','📊 داشبورد: رشد شخصی'],
  ['cal','📅 تقویم'],['charts','📊 نمودارها و شاخص‌ها'],
  ['mydash','📐 داشبوردهای شخصی'],['mbuilder','🧩 ساختارساز شاخص‌ها'],
  ['saleswf','🔁 کارتابل گردش فروش'],
@@ -9724,7 +9717,7 @@ try{const _sv=JSON.parse(localStorage.getItem('xr_view')||'null');
 /* 🪗 جمع‌شوندگی گروه‌های منو بر اساس موضوع */
 let navCol=null;
 try{navCol=JSON.parse(localStorage.getItem('xr_navcol')||'null');}catch(e){navCol=null;}
-const DASH_GRP={saleswf:'فروش',invnew:'فروش',quotenew:'کالا و انبار',pinvnew:'کالا و انبار',paydash:'مالی',settlenew:'مالی',bpm:'پرسنل و سازمان',wfcenter:'پرسنل و سازمان',ceodash:'داشبوردها',charts:'داشبوردها',smdash:'داشبوردها',plreport:'داشبوردها',targetdash:'داشبوردها',distdash:'داشبوردها',custdash:'داشبوردها',loyaldash:'داشبوردها',smsdash:'داشبوردها',whdash:'داشبوردها',pudash:'داشبوردها',supdash:'داشبوردها',pldash:'داشبوردها',bankdash:'داشبوردها',arapdash:'داشبوردها',chqdash:'داشبوردها',sepfin:'داشبوردها',sepdash:'داشبوردها',dualdash:'داشبوردها',pfdash:'داشبوردها',gldash:'داشبوردها',findash:'داشبوردها',perfdash:'داشبوردها',aligndash:'داشبوردها',riskdash:'داشبوردها',stratdash:'داشبوردها',bscmap:'داشبوردها',bsccanvas:'داشبوردها',swotmap:'داشبوردها',procmap:'داشبوردها',invdash:'داشبوردها',portdash:'داشبوردها',epcfdash:'داشبوردها',agiledash:'داشبوردها',tokendash:'داشبوردها',cdash:'داشبوردها',gdash:'داشبوردها',mydash:'داشبوردها',glnew:'حسابداری',cfaacad:'سرمایه‌گذاری و ثروت',bizdash:'داشبوردها'};
+const DASH_GRP={saleswf:'فروش',invnew:'فروش',quotenew:'کالا و انبار',pinvnew:'کالا و انبار',paydash:'مالی',settlenew:'مالی',bpm:'پرسنل و سازمان',wfcenter:'پرسنل و سازمان',ceodash:'داشبوردها',charts:'داشبوردها',smdash:'داشبوردها',plreport:'داشبوردها',targetdash:'داشبوردها',distdash:'داشبوردها',custdash:'داشبوردها',loyaldash:'داشبوردها',smsdash:'داشبوردها',whdash:'داشبوردها',pudash:'داشبوردها',supdash:'داشبوردها',pldash:'داشبوردها',bankdash:'داشبوردها',arapdash:'داشبوردها',chqdash:'داشبوردها',sepfin:'داشبوردها',sepdash:'داشبوردها',dualdash:'داشبوردها',pfdash:'داشبوردها',gldash:'داشبوردها',findash:'داشبوردها',perfdash:'داشبوردها',aligndash:'داشبوردها',riskdash:'داشبوردها',stratdash:'داشبوردها',bscmap:'داشبوردها',bsccanvas:'داشبوردها',swotmap:'داشبوردها',procmap:'داشبوردها',mydash:'داشبوردها',glnew:'حسابداری',bizdash:'داشبوردها'};
 function activeGrp(){ // گروهی که صفحه فعلی به آن تعلق دارد (همیشه باز نمایش داده می‌شود)
   if(view.type==='module')return view.flt||null;
   if(view.type==='mydash')return 'داشبوردها';
@@ -10095,13 +10088,6 @@ const DASHREG=[
  {k:'bsccanvas',n:'بوم استراتژی',ic:'🧭',cat:'استراتژی',d:'بوم مدل کسب‌وکار و انتخاب‌های استراتژیک',s:()=>canSee('bsc'),kpi:()=>[dkC('bsc','هدف')]},
  {k:'swotmap',n:'بوم SWOT / PESTEL',ic:'🧩',cat:'استراتژی',d:'تحلیل نقاط قوت، ضعف، فرصت و تهدید',s:()=>canSee('swot'),kpi:()=>[dkC('swot','گزاره')]},
  {k:'procmap',n:'نقشه فرآیندها (ISO)',ic:'🔁',cat:'استراتژی',d:'فرآیندهای اصلی، پشتیبان و مدیریتی سازمان',s:()=>canSee('process'),kpi:()=>[dkC('process','فرآیند')]},
- {k:'invdash',n:'سرمایه‌گذاری و ثروت',ic:'💎',cat:'تخصصی',d:'ارزش‌گذاری، طرح توجیهی و سبد دارایی',s:()=>canSee('valuation')||canSee('feasproj')||canSee('position'),kpi:()=>[dkC('position','پوزیشن'),dkC('valuation','ارزش‌گذاری')]},
- {k:'portdash',n:'پورتفوی پروژه‌ها',ic:'🏦',cat:'تخصصی',d:'وضعیت کل پروژه‌های هلدینگ در یک نگاه',s:()=>canSee('eproject'),kpi:()=>[dkC('eproject','پروژه')]},
- {k:'epcfdash',n:'داشبورد EPCF',ic:'🎛️',cat:'تخصصی',d:'پیشرفت مهندسی، تدارکات، اجرا و تأمین مالی',s:()=>canSee('eproject'),kpi:()=>[dkC('eproject','پروژه')]},
- {k:'agiledash',n:'داشبورد Agile',ic:'💻',cat:'تخصصی',d:'اسپرینت‌ها، داستان‌های کاربر و سرعت تیم',s:()=>canSee('astory'),kpi:()=>[dkC('astory','داستان')]},
- {k:'tokendash',n:'داشبورد توکن',ic:'🪙',cat:'تخصصی',d:'توکن‌ها، عرضه و گردش دارایی دیجیتال',s:()=>canSee('token'),kpi:()=>[dkC('token','توکن')]},
- {k:'cdash',n:'داشبورد ساخت‌وساز',ic:'🏢',cat:'تخصصی',d:'متره، برآورد و پیشرفت پروژه‌های عمرانی',s:()=>canSee('cboq'),kpi:()=>[dkC('cboq','ردیف متره')]},
- {k:'gdash',n:'رشد شخصی',ic:'✨',cat:'تخصصی',d:'عادت‌ها، اهداف شخصی و پیشرفت فردی',s:()=>true,kpi:()=>[dkC('habit','عادت'),dkC('growth','هدف')]}
 ];
 const DASH_CATS=['مدیریتی','فروش','مشتریان','انبار و خرید','مالی','عملکرد و سازمان','استراتژی','تخصصی'];
 function dkC(e,l){ // شمارش رکوردهای یک بخش
@@ -10300,7 +10286,6 @@ function nav(){
     const ents=groupEnts(g); // ردیف‌های داخلی (sub) و لیست‌های ادغام‌شده در داشبورد، در منو نمایش داده نمی‌شوند
     let items='';
     items+=wsMenu(g);
-    if(g==='سرمایه‌گذاری و ثروت'&&canView('cfaacad'))items+=`<div class="nav-i ${view.type==='cfaacad'?'on':''}" onclick="go('cfaacad')">🎓 آموزش و کاربرد CFA</div>`;
     if(g==='حسابداری'&&canSee('voucher')&&can('c','voucher')&&canView('glnew'))items+=`<div class="nav-i ${view.type==='glnew'?'on':''}" onclick="glDraft=null;go('glnew')">🖊️ ثبت سند</div>`;
     if(g==='EPCF'&&canSee('eproject')){
       const prjs=byE('eproject');
@@ -10386,7 +10371,6 @@ function render(){
     view.type==='lvreq'?'🌴 درخواست مرخصی':
     view.type==='cartable'?'📨 کارتابل نامه‌ها و تأییدها':
     view.type==='saleswf'?'🔁 گردش فروش — پیش‌فاکتور تا صدور':
-    view.type==='gdash'?'✨ داشبورد رشد شخصی':
     view.type==='cal'?'📅 تقویم':
     view.type==='bizdash'?'🏪 داشبورد کسب‌وکار':
     view.type==='bizkpi'?'🧭 داشبورد مدیریت کسب‌وکار':
@@ -10404,14 +10388,9 @@ function render(){
     view.type==='smdash'?'💼 داشبورد مدیریت فروش':
     view.type==='quickadd'?'⚡ مرکز ثبت سریع':
     view.type==='pfdash'?'🔄 تسویه درگاه‌ها و پلتفرم‌ها':
-    view.type==='epcfdash'?'🎛️ داشبورد EPCF':
-    view.type==='cdash'?'🏢 داشبورد ساخت‌وساز':
-    view.type==='portdash'?'🏦 پورتفوی پروژه‌ها':
-    view.type==='tokendash'?'🪙 داشبورد توکن':
     view.type==='perfdash'?'🎖️ داشبورد عملکرد':
     view.type==='aligndash'?'🧭 همسویی عملکرد و استراتژی':
     view.type==='backupdash'?'💾 پشتیبان‌گیری و بازیابی':
-    view.type==='agiledash'?'💻 داشبورد Agile':
     view.type==='salesdash'?'🧾 داشبورد فروش':
     view.type==='invnew'?'🧾 صدور فاکتور':
     view.type==='pinvnew'?'🧾 ثبت فاکتور خرید':
@@ -10426,8 +10405,6 @@ function render(){
     view.type==='pldash'?'💰 داشبورد مدیریت مالی':
     view.type==='bankdash'?'🏦 صندوق و بانک':
     view.type==='finform'?'💰 ورود سود و زیان':
-    view.type==='invdash'?'💎 داشبورد سرمایه‌گذاری':
-    view.type==='cfaacad'?'🎓 آموزش و کاربرد CFA':
     view.type==='gldash'?'📒 دفتر کل و صورت‌های مالی':
     view.type==='glnew'?'🖊️ ثبت سند حسابداری':
     view.type==='procmap'?'🔁 نقشه فرآیندها (ISO)':
@@ -10452,7 +10429,7 @@ function render(){
   const _mtEl=document.getElementById('mtabs');
   if(_mtEl){try{_mtEl.innerHTML=mtabsHTML();}catch(e){_mtEl.innerHTML='';}}
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',gdash:'gdash',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',invdash:'invdash',cfaacad:'invdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',epcfdash:'epcfdash',sepdash:'sepdash',sepfin:'sepfin',cdash:'cdash',portdash:'portdash',tokendash:'tokendash',perfdash:'perfdash',aligndash:'aligndash',agiledash:'agiledash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',paydash:'paydash',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
+  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',paydash:'paydash',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -10473,7 +10450,6 @@ function render(){
     else if(view.type==='lvreq')c.innerHTML=lvreqHTML();
     else if(view.type==='cartable')c.innerHTML=cartHTML();
     else if(view.type==='saleswf')c.innerHTML=swfHTML();
-    else if(view.type==='gdash')c.innerHTML=gdashHTML();
     else if(view.type==='cal')c.innerHTML=calHTML();
     else if(view.type==='bizdash')c.innerHTML=bizdashHTML();
     else if(view.type==='charts')c.innerHTML=chartsHTML();
@@ -10485,7 +10461,6 @@ function render(){
     else if(view.type==='pldash')c.innerHTML=pldashHTML();
     else if(view.type==='bankdash')c.innerHTML=bankdashHTML();
     else if(view.type==='finform')c.innerHTML=finFormHTML();
-    else if(view.type==='invdash'||view.type==='cfaacad')c.innerHTML=invdashHTML();
     else if(view.type==='procmap')c.innerHTML=procmapHTML();
     else if(view.type==='sepdash')c.innerHTML=sepdashHTML();
     else if(view.type==='dualdash')c.innerHTML=dualdashHTML();
@@ -10507,14 +10482,9 @@ function render(){
     else if(view.type==='smdash')c.innerHTML=smdashHTML();
     else if(view.type==='quickadd')c.innerHTML=quickaddHTML();
     else if(view.type==='pfdash')c.innerHTML=pfdashHTML();
-    else if(view.type==='epcfdash')c.innerHTML=epcfdashHTML();
-    else if(view.type==='cdash')c.innerHTML=cdashHTML();
-    else if(view.type==='portdash')c.innerHTML=portdashHTML();
-    else if(view.type==='tokendash')c.innerHTML=tokendashHTML();
     else if(view.type==='perfdash')c.innerHTML=perfdashHTML();
     else if(view.type==='aligndash')c.innerHTML=aligndashHTML();
     else if(view.type==='backupdash')c.innerHTML=backupdashHTML();
-    else if(view.type==='agiledash')c.innerHTML=agiledashHTML();
     else if(view.type==='salesdash')c.innerHTML=salesdashHTML();
     else if(view.type==='invnew')c.innerHTML=invnewHTML();
     else if(view.type==='pinvnew')c.innerHTML=pinvnewHTML();
@@ -13500,7 +13470,7 @@ function portdashHTML(){
     ${stats.slice().sort((a,b)=>b.cval-a.cval).map(x=>{
       const spiC=x.spi==null?'var(--tx2)':x.spi<0.9?'var(--bad)':x.spi<1?'#e5b567':'var(--ok)';
       const cpiC=x.cpi==null?'var(--tx2)':x.cpi<0.9?'var(--bad)':x.cpi<1?'#e5b567':'var(--ok)';
-      return `<tr onclick="setGPrj('${x.pr.id}');go('epcfdash')" style="cursor:pointer" title="کلیک: باز کردن داشبورد این پروژه">
+      return `<tr onclick="setGPrj('${x.pr.id}');render()" style="cursor:pointer" title="کلیک: انتخاب این پروژه">
       <td style="text-align:right"><b>${esc(x.pr.d.title)}</b></td><td>${abbrN(x.cval)}</td>
       <td>${x.act.toLocaleString('fa-IR',{maximumFractionDigits:0})}٪ / ${x.plan.toLocaleString('fa-IR',{maximumFractionDigits:0})}٪</td>
       <td><b style="color:${spiC}">${x.spi==null?'—':x.spi.toLocaleString('fa-IR',{maximumFractionDigits:2})}</b></td>
@@ -25221,7 +25191,7 @@ function npvIrrCalc(){
 window.npvIrrCalc=npvIrrCalc;
 function invdashHTML(){
   const vals=byE('valuation'),feas=byE('feasproj'),poss=byE('position');
-  const cfaOnly=view.type==='cfaacad';
+  const cfaOnly=false;
   if(cfaOnly)view.ivTab='cfa';
   else if(!view.ivTab||view.ivTab==='cfa')view.ivTab='port';
   const TB=cfaOnly?[]:[['port','👜 پورتفوی و تخصیص دارایی'],['tools','💎 ارزش‌گذاری و طرح‌ها'],['calc','🧮 ماشین‌حساب مالی'],['qlab','🧠 آزمایشگاه تحلیل کمی']];
