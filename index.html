@@ -43,10 +43,30 @@ body{font-family:Vazirmatn,Tahoma,sans-serif;color:var(--tx);font-size:14px;
 .nav-h{font-size:11.5px;color:var(--tx);font-weight:800;margin:14px 8px 4px}
 .navg .gic{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:14px;flex-shrink:0;background:var(--gdot,#8a96a8);box-shadow:var(--sh2)}
 #mtabs:empty{display:none}
-.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
-.dcard{display:flex;align-items:center;gap:11px;padding:13px 15px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;box-shadow:var(--sh2);transition:box-shadow .25s var(--ease),transform .25s var(--ease)}
-.dcard:hover{box-shadow:var(--sh8);transform:translateY(-2px);border-color:var(--ac)}
-.dcard .dic{width:36px;height:36px;flex:none;border-radius:10px;display:grid;place-items:center;font-size:19px;background:var(--bg3)}
+.dbar{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 4px}
+.dbar .dchip{border-radius:20px;font-size:12.5px;padding:7px 14px}
+.dbar .dchn{opacity:.6;font-size:11px;margin-inline-start:3px}
+.dsec{padding:16px 18px 18px}
+.dsech{display:flex;align-items:center;gap:9px;margin-bottom:13px}
+.dsech .dsecb{width:5px;height:19px;border-radius:3px;flex:none}
+.dsech h3{margin:0;font-size:14.5px}
+.dsech .dsecn{font-size:11px;color:var(--tx2);background:var(--bg3);padding:2px 9px;border-radius:10px}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:12px}
+.dcard{position:relative;display:flex;flex-direction:column;padding:15px 16px 13px;border:1px solid var(--line);border-radius:14px;background:var(--bg2,#fff);cursor:pointer;box-shadow:var(--sh2);overflow:hidden;transition:box-shadow .25s var(--ease),transform .25s var(--ease),border-color .25s var(--ease)}
+.dcard::before{content:'';position:absolute;top:0;right:0;left:0;height:3px;background:var(--dc,#0078D4);opacity:.85}
+.dcard:hover{box-shadow:var(--sh16);transform:translateY(-3px);border-color:var(--dc,var(--ac))}
+.dcard .dch{display:flex;align-items:center;gap:11px}
+.dcard .dic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:21px;color:#fff;background:var(--dc,#0078D4);box-shadow:var(--sh2)}
+.dcard .dnm{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dcard .dnm b{font-size:14px;font-weight:800;line-height:1.4}
+.dcard .dnm span{font-size:10.5px;color:var(--tx2)}
+.dcard .ddesc{margin:9px 0 0;font-size:11.5px;color:var(--tx2);line-height:1.85;min-height:42px}
+.dcard .dstats{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.dcard .dstats>div{flex:1;background:var(--bg3);border-radius:9px;padding:7px 9px;text-align:center}
+.dcard .dstats b{display:block;font-size:15px;font-weight:800;color:var(--dc,var(--tx));line-height:1.5}
+.dcard .dstats span{font-size:10px;color:var(--tx2)}
+.dcard .dgo{margin-top:10px;font-size:11.5px;font-weight:700;color:var(--dc,var(--ac));opacity:0;transform:translateX(6px);transition:all .25s var(--ease)}
+.dcard:hover .dgo{opacity:1;transform:none}
 .mcrumb{font-size:12px;color:var(--tx2);padding:2px 6px 10px}
 .mcrumb b{font-weight:700}
 .mhero{display:flex;align-items:center;gap:18px;margin:0 0 18px;padding:24px 26px;background:#fff;border:1px solid var(--line);border-inline-start:5px solid var(--mtc,#0078D4);border-radius:16px;box-shadow:var(--sh2)}
@@ -311,11 +331,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.34</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.35</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.34</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.35</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -10039,67 +10059,111 @@ function bizMenuHTML(){
 }
 /* ═══ 📊 مرکز داشبوردها — همهٔ داشبوردهای سیستم یک‌جا (دسترسی هرکدام در «🛡️ سطوح دسترسی») ═══ */
 const DASHREG=[
- {k:'ceodash',n:'داشبورد مدیریت کسب‌وکار',ic:'🧭',cat:'مدیریتی',s:()=>canSee('invoice')||canSee('product')||canSee('purchinv')},
- {k:'charts',n:'نمودارها و شاخص‌ها',ic:'📊',cat:'مدیریتی',s:()=>true},
- {k:'smdash',n:'داشبورد فروش',ic:'📈',cat:'فروش',s:()=>canSee('invoice')},
- {k:'plreport',n:'سود و زیان فروش',ic:'💰',cat:'فروش',s:()=>canSee('invoice')},
- {k:'targetdash',n:'پایش تارگت فروش',ic:'🎯',cat:'فروش',s:()=>canSee('saletarget')},
- {k:'distdash',n:'داشبورد پخش و توزیع',ic:'🛵',cat:'فروش',s:()=>canSee('delivery')},
- {k:'custdash',n:'داشبورد مشتریان',ic:'🛍️',cat:'مشتریان',s:()=>canSee('customer')},
- {k:'loyaldash',n:'باشگاه مشتریان',ic:'💎',cat:'مشتریان',s:()=>canSee('customer')},
- {k:'smsdash',n:'پنل پیامک',ic:'💬',cat:'مشتریان',s:()=>canSee('customer')},
- {k:'whdash',n:'داشبورد انبار',ic:'📦',cat:'انبار و خرید',s:()=>canSee('product')},
- {k:'pudash',n:'داشبورد خرید',ic:'🚚',cat:'انبار و خرید',s:()=>canSee('purchinv')||canSee('purchase')},
- {k:'supdash',n:'تأمین‌کنندگان',ic:'🏭',cat:'انبار و خرید',s:()=>canSee('crm')},
- {k:'pldash',n:'داشبورد مالی (سود و زیان)',ic:'💰',cat:'مالی',s:()=>canSee('plfin')},
- {k:'bankdash',n:'صندوق و بانک',ic:'🏦',cat:'مالی',s:()=>canSee('account')},
- {k:'arapdash',n:'طلب، بدهی و دریافت/پرداخت',ic:'💵',cat:'مالی',s:()=>canSee('settle')},
- {k:'chqdash',n:'تابلوی چک‌ها',ic:'💳',cat:'مالی',s:()=>canSee('cheque')},
- {k:'sepfin',n:'حسابداری رسمی (سپیدار)',ic:'🟦',cat:'مالی',s:()=>canSee('sepdoc')},
- {k:'sepdash',n:'تطبیق عملیات و حسابداری',ic:'⚖️',cat:'مالی',s:()=>canSee('sepdoc')},
- {k:'dualdash',n:'کنترل دوگانه (حسابداری⇄عملیات)',ic:'🎛',cat:'مالی',s:()=>canSee('sepdoc')},
- {k:'pfdash',n:'تسویه درگاه‌ها',ic:'🔄',cat:'مالی',s:()=>canSee('pfsettle')},
- {k:'gldash',n:'دفتر کل و صورت‌های مالی',ic:'📒',cat:'مالی',s:()=>canSee('voucher')},
- {k:'findash',n:'داشبورد مالی تخصصی (IFRS)',ic:'💼',cat:'مالی',s:()=>canSee('finis')||canSee('finbs')||canSee('fincf')},
- {k:'perfdash',n:'داشبورد عملکرد',ic:'🎖️',cat:'عملکرد و سازمان',s:()=>canSee('perfscore')||canSee('eproject')},
- {k:'aligndash',n:'همسویی عملکرد ↔ استراتژی',ic:'🧭',cat:'عملکرد و سازمان',s:()=>canSee('perfscore')},
- {k:'riskdash',n:'داشبورد ریسک (ISO 31000)',ic:'🤨',cat:'عملکرد و سازمان',s:()=>canSee('risk')},
- {k:'stratdash',n:'داشبورد استراتژیک هلدینگ',ic:'🏛️',cat:'استراتژی',s:()=>canSee('bsc')},
- {k:'bscmap',n:'نقشه استراتژی و BSC',ic:'🗺️',cat:'استراتژی',s:()=>canSee('bsc')},
- {k:'bsccanvas',n:'بوم استراتژی',ic:'🧭',cat:'استراتژی',s:()=>canSee('bsc')},
- {k:'swotmap',n:'بوم SWOT / PESTEL',ic:'🧭',cat:'استراتژی',s:()=>canSee('swot')},
- {k:'procmap',n:'نقشه فرآیندها (ISO)',ic:'🔁',cat:'استراتژی',s:()=>canSee('process')},
- {k:'invdash',n:'داشبورد سرمایه‌گذاری',ic:'💎',cat:'تخصصی',s:()=>canSee('valuation')||canSee('feasproj')||canSee('position')},
- {k:'portdash',n:'پورتفوی پروژه‌ها (هلدینگ)',ic:'🏦',cat:'تخصصی',s:()=>canSee('eproject')},
- {k:'epcfdash',n:'داشبورد EPCF',ic:'🎛️',cat:'تخصصی',s:()=>canSee('eproject')},
- {k:'agiledash',n:'داشبورد Agile',ic:'💻',cat:'تخصصی',s:()=>canSee('astory')},
- {k:'tokendash',n:'داشبورد توکن',ic:'🪙',cat:'تخصصی',s:()=>canSee('token')},
- {k:'cdash',n:'داشبورد ساخت‌وساز',ic:'🏢',cat:'تخصصی',s:()=>canSee('cboq')},
- {k:'gdash',n:'داشبورد رشد شخصی',ic:'✨',cat:'تخصصی',s:()=>true}
+ {k:'ceodash',n:'مدیریت کسب‌وکار',ic:'🧭',cat:'مدیریتی',d:'نمای کلی فروش، خرید، موجودی و نقدینگی در یک صفحه',s:()=>canSee('invoice')||canSee('product')||canSee('purchinv'),kpi:()=>[dkC('invoice','فاکتور'),dkC('product','کالا')]},
+ {k:'charts',n:'نمودارها و شاخص‌ها',ic:'📊',cat:'مدیریتی',d:'نمودارهای تحلیلی و شاخص‌های کلیدی قابل تنظیم',s:()=>true,kpi:()=>[dkC('mdef','شاخص'),dkC('kpival','ثبت')]},
+ {k:'smdash',n:'داشبورد فروش',ic:'📈',cat:'فروش',d:'روند فروش، فروشندگان برتر، کالاها و کانال‌ها',s:()=>canSee('invoice'),kpi:()=>[dkN(invKindCount(INV_KIND_SALE),'فاکتور فروش'),dkN(invKindCount(INV_KIND_PROF),'پیش‌فاکتور')]},
+ {k:'plreport',n:'سود و زیان فروش',ic:'💰',cat:'فروش',d:'حاشیه سود هر فاکتور، کالا و مشتری',s:()=>canSee('invoice'),kpi:()=>[dkC('invline','ردیف فروش')]},
+ {k:'targetdash',n:'پایش تارگت فروش',ic:'🎯',cat:'فروش',d:'تحقق هدف فروش هر فرد، تیم و دوره',s:()=>canSee('saletarget'),kpi:()=>[dkC('saletarget','تارگت')]},
+ {k:'distdash',n:'پخش و توزیع',ic:'🛵',cat:'فروش',d:'وضعیت ارسال‌ها، پیک‌ها و مبالغ در راه',s:()=>canSee('delivery'),kpi:()=>[dkC('delivery','ارسال'),dkF(()=>byE('delivery').filter(d=>['آمادهٔ ارسال','در مسیر'].includes(d.d.status||'آمادهٔ ارسال')).length,'باز')]},
+ {k:'custdash',n:'داشبورد مشتریان',ic:'🛍️',cat:'مشتریان',d:'رتبه‌بندی مشتریان، خرید و بدهی هرکدام',s:()=>canSee('customer'),kpi:()=>[dkC('customer','مشتری')]},
+ {k:'loyaldash',n:'باشگاه مشتریان',ic:'💎',cat:'مشتریان',d:'امتیاز وفاداری و سوابق استفاده از جوایز',s:()=>canSee('customer'),kpi:()=>[dkC('loyredeem','استفاده')]},
+ {k:'smsdash',n:'پنل پیامک',ic:'💬',cat:'مشتریان',d:'ارسال گروهی پیامک و سابقهٔ پیام‌ها',s:()=>canSee('customer'),kpi:()=>[dkC('smslog','پیام')]},
+ {k:'whdash',n:'داشبورد انبار',ic:'📦',cat:'انبار و خرید',d:'موجودی هر انبار، ارزش FIFO و کالاهای بحرانی',s:()=>canSee('product'),kpi:()=>[dkC('product','کالا'),dkC('whouse','انبار')]},
+ {k:'pudash',n:'داشبورد خرید',ic:'🚚',cat:'انبار و خرید',d:'روند خرید، سفارش‌های باز و کالاهای در راه',s:()=>canSee('purchinv')||canSee('purchase'),kpi:()=>[dkC('purchinv','فاکتور خرید'),dkC('po','سفارش')]},
+ {k:'supdash',n:'تأمین‌کنندگان',ic:'🏭',cat:'انبار و خرید',d:'امتیاز تأمین‌کنندگان، بدهی و آخرین قیمت‌ها',s:()=>canSee('crm'),kpi:()=>[dkC('crm','تأمین‌کننده'),dkC('rfq','استعلام')]},
+ {k:'pldash',n:'مالی (سود و زیان)',ic:'💰',cat:'مالی',d:'صورت سود و زیان ماهانه و روند درآمد/هزینه',s:()=>canSee('plfin'),kpi:()=>[dkC('plmonth','دوره'),dkC('expense','هزینه')]},
+ {k:'bankdash',n:'صندوق و بانک',ic:'🏦',cat:'مالی',d:'مانده هر حساب، گردش نقدی و انتقال بین حساب‌ها',s:()=>canSee('account'),kpi:()=>[dkC('account','حساب'),dkF(()=>byE('account').reduce((a,x)=>a+(+bankBal(x.id)||0),0),'مانده کل',1)]},
+ {k:'arapdash',n:'طلب، بدهی و تسویه',ic:'💵',cat:'مالی',d:'مطالبات از مشتریان و بدهی به تأمین‌کنندگان',s:()=>canSee('settle'),kpi:()=>[dkC('settle','سند تسویه')]},
+ {k:'chqdash',n:'تابلوی چک‌ها',ic:'💳',cat:'مالی',d:'چک‌های دریافتی و پرداختی بر اساس سررسید',s:()=>canSee('cheque'),kpi:()=>[dkC('cheque','چک')]},
+ {k:'sepfin',n:'حسابداری رسمی (سپیدار)',ic:'🟦',cat:'مالی',d:'اسناد رسمی حسابداری و تراز آن‌ها',s:()=>canSee('sepdoc'),kpi:()=>[dkC('sepdoc','سند')]},
+ {k:'sepdash',n:'تطبیق عملیات و حسابداری',ic:'⚖️',cat:'مالی',d:'مغایرت‌گیری بین ثبت عملیاتی و سند رسمی',s:()=>canSee('sepdoc'),kpi:()=>[dkC('sepdoc','سند')]},
+ {k:'dualdash',n:'کنترل دوگانه',ic:'🎛',cat:'مالی',d:'مقایسهٔ همزمان ارقام حسابداری و عملیات',s:()=>canSee('sepdoc'),kpi:()=>[dkC('sepdoc','سند')]},
+ {k:'pfdash',n:'تسویه درگاه‌ها',ic:'🔄',cat:'مالی',d:'تطبیق واریزی درگاه‌های پرداخت و پلتفرم‌ها',s:()=>canSee('pfsettle'),kpi:()=>[dkC('pfsettle','تسویه'),dkC('gateway','درگاه')]},
+ {k:'gldash',n:'دفتر کل و صورت‌های مالی',ic:'📒',cat:'مالی',d:'دفتر کل، تراز آزمایشی و صورت‌های مالی',s:()=>canSee('voucher'),kpi:()=>[dkC('voucher','سند'),dkC('acct','حساب')]},
+ {k:'findash',n:'مالی تخصصی (IFRS)',ic:'💼',cat:'مالی',d:'صورت‌های مالی استاندارد و نسبت‌های تحلیلی',s:()=>canSee('finis')||canSee('finbs')||canSee('fincf'),kpi:()=>[dkC('finis','سود و زیان'),dkC('finbs','ترازنامه')]},
+ {k:'perfdash',n:'داشبورد عملکرد',ic:'🎖️',cat:'عملکرد و سازمان',d:'امتیاز عملکرد افراد و تیم‌ها در هر دوره',s:()=>canSee('perfscore')||canSee('eproject'),kpi:()=>[dkC('perfscore','ارزیابی'),dkC('perfkpi','شاخص')]},
+ {k:'aligndash',n:'همسویی عملکرد و استراتژی',ic:'🧭',cat:'عملکرد و سازمان',d:'اتصال شاخص‌های فردی به اهداف استراتژیک',s:()=>canSee('perfscore'),kpi:()=>[dkC('perfkpi','شاخص')]},
+ {k:'riskdash',n:'مدیریت ریسک (ISO 31000)',ic:'🤨',cat:'عملکرد و سازمان',d:'ماتریس ریسک، شدت و اقدامات کاهشی',s:()=>canSee('risk'),kpi:()=>[dkC('risk','ریسک')]},
+ {k:'stratdash',n:'داشبورد استراتژیک هلدینگ',ic:'🏛️',cat:'استراتژی',d:'پیشرفت اهداف استراتژیک در سطح هلدینگ',s:()=>canSee('bsc'),kpi:()=>[dkC('bsc','هدف')]},
+ {k:'bscmap',n:'نقشه استراتژی و BSC',ic:'🗺️',cat:'استراتژی',d:'چهار منظر کارت امتیازی متوازن و روابط اهداف',s:()=>canSee('bsc'),kpi:()=>[dkC('bsc','هدف')]},
+ {k:'bsccanvas',n:'بوم استراتژی',ic:'🧭',cat:'استراتژی',d:'بوم مدل کسب‌وکار و انتخاب‌های استراتژیک',s:()=>canSee('bsc'),kpi:()=>[dkC('bsc','هدف')]},
+ {k:'swotmap',n:'بوم SWOT / PESTEL',ic:'🧩',cat:'استراتژی',d:'تحلیل نقاط قوت، ضعف، فرصت و تهدید',s:()=>canSee('swot'),kpi:()=>[dkC('swot','گزاره')]},
+ {k:'procmap',n:'نقشه فرآیندها (ISO)',ic:'🔁',cat:'استراتژی',d:'فرآیندهای اصلی، پشتیبان و مدیریتی سازمان',s:()=>canSee('process'),kpi:()=>[dkC('process','فرآیند')]},
+ {k:'invdash',n:'سرمایه‌گذاری و ثروت',ic:'💎',cat:'تخصصی',d:'ارزش‌گذاری، طرح توجیهی و سبد دارایی',s:()=>canSee('valuation')||canSee('feasproj')||canSee('position'),kpi:()=>[dkC('position','پوزیشن'),dkC('valuation','ارزش‌گذاری')]},
+ {k:'portdash',n:'پورتفوی پروژه‌ها',ic:'🏦',cat:'تخصصی',d:'وضعیت کل پروژه‌های هلدینگ در یک نگاه',s:()=>canSee('eproject'),kpi:()=>[dkC('eproject','پروژه')]},
+ {k:'epcfdash',n:'داشبورد EPCF',ic:'🎛️',cat:'تخصصی',d:'پیشرفت مهندسی، تدارکات، اجرا و تأمین مالی',s:()=>canSee('eproject'),kpi:()=>[dkC('eproject','پروژه')]},
+ {k:'agiledash',n:'داشبورد Agile',ic:'💻',cat:'تخصصی',d:'اسپرینت‌ها، داستان‌های کاربر و سرعت تیم',s:()=>canSee('astory'),kpi:()=>[dkC('astory','داستان')]},
+ {k:'tokendash',n:'داشبورد توکن',ic:'🪙',cat:'تخصصی',d:'توکن‌ها، عرضه و گردش دارایی دیجیتال',s:()=>canSee('token'),kpi:()=>[dkC('token','توکن')]},
+ {k:'cdash',n:'داشبورد ساخت‌وساز',ic:'🏢',cat:'تخصصی',d:'متره، برآورد و پیشرفت پروژه‌های عمرانی',s:()=>canSee('cboq'),kpi:()=>[dkC('cboq','ردیف متره')]},
+ {k:'gdash',n:'رشد شخصی',ic:'✨',cat:'تخصصی',d:'عادت‌ها، اهداف شخصی و پیشرفت فردی',s:()=>true,kpi:()=>[dkC('habit','عادت'),dkC('growth','هدف')]}
 ];
 const DASH_CATS=['مدیریتی','فروش','مشتریان','انبار و خرید','مالی','عملکرد و سازمان','استراتژی','تخصصی'];
+function dkC(e,l){ // شمارش رکوردهای یک بخش
+  let v=0;try{v=canSee(e)?byE(e).length:0;}catch(x){v=0;}
+  return {v:v.toLocaleString('fa-IR'),l};}
+function dkN(v,l){return {v:(+v||0).toLocaleString('fa-IR'),l};}
+function dkF(fn,l,mny){let v=0;try{v=fn()||0;}catch(x){v=0;}
+  return {v:mny?money(v).replace(/\s*ریال$/,''):(+v).toLocaleString('fa-IR'),l:mny?l+' (ریال)':l};}
 function dashVisible(){try{return DASHREG.filter(d=>{try{return d.s()&&canView(d.k);}catch(e){return false;}});}catch(e){return [];}}
 function dashUser(){try{return byE('dashdef').filter(()=>canView('mydash'));}catch(e){return [];}}
 function dashChips(){ // چیپ‌های نوار بالای صفحه
-  let h=dashVisible().map(d=>`<div class="nav-i ${view.type===d.k?'on':''}" onclick="go('${d.k}')">${d.ic} ${esc(d.n)}</div>`).join('');
+  let h=`<div class="nav-i ${view.type==='module'&&view.flt==='داشبوردها'?'on':''}" onclick="openModule('داشبوردها')">🏠 مرکز داشبوردها</div>`;
+  h+=dashVisible().map(d=>`<div class="nav-i ${view.type===d.k?'on':''}" onclick="dashOpen('${d.k}')">${d.ic} ${esc(d.n)}</div>`).join('');
   dashUser().forEach(d=>{h+=`<div class="nav-i ${view.type==='mydash'&&view.mdSel===d.id?'on':''}" onclick="view={type:'mydash',mdSel:'${d.id}'};render()">${esc((d.d.ic||'📐')+' '+(d.d.title||'—'))}</div>`;});
   return h;
 }
-function dashHubHTML(){ // 📊 صفحهٔ مرکز داشبوردها — کارت‌های دسته‌بندی‌شده
+/* 🕘 داشبوردهای اخیر (روی همین دستگاه) */
+function dashRecent(){try{return JSON.parse(localStorage.getItem('xr_dashrec')||'[]');}catch(e){return [];}}
+window.dashOpen=function(k){
+  try{const r=dashRecent().filter(x=>x!==k);r.unshift(k);localStorage.setItem('xr_dashrec',JSON.stringify(r.slice(0,6)));}catch(e){}
+  go(k);
+};
+const DASH_CATC={'مدیریتی':'#5B2C93','فروش':'#0078D4','مشتریان':'#038387','انبار و خرید':'#CA5010','مالی':'#107C10','عملکرد و سازمان':'#E3008C','استراتژی':'#8764B8','تخصصی':'#4F6BED'};
+function dashCardHTML(d){
+  const c=DASH_CATC[d.cat]||'#0078D4';
+  let st=[];try{st=(d.kpi?d.kpi():[])||[];}catch(e){st=[];}
+  return `<div class="dcard" style="--dc:${c}" data-sr="dsh" data-srt="${esc(d.n+' '+(d.d||'')+' '+d.cat)}" onclick="dashOpen('${d.k}')">
+    <div class="dch"><span class="dic">${d.ic}</span>
+      <div class="dnm"><b>${esc(d.n)}</b><span>${esc(d.cat)}</span></div></div>
+    <p class="ddesc">${esc(d.d||'')}</p>
+    <div class="dstats">${st.map(x=>`<div><b>${x.v}</b><span>${esc(x.l)}</span></div>`).join('')||'<div><b>—</b><span>بدون داده</span></div>'}</div>
+    <div class="dgo">مشاهده داشبورد ‹</div></div>`;
+}
+function dashHubHTML(){ // 📊 مرکز داشبوردها
   const vis=dashVisible(), usr=dashUser();
   const c=GRP_COLOR['داشبوردها'];
-  const card=(k,ic,n,onclick)=>`<div class="dcard" onclick="${onclick}"><span class="dic">${ic}</span><span>${esc(n)}</span></div>`;
+  const cats=DASH_CATS.filter(x=>vis.some(d=>d.cat===x));
+  const cur=view.dcat&&(cats.includes(view.dcat)||view.dcat==='همه')?view.dcat:'همه';
+  const rec=dashRecent().map(k=>vis.find(d=>d.k===k)).filter(Boolean).slice(0,5);
+  const chip=(k,l,n)=>`<button class="btn ${cur===k?'':'gh '}sm dchip" onclick="view.dcat='${k}';render()">${l}${n!=null?` <span class="dchn">${n.toLocaleString('fa-IR')}</span>`:''}</button>`;
   let body='';
-  DASH_CATS.forEach(cat=>{
-    const list=vis.filter(d=>d.cat===cat);if(!list.length)return;
-    body+=`<div class="sec"><h3 style="font-size:14px">${esc(cat)} <span style="font-size:11px;color:var(--tx2);font-weight:400">${list.length.toLocaleString('fa-IR')} داشبورد</span></h3>
-      <div class="dgrid">${list.map(d=>card(d.k,d.ic,d.n,`go('${d.k}')`)).join('')}</div></div>`;
-  });
-  if(usr.length)body+=`<div class="sec"><h3 style="font-size:14px">📐 داشبوردهای ساختهٔ خودم</h3>
-    <div class="dgrid">${usr.map(d=>card(d.id,d.d.ic||'📐',d.d.title||'—',`view={type:'mydash',mdSel:'${d.id}'};render()`)).join('')}</div></div>`;
-  if(!body)body=`<div class="empty">هیچ داشبوردی برای شما فعال نشده — از ادمین بخواهید در «🛡️ سطوح دسترسی» دسترسی بدهد</div>`;
+  if(cur==='همه'){
+    if(rec.length)body+=`<div class="sec dsec"><div class="dsech"><span class="dsecb" style="background:#5B2C93"></span><h3>🕘 اخیرا استفاده کرده‌اید</h3></div>
+      <div class="dgrid">${rec.map(dashCardHTML).join('')}</div></div>`;
+    cats.forEach(cat=>{
+      const list=vis.filter(d=>d.cat===cat);if(!list.length)return;
+      body+=`<div class="sec dsec"><div class="dsech"><span class="dsecb" style="background:${DASH_CATC[cat]||'#0078D4'}"></span>
+        <h3>${esc(cat)}</h3><span class="dsecn">${list.length.toLocaleString('fa-IR')} داشبورد</span></div>
+        <div class="dgrid">${list.map(dashCardHTML).join('')}</div></div>`;
+    });
+  }else{
+    const list=vis.filter(d=>d.cat===cur);
+    body+=`<div class="sec dsec"><div class="dsech"><span class="dsecb" style="background:${DASH_CATC[cur]||'#0078D4'}"></span>
+      <h3>${esc(cur)}</h3><span class="dsecn">${list.length.toLocaleString('fa-IR')} داشبورد</span></div>
+      <div class="dgrid">${list.map(dashCardHTML).join('')}</div></div>`;
+  }
+  if(usr.length&&(cur==='همه'))body+=`<div class="sec dsec"><div class="dsech"><span class="dsecb" style="background:#767676"></span><h3>📐 ساختهٔ خودم</h3><span class="dsecn">${usr.length.toLocaleString('fa-IR')} داشبورد</span></div>
+    <div class="dgrid">${usr.map(d=>`<div class="dcard" style="--dc:#767676" data-sr="dsh" data-srt="${esc(d.d.title||'')}" onclick="view={type:'mydash',mdSel:'${d.id}'};render()">
+      <div class="dch"><span class="dic">${esc(d.d.ic||'📐')}</span><div class="dnm"><b>${esc(d.d.title||'—')}</b><span>داشبورد شخصی</span></div></div>
+      <p class="ddesc">داشبوردی که خودتان با «ساختارساز شاخص‌ها» ساخته‌اید</p>
+      <div class="dstats"><div><b>${((d.d.widgets||[]).length||0).toLocaleString('fa-IR')}</b><span>ویجت</span></div></div>
+      <div class="dgo">مشاهده داشبورد ‹</div></div>`).join('')}</div></div>`;
+  if(!vis.length&&!usr.length)body=`<div class="empty">هیچ داشبوردی برای شما فعال نشده — از ادمین بخواهید در «🛡️ سطوح دسترسی» دسترسی بدهد</div>`;
   return `<div class="mhero" style="--mtc:${c}"><span class="mico" style="background:${c}">📊</span>
-    <div><div class="mttl">داشبوردها</div><div class="msub">${(vis.length+usr.length).toLocaleString('fa-IR')} داشبورد در دسترس شما${isAdmin()?' — دسترسی هرکدام در «🛡️ سطوح دسترسی» قابل تنظیم است':''}</div></div></div>${body}`;
+    <div><div class="mttl">مرکز داشبوردها</div><div class="msub">${(vis.length+usr.length).toLocaleString('fa-IR')} داشبورد در دسترس شما${isAdmin()?' · دسترسی هرکدام در «🛡️ سطوح دسترسی» جدا تنظیم می‌شود':''}</div></div></div>
+  <div class="dbar">${chip('همه','همه',vis.length)}${cats.map(x=>chip(x,x,vis.filter(d=>d.cat===x).length)).join('')}</div>
+  ${srchBox('dsh','جستجوی داشبورد…','','[data-sr="dsh"]','[data-srsec="dsh"]')}
+  ${body}`;
 }
 window.dashHubHTML=dashHubHTML;window.dashChips=dashChips;window.dashVisible=dashVisible;
 function wsMenu(g){
