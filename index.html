@@ -337,11 +337,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.38</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.39</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.38</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.39</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -3152,6 +3152,7 @@ const VIEWS_ACL=[
  ['chqdash','💳 تابلوی چک‌ها'],
  ['paydash','💸 حواله روزانه (پرداخت‌های تأییدی)'],
  ['wfcenter','🗂 مرکز گردش کارها'],
+ ['ucenter','👤 مرکز فرمان کاربران (ادمین)'],
  ['sepfin','🟦 حسابداری رسمی (سپیدار)'],
  ['sepdash','⚖️ تطبیق عملیات و حسابداری'],
  ['dualdash','🎛 کنترل دوگانه (حسابداری⇄عملیات)'],
@@ -3987,8 +3988,9 @@ function reconTile(){
 
 /* ═══ 🔁 گردش فروش — پیش‌فاکتور با تأیید چندمرحله‌ای ═══ */
 const WF_ST={NEW:'نزد مدیر فروش',FIN:'نزد مالی',FINOK:'تأیید مالی — نزد مدیر فروش',SELL:'تأییدشده — نزد فروشنده',PAY:'اسناد پرداخت — نزد مالی',DONE:'فاکتور صادر شد',FIX:'برگشت برای اصلاح',VOID:'باطل/بایگانی'};
-function myWrole(){
+function myWrole(flow){
   if(isAdmin())return 'ادمین';
+  try{const cw=wroleOf(flow||'sales');if(cw)return cw;}catch(e){} // 🎛 نقش تعریف‌شده در مرکز فرمان کاربران
   const me=_meHr();const w=me&&recs[me]?recs[me].d.wrole:'';
   if(w&&w!=='—')return w;
   const r=myRole();return r==='مدیرارشد'?'مدیر ارشد':'';
@@ -4015,6 +4017,12 @@ function wfCan(act,r){
   if(!need)return 'اقدام ناشناخته';
   const sts=Array.isArray(need[0])?need[0]:[need[0]];
   if(!sts.includes(st))return 'این سند در مرحلهٔ «'+(st||'—')+'» است و این اقدام برای آن مجاز نیست';
+  if(act==='mgrOk'){ // ✅ تأییدکنندهٔ الزامی تعریف‌شده در مرکز فرمان کاربران
+    let need='';try{const t=invTotals?invTotals(r):null;const amt=(t&&t.net)||(+r.d.total||0);
+      const mm=aprMatch(r.d._by||'','invoice',amt);if(mm.length&&mm[0].by)need=mm[0].by;}catch(e){}
+    if(need&&!isAdmin()&&![...myHRids()].includes(need))
+      return 'طبق قواعد تأیید، این سند حتماً باید توسط «'+((recs[need]||{d:{}}).d.title||'فرد تعیین‌شده')+'» تأیید شود';
+  }
   if(need[1]&&!need[1].includes(w))return 'نقش شما ('+(w||'تعریف‌نشده')+') اجازهٔ این اقدام را ندارد — این کار مربوط به '+(need[1][0])+' است';
   if(act==='paySend'&&!wfIsSeller(r)&&!['ادمین','مدیر ارشد'].includes(w))return 'فقط فروشندهٔ همین سند می‌تواند اسناد پرداخت را ارسال کند';
   // 🛡 تفکیک وظایف: تأییدکننده نمی‌تواند فروشندهٔ همان سند باشد
@@ -4175,9 +4183,11 @@ function pwfIsMgrOf(r){ // آیا من مدیر مستقیم درخواست‌ک
   const h=hrByEmail(r.d._by);if(!h)return false;
   const mgr=relIds(h,'manager')[0];return !!mgr&&[...myHRids()].includes(mgr);}
 function pwfCan(act,r){
-  const w=myWrole(),st=r.d.wfst;const SR=['مدیر ارشد','ادمین'];
+  const w=myWrole('purchase'),st=r.d.wfst;const SR=['مدیر ارشد','ادمین'];
   if(act==='submit')return (!st||st===PWF.FIX)?'':'در این مرحله قابل ارسال نیست';
   if(act==='mgrOk'){if(st!==PWF.MGR)return 'سند در مرحلهٔ تأیید مدیر نیست';
+    if(r.d._aprBy&&!isAdmin()&&![...myHRids()].includes(r.d._aprBy))
+      return 'طبق قواعد تأیید، این درخواست حتماً باید توسط «'+((recs[r.d._aprBy]||{d:{}}).d.title||'فرد تعیین‌شده')+'» تأیید شود';
     if(!(pwfIsMgrOf(r)||['مدیر خرید',...SR].includes(w)))return 'تأیید این مرحله با مدیر مستقیم درخواست‌کننده یا مدیر خرید است';
     if(pwfIsReq(r)&&w!=='ادمین')return 'تفکیک وظایف: نمی‌توانید درخواست خودتان را تأیید کنید';return '';}
   if(act==='finOk'){if(st!==PWF.FIN)return 'سند در مرحلهٔ مالی نیست';
@@ -4193,7 +4203,11 @@ window.pwfAct=function(id,act){
   if((act==='fix'||act==='rej')&&!note){setSync('err','دلیل «'+(act==='fix'?'اصلاح':'رد')+'» الزامی است — در کادر توضیح بنویس');return;}
   window._wfActing=1;
   try{
-    if(act==='submit'){r.d={...r.d,wfst:PWF.MGR,status:'باز'};wfLog(r,'📤 ارسال درخواست خرید برای تأیید مدیر',note);}
+    if(act==='submit'){
+      let amt=0;try{amt=(+r.d.qty||0)*(+r.d.price||0);}catch(e){}
+      let need='';try{const mm=aprMatch(r.d._by||myEmail(),'preq',amt);if(mm.length&&mm[0].by)need=mm[0].by;}catch(e){}
+      r.d={...r.d,wfst:PWF.MGR,status:'باز',_aprBy:need||''};
+      wfLog(r,'📤 ارسال درخواست خرید برای تأیید مدیر'+(need&&recs[need]?' — تأیید الزامی: '+(recs[need].d.title||''):''),note);}
     else if(act==='mgrOk'){r.d={...r.d,wfst:PWF.FIN};wfLog(r,'✅ تأیید مدیر — ارسال به مالی (بودجه)',note);}
     else if(act==='finOk'){r.d={...r.d,wfst:PWF.OK};wfLog(r,'✅ تأیید مالی — آمادهٔ صدور سفارش',note);}
     else if(act==='fix'){r.d={...r.d,wfst:PWF.FIX};wfLog(r,'✏️ برگشت برای اصلاح',note);}
@@ -5713,6 +5727,11 @@ function payslipBrief(r){
 function lvApprove(id,ok){
   const r=recs[id];if(!r||r.del)return;
   if(!can('e',r.e,r)){setSync('err','اجازهٔ تأیید ندارید');return;}
+  try{const p=relIds(r,'person')[0];const pe=p?ucEmailOfHr(p):'';
+    const mm=pe?aprMatch(pe,'leave',0):[];
+    if(mm.length&&mm[0].by&&!isAdmin()&&![...myHRids()].includes(mm[0].by)){
+      setSync('err','طبق قواعد تأیید، این مرخصی باید توسط «'+((recs[mm[0].by]||{d:{}}).d.title||'فرد تعیین‌شده')+'» بررسی شود');return;}
+  }catch(e){}
   const note=((document.getElementById('lvn_'+id)||{}).value||'').trim();
   if(!ok&&!note){view._lvRej=id;render();return;} // ⛔ رد بدون دلیل ممنوع — کادر دلیل باز می‌شود
   const me=[...myHRids()][0];
@@ -9717,7 +9736,7 @@ try{const _sv=JSON.parse(localStorage.getItem('xr_view')||'null');
 /* 🪗 جمع‌شوندگی گروه‌های منو بر اساس موضوع */
 let navCol=null;
 try{navCol=JSON.parse(localStorage.getItem('xr_navcol')||'null');}catch(e){navCol=null;}
-const DASH_GRP={saleswf:'فروش',invnew:'فروش',quotenew:'کالا و انبار',pinvnew:'کالا و انبار',paydash:'مالی',settlenew:'مالی',bpm:'پرسنل و سازمان',wfcenter:'پرسنل و سازمان',ceodash:'داشبوردها',charts:'داشبوردها',smdash:'داشبوردها',plreport:'داشبوردها',targetdash:'داشبوردها',distdash:'داشبوردها',custdash:'داشبوردها',loyaldash:'داشبوردها',smsdash:'داشبوردها',whdash:'داشبوردها',pudash:'داشبوردها',supdash:'داشبوردها',pldash:'داشبوردها',bankdash:'داشبوردها',arapdash:'داشبوردها',chqdash:'داشبوردها',sepfin:'داشبوردها',sepdash:'داشبوردها',dualdash:'داشبوردها',pfdash:'داشبوردها',gldash:'داشبوردها',findash:'داشبوردها',perfdash:'داشبوردها',aligndash:'داشبوردها',riskdash:'داشبوردها',stratdash:'داشبوردها',bscmap:'داشبوردها',bsccanvas:'داشبوردها',swotmap:'داشبوردها',procmap:'داشبوردها',mydash:'داشبوردها',glnew:'حسابداری',bizdash:'داشبوردها'};
+const DASH_GRP={saleswf:'فروش',invnew:'فروش',quotenew:'کالا و انبار',pinvnew:'کالا و انبار',paydash:'مالی',settlenew:'مالی',bpm:'پرسنل و سازمان',wfcenter:'پرسنل و سازمان',ucenter:'پرسنل و سازمان',ceodash:'داشبوردها',charts:'داشبوردها',smdash:'داشبوردها',plreport:'داشبوردها',targetdash:'داشبوردها',distdash:'داشبوردها',custdash:'داشبوردها',loyaldash:'داشبوردها',smsdash:'داشبوردها',whdash:'داشبوردها',pudash:'داشبوردها',supdash:'داشبوردها',pldash:'داشبوردها',bankdash:'داشبوردها',arapdash:'داشبوردها',chqdash:'داشبوردها',sepfin:'داشبوردها',sepdash:'داشبوردها',dualdash:'داشبوردها',pfdash:'داشبوردها',gldash:'داشبوردها',findash:'داشبوردها',perfdash:'داشبوردها',aligndash:'داشبوردها',riskdash:'داشبوردها',stratdash:'داشبوردها',bscmap:'داشبوردها',bsccanvas:'داشبوردها',swotmap:'داشبوردها',procmap:'داشبوردها',mydash:'داشبوردها',glnew:'حسابداری',bizdash:'داشبوردها'};
 function activeGrp(){ // گروهی که صفحه فعلی به آن تعلق دارد (همیشه باز نمایش داده می‌شود)
   if(view.type==='module')return view.flt||null;
   if(view.type==='mydash')return 'داشبوردها';
@@ -10275,6 +10294,7 @@ function nav(){
   ${canView('cal')?`<div class="nav-i ${view.type==='cal'?'on':''}" onclick="go('cal')">📅 تقویم</div>`:''}
   `;
   if(isAdmin())h+=`<div class="nav-i ${view.type==='users'?'on':''}" onclick="go('users')">👤 کاربران و دسترسی</div>
+  <div class="nav-i ${view.type==='ucenter'?'on':''}" onclick="go('ucenter')">🎛️ مرکز فرمان کاربران</div>
   <div class="nav-i ${view.type==='acl'?'on':''}" onclick="go('acl')" style="${isAdmin()?'':'display:none'}">🛡️ سطوح دسترسی</div>
   <div class="nav-i ${view.type==='schema'?'on':''}" onclick="go('schema')">🧩 فیلدها و بخش‌ها</div>
   <div class="nav-i ${view.type==='backupdash'?'on':''}" onclick="go('backupdash')">💾 پشتیبان‌گیری و بازیابی</div>`;
@@ -10419,6 +10439,7 @@ function render(){
     view.type==='paydash'?'💸 حواله روزانه':
     view.type==='bpm'?'🧩 فرآیندهای کاری':
     view.type==='wfcenter'?'🗂 مرکز گردش کارها':
+    view.type==='ucenter'?'👤 مرکز فرمان کاربران':
     view.type==='basedash'?'🧰 اطلاعات پایه':
     view.type==='module'?((GRP_IC[view.flt]||'🧩')+' '+(view.flt||'ماژول')):
     view.type==='bsccanvas'?'🧭 بوم استراتژی':
@@ -10429,7 +10450,7 @@ function render(){
   const _mtEl=document.getElementById('mtabs');
   if(_mtEl){try{_mtEl.innerHTML=mtabsHTML();}catch(e){_mtEl.innerHTML='';}}
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',paydash:'paydash',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
+  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',paydash:'paydash',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',ucenter:'ucenter',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -10443,6 +10464,7 @@ function render(){
     else if(view.type==='paydash')c.innerHTML=paydashHTML();
     else if(view.type==='bpm')c.innerHTML=bpmHTML();
     else if(view.type==='wfcenter')c.innerHTML=wfcenterHTML();
+    else if(view.type==='ucenter'){if(!isAdmin())c.innerHTML='<div class="empty">فقط ادمین</div>';else c.innerHTML=ucenterHTML();}
     else if(view.type==='basedash')c.innerHTML=basedashHTML();
     else if(view.type==='module')c.innerHTML=moduleHTML(view.flt);
     else if(view.type==='me')c.innerHTML=meHTML();
@@ -14740,6 +14762,175 @@ function aclTarget(){
   const v=view.aclV||(t==='role'?aclRoles().filter(r=>r!=='ادمین')[0]:(usersList()[0]||{}).email);
   return {t,v};
 }
+/* ═══════════ 👤 مرکز فرمان کاربر — نقش، سلسله‌مراتب، گردش‌ها، تأییدها، دسترسی دقیق ═══════════ */
+const WFLOWS=[{k:'sales',n:'🧾 گردش فروش',roles:['—','فروشنده','مدیر فروش','کارمند حسابداری','مدیر مالی','مدیر ارشد']},
+ {k:'purchase',n:'🛒 گردش خرید',roles:['—','درخواست‌کننده','مدیر خرید','کارمند حسابداری','مدیر مالی','مدیر ارشد']},
+ {k:'leave',n:'🌴 گردش مرخصی',roles:['—','کارمند','مدیر تأییدکننده','مدیر منابع انسانی']}];
+const APR_SUBJ=[['invoice','🧾 پیش‌فاکتور / فاکتور فروش'],['preq','🙋 درخواست خرید'],['po','📑 سفارش خرید'],
+ ['leave','🌴 درخواست مرخصی'],['settle','💵 پرداخت / تسویه'],['*','🌐 هر درخواستی']];
+function ucfg(em){const a=acl();return ((a.users||{})[String(em||'').toLowerCase()])||{};}
+function ucSet(em,fn){
+  const key=String(em||'').toLowerCase();if(!key)return;
+  saveAcl(d=>{d.users=d.users||{};const c=d.users[key]=d.users[key]||{};fn(c);});
+}
+function ucHrOf(em){ // پروندهٔ HR متصل به این ایمیل
+  em=String(em||'').toLowerCase();if(!em)return null;
+  const u=usersList().find(x=>(x.email||'').toLowerCase()===em);
+  if(u&&u.hr&&recs[u.hr]&&!recs[u.hr].del)return recs[u.hr];
+  return byE('hr').find(h=>(h.d.email||'').toLowerCase()===em)||null;
+}
+function ucEmailOfHr(id){const h=recs[id];if(!h)return '';
+  if(h.d.email)return String(h.d.email).toLowerCase();
+  const u=usersList().find(x=>x.hr===id);return u?String(u.email||'').toLowerCase():'';}
+/* 🔁 نقش این کاربر در یک گردش مشخص */
+function wroleOf(flow,em){
+  const c=ucfg(em||myEmail());
+  const v=(c.wf||{})[flow];
+  if(v&&v!=='—')return v;
+  if(flow==='sales'){const h=ucHrOf(em||myEmail());const w=h&&h.d.wrole;if(w&&w!=='—')return w;}
+  return '';
+}
+window.wroleOf=wroleOf;
+/* ✅ قواعد «تأیید از نفر مشخص» */
+function aprRules(em){return (ucfg(em).apr)||[];}
+function aprMatch(em,ent,amount){
+  return aprRules(em).filter(r=>(r.k===ent||r.k==='*')&&(!r.amt||(+amount||0)>=(+r.amt||0)));
+}
+window.aprMatch=aprMatch;
+function ucAprAdd(em){
+  ucSet(em,c=>{c.apr=[...(c.apr||[]),{k:'invoice',amt:0,by:''}];});render();
+}
+function ucAprSet(em,i,f,v){ucSet(em,c=>{c.apr=(c.apr||[]).map((r,j)=>j===i?{...r,[f]:f==='amt'?(+String(v).replace(/[^\d.]/g,'')||0):v}:r);});render();}
+function ucAprDel(em,i){ucSet(em,c=>{c.apr=(c.apr||[]).filter((r,j)=>j!==i);});render();}
+window.ucAprAdd=ucAprAdd;window.ucAprSet=ucAprSet;window.ucAprDel=ucAprDel;
+function ucSetWf(em,flow,v){ucSet(em,c=>{c.wf=c.wf||{};if(v&&v!=='—')c.wf[flow]=v;else delete c.wf[flow];});render();}
+window.ucSetWf=ucSetWf;
+function ucSetMgr(em,mgrId){
+  const h=ucHrOf(em);if(!h){setSync('err','ابتدا پروندهٔ منابع انسانی این کاربر را وصل کنید');return;}
+  h.d={...h.d,manager:mgrId?[mgrId]:[]};h.u=Date.now();put(h);setSync('ok','مدیر بالادست ثبت شد');render();
+}
+window.ucSetMgr=ucSetMgr;
+function ucToggleSub(em,subId,on){ // زیردست: مدیرِ آن فرد را این کاربر قرار می‌دهیم
+  const h=ucHrOf(em);if(!h)return;
+  const r=recs[subId];if(!r)return;
+  r.d={...r.d,manager:on?[h.id]:[]};r.u=Date.now();put(r);render();
+}
+window.ucToggleSub=ucToggleSub;
+function ucSubs(em){const h=ucHrOf(em);if(!h)return [];return byE('hr').filter(x=>relIds(x,'manager').includes(h.id));}
+function ucenterHTML(){
+  if(!isAdmin())return `<div class="empty">فقط ادمین</div>`;
+  const list=usersList();
+  if(!list.length)return `<div class="empty">هنوز کاربری ثبت نشده — از «👤 کاربران و دسترسی» اضافه کنید</div>`;
+  const em=String(view.ucU||list[0].email||'').toLowerCase();
+  const u=list.find(x=>(x.email||'').toLowerCase()===em)||list[0];
+  const hr=ucHrOf(em), cfg=ucfg(em);
+  const tab=view.ucT||'id';
+  const T=(k,l)=>`<button class="btn ${tab===k?'':'gh '}sm" onclick="view.ucT='${k}';render()">${l}</button>`;
+  const hrs=byE('hr').slice().sort((a,b)=>(a.d.title||'').localeCompare(b.d.title||'','fa'));
+  let h=`<div class="mhero" style="--mtc:#5B2C93"><span class="mico" style="background:#5B2C93">👤</span>
+    <div><div class="mttl">مرکز فرمان کاربران</div><div class="msub">نقش، مدیر بالادست، زیردستان، نقش در هر گردش، تأییدکننده‌ها و دسترسی دقیق تا سطح یک فیلد</div></div></div>
+  <div class="sec"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <b style="font-size:12.5px">کاربر:</b>
+    <select onchange="view.ucU=this.value;render()" style="max-width:290px" dir="ltr">
+      ${list.map(x=>`<option value="${esc(x.email)}" ${String(x.email).toLowerCase()===em?'selected':''}>${esc(x.email)}${x.role?' — '+esc(x.role):''}</option>`).join('')}</select>
+    ${hr?`<span class="tag">👥 ${esc(hr.d.title||'')}${hr.d.role?' · '+esc(hr.d.role):''}</span>`:`<span class="tag" style="color:var(--bad)">⚠️ پروندهٔ HR وصل نیست</span>`}
+    <span style="flex:1"></span><button class="btn gh sm" onclick="go('users')">👤 فهرست کاربران</button></div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:11px">
+    ${T('id','🪪 هویت و نقش')}${T('org','🏛 سلسله‌مراتب')}${T('wf','🔁 نقش در گردش‌ها')}${T('apr','✅ تأییدها')}${T('acl','🛡 دسترسی دقیق')}</div></div>`;
+  /* 🪪 هویت */
+  if(tab==='id'){
+    const i=list.findIndex(x=>String(x.email).toLowerCase()===em);
+    h+=`<div class="sec"><h3>🪪 هویت و نقش پایه</h3>
+    <div class="row">
+      <div><label>ایمیل ورود</label><input value="${esc(u.email||'')}" dir="ltr" readonly></div>
+      <div><label>نقش سیستمی</label><select onchange="setRole(${i},this.value);render()">
+        ${aclRoles().concat([PENDING]).map(r=>`<option ${((ROLE_LEGACY[u.role]||u.role)===r)?'selected':''}>${r}</option>`).join('')}</select></div>
+      <div><label>پروندهٔ منابع انسانی</label><select onchange="setUserHR(${i},this.value);render()">
+        <option value="">— بدون اتصال —</option>
+        ${hrs.map(x=>`<option value="${x.id}" ${hr&&hr.id===x.id?'selected':''}>${esc(x.d.title||'—')}</option>`).join('')}</select></div>
+    </div>
+    ${hr?`<div class="row" style="margin-top:8px">
+      <div><label>سمت</label><input value="${esc(hr.d.role||'')}" readonly></div>
+      <div><label>واحد سازمانی</label><input value="${esc((relIds(hr,'orgu')[0]&&recs[relIds(hr,'orgu')[0]])?recs[relIds(hr,'orgu')[0]].d.title:(hr.d.unit||'—'))}" readonly></div>
+      <div><label>وضعیت همکاری</label><input value="${esc(hr.d.wstatus||'—')}" readonly></div></div>
+      <div style="margin-top:8px"><button class="btn gh sm" onclick="go('rec','hr','${hr.id}')">✏️ ویرایش پروندهٔ کامل</button>
+      <button class="btn gh sm" onclick="adminPwUI('${esc(u.email)}')">🔑 تغییر رمز</button></div>`
+      :`<div class="hint" style="margin-top:8px">تا وقتی پروندهٔ HR وصل نشود، سلسله‌مراتب و گردش‌ها برای این کاربر کار نمی‌کند.</div>`}
+    </div>`;
+  }
+  /* 🏛 سلسله‌مراتب */
+  if(tab==='org'){
+    const mgr=hr?relIds(hr,'manager')[0]:'';
+    const subs=ucSubs(em);
+    h+=`<div class="sec"><h3>🏛 مدیر بالادست</h3>
+    ${hr?`<div class="row"><div style="grid-column:1/-1"><label>مدیر مستقیم این کاربر</label>
+      <select onchange="ucSetMgr('${esc(em)}',this.value)" style="max-width:330px">
+        <option value="">— بدون مدیر —</option>
+        ${hrs.filter(x=>x.id!==hr.id).map(x=>`<option value="${x.id}" ${mgr===x.id?'selected':''}>${esc(x.d.title||'—')}${x.d.role?' · '+esc(x.d.role):''}</option>`).join('')}</select></div></div>
+      <div class="hint" style="margin-top:6px">درخواست‌های مرخصی و خرید این کاربر به‌صورت پیش‌فرض به همین فرد ارجاع می‌شود.</div>`
+      :'<div class="hint">ابتدا پروندهٔ HR را وصل کنید.</div>'}
+    </div>
+    <div class="sec"><h3>👥 زیردستان <span style="font-size:11px;color:var(--tx2);font-weight:400">${subs.length.toLocaleString('fa-IR')} نفر</span></h3>
+    ${hr?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:5px">
+      ${hrs.filter(x=>x.id!==hr.id).map(x=>{const on=relIds(x,'manager').includes(hr.id);const other=relIds(x,'manager')[0];
+        return `<label style="display:flex;gap:7px;align-items:center;font-size:12px;cursor:pointer;padding:5px 8px;border-radius:8px;${on?'background:var(--bg3)':''}">
+          <input type="checkbox" ${on?'checked':''} onchange="ucToggleSub('${esc(em)}','${x.id}',this.checked)">
+          <span style="flex:1">${esc(x.d.title||'—')}${other&&!on&&recs[other]?` <span style="color:var(--tx2);font-size:10px">(زیردست ${esc(recs[other].d.title||'')})</span>`:''}</span></label>`;}).join('')}</div>
+      <div class="hint" style="margin-top:7px">با تیک‌زدن، «مدیر مستقیم» آن فرد به این کاربر تغییر می‌کند.</div>`
+      :'<div class="hint">ابتدا پروندهٔ HR را وصل کنید.</div>'}
+    </div>`;
+  }
+  /* 🔁 نقش در گردش‌ها */
+  if(tab==='wf'){
+    let defs=[];try{defs=byE('wfdef').filter(d=>d.d.active);}catch(e){}
+    h+=`<div class="sec"><h3>🔁 نقش این کاربر در هر گردش کاری</h3>
+    <p style="font-size:12px;color:var(--tx2);line-height:2">یک نفر می‌تواند در هر فرآیند نقش متفاوتی داشته باشد — مثلاً در گردش فروش «مدیر فروش» و در گردش خرید «تأییدکنندهٔ بودجه». اینجا برای هر گردش جداگانه تعیین کنید.</p>
+    <div class="tblwrap"><table><thead><tr><th>گردش کاری</th><th>نقش این کاربر</th><th>یعنی چه؟</th></tr></thead><tbody>
+    ${WFLOWS.map(f=>{const cur=(cfg.wf||{})[f.k]||'';
+      const eff=wroleOf(f.k,em);
+      return `<tr><td>${f.n}</td>
+        <td><select onchange="ucSetWf('${esc(em)}','${f.k}',this.value)" style="max-width:200px">
+          ${f.roles.map(r=>`<option value="${r}" ${cur===r||(!cur&&r==='—')?'selected':''}>${r}</option>`).join('')}</select></td>
+        <td style="font-size:11.5px;color:var(--tx2)">${eff?'در این گردش به‌عنوان «'+esc(eff)+'» عمل می‌کند':'در این گردش نقشی ندارد'}</td></tr>`;}).join('')}
+    ${defs.map(d=>{const cur=(cfg.wf||{})['bp:'+d.id]||'';
+      const steps=(d.d.steps||[]).map(s=>s.name).filter(Boolean);
+      return `<tr><td>🧩 ${esc(d.d.title||'فرآیند')}</td>
+        <td><select onchange="ucSetWf('${esc(em)}','bp:${d.id}',this.value)" style="max-width:200px">
+          <option value="—">—</option>${steps.map(sn=>`<option ${cur===sn?'selected':''}>${esc(sn)}</option>`).join('')}</select></td>
+        <td style="font-size:11.5px;color:var(--tx2)">مرحله‌ای که این کاربر مسئول آن است</td></tr>`;}).join('')}
+    </tbody></table></div>
+    ${defs.length?'':'<div class="hint" style="margin-top:7px">فرآیندهای سفارشی را در «🧩 فرآیندهای کاری» بسازید تا اینجا هم قابل تخصیص شوند.</div>'}
+    </div>`;
+  }
+  /* ✅ تأییدها */
+  if(tab==='apr'){
+    const rules=aprRules(em);
+    h+=`<div class="sec"><h3>✅ این کاربر برای چه چیزی از چه کسی تأیید بگیرد</h3>
+    <p style="font-size:12px;color:var(--tx2);line-height:2">هر قاعده یعنی: وقتی این کاربر مورد زیر را ثبت کند (و در صورت تعیین مبلغ، از آن مبلغ بیشتر باشد)، سند حتماً باید توسط شخص تعیین‌شده تأیید شود — حتی اگر دیگران هم دسترسی تأیید داشته باشند.</p>
+    <div class="tblwrap"><table><thead><tr><th>موضوع</th><th>از مبلغ (ریال)</th><th>تأییدکنندهٔ الزامی</th><th></th></tr></thead><tbody>
+    ${rules.map((r,i)=>`<tr>
+      <td><select onchange="ucAprSet('${esc(em)}',${i},'k',this.value)" style="max-width:210px">
+        ${APR_SUBJ.map(([k,n])=>`<option value="${k}" ${r.k===k?'selected':''}>${n}</option>`).join('')}</select></td>
+      <td><input inputmode="numeric" value="${r.amt||''}" placeholder="۰ = همیشه" style="max-width:150px" onchange="ucAprSet('${esc(em)}',${i},'amt',this.value)"></td>
+      <td><select onchange="ucAprSet('${esc(em)}',${i},'by',this.value)" style="max-width:220px">
+        <option value="">— انتخاب کنید —</option>
+        ${hrs.map(x=>`<option value="${x.id}" ${r.by===x.id?'selected':''}>${esc(x.d.title||'—')}${x.d.role?' · '+esc(x.d.role):''}</option>`).join('')}</select></td>
+      <td><button class="btn bad sm" onclick="ucAprDel('${esc(em)}',${i})">🗑</button></td></tr>`).join('')
+      ||'<tr><td colspan="4" style="color:var(--tx2)">قاعده‌ای تعریف نشده — این کاربر طبق مسیر عادی گردش تأیید می‌گیرد</td></tr>'}
+    </tbody></table></div>
+    <button class="btn sm" style="margin-top:9px" onclick="ucAprAdd('${esc(em)}')">＋ قاعدهٔ تأیید جدید</button></div>`;
+  }
+  /* 🛡 دسترسی دقیق */
+  if(tab==='acl'){
+    view.aclT='user';view.aclV=u.email;
+    h+=`<div class="sec" style="border-inline-start:3px solid #5B2C93"><h3>🛡 دسترسی دقیق این کاربر</h3>
+    <p style="font-size:12px;color:var(--tx2);line-height:2">هر صفحه، هر بخش و حتی <b>هر فیلد</b> را جداگانه تعیین کنید: عادی / فقط مشاهده (نتواند تغییر دهد) / مخفی (اصلاً نبیند). این تنظیم‌ها روی تنظیم نقش او اولویت دارند و در سرور هم اعمال می‌شوند.</p></div>`;
+    h+=ucAclBody(u.email);
+  }
+  return h;
+}
+window.ucenterHTML=ucenterHTML;
+
 function aclCfg(){
   const {t,v}=aclTarget(); const a=acl();
   return ((t==='role'?a.roles:a.users)||{})[t==='user'?String(v).toLowerCase():v]||{};
@@ -14836,7 +15027,13 @@ function aclHTML(){
     <button class="btn gh sm" onclick="addRole()">＋ نقش جدید</button>
     ${t==='role'&&!ROLES.includes(v)?`<button class="btn bad sm" onclick="rmRole()">🗑 حذف نقش</button>`:''}
   </div></div>`;
-  if(!v)return h+`<div class="empty">کاربری ثبت نشده است</div>`;
+  return h+aclBodyHTML();
+}
+function ucAclBody(em){view.aclT='user';view.aclV=em;return aclBodyHTML();}
+window.ucAclBody=ucAclBody;
+function aclBodyHTML(){
+  const {t,v}=aclTarget(); const cfg=aclCfg(); let h='';
+  if(!v)return `<div class="empty">کاربری ثبت نشده است</div>`;
   // صفحات و ابزارهای ویژه
   h+=`<div class="sec"><h3>🖥️ صفحات و ابزارها (داشبوردها)</h3>
   ${srchBox('aclv','جستجوی صفحه یا ابزار…','','[data-sr="aclv"]')}
@@ -28268,7 +28465,7 @@ function usersHTML(){
         ${byE('hr').sort((a,b)=>(a.d.title||'').localeCompare(b.d.title||'','fa')).map(x=>`<option value="${x.id}" ${hrLinked===x.id?'selected':''}>${esc(x.d.title||'—')}</option>`).join('')}</select>
       ${emailMatch?`<div style="font-size:10.5px;color:var(--ok)">✓ از طریق ایمیل به «${esc(emailMatch.d.title)}» وصل است</div>`:''}
       ${!hrLinked&&!emailMatch?`<div style="font-size:10.5px;color:var(--tx2)">وصل کنید تا میز کارش پر شود</div>`:''}</td>
-      <td style="white-space:nowrap"><button class="btn gh sm" onclick="adminPwUI('${esc(u.email)}')">🔑 رمز</button> <button class="btn bad sm" onclick="rmUser(${i})">حذف</button></td></tr>`;
+      <td style="white-space:nowrap"><button class="btn gh sm" onclick="view.ucU='${esc(u.email)}';view.ucT='id';go('ucenter')">🎛️ تنظیمات</button> <button class="btn gh sm" onclick="adminPwUI('${esc(u.email)}')">🔑 رمز</button> <button class="btn bad sm" onclick="rmUser(${i})">حذف</button></td></tr>`;
   });
   h+=`</tbody></table></div>
   ${view._pwRst?`<div style="margin-top:10px;border:1px solid var(--ac);border-radius:12px;padding:12px 14px;background:var(--bg2)">
