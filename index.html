@@ -43,6 +43,53 @@ body{font-family:Vazirmatn,Tahoma,sans-serif;color:var(--tx);font-size:14px;
 .nav-h{font-size:11.5px;color:var(--tx);font-weight:800;margin:14px 8px 4px}
 .navg .gic{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:14px;flex-shrink:0;background:var(--gdot,#8a96a8);box-shadow:var(--sh2)}
 #mtabs:empty{display:none}
+/* 🎛 مرکز فرمان کاربران */
+.ucbar{padding:14px 16px 10px}
+.uchead{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.uav{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:17px;font-weight:800;color:#fff;background:#5B2C93}
+.uav.big{width:48px;height:48px;font-size:21px}
+.uav.dim{background:var(--bg3);color:var(--tx2)}
+.ucid{display:flex;flex-direction:column;gap:1px;min-width:0}
+.ucid b{font-size:15.5px;font-weight:800}
+.ucid span{font-size:11px;color:var(--tx2)}
+.uctabs{display:flex;gap:4px;flex-wrap:wrap;margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.uct{position:relative;display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border:none;background:transparent;border-radius:9px;font-size:13px;color:var(--tx2);cursor:pointer;font-family:inherit}
+.uct:hover{background:var(--bg3);color:var(--tx)}
+.uct.on{background:#5B2C93;color:#fff;font-weight:800;box-shadow:var(--sh2)}
+.ucgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.ucl{font-size:11px;color:var(--tx2);display:block;margin-bottom:4px}
+.ucinfos{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-top:12px}
+.ucinfo{background:var(--bg3);border-radius:10px;padding:9px 13px;display:flex;flex-direction:column;gap:3px}
+.ucinfo span{font-size:10.5px;color:var(--tx2)}
+.ucinfo b{font-size:13px}
+.ucchain{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap}
+.ucnode{flex:1;min-width:170px;display:flex;flex-direction:column;align-items:center;gap:7px;background:var(--bg3);border-radius:13px;padding:14px 12px;text-align:center}
+.ucnode.me{background:rgba(91,44,147,.08);border:1.5px solid #5B2C93}
+.ucnode select{max-width:100%;font-size:12px}
+.ucnl{font-size:10.5px;color:var(--tx2);font-weight:700}
+.ucarr{align-self:center;font-size:17px;color:var(--tx2)}
+.ucpeople{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:9px}
+.ucp{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg2,#fff);cursor:pointer;transition:all .2s var(--ease)}
+.ucp:hover{border-color:#5B2C93;box-shadow:var(--sh2)}
+.ucp.on{border-color:#5B2C93;background:rgba(91,44,147,.07)}
+.ucp .uav{width:34px;height:34px;font-size:14px}
+.ucp.on .uav{background:#107C10}
+.ucpn{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.ucpn b{font-size:12.5px}
+.ucpn span{font-size:10.5px;color:var(--tx2)}
+.ucpst{font-size:10px;color:var(--tx2);white-space:nowrap}
+.ucp.on .ucpst{color:#107C10;font-weight:800}
+.ucflows{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:11px}
+.ucf{border:1px solid var(--line);border-radius:13px;padding:13px 14px;background:var(--bg2,#fff);display:flex;flex-direction:column;gap:9px}
+.ucfh{display:flex;align-items:center;gap:9px;font-size:13.5px}
+.ucfi{width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;font-size:17px;background:var(--bg3)}
+.ucfe{font-size:11px;color:var(--tx2);line-height:1.8;min-height:18px}
+.ucfe.has{color:#107C10;font-weight:600}
+.ucrule{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:12.5px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;margin-bottom:7px;background:var(--bg2,#fff)}
+.ucrule select{max-width:190px;font-size:12px}
+.ucrule input{max-width:120px;font-size:12px;text-align:left;direction:ltr}
+.ucrn{width:22px;height:22px;flex:none;border-radius:50%;background:#5B2C93;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800}
+.ucempty{padding:22px;text-align:center;color:var(--tx2);font-size:12.5px;background:var(--bg3);border-radius:12px}
 .dbarline{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 12px;padding:7px 12px;background:var(--bg2,#fff);border:1px solid var(--line);border-inline-start:4px solid var(--dc,#0078D4);border-radius:10px;box-shadow:var(--sh2)}
 .dbarline .dback{border-radius:8px;font-size:12px;white-space:nowrap}
 .dbarline .dbi{font-size:17px}
@@ -337,11 +384,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.39</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.40</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.39</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.40</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -9736,7 +9783,7 @@ try{const _sv=JSON.parse(localStorage.getItem('xr_view')||'null');
 /* 🪗 جمع‌شوندگی گروه‌های منو بر اساس موضوع */
 let navCol=null;
 try{navCol=JSON.parse(localStorage.getItem('xr_navcol')||'null');}catch(e){navCol=null;}
-const DASH_GRP={saleswf:'فروش',invnew:'فروش',quotenew:'کالا و انبار',pinvnew:'کالا و انبار',paydash:'مالی',settlenew:'مالی',bpm:'پرسنل و سازمان',wfcenter:'پرسنل و سازمان',ucenter:'پرسنل و سازمان',ceodash:'داشبوردها',charts:'داشبوردها',smdash:'داشبوردها',plreport:'داشبوردها',targetdash:'داشبوردها',distdash:'داشبوردها',custdash:'داشبوردها',loyaldash:'داشبوردها',smsdash:'داشبوردها',whdash:'داشبوردها',pudash:'داشبوردها',supdash:'داشبوردها',pldash:'داشبوردها',bankdash:'داشبوردها',arapdash:'داشبوردها',chqdash:'داشبوردها',sepfin:'داشبوردها',sepdash:'داشبوردها',dualdash:'داشبوردها',pfdash:'داشبوردها',gldash:'داشبوردها',findash:'داشبوردها',perfdash:'داشبوردها',aligndash:'داشبوردها',riskdash:'داشبوردها',stratdash:'داشبوردها',bscmap:'داشبوردها',bsccanvas:'داشبوردها',swotmap:'داشبوردها',procmap:'داشبوردها',mydash:'داشبوردها',glnew:'حسابداری',bizdash:'داشبوردها'};
+const DASH_GRP={saleswf:'فروش',invnew:'فروش',quotenew:'کالا و انبار',pinvnew:'کالا و انبار',paydash:'مالی',settlenew:'مالی',bpm:'پرسنل و سازمان',wfcenter:'پرسنل و سازمان',ceodash:'داشبوردها',charts:'داشبوردها',smdash:'داشبوردها',plreport:'داشبوردها',targetdash:'داشبوردها',distdash:'داشبوردها',custdash:'داشبوردها',loyaldash:'داشبوردها',smsdash:'داشبوردها',whdash:'داشبوردها',pudash:'داشبوردها',supdash:'داشبوردها',pldash:'داشبوردها',bankdash:'داشبوردها',arapdash:'داشبوردها',chqdash:'داشبوردها',sepfin:'داشبوردها',sepdash:'داشبوردها',dualdash:'داشبوردها',pfdash:'داشبوردها',gldash:'داشبوردها',findash:'داشبوردها',perfdash:'داشبوردها',aligndash:'داشبوردها',riskdash:'داشبوردها',stratdash:'داشبوردها',bscmap:'داشبوردها',bsccanvas:'داشبوردها',swotmap:'داشبوردها',procmap:'داشبوردها',mydash:'داشبوردها',glnew:'حسابداری',bizdash:'داشبوردها'};
 function activeGrp(){ // گروهی که صفحه فعلی به آن تعلق دارد (همیشه باز نمایش داده می‌شود)
   if(view.type==='module')return view.flt||null;
   if(view.type==='mydash')return 'داشبوردها';
@@ -14817,6 +14864,7 @@ function ucToggleSub(em,subId,on){ // زیردست: مدیرِ آن فرد را 
 }
 window.ucToggleSub=ucToggleSub;
 function ucSubs(em){const h=ucHrOf(em);if(!h)return [];return byE('hr').filter(x=>relIds(x,'manager').includes(h.id));}
+function ucAvatar(name,cls){const ch=String(name||'؟').trim().charAt(0)||'؟';return `<span class="uav ${cls||''}">${esc(ch)}</span>`;}
 function ucenterHTML(){
   if(!isAdmin())return `<div class="empty">فقط ادمین</div>`;
   const list=usersList();
@@ -14825,106 +14873,139 @@ function ucenterHTML(){
   const u=list.find(x=>(x.email||'').toLowerCase()===em)||list[0];
   const hr=ucHrOf(em), cfg=ucfg(em);
   const tab=view.ucT||'id';
-  const T=(k,l)=>`<button class="btn ${tab===k?'':'gh '}sm" onclick="view.ucT='${k}';render()">${l}</button>`;
   const hrs=byE('hr').slice().sort((a,b)=>(a.d.title||'').localeCompare(b.d.title||'','fa'));
-  let h=`<div class="mhero" style="--mtc:#5B2C93"><span class="mico" style="background:#5B2C93">👤</span>
-    <div><div class="mttl">مرکز فرمان کاربران</div><div class="msub">نقش، مدیر بالادست، زیردستان، نقش در هر گردش، تأییدکننده‌ها و دسترسی دقیق تا سطح یک فیلد</div></div></div>
-  <div class="sec"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-    <b style="font-size:12.5px">کاربر:</b>
-    <select onchange="view.ucU=this.value;render()" style="max-width:290px" dir="ltr">
-      ${list.map(x=>`<option value="${esc(x.email)}" ${String(x.email).toLowerCase()===em?'selected':''}>${esc(x.email)}${x.role?' — '+esc(x.role):''}</option>`).join('')}</select>
-    ${hr?`<span class="tag">👥 ${esc(hr.d.title||'')}${hr.d.role?' · '+esc(hr.d.role):''}</span>`:`<span class="tag" style="color:var(--bad)">⚠️ پروندهٔ HR وصل نیست</span>`}
-    <span style="flex:1"></span><button class="btn gh sm" onclick="go('users')">👤 فهرست کاربران</button></div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:11px">
-    ${T('id','🪪 هویت و نقش')}${T('org','🏛 سلسله‌مراتب')}${T('wf','🔁 نقش در گردش‌ها')}${T('apr','✅ تأییدها')}${T('acl','🛡 دسترسی دقیق')}</div></div>`;
-  /* 🪪 هویت */
+  const dispName=hr?(hr.d.title||u.email):u.email;
+  const T=(k,ic,l)=>`<button class="uct ${tab===k?'on':''}" onclick="view.ucT='${k}';render()"><span>${ic}</span>${l}</button>`;
+  /* ── سربرگ فشرده: کاربر + تب‌ها در یک کارت ── */
+  let h=`<div class="sec ucbar">
+    <div class="uchead">
+      ${ucAvatar(dispName,'big')}
+      <div class="ucid"><b>${esc(dispName)}</b>
+        <span dir="ltr">${esc(u.email||'')}</span></div>
+      <span class="tag" style="background:#5B2C93;color:#fff">${esc(ROLE_LEGACY[u.role]||u.role||'—')}</span>
+      ${hr?`<span class="tag">${esc(hr.d.role||'بدون سمت')}</span>`:`<span class="tag" style="color:var(--bad);border:1px solid var(--bad)">⚠️ پروندهٔ HR وصل نیست</span>`}
+      <span style="flex:1"></span>
+      <select onchange="view.ucU=this.value;render()" style="max-width:250px" dir="ltr" title="انتخاب کاربر دیگر">
+        ${list.map(x=>`<option value="${esc(x.email)}" ${String(x.email).toLowerCase()===em?'selected':''}>${esc(x.email)}</option>`).join('')}</select>
+    </div>
+    <div class="uctabs">
+      ${T('id','🪪','هویت و نقش')}${T('org','🏛','سلسله‌مراتب')}${T('wf','🔁','نقش در گردش‌ها')}${T('apr','✅','تأییدها')}${T('acl','🛡','دسترسی دقیق')}
+    </div></div>`;
+  /* ═══ 🪪 هویت و نقش ═══ */
   if(tab==='id'){
     const i=list.findIndex(x=>String(x.email).toLowerCase()===em);
+    const info=(l,v)=>`<div class="ucinfo"><span>${l}</span><b>${esc(v||'—')}</b></div>`;
     h+=`<div class="sec"><h3>🪪 هویت و نقش پایه</h3>
-    <div class="row">
-      <div><label>ایمیل ورود</label><input value="${esc(u.email||'')}" dir="ltr" readonly></div>
-      <div><label>نقش سیستمی</label><select onchange="setRole(${i},this.value);render()">
+    <div class="ucgrid">
+      <div><label class="ucl">نقش سیستمی (سطح کلی دسترسی)</label>
+        <select onchange="setRole(${i},this.value);render()">
         ${aclRoles().concat([PENDING]).map(r=>`<option ${((ROLE_LEGACY[u.role]||u.role)===r)?'selected':''}>${r}</option>`).join('')}</select></div>
-      <div><label>پروندهٔ منابع انسانی</label><select onchange="setUserHR(${i},this.value);render()">
+      <div><label class="ucl">پروندهٔ منابع انسانی</label>
+        <select onchange="setUserHR(${i},this.value);render()">
         <option value="">— بدون اتصال —</option>
         ${hrs.map(x=>`<option value="${x.id}" ${hr&&hr.id===x.id?'selected':''}>${esc(x.d.title||'—')}</option>`).join('')}</select></div>
     </div>
-    ${hr?`<div class="row" style="margin-top:8px">
-      <div><label>سمت</label><input value="${esc(hr.d.role||'')}" readonly></div>
-      <div><label>واحد سازمانی</label><input value="${esc((relIds(hr,'orgu')[0]&&recs[relIds(hr,'orgu')[0]])?recs[relIds(hr,'orgu')[0]].d.title:(hr.d.unit||'—'))}" readonly></div>
-      <div><label>وضعیت همکاری</label><input value="${esc(hr.d.wstatus||'—')}" readonly></div></div>
-      <div style="margin-top:8px"><button class="btn gh sm" onclick="go('rec','hr','${hr.id}')">✏️ ویرایش پروندهٔ کامل</button>
-      <button class="btn gh sm" onclick="adminPwUI('${esc(u.email)}')">🔑 تغییر رمز</button></div>`
-      :`<div class="hint" style="margin-top:8px">تا وقتی پروندهٔ HR وصل نشود، سلسله‌مراتب و گردش‌ها برای این کاربر کار نمی‌کند.</div>`}
-    </div>`;
-  }
-  /* 🏛 سلسله‌مراتب */
-  if(tab==='org'){
-    const mgr=hr?relIds(hr,'manager')[0]:'';
-    const subs=ucSubs(em);
-    h+=`<div class="sec"><h3>🏛 مدیر بالادست</h3>
-    ${hr?`<div class="row"><div style="grid-column:1/-1"><label>مدیر مستقیم این کاربر</label>
-      <select onchange="ucSetMgr('${esc(em)}',this.value)" style="max-width:330px">
-        <option value="">— بدون مدیر —</option>
-        ${hrs.filter(x=>x.id!==hr.id).map(x=>`<option value="${x.id}" ${mgr===x.id?'selected':''}>${esc(x.d.title||'—')}${x.d.role?' · '+esc(x.d.role):''}</option>`).join('')}</select></div></div>
-      <div class="hint" style="margin-top:6px">درخواست‌های مرخصی و خرید این کاربر به‌صورت پیش‌فرض به همین فرد ارجاع می‌شود.</div>`
-      :'<div class="hint">ابتدا پروندهٔ HR را وصل کنید.</div>'}
+    ${hr?`<div class="ucinfos">
+      ${info('سمت',hr.d.role)}
+      ${info('واحد',(relIds(hr,'orgu')[0]&&recs[relIds(hr,'orgu')[0]])?recs[relIds(hr,'orgu')[0]].d.title:hr.d.unit)}
+      ${info('وضعیت همکاری',hr.d.wstatus)}
+      ${info('تلفن',hr.d.phone)}
     </div>
-    <div class="sec"><h3>👥 زیردستان <span style="font-size:11px;color:var(--tx2);font-weight:400">${subs.length.toLocaleString('fa-IR')} نفر</span></h3>
-    ${hr?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:5px">
-      ${hrs.filter(x=>x.id!==hr.id).map(x=>{const on=relIds(x,'manager').includes(hr.id);const other=relIds(x,'manager')[0];
-        return `<label style="display:flex;gap:7px;align-items:center;font-size:12px;cursor:pointer;padding:5px 8px;border-radius:8px;${on?'background:var(--bg3)':''}">
-          <input type="checkbox" ${on?'checked':''} onchange="ucToggleSub('${esc(em)}','${x.id}',this.checked)">
-          <span style="flex:1">${esc(x.d.title||'—')}${other&&!on&&recs[other]?` <span style="color:var(--tx2);font-size:10px">(زیردست ${esc(recs[other].d.title||'')})</span>`:''}</span></label>`;}).join('')}</div>
-      <div class="hint" style="margin-top:7px">با تیک‌زدن، «مدیر مستقیم» آن فرد به این کاربر تغییر می‌کند.</div>`
-      :'<div class="hint">ابتدا پروندهٔ HR را وصل کنید.</div>'}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+      <button class="btn gh sm" onclick="go('rec','hr','${hr.id}')">✏️ ویرایش پروندهٔ کامل HR</button>
+      <button class="btn gh sm" onclick="go('users');adminPwUI('${esc(u.email)}')">🔑 تغییر رمز عبور</button></div>`
+    :`<div class="hint" style="margin-top:10px">⚠️ تا وقتی پروندهٔ HR وصل نشود، «سلسله‌مراتب» و «نقش در گردش‌ها» برای این کاربر فعال نمی‌شود — از فهرست بالا یک پرونده انتخاب کنید.</div>`}
     </div>`;
   }
-  /* 🔁 نقش در گردش‌ها */
+  /* ═══ 🏛 سلسله‌مراتب ═══ */
+  if(tab==='org'){
+    if(!hr){h+=`<div class="sec"><div class="hint">⚠️ ابتدا در تب «هویت و نقش» پروندهٔ منابع انسانی این کاربر را وصل کنید.</div></div>`;}
+    else{
+      const mgr=relIds(hr,'manager')[0];
+      const subs=ucSubs(em);
+      h+=`<div class="sec"><h3>🏛 جایگاه در سازمان</h3>
+      <div class="ucchain">
+        <div class="ucnode">
+          <div class="ucnl">مدیر بالادست</div>
+          ${mgr&&recs[mgr]?ucAvatar(recs[mgr].d.title):'<span class="uav dim">؟</span>'}
+          <select onchange="ucSetMgr('${esc(em)}',this.value)">
+            <option value="">— بدون مدیر —</option>
+            ${hrs.filter(x=>x.id!==hr.id).map(x=>`<option value="${x.id}" ${mgr===x.id?'selected':''}>${esc(x.d.title||'—')}</option>`).join('')}</select>
+        </div>
+        <span class="ucarr">⬅</span>
+        <div class="ucnode me">
+          <div class="ucnl">این کاربر</div>
+          ${ucAvatar(dispName)}
+          <b style="font-size:13px">${esc(dispName)}</b>
+          <span style="font-size:10.5px;color:var(--tx2)">${esc(hr.d.role||'')}</span>
+        </div>
+        <span class="ucarr">⬅</span>
+        <div class="ucnode">
+          <div class="ucnl">زیردستان</div>
+          <b style="font-size:22px;color:#5B2C93">${subs.length.toLocaleString('fa-IR')}</b>
+          <span style="font-size:10.5px;color:var(--tx2)">نفر</span>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:8px">درخواست‌های مرخصی و خرید این کاربر به‌صورت پیش‌فرض برای «مدیر بالادست» او ارسال می‌شود.</p></div>
+      <div class="sec"><h3>👥 انتخاب زیردستان <span style="font-size:11px;color:var(--tx2);font-weight:400">روی کارت هر نفر بزنید تا زیردست این کاربر شود</span></h3>
+      <div class="ucpeople">
+      ${hrs.filter(x=>x.id!==hr.id).map(x=>{
+        const on=relIds(x,'manager').includes(hr.id);
+        const other=relIds(x,'manager')[0];
+        const sub=on?'✓ زیردست این کاربر':(other&&recs[other]?'زیردستِ '+esc(recs[other].d.title||''):'بدون مدیر');
+        return `<div class="ucp ${on?'on':''}" onclick="ucToggleSub('${esc(em)}','${x.id}',${on?'false':'true'})">
+          ${ucAvatar(x.d.title)}
+          <div class="ucpn"><b>${esc(x.d.title||'—')}</b><span>${esc(x.d.role||'')}</span></div>
+          <span class="ucpst">${sub}</span></div>`;}).join('')||'<div class="hint">پرسنل دیگری ثبت نشده</div>'}
+      </div></div>`;
+    }
+  }
+  /* ═══ 🔁 نقش در گردش‌ها ═══ */
   if(tab==='wf'){
     let defs=[];try{defs=byE('wfdef').filter(d=>d.d.active);}catch(e){}
+    const fcard=(key,ic,name,roles,cur,eff,hint)=>`<div class="ucf">
+      <div class="ucfh"><span class="ucfi">${ic}</span><b>${name}</b></div>
+      <select onchange="ucSetWf('${esc(em)}','${key}',this.value)">
+        ${roles.map(r=>`<option value="${r}" ${cur===r||(!cur&&r==='—')?'selected':''}>${r==='—'?'— نقشی ندارد —':r}</option>`).join('')}</select>
+      <div class="ucfe ${eff?'has':''}">${eff?'✅ در این گردش: <b>'+esc(eff)+'</b>':hint||'در این گردش نقشی ندارد'}</div></div>`;
     h+=`<div class="sec"><h3>🔁 نقش این کاربر در هر گردش کاری</h3>
-    <p style="font-size:12px;color:var(--tx2);line-height:2">یک نفر می‌تواند در هر فرآیند نقش متفاوتی داشته باشد — مثلاً در گردش فروش «مدیر فروش» و در گردش خرید «تأییدکنندهٔ بودجه». اینجا برای هر گردش جداگانه تعیین کنید.</p>
-    <div class="tblwrap"><table><thead><tr><th>گردش کاری</th><th>نقش این کاربر</th><th>یعنی چه؟</th></tr></thead><tbody>
-    ${WFLOWS.map(f=>{const cur=(cfg.wf||{})[f.k]||'';
-      const eff=wroleOf(f.k,em);
-      return `<tr><td>${f.n}</td>
-        <td><select onchange="ucSetWf('${esc(em)}','${f.k}',this.value)" style="max-width:200px">
-          ${f.roles.map(r=>`<option value="${r}" ${cur===r||(!cur&&r==='—')?'selected':''}>${r}</option>`).join('')}</select></td>
-        <td style="font-size:11.5px;color:var(--tx2)">${eff?'در این گردش به‌عنوان «'+esc(eff)+'» عمل می‌کند':'در این گردش نقشی ندارد'}</td></tr>`;}).join('')}
+    <p style="font-size:12px;color:var(--tx2);line-height:2;margin-bottom:12px">یک نفر می‌تواند در هر فرآیند نقش متفاوتی داشته باشد — مثلاً در گردش فروش «مدیر فروش» و در گردش خرید «تأییدکنندهٔ بودجه». کارتابل و دکمه‌های هر گردش بر اساس همین انتخاب فعال می‌شود.</p>
+    <div class="ucflows">
+    ${WFLOWS.map(f=>{const cur=(cfg.wf||{})[f.k]||'';const eff=wroleOf(f.k,em);
+      return fcard(f.k,f.n.split(' ')[0],f.n.replace(/^\S+\s/,''),f.roles,cur,eff,
+        f.k==='sales'&&!eff?'اگر خالی بماند از «نقش گردش فروش» در پروندهٔ HR خوانده می‌شود':'');}).join('')}
     ${defs.map(d=>{const cur=(cfg.wf||{})['bp:'+d.id]||'';
-      const steps=(d.d.steps||[]).map(s=>s.name).filter(Boolean);
-      return `<tr><td>🧩 ${esc(d.d.title||'فرآیند')}</td>
-        <td><select onchange="ucSetWf('${esc(em)}','bp:${d.id}',this.value)" style="max-width:200px">
-          <option value="—">—</option>${steps.map(sn=>`<option ${cur===sn?'selected':''}>${esc(sn)}</option>`).join('')}</select></td>
-        <td style="font-size:11.5px;color:var(--tx2)">مرحله‌ای که این کاربر مسئول آن است</td></tr>`;}).join('')}
-    </tbody></table></div>
-    ${defs.length?'':'<div class="hint" style="margin-top:7px">فرآیندهای سفارشی را در «🧩 فرآیندهای کاری» بسازید تا اینجا هم قابل تخصیص شوند.</div>'}
+      const steps=['—'].concat((d.d.steps||[]).map(x=>x.name).filter(Boolean));
+      return fcard('bp:'+d.id,'🧩',esc(d.d.title||'فرآیند'),steps,cur,cur&&cur!=='—'?('مسئول مرحلهٔ «'+cur+'»'):'','');}).join('')}
+    </div>
+    ${defs.length?'':'<p class="hint" style="margin-top:10px">فرآیندهای سفارشی را در «🧩 فرآیندهای کاری» بسازید — خودکار اینجا اضافه می‌شوند.</p>'}
     </div>`;
   }
-  /* ✅ تأییدها */
+  /* ═══ ✅ تأییدها ═══ */
   if(tab==='apr'){
     const rules=aprRules(em);
-    h+=`<div class="sec"><h3>✅ این کاربر برای چه چیزی از چه کسی تأیید بگیرد</h3>
-    <p style="font-size:12px;color:var(--tx2);line-height:2">هر قاعده یعنی: وقتی این کاربر مورد زیر را ثبت کند (و در صورت تعیین مبلغ، از آن مبلغ بیشتر باشد)، سند حتماً باید توسط شخص تعیین‌شده تأیید شود — حتی اگر دیگران هم دسترسی تأیید داشته باشند.</p>
-    <div class="tblwrap"><table><thead><tr><th>موضوع</th><th>از مبلغ (ریال)</th><th>تأییدکنندهٔ الزامی</th><th></th></tr></thead><tbody>
-    ${rules.map((r,i)=>`<tr>
-      <td><select onchange="ucAprSet('${esc(em)}',${i},'k',this.value)" style="max-width:210px">
-        ${APR_SUBJ.map(([k,n])=>`<option value="${k}" ${r.k===k?'selected':''}>${n}</option>`).join('')}</select></td>
-      <td><input inputmode="numeric" value="${r.amt||''}" placeholder="۰ = همیشه" style="max-width:150px" onchange="ucAprSet('${esc(em)}',${i},'amt',this.value)"></td>
-      <td><select onchange="ucAprSet('${esc(em)}',${i},'by',this.value)" style="max-width:220px">
-        <option value="">— انتخاب کنید —</option>
-        ${hrs.map(x=>`<option value="${x.id}" ${r.by===x.id?'selected':''}>${esc(x.d.title||'—')}${x.d.role?' · '+esc(x.d.role):''}</option>`).join('')}</select></td>
-      <td><button class="btn bad sm" onclick="ucAprDel('${esc(em)}',${i})">🗑</button></td></tr>`).join('')
-      ||'<tr><td colspan="4" style="color:var(--tx2)">قاعده‌ای تعریف نشده — این کاربر طبق مسیر عادی گردش تأیید می‌گیرد</td></tr>'}
-    </tbody></table></div>
-    <button class="btn sm" style="margin-top:9px" onclick="ucAprAdd('${esc(em)}')">＋ قاعدهٔ تأیید جدید</button></div>`;
+    h+=`<div class="sec"><h3>✅ تأییدکننده‌های الزامی برای ${esc(dispName)}</h3>
+    <p style="font-size:12px;color:var(--tx2);line-height:2;margin-bottom:10px">هر قاعده یعنی: وقتی این کاربر مورد انتخابی را ثبت کند (و مبلغش از حد تعیین‌شده بیشتر باشد)، سند <b>حتماً</b> باید توسط شخص تعیین‌شده تأیید شود — هیچ‌کس دیگری نمی‌تواند به‌جای او تأیید کند (به‌جز ادمین).</p>
+    ${rules.map((r,i)=>`<div class="ucrule">
+      <span class="ucrn">${(i+1).toLocaleString('fa-IR')}</span>
+      <span>وقتی</span>
+      <select onchange="ucAprSet('${esc(em)}',${i},'k',this.value)">
+        ${APR_SUBJ.map(([k,n])=>`<option value="${k}" ${r.k===k?'selected':''}>${n}</option>`).join('')}</select>
+      <span>ثبت کرد، از مبلغ</span>
+      <input inputmode="numeric" value="${r.amt||''}" placeholder="۰ = همیشه" onchange="ucAprSet('${esc(em)}',${i},'amt',this.value)">
+      <span>ریال به بالا، تأییدِ</span>
+      <select onchange="ucAprSet('${esc(em)}',${i},'by',this.value)" style="${r.by?'':'border-color:var(--warn)'}">
+        <option value="">— انتخاب شخص —</option>
+        ${hrs.map(x=>`<option value="${x.id}" ${r.by===x.id?'selected':''}>${esc(x.d.title||'—')}</option>`).join('')}</select>
+      <span>الزامی است</span>
+      <button class="btn bad sm" onclick="ucAprDel('${esc(em)}',${i})">🗑</button></div>`).join('')
+    ||`<div class="ucempty">📭 قاعده‌ای تعریف نشده — اسناد این کاربر مسیر عادی گردش را طی می‌کنند</div>`}
+    <button class="btn sm" style="margin-top:11px" onclick="ucAprAdd('${esc(em)}')">＋ قاعدهٔ تأیید جدید</button></div>`;
   }
-  /* 🛡 دسترسی دقیق */
+  /* ═══ 🛡 دسترسی دقیق ═══ */
   if(tab==='acl'){
-    view.aclT='user';view.aclV=u.email;
-    h+=`<div class="sec" style="border-inline-start:3px solid #5B2C93"><h3>🛡 دسترسی دقیق این کاربر</h3>
-    <p style="font-size:12px;color:var(--tx2);line-height:2">هر صفحه، هر بخش و حتی <b>هر فیلد</b> را جداگانه تعیین کنید: عادی / فقط مشاهده (نتواند تغییر دهد) / مخفی (اصلاً نبیند). این تنظیم‌ها روی تنظیم نقش او اولویت دارند و در سرور هم اعمال می‌شوند.</p></div>`;
+    h+=`<div class="sec" style="border-inline-start:3px solid #5B2C93"><h3>🛡 دسترسی دقیق ${esc(dispName)}</h3>
+    <p style="font-size:12px;color:var(--tx2);line-height:2">هر صفحه، هر بخش و حتی <b>هر فیلد</b> را جداگانه تعیین کنید: عادی / فقط مشاهده / مخفی. تنظیم فردی روی تنظیم نقش اولویت دارد و در سرور هم اعمال می‌شود.</p></div>`;
     h+=ucAclBody(u.email);
   }
   return h;
@@ -28465,7 +28546,7 @@ function usersHTML(){
         ${byE('hr').sort((a,b)=>(a.d.title||'').localeCompare(b.d.title||'','fa')).map(x=>`<option value="${x.id}" ${hrLinked===x.id?'selected':''}>${esc(x.d.title||'—')}</option>`).join('')}</select>
       ${emailMatch?`<div style="font-size:10.5px;color:var(--ok)">✓ از طریق ایمیل به «${esc(emailMatch.d.title)}» وصل است</div>`:''}
       ${!hrLinked&&!emailMatch?`<div style="font-size:10.5px;color:var(--tx2)">وصل کنید تا میز کارش پر شود</div>`:''}</td>
-      <td style="white-space:nowrap"><button class="btn gh sm" onclick="view.ucU='${esc(u.email)}';view.ucT='id';go('ucenter')">🎛️ تنظیمات</button> <button class="btn gh sm" onclick="adminPwUI('${esc(u.email)}')">🔑 رمز</button> <button class="btn bad sm" onclick="rmUser(${i})">حذف</button></td></tr>`;
+      <td style="white-space:nowrap"><button class="btn gh sm" onclick="go('ucenter');view.ucU='${esc(u.email)}';view.ucT='id';render()">🎛️ تنظیمات</button> <button class="btn gh sm" onclick="adminPwUI('${esc(u.email)}')">🔑 رمز</button> <button class="btn bad sm" onclick="rmUser(${i})">حذف</button></td></tr>`;
   });
   h+=`</tbody></table></div>
   ${view._pwRst?`<div style="margin-top:10px;border:1px solid var(--ac);border-radius:12px;padding:12px 14px;background:var(--bg2)">
