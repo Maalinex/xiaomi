@@ -43,6 +43,15 @@ body{font-family:Vazirmatn,Tahoma,sans-serif;color:var(--tx);font-size:14px;
 .nav-h{font-size:11.5px;color:var(--tx);font-weight:800;margin:14px 8px 4px}
 .navg .gic{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:14px;flex-shrink:0;background:var(--gdot,#8a96a8);box-shadow:var(--sh2)}
 #mtabs:empty{display:none}
+.ocovl{position:fixed;inset:0;background:rgba(0,0,0,.32);backdrop-filter:blur(3px);z-index:60;display:flex;align-items:center;justify-content:center;padding:18px}
+.ocmodal{width:min(660px,96vw);max-height:86vh;background:var(--bg,#F3F3F3);border-radius:16px;box-shadow:var(--sh16);display:flex;flex-direction:column;overflow:hidden;animation:ocin .22s var(--ease)}
+@keyframes ocin{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.ocmh{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:13px 16px;background:var(--bg2,#fff);border-bottom:1px solid var(--line)}
+.ocmh b{font-size:14.5px}
+.ocmb{padding:14px 16px;overflow-y:auto}
+.ocmb textarea{width:100%}
+.ocmem{max-height:190px;overflow-y:auto}
+.ocmf{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:11px 16px;background:var(--bg2,#fff);border-top:1px solid var(--line)}
 /* 🏛 چارت سازمانی */
 .octree{overflow:auto;padding:22px 12px 26px}
 .octree ul{display:flex;justify-content:center;align-items:flex-start;margin:0;padding:0;list-style:none}
@@ -407,11 +416,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.43</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.44</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.43</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.44</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -14924,10 +14933,13 @@ function ocNodeHTML(u,depth){
 }
 function orgchartHTML(){
   const roots=ocRoots();
-  let h=`<div class="sec" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px">
+  const placed=roots.length?ocPlacedIds():new Set();
+  const un=roots.length?byE('hr').filter(x=>!placed.has(x.id)&&(x.d.wstatus||'شاغل')==='شاغل'):[];
+  let h=`<div class="sec" style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;padding:11px 16px">
     <b style="font-size:14px">🏛 چارت سازمانی</b>
-    <span style="font-size:11.5px;color:var(--tx2)">روی هر باکس کلیک کنید تا جزئیات و تنظیماتش باز شود · ＋ روی باکس = زیرمجموعهٔ جدید</span>
+    <span style="font-size:11px;color:var(--tx2)">کلیک روی باکس = جزئیات · ＋ روی باکس = زیرمجموعه</span>
     <span style="flex:1"></span>
+    ${un.length?`<button class="btn gh sm" style="border-color:var(--warn)" onclick="view.ocUn=!view.ocUn;render()">⚠️ ${un.length.toLocaleString('fa-IR')} نفر بدون جایگاه ${view.ocUn?'▴':'▾'}</button>`:''}
     ${isAdmin()?`<button class="btn gh sm" onclick="ocAddChild(null)">＋ باکس سطح بالا</button>`:''}
   </div>`;
   if(!roots.length)
@@ -14935,60 +14947,61 @@ function orgchartHTML(){
       <div style="font-size:40px;margin-bottom:10px">🏛</div>
       <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">هنوز چارتی ساخته نشده. با یک کلیک ساختار پایه ساخته می‌شود:<br>مدیرعامل + مدیریت فروش، خرید، مالی، پشتیبانی و توسعه کسب‌وکار + کارشناس هرکدام</p>
       ${isAdmin()?`<button class="btn" onclick="ocSeed()">🚀 ساخت ساختار پایه</button>`:'<span class="hint">از ادمین بخواهید چارت را بسازد</span>'}</div>`;
-  h+=`<div class="sec" style="padding:8px 6px"><div class="octree" dir="ltr"><ul class="ocroot" dir="rtl">${roots.map(r=>ocNodeHTML(r,0)).join('')}</ul></div></div>`;
-  { // 🔗 اتصال با منابع انسانی: چه کسانی هنوز در چارت جایی ندارند؟
-    const placed=ocPlacedIds();
-    const un=byE('hr').filter(x=>!placed.has(x.id)&&(x.d.wstatus||'شاغل')==='شاغل');
-    if(un.length)h+=`<div class="sec" style="border-inline-start:3px solid var(--warn)">
-      <h3 style="font-size:13px">⚠️ افراد بدون جایگاه در چارت <span style="font-size:11px;color:var(--tx2);font-weight:400">${un.length.toLocaleString('fa-IR')} نفر از منابع انسانی</span></h3>
-      <p style="font-size:11.5px;color:var(--tx2);margin-bottom:9px">${view.ocSel&&recs[view.ocSel]?'روی هر نفر بزنید تا عضو باکس انتخاب‌شده («'+esc(recs[view.ocSel].d.title||'')+'») شود':'اول یک باکس را در چارت انتخاب کنید، بعد روی افراد بزنید تا به آن اضافه شوند'}</p>
+  if(view.ocUn&&un.length)
+    h+=`<div class="sec" style="border-inline-start:3px solid var(--warn);padding:12px 16px">
+      <p style="font-size:11.5px;color:var(--tx2);margin-bottom:8px">${view.ocSel&&recs[view.ocSel]?'کلیک روی هر نفر = افزودن به «'+esc(recs[view.ocSel].d.title||'')+'»':'اول یک باکس را انتخاب کنید، بعد روی افراد بزنید'}</p>
       <div class="ucpeople">${un.map(x=>`<div class="ucp" onclick="${view.ocSel?`ocMember('${view.ocSel}','${x.id}',true)`:`setSync('err','اول یک باکس را در چارت انتخاب کنید')`}">
-        ${ucAvatar(x.d.title)}<div class="ucpn"><b>${esc(x.d.title||'—')}</b><span>${esc(x.d.role||'')}</span></div><span class="ucpst">＋ افزودن</span></div>`).join('')}</div></div>`;
-  }
-  /* پنل جزئیات */
+        ${ucAvatar(x.d.title)}<div class="ucpn"><b>${esc(x.d.title||'—')}</b><span>${esc(x.d.role||'')}</span></div><span class="ucpst">＋</span></div>`).join('')}</div></div>`;
+  h+=`<div class="sec" style="padding:8px 6px"><div class="octree" dir="ltr"><ul class="ocroot" dir="rtl">${roots.map(r=>ocNodeHTML(r,0)).join('')}</ul></div></div>`;
+  /* 🪟 جزئیات باکس — پنجرهٔ شناور، چارت تمیز می‌ماند */
   const id=view.ocSel;
   if(id&&recs[id]&&!recs[id].del){
     const u=recs[id];
     const head=relIds(u,'head')[0]||'';
     const par=relIds(u,'parent')[0]||'';
-    const kids=ocKids(id), mems=relIds(u,'members'), chain=ocChain(id);
+    const kids=ocKids(id), chain=ocChain(id);
     const hrs=byE('hr').slice().sort((a,b)=>(a.d.title||'').localeCompare(b.d.title||'','fa'));
     const units=byE('orgunit').filter(x=>x.id!==id);
-    h+=`<div class="sec" style="border-inline-start:4px solid #0078D4">
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
-        <h3 style="margin:0">📋 ${esc(u.d.title||'—')}</h3>
-        ${chain.length?`<span style="font-size:11px;color:var(--tx2)">مسیر: ${chain.slice().reverse().map(x=>esc(x.d.title||'')).join(' ← ')} ← <b>${esc(u.d.title||'')}</b></span>`:'<span class="tag" style="background:#B8860B;color:#fff">سطح بالا</span>'}
+    h+=`<div class="ocovl" onclick="view.ocSel=null;view._ocDel=null;render()"><div class="ocmodal" onclick="event.stopPropagation()">
+      <div class="ocmh">
+        <b>📋 ${esc(u.d.title||'—')}</b>
+        <span style="font-size:10.5px;color:var(--tx2)">${chain.length?chain.slice().reverse().map(x=>esc(x.d.title||'')).join(' ← ')+' ← این باکس':'سطح بالا'}</span>
         <span style="flex:1"></span>
+        <button class="btn gh sm" onclick="view.ocSel=null;view._ocDel=null;render()">✕</button>
+      </div>
+      <div class="ocmb">
+        <div class="ucgrid">
+          <div><label class="ucl">نام باکس</label><input id="oc_title" value="${esc(u.d.title||'')}" onchange="ocField('${id}','title',this.value)"></div>
+          <div><label class="ucl">👤 مسئول</label><select onchange="ocRel('${id}','head',this.value)">
+            <option value="">— تعیین نشده —</option>
+            ${hrs.map(x=>`<option value="${x.id}" ${head===x.id?'selected':''}>${esc(x.d.title||'—')}</option>`).join('')}</select></div>
+          <div><label class="ucl">⬆ بالاسری</label><select onchange="ocRel('${id}','parent',this.value)">
+            <option value="">— سطح بالا —</option>
+            ${units.map(x=>`<option value="${x.id}" ${par===x.id?'selected':''}>${esc(x.d.title||'—')}</option>`).join('')}</select></div>
+        </div>
+        <div class="ucgrid" style="margin-top:10px">
+          <div><label class="ucl">📝 شرح وظایف</label><textarea rows="3" onchange="ocField('${id}','duties',this.value)" placeholder="وظایف اصلی این واحد…">${esc(u.d.duties||'')}</textarea></div>
+          <div><label class="ucl">🎯 مسئولیت‌ها و پاسخگویی‌ها</label><textarea rows="3" onchange="ocField('${id}','accnt',this.value)" placeholder="پاسخگوی چه چیزهایی و به چه کسی…">${esc(u.d.accnt||'')}</textarea></div>
+        </div>
+        <label class="ucl" style="margin:13px 0 6px">👥 اعضا <span style="opacity:.7">(کلیک = افزودن/حذف)</span></label>
+        <div class="ucpeople ocmem">
+        ${hrs.map(x=>{const on=ocIsMember(u,x.id);const isHead=head===x.id;
+          return `<div class="ucp ${on||isHead?'on':''}" onclick="${isHead?'':`ocMember('${id}','${x.id}',${on?'false':'true'})`}">
+            ${ucAvatar(x.d.title)}
+            <div class="ucpn"><b>${esc(x.d.title||'—')}</b><span>${esc(x.d.role||'')}</span></div>
+            <span class="ucpst">${isHead?'👤 مسئول':(on?'✓':'')}</span></div>`;}).join('')||'<div class="hint">پرسنلی ثبت نشده</div>'}
+        </div>
+        ${kids.length?`<label class="ucl" style="margin:12px 0 6px">🧩 زیرمجموعه‌ها</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${kids.map(k=>`<button class="btn gh sm" onclick="view.ocSel='${k.id}';render()">${esc(k.d.title||'—')}</button>`).join('')}</div>`:''}
+      </div>
+      <div class="ocmf">
+        <button class="btn sm" onclick="ocApply('${id}')" title="مدیر مستقیم اعضا = مسئول این باکس؛ مدیر مسئول = مسئول باکس بالاسری">🧬 اعمال سلسله‌مراتب</button>
         <button class="btn gh sm" onclick="ocAddChild('${id}')">＋ زیرمجموعه</button>
-        <button class="btn sm" onclick="ocApply('${id}')" title="مدیر مستقیم اعضا و مسئول این واحد طبق چارت تنظیم می‌شود">🧬 اعمال سلسله‌مراتب</button>
-        ${view._ocDel===id?`<b style="color:var(--bad);font-size:12px">حذف شود؟</b><button class="btn bad sm" onclick="ocDel('${id}')">بله، حذف</button><button class="btn gh sm" onclick="view._ocDel=null;render()">انصراف</button>`
-          :`<button class="btn bad sm" onclick="ocDel('${id}')">🗑</button>`}
+        <span style="flex:1"></span>
+        ${view._ocDel===id?`<b style="color:var(--bad);font-size:12px">حذف شود؟</b><button class="btn bad sm" onclick="ocDel('${id}')">بله</button><button class="btn gh sm" onclick="view._ocDel=null;render()">انصراف</button>`
+          :`<button class="btn bad sm" onclick="ocDel('${id}')">🗑 حذف باکس</button>`}
       </div>
-      <div class="ucgrid">
-        <div><label class="ucl">نام باکس / واحد</label><input id="oc_title" value="${esc(u.d.title||'')}" onchange="ocField('${id}','title',this.value)"></div>
-        <div><label class="ucl">👤 مسئول (نفر مشخص این باکس)</label><select onchange="ocRel('${id}','head',this.value)">
-          <option value="">— تعیین نشده —</option>
-          ${hrs.map(x=>`<option value="${x.id}" ${head===x.id?'selected':''}>${esc(x.d.title||'—')}${x.d.role?' · '+esc(x.d.role):''}</option>`).join('')}</select></div>
-        <div><label class="ucl">⬆ بالاسری (واحد والد)</label><select onchange="ocRel('${id}','parent',this.value)">
-          <option value="">— سطح بالا —</option>
-          ${units.map(x=>`<option value="${x.id}" ${par===x.id?'selected':''}>${esc(x.d.title||'—')}</option>`).join('')}</select></div>
-      </div>
-      <div class="ucgrid" style="margin-top:11px">
-        <div><label class="ucl">📝 شرح وظایف</label><textarea rows="4" onchange="ocField('${id}','duties',this.value)" placeholder="وظایف اصلی این واحد را بنویسید…">${esc(u.d.duties||'')}</textarea></div>
-        <div><label class="ucl">🎯 مسئولیت‌ها و پاسخگویی‌ها</label><textarea rows="4" onchange="ocField('${id}','accnt',this.value)" placeholder="این واحد پاسخگوی چه چیزهایی و به چه کسی است…">${esc(u.d.accnt||'')}</textarea></div>
-      </div>
-      <h3 style="font-size:13px;margin:15px 0 8px">👥 اعضای این باکس <span style="font-size:11px;color:var(--tx2);font-weight:400">کلیک = افزودن / حذف</span></h3>
-      <div class="ucpeople">
-      ${hrs.map(x=>{const on=ocIsMember(u,x.id);const isHead=head===x.id;
-        return `<div class="ucp ${on||isHead?'on':''}" onclick="${isHead?'':`ocMember('${id}','${x.id}',${on?'false':'true'})`}">
-          ${ucAvatar(x.d.title)}
-          <div class="ucpn"><b>${esc(x.d.title||'—')}</b><span>${esc(x.d.role||'')}</span></div>
-          <span class="ucpst">${isHead?'👤 مسئول':(on?'✓ عضو':'')}</span></div>`;}).join('')||'<div class="hint">هنوز پرسنلی ثبت نشده — از «منابع انسانی» اضافه کنید</div>'}
-      </div>
-      ${kids.length?`<h3 style="font-size:13px;margin:15px 0 8px">🧩 زیرمجموعه‌ها</h3>
-      <div style="display:flex;gap:7px;flex-wrap:wrap">${kids.map(k=>`<button class="btn gh sm" onclick="view.ocSel='${k.id}';render()">${esc(k.d.title||'—')}${ocHead(k)?' · '+esc(ocHead(k).d.title):''}</button>`).join('')}</div>`:''}
-      <p class="hint" style="margin-top:13px">🧬 با «اعمال سلسله‌مراتب»، مدیر مستقیم اعضا = مسئول این باکس و مدیر مستقیم مسئول = مسئول باکس بالاسری می‌شود؛ گردش مرخصی/خرید، ارجاع نامه‌ها و تأییدها از همین ساختار پیروی می‌کنند.</p>
-    </div>`;
+    </div></div>`;
   }
   return h;
 }
