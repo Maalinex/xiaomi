@@ -43,6 +43,29 @@ body{font-family:Vazirmatn,Tahoma,sans-serif;color:var(--tx);font-size:14px;
 .nav-h{font-size:11.5px;color:var(--tx);font-weight:800;margin:14px 8px 4px}
 .navg .gic{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:14px;flex-shrink:0;background:var(--gdot,#8a96a8);box-shadow:var(--sh2)}
 #mtabs:empty{display:none}
+/* 🏛 چارت سازمانی */
+.octree{overflow:auto;padding:22px 12px 26px}
+.octree ul{display:flex;justify-content:center;align-items:flex-start;margin:0;padding:0;list-style:none}
+.octree li{position:relative;display:flex;flex-direction:column;align-items:center;padding:26px 7px 0}
+.ocroot>li{padding-top:0}
+.octree li::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-1px);width:2px;height:26px;background:var(--bd)}
+.octree li::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--bd)}
+.octree li:first-child::after{left:50%}
+.octree li:last-child::after{right:50%}
+.octree li:only-child::after{display:none}
+.ocroot>li::before,.ocroot>li::after{display:none}
+.ocstem{width:2px;height:26px;background:var(--bd)}
+.ocn{position:relative;width:168px;background:var(--bg2,#fff);border:1.5px solid var(--line);border-top:4px solid var(--occ,#0078D4);border-radius:12px;padding:11px 12px 9px;text-align:center;cursor:pointer;box-shadow:var(--sh2);transition:all .2s var(--ease)}
+.ocn:hover{box-shadow:var(--sh8);transform:translateY(-2px)}
+.ocn.sel{border-color:var(--occ,#0078D4);box-shadow:0 0 0 3px color-mix(in srgb,var(--occ,#0078D4) 25%,transparent),var(--sh8)}
+.ocn b{display:block;font-size:12.5px;font-weight:800;line-height:1.7}
+.ocn .och{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px;font-size:11px;color:var(--tx2)}
+.ocn .och .uav{width:22px;height:22px;font-size:10px;background:var(--occ,#0078D4)}
+.ocn .och.dim{color:var(--tx2);opacity:.6;font-size:10.5px}
+.ocn .ocm{display:inline-block;margin-top:5px;font-size:10px;background:var(--bg3);border-radius:9px;padding:1px 8px;color:var(--tx2)}
+.ocn .ocadd{position:absolute;bottom:-11px;left:50%;transform:translateX(-50%);width:22px;height:22px;border-radius:50%;border:none;background:var(--occ,#0078D4);color:#fff;font-size:14px;line-height:1;cursor:pointer;opacity:0;transition:opacity .2s;box-shadow:var(--sh2);padding:0}
+.ocn:hover .ocadd{opacity:1}
+.octree textarea{width:100%}
 /* 🎛 مرکز فرمان کاربران */
 .ucbar{padding:14px 16px 10px}
 .uchead{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
@@ -384,11 +407,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.41</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.43</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.41</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.43</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -600,6 +623,8 @@ orgunit:{ic:'🧩',n:'واحدهای سازمانی',grp:'پرسنل و سازم
  {k:'head',n:'مسئول واحد',t:REL,r:'hr',s:1},
  {k:'members',n:'اعضای واحد',t:REL,r:'hr'},
  {k:'parent',n:'واحد والد',t:REL,r:'orgunit',s:1},
+ {k:'duties',n:'شرح وظایف',t:LNG},
+ {k:'accnt',n:'مسئولیت‌ها و پاسخگویی‌ها',t:LNG},
  {k:'note',n:'توضیح',t:TXT}],
  cols:['title','company','head','parent']},
 team:{ic:'👨‍👩‍👦',n:'تیم‌ها',grp:'پرسنل و سازمان',f:[
@@ -3200,6 +3225,7 @@ const VIEWS_ACL=[
  ['chqdash','💳 تابلوی چک‌ها'],
  ['paydash','💸 حواله روزانه (پرداخت‌های تأییدی)'],
  ['wfcenter','🗂 مرکز گردش کارها'],
+ ['orgchart','🏛 چارت سازمانی'],
  ['ucenter','👤 مرکز فرمان کاربران (ادمین)'],
  ['sepfin','🟦 حسابداری رسمی (سپیدار)'],
  ['sepdash','⚖️ تطبیق عملیات و حسابداری'],
@@ -9784,7 +9810,7 @@ try{const _sv=JSON.parse(localStorage.getItem('xr_view')||'null');
 /* 🪗 جمع‌شوندگی گروه‌های منو بر اساس موضوع */
 let navCol=null;
 try{navCol=JSON.parse(localStorage.getItem('xr_navcol')||'null');}catch(e){navCol=null;}
-const DASH_GRP={saleswf:'فروش',invnew:'فروش',quotenew:'کالا و انبار',pinvnew:'کالا و انبار',paydash:'مالی',settlenew:'مالی',bpm:'پرسنل و سازمان',wfcenter:'پرسنل و سازمان',ceodash:'داشبوردها',charts:'داشبوردها',smdash:'داشبوردها',plreport:'داشبوردها',targetdash:'داشبوردها',distdash:'داشبوردها',custdash:'داشبوردها',loyaldash:'داشبوردها',smsdash:'داشبوردها',whdash:'داشبوردها',pudash:'داشبوردها',supdash:'داشبوردها',pldash:'داشبوردها',bankdash:'داشبوردها',arapdash:'داشبوردها',chqdash:'داشبوردها',sepfin:'داشبوردها',sepdash:'داشبوردها',dualdash:'داشبوردها',pfdash:'داشبوردها',gldash:'داشبوردها',findash:'داشبوردها',perfdash:'داشبوردها',aligndash:'داشبوردها',riskdash:'داشبوردها',stratdash:'داشبوردها',bscmap:'داشبوردها',bsccanvas:'داشبوردها',swotmap:'داشبوردها',procmap:'داشبوردها',mydash:'داشبوردها',glnew:'حسابداری',bizdash:'داشبوردها'};
+const DASH_GRP={saleswf:'فروش',invnew:'فروش',quotenew:'کالا و انبار',pinvnew:'کالا و انبار',paydash:'مالی',settlenew:'مالی',bpm:'پرسنل و سازمان',wfcenter:'پرسنل و سازمان',orgchart:'پرسنل و سازمان',ceodash:'داشبوردها',charts:'داشبوردها',smdash:'داشبوردها',plreport:'داشبوردها',targetdash:'داشبوردها',distdash:'داشبوردها',custdash:'داشبوردها',loyaldash:'داشبوردها',smsdash:'داشبوردها',whdash:'داشبوردها',pudash:'داشبوردها',supdash:'داشبوردها',pldash:'داشبوردها',bankdash:'داشبوردها',arapdash:'داشبوردها',chqdash:'داشبوردها',sepfin:'داشبوردها',sepdash:'داشبوردها',dualdash:'داشبوردها',pfdash:'داشبوردها',gldash:'داشبوردها',findash:'داشبوردها',perfdash:'داشبوردها',aligndash:'داشبوردها',riskdash:'داشبوردها',stratdash:'داشبوردها',bscmap:'داشبوردها',bsccanvas:'داشبوردها',swotmap:'داشبوردها',procmap:'داشبوردها',mydash:'داشبوردها',glnew:'حسابداری',bizdash:'داشبوردها'};
 function activeGrp(){ // گروهی که صفحه فعلی به آن تعلق دارد (همیشه باز نمایش داده می‌شود)
   if(view.type==='module')return view.flt||null;
   if(view.type==='mydash')return 'داشبوردها';
@@ -10269,6 +10295,7 @@ function wsMenu(g){
     it('paydash','💸 حواله روزانه',"go('paydash')",canSee('settle')&&canView('paydash'))+
     it('settlenew','💵 ثبت دریافت/پرداخت',"go('settlenew')",canSee('settle')&&can('c','settle')&&canView('settlenew')));
   if(g==='پرسنل و سازمان')return (
+    it('orgchart','🏛 چارت سازمانی',"go('orgchart')",canView('orgchart'))+
     (canView('wfcenter')?(()=>{const _n=wfcMineCnt();return `<div class="nav-i ${view.type==='wfcenter'?'on':''}" onclick="go('wfcenter')">🗂 مرکز گردش کارها${_n?` <span class="c" style="background:var(--ac);color:#fff">${_n.toLocaleString('fa-IR')}</span>`:''}</div>`;})():'')+
     it('bpm','🧩 فرآیندهای کاری',"go('bpm')",canView('bpm')));
   return '';
@@ -10488,6 +10515,7 @@ function render(){
     view.type==='bpm'?'🧩 فرآیندهای کاری':
     view.type==='wfcenter'?'🗂 مرکز گردش کارها':
     view.type==='ucenter'?'👤 مرکز فرمان کاربران':
+    view.type==='orgchart'?'🏛 چارت سازمانی':
     view.type==='basedash'?'🧰 اطلاعات پایه':
     view.type==='module'?((GRP_IC[view.flt]||'🧩')+' '+(view.flt||'ماژول')):
     view.type==='bsccanvas'?'🧭 بوم استراتژی':
@@ -10498,7 +10526,7 @@ function render(){
   const _mtEl=document.getElementById('mtabs');
   if(_mtEl){try{_mtEl.innerHTML=mtabsHTML();}catch(e){_mtEl.innerHTML='';}}
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',paydash:'paydash',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',ucenter:'ucenter',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
+  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',paydash:'paydash',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',ucenter:'ucenter',orgchart:'orgchart',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -10512,6 +10540,7 @@ function render(){
     else if(view.type==='paydash')c.innerHTML=paydashHTML();
     else if(view.type==='bpm')c.innerHTML=bpmHTML();
     else if(view.type==='wfcenter')c.innerHTML=wfcenterHTML();
+    else if(view.type==='orgchart')c.innerHTML=orgchartHTML();
     else if(view.type==='ucenter'){if(!isAdmin())c.innerHTML='<div class="empty">فقط ادمین</div>';else c.innerHTML=ucenterHTML();}
     else if(view.type==='basedash')c.innerHTML=basedashHTML();
     else if(view.type==='module')c.innerHTML=moduleHTML(view.flt);
@@ -14810,6 +14839,161 @@ function aclTarget(){
   const v=view.aclV||(t==='role'?aclRoles().filter(r=>r!=='ادمین')[0]:(usersList()[0]||{}).email);
   return {t,v};
 }
+/* ═══════════ 🏛 چارت سازمانی گرافیکی ═══════════ */
+const OC_COLORS=['#B8860B','#0078D4','#038387','#CA5010','#744DA9','#107C10'];
+function ocKids(id){return byE('orgunit').filter(x=>relIds(x,'parent')[0]===id);}
+function ocRoots(){return byE('orgunit').filter(x=>!relIds(x,'parent').length||!recs[relIds(x,'parent')[0]]);}
+function ocHead(u){const h=relIds(u,'head')[0];return h&&recs[h]?recs[h]:null;}
+function ocMembers(u){ // اتصال دوطرفه با منابع انسانی: عضو صریح یا واحد سازمانی پرونده
+  const ids=new Set(relIds(u,'members'));
+  byE('hr').forEach(h=>{if(relIds(h,'orgu')[0]===u.id)ids.add(h.id);});
+  return [...ids].map(i=>recs[i]).filter(x=>x&&!x.del);
+}
+function ocIsMember(u,hrId){return relIds(u,'members').includes(hrId)||relIds(recs[hrId]||{d:{}},'orgu')[0]===u.id;}
+function ocPlacedIds(){ // همهٔ افرادی که جایی در چارت دارند
+  const ids=new Set();
+  byE('orgunit').forEach(u=>{relIds(u,'head').forEach(i=>ids.add(i));ocMembers(u).forEach(m=>ids.add(m.id));});
+  return ids;
+}
+function ocChain(id){ // زنجیرهٔ بالاسری تا ریشه
+  const out=[];let cur=recs[id];let guard=0;
+  while(cur&&guard++<20){const p=relIds(cur,'parent')[0];if(!p||!recs[p])break;cur=recs[p];out.push(cur);}
+  return out;
+}
+function _ocMut(id,fn){const r=recs[id];if(!r||r.del)return;fn(r);r.u=Date.now();put(r);}
+window.ocField=function(id,k,v){_ocMut(id,r=>{r.d={...r.d,[k]:v};});if(k==='title')render();};
+window.ocRel=function(id,k,v){_ocMut(id,r=>{r.d={...r.d,[k]:v?[v]:[]};});render();};
+window.ocAddChild=function(pid){
+  const nid=uid();
+  put({id:nid,e:'orgunit',u:Date.now(),d:{title:'واحد جدید',parent:pid?[pid]:[],_by:myEmail()}});
+  view.ocSel=nid;render();
+  setTimeout(()=>{const el=document.getElementById('oc_title');if(el){el.focus();el.select();}},60);
+};
+window.ocMember=function(id,hrId,on){
+  _ocMut(id,r=>{const m=relIds(r,'members').filter(x=>x!==hrId);if(on)m.push(hrId);r.d={...r.d,members:m};});
+  const h=recs[hrId]; // 🔗 همگام‌سازی با پروندهٔ منابع انسانی
+  if(h&&!h.del){window._wfActing=1;try{
+    if(on)h.d={...h.d,orgu:[id]};
+    else if(relIds(h,'orgu')[0]===id)h.d={...h.d,orgu:[]};
+    h.u=Date.now();put(h);}finally{window._wfActing=0;}}
+  render();
+};
+window.ocDel=function(id){
+  if(ocKids(id).length){setSync('err','این واحد زیرمجموعه دارد — اول زیرمجموعه‌ها را حذف یا جابه‌جا کنید');return;}
+  if(view._ocDel!==id){view._ocDel=id;render();return;}
+  const r=recs[id];if(r){r.del=true;r.u=Date.now();put(r);}
+  view._ocDel=null;view.ocSel=null;setSync('ok','واحد حذف شد');render();
+};
+window.ocApply=function(id){ // 🧬 اعمال سلسله‌مراتب چارت روی پرونده‌های HR
+  const u=recs[id];if(!u)return;
+  const head=relIds(u,'head')[0];
+  let n=0;
+  window._wfActing=1;
+  try{
+    ocMembers(u).forEach(m=>{ if(head&&m.id!==head){m.d={...m.d,manager:[head],orgu:[id]};m.u=Date.now();put(m);n++;} });
+    if(head&&recs[head]){
+      const par=relIds(u,'parent')[0];
+      const ph=par?relIds(recs[par],'head')[0]:null;
+      const hh=recs[head];
+      hh.d={...hh.d,orgu:[id],...(ph&&ph!==head?{manager:[ph]}:{})};hh.u=Date.now();put(hh);n++;
+    }
+  }finally{window._wfActing=0;}
+  setSync('ok','🧬 سلسله‌مراتب روی '+n.toLocaleString('fa-IR')+' پرونده اعمال شد — گردش‌ها، نامه‌ها و تأییدها از همین ساختار پیروی می‌کنند');
+};
+window.ocSeed=function(){
+  const mk=(t,p)=>{const i=uid();put({id:i,e:'orgunit',u:Date.now(),d:{title:t,parent:p?[p]:[]}});return i;};
+  const ceo=mk('مدیرعامل',null);
+  [['مدیریت فروش','کارشناس فروش'],['مدیریت خرید','کارشناس خرید'],['مدیریت مالی','کارشناس مالی'],
+   ['مدیریت پشتیبانی','کارشناس پشتیبانی'],['مدیریت توسعه کسب‌وکار','کارشناس توسعه کسب‌وکار']]
+   .forEach(([m,k])=>{const mid=mk(m,ceo);mk(k,mid);});
+  view.ocSel=ceo;setSync('ok','ساختار پایه ساخته شد — روی هر باکس بزنید و کاملش کنید');render();
+};
+function ocNodeHTML(u,depth){
+  const kids=ocKids(u.id);
+  const head=ocHead(u);
+  const mems=ocMembers(u);
+  const c=OC_COLORS[Math.min(depth,OC_COLORS.length-1)];
+  const sel=view.ocSel===u.id;
+  const box=`<div class="ocn ${sel?'sel':''}" style="--occ:${c}" onclick="event.stopPropagation();view.ocSel=view.ocSel==='${u.id}'?null:'${u.id}';view._ocDel=null;render()">
+    <b>${esc(u.d.title||'—')}</b>
+    ${head?`<div class="och">${ucAvatar(head.d.title)}<span>${esc(head.d.title||'')}</span></div>`:`<div class="och dim">بدون مسئول</div>`}
+    ${mems.length?`<span class="ocm">${mems.length.toLocaleString('fa-IR')} نفر</span>`:''}
+    <button class="ocadd" title="افزودن زیرمجموعه" onclick="event.stopPropagation();ocAddChild('${u.id}')">＋</button>
+  </div>`;
+  return `<li>${box}${kids.length?`<div class="ocstem"></div><ul>${kids.map(k=>ocNodeHTML(k,depth+1)).join('')}</ul>`:''}</li>`;
+}
+function orgchartHTML(){
+  const roots=ocRoots();
+  let h=`<div class="sec" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px">
+    <b style="font-size:14px">🏛 چارت سازمانی</b>
+    <span style="font-size:11.5px;color:var(--tx2)">روی هر باکس کلیک کنید تا جزئیات و تنظیماتش باز شود · ＋ روی باکس = زیرمجموعهٔ جدید</span>
+    <span style="flex:1"></span>
+    ${isAdmin()?`<button class="btn gh sm" onclick="ocAddChild(null)">＋ باکس سطح بالا</button>`:''}
+  </div>`;
+  if(!roots.length)
+    return h+`<div class="sec" style="text-align:center;padding:44px 20px">
+      <div style="font-size:40px;margin-bottom:10px">🏛</div>
+      <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">هنوز چارتی ساخته نشده. با یک کلیک ساختار پایه ساخته می‌شود:<br>مدیرعامل + مدیریت فروش، خرید، مالی، پشتیبانی و توسعه کسب‌وکار + کارشناس هرکدام</p>
+      ${isAdmin()?`<button class="btn" onclick="ocSeed()">🚀 ساخت ساختار پایه</button>`:'<span class="hint">از ادمین بخواهید چارت را بسازد</span>'}</div>`;
+  h+=`<div class="sec" style="padding:8px 6px"><div class="octree" dir="ltr"><ul class="ocroot" dir="rtl">${roots.map(r=>ocNodeHTML(r,0)).join('')}</ul></div></div>`;
+  { // 🔗 اتصال با منابع انسانی: چه کسانی هنوز در چارت جایی ندارند؟
+    const placed=ocPlacedIds();
+    const un=byE('hr').filter(x=>!placed.has(x.id)&&(x.d.wstatus||'شاغل')==='شاغل');
+    if(un.length)h+=`<div class="sec" style="border-inline-start:3px solid var(--warn)">
+      <h3 style="font-size:13px">⚠️ افراد بدون جایگاه در چارت <span style="font-size:11px;color:var(--tx2);font-weight:400">${un.length.toLocaleString('fa-IR')} نفر از منابع انسانی</span></h3>
+      <p style="font-size:11.5px;color:var(--tx2);margin-bottom:9px">${view.ocSel&&recs[view.ocSel]?'روی هر نفر بزنید تا عضو باکس انتخاب‌شده («'+esc(recs[view.ocSel].d.title||'')+'») شود':'اول یک باکس را در چارت انتخاب کنید، بعد روی افراد بزنید تا به آن اضافه شوند'}</p>
+      <div class="ucpeople">${un.map(x=>`<div class="ucp" onclick="${view.ocSel?`ocMember('${view.ocSel}','${x.id}',true)`:`setSync('err','اول یک باکس را در چارت انتخاب کنید')`}">
+        ${ucAvatar(x.d.title)}<div class="ucpn"><b>${esc(x.d.title||'—')}</b><span>${esc(x.d.role||'')}</span></div><span class="ucpst">＋ افزودن</span></div>`).join('')}</div></div>`;
+  }
+  /* پنل جزئیات */
+  const id=view.ocSel;
+  if(id&&recs[id]&&!recs[id].del){
+    const u=recs[id];
+    const head=relIds(u,'head')[0]||'';
+    const par=relIds(u,'parent')[0]||'';
+    const kids=ocKids(id), mems=relIds(u,'members'), chain=ocChain(id);
+    const hrs=byE('hr').slice().sort((a,b)=>(a.d.title||'').localeCompare(b.d.title||'','fa'));
+    const units=byE('orgunit').filter(x=>x.id!==id);
+    h+=`<div class="sec" style="border-inline-start:4px solid #0078D4">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+        <h3 style="margin:0">📋 ${esc(u.d.title||'—')}</h3>
+        ${chain.length?`<span style="font-size:11px;color:var(--tx2)">مسیر: ${chain.slice().reverse().map(x=>esc(x.d.title||'')).join(' ← ')} ← <b>${esc(u.d.title||'')}</b></span>`:'<span class="tag" style="background:#B8860B;color:#fff">سطح بالا</span>'}
+        <span style="flex:1"></span>
+        <button class="btn gh sm" onclick="ocAddChild('${id}')">＋ زیرمجموعه</button>
+        <button class="btn sm" onclick="ocApply('${id}')" title="مدیر مستقیم اعضا و مسئول این واحد طبق چارت تنظیم می‌شود">🧬 اعمال سلسله‌مراتب</button>
+        ${view._ocDel===id?`<b style="color:var(--bad);font-size:12px">حذف شود؟</b><button class="btn bad sm" onclick="ocDel('${id}')">بله، حذف</button><button class="btn gh sm" onclick="view._ocDel=null;render()">انصراف</button>`
+          :`<button class="btn bad sm" onclick="ocDel('${id}')">🗑</button>`}
+      </div>
+      <div class="ucgrid">
+        <div><label class="ucl">نام باکس / واحد</label><input id="oc_title" value="${esc(u.d.title||'')}" onchange="ocField('${id}','title',this.value)"></div>
+        <div><label class="ucl">👤 مسئول (نفر مشخص این باکس)</label><select onchange="ocRel('${id}','head',this.value)">
+          <option value="">— تعیین نشده —</option>
+          ${hrs.map(x=>`<option value="${x.id}" ${head===x.id?'selected':''}>${esc(x.d.title||'—')}${x.d.role?' · '+esc(x.d.role):''}</option>`).join('')}</select></div>
+        <div><label class="ucl">⬆ بالاسری (واحد والد)</label><select onchange="ocRel('${id}','parent',this.value)">
+          <option value="">— سطح بالا —</option>
+          ${units.map(x=>`<option value="${x.id}" ${par===x.id?'selected':''}>${esc(x.d.title||'—')}</option>`).join('')}</select></div>
+      </div>
+      <div class="ucgrid" style="margin-top:11px">
+        <div><label class="ucl">📝 شرح وظایف</label><textarea rows="4" onchange="ocField('${id}','duties',this.value)" placeholder="وظایف اصلی این واحد را بنویسید…">${esc(u.d.duties||'')}</textarea></div>
+        <div><label class="ucl">🎯 مسئولیت‌ها و پاسخگویی‌ها</label><textarea rows="4" onchange="ocField('${id}','accnt',this.value)" placeholder="این واحد پاسخگوی چه چیزهایی و به چه کسی است…">${esc(u.d.accnt||'')}</textarea></div>
+      </div>
+      <h3 style="font-size:13px;margin:15px 0 8px">👥 اعضای این باکس <span style="font-size:11px;color:var(--tx2);font-weight:400">کلیک = افزودن / حذف</span></h3>
+      <div class="ucpeople">
+      ${hrs.map(x=>{const on=ocIsMember(u,x.id);const isHead=head===x.id;
+        return `<div class="ucp ${on||isHead?'on':''}" onclick="${isHead?'':`ocMember('${id}','${x.id}',${on?'false':'true'})`}">
+          ${ucAvatar(x.d.title)}
+          <div class="ucpn"><b>${esc(x.d.title||'—')}</b><span>${esc(x.d.role||'')}</span></div>
+          <span class="ucpst">${isHead?'👤 مسئول':(on?'✓ عضو':'')}</span></div>`;}).join('')||'<div class="hint">هنوز پرسنلی ثبت نشده — از «منابع انسانی» اضافه کنید</div>'}
+      </div>
+      ${kids.length?`<h3 style="font-size:13px;margin:15px 0 8px">🧩 زیرمجموعه‌ها</h3>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">${kids.map(k=>`<button class="btn gh sm" onclick="view.ocSel='${k.id}';render()">${esc(k.d.title||'—')}${ocHead(k)?' · '+esc(ocHead(k).d.title):''}</button>`).join('')}</div>`:''}
+      <p class="hint" style="margin-top:13px">🧬 با «اعمال سلسله‌مراتب»، مدیر مستقیم اعضا = مسئول این باکس و مدیر مستقیم مسئول = مسئول باکس بالاسری می‌شود؛ گردش مرخصی/خرید، ارجاع نامه‌ها و تأییدها از همین ساختار پیروی می‌کنند.</p>
+    </div>`;
+  }
+  return h;
+}
+window.orgchartHTML=orgchartHTML;
+
 /* ═══════════ 👤 مرکز فرمان کاربر — نقش، سلسله‌مراتب، گردش‌ها، تأییدها، دسترسی دقیق ═══════════ */
 const WFLOWS=[{k:'sales',n:'🧾 گردش فروش',roles:['—','فروشنده','مدیر فروش','کارمند حسابداری','مدیر مالی','مدیر ارشد']},
  {k:'purchase',n:'🛒 گردش خرید',roles:['—','درخواست‌کننده','مدیر خرید','کارمند حسابداری','مدیر مالی','مدیر ارشد']},
