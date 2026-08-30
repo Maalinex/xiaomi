@@ -416,11 +416,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.45</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.46</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.45</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.46</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -752,6 +752,7 @@ customer:{ic:'🛍️',n:'مشتریان کسب‌وکار',grp:'CRM و مشتر
  {k:'phone',n:'تلفن ثابت',t:TXT},
  {k:'address',n:'آدرس',t:LNG},
  {k:'city',n:'شهر',t:TXT},
+ {k:'district',n:'منطقه (ویژه تهران، ۱ تا ۲۲)',t:SEL,o:['—','۱','۲','۳','۴','۵','۶','۷','۸','۹','۱۰','۱۱','۱۲','۱۳','۱۴','۱۵','۱۶','۱۷','۱۸','۱۹','۲۰','۲۱','۲۲']},
  {k:'segment',n:'دسته‌بندی مشتری',t:SEL,o:['وفادار','معمولی','عمده (کلی)','تازه‌وارد','VIP','غیرفعال']},
  {k:'gender',n:'جنسیت',t:SEL,o:['آقا','خانم','نامشخص']},
  {k:'province',n:'استان',t:SEL,o:['آذربایجان شرقی','آذربایجان غربی','اردبیل','اصفهان','البرز','ایلام','بوشهر','تهران','چهارمحال و بختیاری','خراسان جنوبی','خراسان رضوی','خراسان شمالی','خوزستان','زنجان','سمنان','سیستان و بلوچستان','فارس','قزوین','قم','کردستان','کرمان','کرمانشاه','کهگیلویه و بویراحمد','گلستان','گیلان','لرستان','مازندران','مرکزی','هرمزگان','همدان','یزد']},
@@ -2819,6 +2820,7 @@ const VIEWS_ACL=[
  ['paydash','💸 حواله روزانه (پرداخت‌های تأییدی)'],
  ['wfcenter','🗂 مرکز گردش کارها'],
  ['orgchart','🏛 چارت سازمانی'],
+ ['geodash','📊 داشبورد: نقشه مشتریان'],
  ['ucenter','👤 مرکز فرمان کاربران (ادمین)'],
  ['sepfin','🟦 حسابداری رسمی (سپیدار)'],
  ['sepdash','⚖️ تطبیق عملیات و حسابداری'],
@@ -9403,7 +9405,7 @@ try{const _sv=JSON.parse(localStorage.getItem('xr_view')||'null');
 /* 🪗 جمع‌شوندگی گروه‌های منو بر اساس موضوع */
 let navCol=null;
 try{navCol=JSON.parse(localStorage.getItem('xr_navcol')||'null');}catch(e){navCol=null;}
-const DASH_GRP={saleswf:'فروش',invnew:'فروش',quotenew:'کالا و انبار',pinvnew:'کالا و انبار',paydash:'مالی',settlenew:'مالی',bpm:'پرسنل و سازمان',wfcenter:'پرسنل و سازمان',orgchart:'پرسنل و سازمان',ceodash:'داشبوردها',charts:'داشبوردها',smdash:'داشبوردها',plreport:'داشبوردها',targetdash:'داشبوردها',distdash:'داشبوردها',custdash:'داشبوردها',loyaldash:'داشبوردها',smsdash:'داشبوردها',whdash:'داشبوردها',pudash:'داشبوردها',supdash:'داشبوردها',pldash:'داشبوردها',bankdash:'داشبوردها',arapdash:'داشبوردها',chqdash:'داشبوردها',sepfin:'داشبوردها',sepdash:'داشبوردها',dualdash:'داشبوردها',pfdash:'داشبوردها',gldash:'داشبوردها',findash:'داشبوردها',perfdash:'داشبوردها',aligndash:'داشبوردها',riskdash:'داشبوردها',stratdash:'داشبوردها',bscmap:'داشبوردها',bsccanvas:'داشبوردها',swotmap:'داشبوردها',procmap:'داشبوردها',mydash:'داشبوردها',glnew:'حسابداری',bizdash:'داشبوردها'};
+const DASH_GRP={saleswf:'فروش',invnew:'فروش',quotenew:'کالا و انبار',pinvnew:'کالا و انبار',paydash:'مالی',settlenew:'مالی',bpm:'پرسنل و سازمان',wfcenter:'پرسنل و سازمان',orgchart:'پرسنل و سازمان',ceodash:'داشبوردها',charts:'داشبوردها',smdash:'داشبوردها',plreport:'داشبوردها',targetdash:'داشبوردها',distdash:'داشبوردها',custdash:'داشبوردها',geodash:'داشبوردها',loyaldash:'داشبوردها',smsdash:'داشبوردها',whdash:'داشبوردها',pudash:'داشبوردها',supdash:'داشبوردها',pldash:'داشبوردها',bankdash:'داشبوردها',arapdash:'داشبوردها',chqdash:'داشبوردها',sepfin:'داشبوردها',sepdash:'داشبوردها',dualdash:'داشبوردها',pfdash:'داشبوردها',gldash:'داشبوردها',findash:'داشبوردها',perfdash:'داشبوردها',aligndash:'داشبوردها',riskdash:'داشبوردها',stratdash:'داشبوردها',bscmap:'داشبوردها',bsccanvas:'داشبوردها',swotmap:'داشبوردها',procmap:'داشبوردها',mydash:'داشبوردها',glnew:'حسابداری',bizdash:'داشبوردها'};
 function activeGrp(){ // گروهی که صفحه فعلی به آن تعلق دارد (همیشه باز نمایش داده می‌شود)
   if(view.type==='module')return view.flt||null;
   if(view.type==='mydash')return 'داشبوردها';
@@ -9750,6 +9752,7 @@ const DASHREG=[
  {k:'plreport',n:'سود و زیان فروش',ic:'💰',cat:'فروش',d:'حاشیه سود هر فاکتور، کالا و مشتری',s:()=>canSee('invoice'),kpi:()=>[dkC('invline','ردیف فروش')]},
  {k:'targetdash',n:'پایش تارگت فروش',ic:'🎯',cat:'فروش',d:'تحقق هدف فروش هر فرد، تیم و دوره',s:()=>canSee('saletarget'),kpi:()=>[dkC('saletarget','تارگت')]},
  {k:'distdash',n:'پخش و توزیع',ic:'🛵',cat:'فروش',d:'وضعیت ارسال‌ها، پیک‌ها و مبالغ در راه',s:()=>canSee('delivery'),kpi:()=>[dkC('delivery','ارسال'),dkF(()=>byE('delivery').filter(d=>['آمادهٔ ارسال','در مسیر'].includes(d.d.status||'آمادهٔ ارسال')).length,'باز')]},
+ {k:'geodash',n:'نقشه مشتریان ایران',ic:'🗺️',cat:'مشتریان',d:'پراکندگی جغرافیایی مشتریان: استان‌ها، شهرها و مناطق ۲۲گانه تهران',s:()=>canSee('customer'),kpi:()=>[dkC('customer','مشتری'),dkF(()=>byE('customer').filter(c=>String(c.d.province||'').trim()).length,'با موقعیت')]},
  {k:'custdash',n:'داشبورد مشتریان',ic:'🛍️',cat:'مشتریان',d:'رتبه‌بندی مشتریان، خرید و بدهی هرکدام',s:()=>canSee('customer'),kpi:()=>[dkC('customer','مشتری')]},
  {k:'loyaldash',n:'باشگاه مشتریان',ic:'💎',cat:'مشتریان',d:'امتیاز وفاداری و سوابق استفاده از جوایز',s:()=>canSee('customer'),kpi:()=>[dkC('loyredeem','استفاده')]},
  {k:'smsdash',n:'پنل پیامک',ic:'💬',cat:'مشتریان',d:'ارسال گروهی پیامک و سابقهٔ پیام‌ها',s:()=>canSee('customer'),kpi:()=>[dkC('smslog','پیام')]},
@@ -10104,6 +10107,7 @@ function render(){
     view.type==='wfcenter'?'🗂 مرکز گردش کارها':
     view.type==='ucenter'?'👤 مرکز فرمان کاربران':
     view.type==='orgchart'?'🏛 چارت سازمانی':
+    view.type==='geodash'?'🗺️ نقشه مشتریان':
     view.type==='basedash'?'🧰 اطلاعات پایه':
     view.type==='module'?((GRP_IC[view.flt]||'🧩')+' '+(view.flt||'ماژول')):
     view.type==='bsccanvas'?'🧭 بوم استراتژی':
@@ -10114,7 +10118,7 @@ function render(){
   const _mtEl=document.getElementById('mtabs');
   if(_mtEl){try{_mtEl.innerHTML=mtabsHTML();}catch(e){_mtEl.innerHTML='';}}
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',paydash:'paydash',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',ucenter:'ucenter',orgchart:'orgchart',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
+  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',findash:'findash',pldash:'pldash',bankdash:'bankdash',finform:'finform',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',paydash:'paydash',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',ucenter:'ucenter',orgchart:'orgchart',geodash:'geodash',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
   if(VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -10129,6 +10133,7 @@ function render(){
     else if(view.type==='bpm')c.innerHTML=bpmHTML();
     else if(view.type==='wfcenter')c.innerHTML=wfcenterHTML();
     else if(view.type==='orgchart')c.innerHTML=orgchartHTML();
+    else if(view.type==='geodash')c.innerHTML=geodashHTML();
     else if(view.type==='ucenter'){if(!isAdmin())c.innerHTML='<div class="empty">فقط ادمین</div>';else c.innerHTML=ucenterHTML();}
     else if(view.type==='basedash')c.innerHTML=basedashHTML();
     else if(view.type==='module')c.innerHTML=moduleHTML(view.flt);
@@ -14427,6 +14432,143 @@ function aclTarget(){
   const v=view.aclV||(t==='role'?aclRoles().filter(r=>r!=='ادمین')[0]:(usersList()[0]||{}).email);
   return {t,v};
 }
+/* ═══════════ 🗺️ نقشه جغرافیایی مشتریان ایران ═══════════ */
+const GEO_IRAN_BORDER=[[39.65,44.4],[39.4,44.45],[38.97,44.4],[38.4,44.3],[37.9,44.6],[37.45,44.6],[37.1,44.8],[36.7,45.2],[35.8,46.0],[35.1,45.9],[34.6,45.5],[33.9,45.6],[33.2,46.15],[32.9,46.6],[32.4,47.4],[31.8,47.7],[31.0,47.7],[30.4,48.0],[29.95,48.55],[30.45,48.9],[30.0,49.5],[29.3,50.6],[28.6,51.1],[28.0,51.9],[27.5,52.7],[27.0,53.6],[26.75,54.6],[26.9,55.6],[27.05,56.1],[26.9,56.9],[26.3,57.3],[25.75,57.8],[25.4,59.1],[25.3,60.6],[25.15,61.5],[26.65,63.15],[27.25,62.9],[28.25,62.75],[28.9,61.6],[29.85,60.87],[30.6,61.8],[31.05,61.75],[31.35,60.85],[32.5,60.6],[33.5,60.5],[34.15,60.55],[34.65,60.85],[35.1,61.1],[35.65,61.25],[36.25,61.15],[36.65,61.2],[37.05,60.3],[37.4,59.8],[37.65,59.0],[37.85,58.3],[38.15,57.4],[38.28,56.4],[38.05,55.9],[37.85,55.4],[37.5,54.85],[37.15,54.3],[36.9,53.9],[36.75,53.0],[36.6,52.2],[36.55,51.5],[36.7,50.9],[37.15,50.3],[37.55,49.8],[38.0,49.3],[38.44,48.88],[38.9,48.3],[39.35,48.0],[39.15,47.4],[38.9,46.9],[38.85,46.1],[39.2,45.6],[39.55,45.2],[39.72,44.85]];
+const GEO_CITY={'تهران':[35.69,51.39],'مشهد':[36.30,59.60],'اصفهان':[32.65,51.67],'شیراز':[29.60,52.53],'تبریز':[38.08,46.29],'کرج':[35.84,50.97],'قم':[34.64,50.88],'اهواز':[31.32,48.67],'کرمانشاه':[34.31,47.06],'ارومیه':[37.55,45.07],'رشت':[37.28,49.58],'زاهدان':[29.50,60.86],'همدان':[34.80,48.51],'کرمان':[30.28,57.06],'یزد':[31.89,54.37],'اردبیل':[38.25,48.30],'بندرعباس':[27.18,56.27],'اراک':[34.09,49.70],'زنجان':[36.68,48.48],'سنندج':[35.31,47.00],'قزوین':[36.27,50.00],'خرم‌آباد':[33.49,48.36],'گرگان':[36.84,54.44],'ساری':[36.56,53.06],'بوشهر':[28.92,50.83],'بجنورد':[37.47,57.33],'بیرجند':[32.87,59.22],'ایلام':[33.64,46.42],'شهرکرد':[32.33,50.85],'یاسوج':[30.67,51.59],'سمنان':[35.57,53.39],'کاشان':[33.98,51.44],'نیشابور':[36.21,58.80],'دزفول':[32.38,48.40],'آبادان':[30.35,48.28],'اسلامشهر':[35.55,51.23],'قشم':[26.95,56.27],'کیش':[26.53,53.98],'ورامین':[35.32,51.65],'شهریار':[35.66,51.06]};
+const GEO_PROV_CAP={'آذربایجان شرقی':'تبریز','آذربایجان غربی':'ارومیه','اردبیل':'اردبیل','اصفهان':'اصفهان','البرز':'کرج','ایلام':'ایلام','بوشهر':'بوشهر','تهران':'تهران','چهارمحال و بختیاری':'شهرکرد','خراسان جنوبی':'بیرجند','خراسان رضوی':'مشهد','خراسان شمالی':'بجنورد','خوزستان':'اهواز','زنجان':'زنجان','سمنان':'سمنان','سیستان و بلوچستان':'زاهدان','فارس':'شیراز','قزوین':'قزوین','قم':'قم','کردستان':'سنندج','کرمان':'کرمان','کرمانشاه':'کرمانشاه','کهگیلویه و بویراحمد':'یاسوج','گلستان':'گرگان','گیلان':'رشت','لرستان':'خرم‌آباد','مازندران':'ساری','مرکزی':'اراک','هرمزگان':'بندرعباس','همدان':'همدان','یزد':'یزد'};
+const GEO_THR_DIST={'۱':[35.805,51.44],'۲':[35.77,51.36],'۳':[35.77,51.43],'۴':[35.75,51.51],'۵':[35.76,51.29],'۶':[35.73,51.40],'۷':[35.73,51.45],'۸':[35.735,51.49],'۹':[35.685,51.31],'۱۰':[35.685,51.36],'۱۱':[35.68,51.39],'۱۲':[35.675,51.43],'۱۳':[35.70,51.48],'۱۴':[35.68,51.47],'۱۵':[35.64,51.46],'۱۶':[35.64,51.40],'۱۷':[35.66,51.36],'۱۸':[35.65,51.30],'۱۹':[35.63,51.36],'۲۰':[35.60,51.43],'۲۱':[35.70,51.24],'۲۲':[35.75,51.22]};
+const GEO_PAL=['#0078D4','#E3008C','#107C10','#CA5010','#744DA9','#038387','#C239B3','#00B294','#D83B01','#4F6BED','#B8860B','#E74856'];
+function geoPrj(lat,lon,W,H,bb){const x=(lon-bb[1])/(bb[3]-bb[1])*W;const y=(bb[2]-lat)/(bb[2]-bb[0])*H;return [x,y];}
+function geoCityLL(name){
+  name=String(name||'').trim().replace(/ي/g,'ی').replace(/ك/g,'ک');
+  if(GEO_CITY[name])return GEO_CITY[name];
+  const k=Object.keys(GEO_CITY).find(c=>name.includes(c)||c.includes(name));
+  return k?GEO_CITY[k]:null;
+}
+function geoSales(){ // جمع فروش هر مشتری
+  const m={};
+  byE('invoice').forEach(v=>{if(v.d.kind!==INV_KIND_SALE&&v.d.kind!=='فاکتور فروش')return;
+    const c=relIds(v,'customer')[0];if(!c)return;m[c]=(m[c]||0)+(+v.d.total||0);});
+  return m;
+}
+function geoAgg(mode){ // گروه‌بندی مشتریان بر اساس سطح انتخابی
+  const g={};const sales=view.geoM==='sales'?geoSales():null;
+  byE('customer').forEach(c=>{
+    let key=null,ll=null;
+    if(mode==='thr'){
+      const ct=String(c.d.city||'').trim();
+      if(!(ct.includes('تهران')||(!ct&&String(c.d.province||'')==='تهران')))return;
+      const d=String(c.d.district||'').trim();if(!d||d==='—')return;
+      key='منطقه '+d;ll=GEO_THR_DIST[d];
+    }else if(mode==='city'){
+      key=String(c.d.city||'').trim().replace(/ي/g,'ی');if(!key)return;ll=geoCityLL(key);
+    }else{
+      key=String(c.d.province||'').trim();if(!key)return;
+      const cap=GEO_PROV_CAP[key];ll=cap?GEO_CITY[cap]:null;
+    }
+    if(!ll)return;
+    const o=g[key]=g[key]||{n:0,v:0,ll,ids:[]};
+    o.n++;o.ids.push(c.id);if(sales)o.v+=sales[c.id]||0;
+  });
+  return g;
+}
+function geoNoLoc(){return byE('customer').filter(c=>{
+  const mode=view.geoL||'prov';
+  if(mode==='thr')return false;
+  if(mode==='city')return !String(c.d.city||'').trim()||!geoCityLL(c.d.city);
+  return !String(c.d.province||'').trim();});}
+window.geoSetLoc=function(id,k,v){const r=recs[id];if(!r)return;r.d={...r.d,[k]:v};r.u=Date.now();put(r);render();};
+function geodashHTML(){
+  view.geoL=view.geoL||'prov';view.geoM=view.geoM||'n';
+  const mode=view.geoL, agg=geoAgg(mode);
+  const keys=Object.keys(agg).sort((a,b)=>agg[b].n-agg[a].n);
+  const total=keys.reduce((a,k)=>a+agg[k].n,0);
+  const noloc=geoNoLoc();
+  const T=(k,l)=>`<button class="btn ${mode===k?'':'gh '}sm" onclick="view.geoL='${k}';view.geoSel=null;render()">${l}</button>`;
+  const M=(k,l)=>`<button class="btn ${view.geoM===k?'':'gh '}sm" onclick="view.geoM='${k}';render()">${l}</button>`;
+  let h=`<div class="sec" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:11px 16px">
+    <b style="font-size:14px">🗺️ نقشه مشتریان</b>
+    <span style="display:flex;gap:5px">${T('prov','🧭 استان‌ها')}${T('city','🏙️ شهرها')}${T('thr','🏢 مناطق تهران')}</span>
+    <span style="display:flex;gap:5px">${M('n','👥 تعداد')}${M('sales','💰 مبلغ فروش')}</span>
+    <span style="flex:1"></span>
+    <span class="tag">${total.toLocaleString('fa-IR')} مشتری روی نقشه</span>
+    ${noloc.length?`<button class="btn gh sm" style="border-color:var(--warn)" onclick="view.geoNo=!view.geoNo;render()">⚠️ ${noloc.length.toLocaleString('fa-IR')} بدون موقعیت ${view.geoNo?'▴':'▾'}</button>`:''}
+  </div>`;
+  if(view.geoNo&&noloc.length){
+    const provs=Object.keys(GEO_PROV_CAP);
+    h+=`<div class="sec" style="border-inline-start:3px solid var(--warn)">
+    <p style="font-size:11.5px;color:var(--tx2);margin-bottom:8px">برای هر مشتری استان/شهر را انتخاب کنید تا روی نقشه بیاید:</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:7px">
+    ${noloc.slice(0,30).map(c=>`<div style="display:flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:7px 10px">
+      <b style="font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.d.title||'—')}</b>
+      ${mode==='city'?`<input list="geo_cities" placeholder="شهر…" style="max-width:120px;font-size:11.5px" onchange="geoSetLoc('${c.id}','city',this.value)">`
+        :`<select style="max-width:150px;font-size:11.5px" onchange="geoSetLoc('${c.id}','province',this.value)"><option value="">استان…</option>${provs.map(p=>`<option>${p}</option>`).join('')}</select>`}
+    </div>`).join('')}</div>
+    <datalist id="geo_cities">${Object.keys(GEO_CITY).map(c=>`<option value="${c}">`).join('')}</datalist>
+    ${noloc.length>30?`<p class="hint" style="margin-top:6px">${(noloc.length-30).toLocaleString('fa-IR')} مورد دیگر…</p>`:''}</div>`;
+  }
+  /* ترسیم نقشه */
+  const W=780,H=700;
+  const bb=mode==='thr'?[35.545,51.13,35.86,51.58]:[24.8,43.7,40.1,63.6];
+  let svg='';
+  if(mode!=='thr'){
+    const pts=GEO_IRAN_BORDER.map(([la,lo])=>geoPrj(la,lo,W,H,bb));
+    let d='';const n=pts.length; // 🎨 منحنی نرم (میان‌نقطه‌ای) برای مرز زیبا
+    for(let i=0;i<n;i++){const a=pts[i],c2=pts[(i+1)%n];const mx=((a[0]+c2[0])/2).toFixed(1),my=((a[1]+c2[1])/2).toFixed(1);
+      d+=(i===0?`M${mx},${my}`:`Q${a[0].toFixed(1)},${a[1].toFixed(1)} ${mx},${my}`);}
+    const a0=pts[0],aE=pts[n-1];const m0=(((aE[0]+a0[0])/2)).toFixed(1),m0y=(((aE[1]+a0[1])/2)).toFixed(1);
+    d+=`Q${a0[0].toFixed(1)},${a0[1].toFixed(1)} ${m0},${m0y} Z`;
+    const gulf=geoPrj(26.35,51.2,W,H,bb), casp=geoPrj(38.6,51.6,W,H,bb);
+    svg+=`<defs><linearGradient id="gIr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EDF6ED"/><stop offset="1" stop-color="#E3EFF8"/></linearGradient>
+      <filter id="gSh" x="-8%" y="-8%" width="116%" height="116%"><feDropShadow dx="0" dy="4" stdDeviation="7" flood-color="#5b7b9b" flood-opacity="0.18"/></filter></defs>
+    <path d="${d}" fill="url(#gIr)" stroke="#8FB0C9" stroke-width="2.4" stroke-linejoin="round" filter="url(#gSh)"/>
+    <text x="${gulf[0]}" y="${gulf[1]}" text-anchor="middle" font-size="15" fill="#7fa8c9" opacity=".8">خلیج فارس</text>
+    <text x="${casp[0]}" y="${casp[1]}" text-anchor="middle" font-size="13" fill="#7fa8c9" opacity=".8">دریای خزر</text>`;
+  }else{
+    svg+=`<rect x="0" y="0" width="${W}" height="${H}" rx="20" fill="#F2F6FA"/>`;
+    for(let i=1;i<8;i++){svg+=`<line x1="${i*W/8}" y1="0" x2="${i*W/8}" y2="${H}" stroke="#E3EAF1"/><line x1="0" y1="${i*H/8}" x2="${W}" y2="${i*H/8}" stroke="#E3EAF1"/>`;}
+    svg+=`<text x="18" y="34" font-size="15" fill="#8fa6ba">🏢 مناطق ۲۲گانه تهران</text>`;
+    Object.entries(GEO_THR_DIST).forEach(([dk,ll])=>{ // جای همه مناطق، کم‌رنگ
+      if(agg['منطقه '+dk])return;
+      const [x,y]=geoPrj(ll[0],ll[1],W,H,bb);
+      svg+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="13" fill="#D7E1EA" opacity=".8"/><text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="middle" font-size="10" fill="#93a7b8">${dk}</text>`;
+    });
+  }
+  const maxV=Math.max(1,...keys.map(k=>view.geoM==='sales'?agg[k].v:agg[k].n));
+  const rMax=mode==='thr'?46:34, rMin=9;
+  keys.forEach((k,i)=>{
+    const o=agg[k];const val=view.geoM==='sales'?o.v:o.n;
+    const [x,y]=geoPrj(o.ll[0],o.ll[1],W,H,bb);
+    const r=rMin+Math.sqrt(val/maxV)*(rMax-rMin);
+    const col=GEO_PAL[i%GEO_PAL.length];
+    const on=view.geoSel===k;
+    svg+=`<g style="cursor:pointer" onclick="view.geoSel=view.geoSel==='${k}'?null:'${k}';render()">
+      <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r+4).toFixed(1)}" fill="${col}" opacity="${on?'.30':'.14'}"/>
+      <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${col}" opacity=".88" stroke="#fff" stroke-width="${on?3:1.6}"/>
+      <text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="middle" font-size="${r>15?13:10.5}" font-weight="800" fill="#fff">${o.n.toLocaleString('fa-IR')}</text>
+      <text x="${x.toFixed(1)}" y="${(y-r-6).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="#3b4a58">${esc(k)}</text>
+      <title>${esc(k)} — ${o.n.toLocaleString('fa-IR')} مشتری${view.geoM==='sales'?' · '+money(o.v):''}</title></g>`;
+  });
+  h+=`<div class="sec" style="padding:10px"><div style="overflow:auto"><svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:900px;display:block;margin:0 auto" dir="ltr">${svg}</svg></div>
+  ${keys.length?'':'<div class="empty">مشتری با موقعیت ثبت‌شده در این نما وجود ندارد — استان/شهر مشتریان را در پرونده‌شان (یا از «بدون موقعیت» بالا) ثبت کنید</div>'}</div>`;
+  /* پنل منطقهٔ انتخاب‌شده */
+  if(view.geoSel&&agg[view.geoSel]){
+    const o=agg[view.geoSel];
+    h+=`<div class="sec" style="border-inline-start:4px solid #0078D4">
+      <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:9px">
+        <h3 style="margin:0">📍 ${esc(view.geoSel)}</h3>
+        <span class="tag">${o.n.toLocaleString('fa-IR')} مشتری</span>
+        ${view.geoM==='sales'?`<span class="tag">💰 ${money(o.v)}</span>`:''}
+        <span style="flex:1"></span><button class="btn gh sm" onclick="view.geoSel=null;render()">✕</button></div>
+      <div class="ucpeople">${o.ids.slice(0,40).map(id=>{const c=recs[id];if(!c)return '';
+        return `<div class="ucp" onclick="go('rec','customer','${id}')">${ucAvatar(c.d.title)}
+          <div class="ucpn"><b>${esc(c.d.title||'—')}</b><span>${esc(c.d.city||c.d.province||'')}${c.d.segment?' · '+esc(c.d.segment):''}</span></div></div>`;}).join('')}</div>
+      ${o.ids.length>40?`<p class="hint" style="margin-top:6px">${(o.ids.length-40).toLocaleString('fa-IR')} مشتری دیگر — از «داشبورد مشتریان» ببینید</p>`:''}</div>`;
+  }
+  return h;
+}
+window.geodashHTML=geodashHTML;
+
 /* ═══════════ 🏛 چارت سازمانی گرافیکی ═══════════ */
 const OC_COLORS=['#B8860B','#0078D4','#038387','#CA5010','#744DA9','#107C10'];
 function ocKids(id){return byE('orgunit').filter(x=>relIds(x,'parent')[0]===id);}
