@@ -429,11 +429,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.53</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.54</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.53</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.54</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2238,9 +2238,9 @@ function byE(e){
   if(!_byRaw)_rebuildByRaw();
   let rows=_byRaw[e]||[];
   if(_scoping)return rows; // جلوگیری از بازگشت بی‌نهایت هنگام محاسبه محدوده
-  if(session&&SEC_ENTS[e]&&!_secing){ // 🔒 دروازه محرمانگی — پیش از محدوده داده
+  if(session&&(SEC_ENTS[e]||PRIV_ENTS[e])&&!_secing){ // 🔒🔐 دروازه محرمانگی — پیش از محدوده داده
     _secing=true;
-    try{rows=rows.filter(secOK);}finally{_secing=false;}
+    try{rows=rows.filter(r=>secOK(r)&&privOK(r));}finally{_secing=false;}
   }
   const s=myScope();if(!s)return rows;
   _scoping=true;
@@ -2707,6 +2707,31 @@ function secOK(r){
   if(!r||!r.e||!SEC_ENTS[r.e])return true;
   if(isAdmin())return true;
   return secSelf(r)&&secInherit(r);
+}
+/* ================= 🔐 محرمانگی شخصی پرسنل (v2.54) =================
+   قرارداد پرسنلی، مرخصی، فیش حقوقی، حقوق و دستمزد و سندِ متصل به فرد،
+   فقط برای خودِ همان فرد (و ادمین) نمایش داده می‌شود.
+   استثنای لازم برای کارکردِ گردش مرخصی: تأییدکننده/مدیر مستقیم، فقط همان درخواست را می‌بیند. */
+const PRIV_ENTS={hrcontract:1,leave:1,payslip:1,payroll:1,doc:1};
+function privOwner(r){ // آیا رکورد متعلق به خود کاربر جاری است؟
+  if(r.d&&r.d._by&&r.d._by===myEmail())return true;
+  const ids=myHRids();if(!ids.size)return false;
+  return relIds(r,'person').some(x=>ids.has(x));
+}
+function privOK(r){
+  if(!session)return true;                      // حالت محلی تک‌کاربره
+  if(!r||!r.e||!PRIV_ENTS[r.e])return true;
+  if(isAdmin())return true;
+  if(r.e==='doc'&&!relIds(r,'person').length)return true; // سند سازمانی (بدون فرد مرتبط) → قاعده عادی دسترسی
+  if(privOwner(r))return true;
+  if(r.e==='leave'){ // گردش مرخصی نباید بشکند: تأییدکننده تعیین‌شده یا مدیر مستقیمِ فرد
+    const ids=myHRids();
+    if(ids.size&&relIds(r,'approver').some(x=>ids.has(x)))return true;
+    const p=recs[relIds(r,'person')[0]];
+    if(p&&ids.size&&relIds(p,'manager').some(x=>ids.has(x)))return true;
+    if(!relIds(r,'approver').length&&SEC_MID[myRole()]&&can('e','leave',r))return true; // بدون تأییدکنندهٔ مشخص → فقط نقش‌های مدیریتیِ مجاز به تأیید
+  }
+  return false;
 }
 /* 🤝 «کارهای من» — رکوردهایی که کاربر جاری در آن‌ها نقش دارد */
 function iAmIn(r){
@@ -10140,6 +10165,7 @@ function render(){
   if(view.type==='rec'&&(!recs[view.id]||recs[view.id].del))view={type:'list',e:view.e};
   if(view.type==='rec'&&myScope()&&!inMyScope(recs[view.id]))view={type:'list',e:view.e}; // خارج از محدوده داده کاربر
   if(view.type==='rec'&&recs[view.id]&&!secOK(recs[view.id]))view={type:'list',e:view.e}; // 🔒 رکورد محرمانه
+  if(view.type==='rec'&&recs[view.id]&&!privOK(recs[view.id]))view={type:'list',e:view.e}; // 🔐 سند شخصی متعلق به دیگری
   document.getElementById('ttl').textContent=
     view.type==='users'?'👤 کاربران و دسترسی':
     view.type==='acl'?'🛡️ سطوح دسترسی':
