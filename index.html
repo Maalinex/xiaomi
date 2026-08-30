@@ -429,11 +429,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.56</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.57</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.56</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.57</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -14769,6 +14769,18 @@ window.ocApply=function(id){ // 🧬 اعمال سلسله‌مراتب چارت
   }finally{window._wfActing=0;}
   setSync('ok','🧬 سلسله‌مراتب روی '+n.toLocaleString('fa-IR')+' پرونده اعمال شد — گردش‌ها، نامه‌ها و تأییدها از همین ساختار پیروی می‌کنند');
 };
+window.ocWipe=function(){ // 🗑 پاک کردن کل چارت (دومرحله‌ای) — پرونده‌های HR دست نمی‌خورند
+  if(!isAdmin()){setSync('err','فقط ادمین می‌تواند چارت را پاک کند');return;}
+  if(!view._ocWipe){view._ocWipe=1;render();return;}
+  let n=0;byE('orgunit').slice().forEach(u=>{u.del=true;u.u=Date.now();put(u);n++;});
+  view._ocWipe=null;view.ocSel=null;view.ocCol=[];view.ocZoom=null;
+  setSync('ok','🗑 '+n.toLocaleString('fa-IR')+' باکس پاک شد — فضای ساخت چارت آماده است');render();
+};
+window.ocBuild=function(){ // 🧱 شروع ساخت از صفر با نام دلخواه باکس ریشه
+  const el=document.getElementById('oc_root');const t=(el&&el.value.trim())||'مدیرعامل';
+  const i=uid();put({id:i,e:'orgunit',u:Date.now(),d:{title:t,_by:myEmail()}});
+  view.ocSel=i;setSync('ok','باکس «'+t+'» ساخته شد — با ＋ زیر هر باکس، سطح بعدی را بسازید');render();
+};
 window.ocSeed=function(){
   const mk=(t,p)=>{const i=uid();put({id:i,e:'orgunit',u:Date.now(),d:{title:t,parent:p?[p]:[]}});return i;};
   const ceo=mk('مدیرعامل',null);
@@ -14851,12 +14863,23 @@ function orgchartHTML(){
     <span style="flex:1"></span>
     ${un.length?`<button class="btn gh sm" style="border-color:var(--warn)" onclick="view.ocUn=!view.ocUn;render()">⚠️ ${un.length.toLocaleString('fa-IR')} نفر بدون جایگاه ${view.ocUn?'▴':'▾'}</button>`:''}
     ${isAdmin()?`<button class="btn gh sm" onclick="ocAddChild(null)">＋ باکس سطح بالا</button>`:''}
+    ${isAdmin()&&roots.length?(view._ocWipe?`<b style="color:var(--bad);font-size:12px">همهٔ باکس‌ها پاک شود؟ (افراد و پرونده‌ها حذف نمی‌شوند)</b>
+      <button class="btn bad sm" onclick="ocWipe()">بله، پاک کن</button>
+      <button class="btn gh sm" onclick="view._ocWipe=null;render()">انصراف</button>`
+      :`<button class="btn bad sm" onclick="ocWipe()">🗑 پاک کردن کل چارت</button>`):''}
   </div>`;
   if(!roots.length)
-    return h+`<div class="sec" style="text-align:center;padding:44px 20px">
-      <div style="font-size:40px;margin-bottom:10px">🏛</div>
-      <p style="font-size:13px;color:var(--tx2);margin-bottom:16px">هنوز چارتی ساخته نشده. با یک کلیک ساختار پایه ساخته می‌شود:<br>مدیرعامل + مدیریت فروش، خرید، مالی، پشتیبانی و توسعه کسب‌وکار + کارشناس هرکدام</p>
-      ${isAdmin()?`<button class="btn" onclick="ocSeed()">🚀 ساخت ساختار پایه</button>`:'<span class="hint">از ادمین بخواهید چارت را بسازد</span>'}</div>`;
+    return h+`<div class="sec" style="text-align:center;padding:40px 20px">
+      <div style="font-size:42px;margin-bottom:8px">🧱</div>
+      <b style="font-size:15px">فضای ساخت چارت</b>
+      <p style="font-size:12.5px;color:var(--tx2);margin:10px 0 18px;line-height:2.2">چارت خالی است. از بالاترین جایگاه شروع کنید؛ بعد با دکمهٔ <b>＋</b> زیر هر باکس، سطح بعدی را بسازید.<br>با کلیک روی هر باکس هم نام، مسئول، اعضا و شرح وظایفش را تعیین می‌کنید.</p>
+      ${isAdmin()?`<div style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap">
+        <input id="oc_root" value="مدیرعامل" style="max-width:220px;text-align:center" onkeydown="if(event.key==='Enter')ocBuild()">
+        <button class="btn" onclick="ocBuild()">🧱 ساخت باکس ریشه</button>
+      </div>
+      <p style="font-size:11px;color:var(--tx2);margin-top:16px">یا اگر می‌خواهید با یک الگوی آماده شروع کنید:
+        <span style="color:var(--ac);cursor:pointer" onclick="ocSeed()">🚀 مدیرعامل + ۵ مدیریت + کارشناس هرکدام</span></p>`
+      :'<span class="hint">از ادمین بخواهید چارت را بسازد</span>'}</div>`;
   if(view.ocUn&&un.length)
     h+=`<div class="sec" style="border-inline-start:3px solid var(--warn);padding:12px 16px">
       <p style="font-size:11.5px;color:var(--tx2);margin-bottom:8px">${view.ocSel&&recs[view.ocSel]?'کلیک روی هر نفر = افزودن به «'+esc(recs[view.ocSel].d.title||'')+'»':'اول یک باکس را انتخاب کنید، بعد روی افراد بزنید'}</p>
