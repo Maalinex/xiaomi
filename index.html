@@ -43,6 +43,18 @@ body{font-family:Vazirmatn,Tahoma,sans-serif;color:var(--tx);font-size:14px;
 .nav-h{font-size:11.5px;color:var(--tx);font-weight:800;margin:14px 8px 4px}
 .navg .gic{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:14px;flex-shrink:0;background:var(--gdot,#8a96a8);box-shadow:var(--sh2)}
 #mtabs:empty{display:none}
+.aclrows{display:flex;flex-direction:column;gap:4px}
+.aclrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:7px 10px;border-radius:9px}
+.aclrow:nth-child(odd){background:var(--bg3)}
+.aclrow .an{flex:1;min-width:150px;font-size:12.5px}
+.aclrow.sm{padding:4px 10px}
+.aclrow.sm .an{font-size:11.5px;color:var(--tx2)}
+.asegs{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--bg2,#fff)}
+.aseg{padding:5px 11px;font-size:11px;background:transparent;border:none;border-inline-start:1px solid var(--line);cursor:pointer;color:var(--tx2);font-family:inherit;white-space:nowrap}
+.aseg:first-child{border-inline-start:none}
+.aseg:hover{background:var(--bg3)}
+.aseg.on{background:var(--ac);color:#fff;font-weight:800}
+.aclflds{margin:2px 6px 8px;padding:9px 11px;border:1px dashed var(--line);border-radius:11px;background:var(--bg2,#fff)}
 .gprov:hover{fill-opacity:.38}
 .ocovl{position:fixed;inset:0;background:rgba(0,0,0,.32);backdrop-filter:blur(3px);z-index:60;display:flex;align-items:center;justify-content:center;padding:18px}
 .ocmodal{width:min(660px,96vw);max-height:86vh;background:var(--bg,#F3F3F3);border-radius:16px;box-shadow:var(--sh16);display:flex;flex-direction:column;overflow:hidden;animation:ocin .22s var(--ease)}
@@ -417,11 +429,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.51</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.52</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.51</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.52</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -13502,7 +13514,7 @@ function listHTML(e){
       if(typeof x==='number'||typeof y==='number'){x=+x||0;y=+y||0;return (x-y)*dir;}
       return String(x??'').localeCompare(String(y??''),'fa',{numeric:true})*dir;});
   } else rows=rows.slice().sort((a,b)=>b.u-a.u);
-  const cols=def.cols.map(k=>def.f.find(f=>f.k===k)).filter(f=>fldMode(e,f.k)!=='hide');
+  const cols=def.cols.map(k=>def.f.find(f=>f.k===k)).filter(f=>f&&fldMode(e,f.k)!=='hide'&&!formHidden(e).includes(f.k));
   // 🪜 فیلتر سطح آبشاری برای اهداف و سنجه‌های BSC
   const LVLS=['هلدینگ','کسب‌وکار','شرکت','واحد','فرد'];
   const LVIC={'هلدینگ':'🏦','کسب‌وکار':'🧢','شرکت':'🏢','واحد':'🧩','فرد':'👤'};
@@ -15143,91 +15155,69 @@ window.ucAclBody=ucAclBody;
 function aclBodyHTML(){
   const {t,v}=aclTarget(); const cfg=aclCfg(); let h='';
   if(!v)return `<div class="empty">کاربری ثبت نشده است</div>`;
-  // صفحات و ابزارهای ویژه
-  h+=`<div class="sec"><h3>🖥️ صفحات و ابزارها (داشبوردها)</h3>
-  ${srchBox('aclv','جستجوی صفحه یا ابزار…','','[data-sr="aclv"]')}
-  <div class="tblwrap"><table><thead><tr><th>صفحه / ابزار</th><th>دسترسی</th></tr></thead><tbody>
-  ${VIEWS_ACL.map(([vk,vn])=>{
+  const who=t==='role'?'این نقش':'این کاربر';
+  /* 🧩 الگوی واحد: دکمه‌های سه‌حالته به‌جای منوهای بازشو */
+  const seg=(opts,cur,fn)=>`<span class="asegs">${opts.map(([val,l,tip])=>`<button class="aseg ${cur===val?'on':''}" title="${tip||''}" onclick="${fn.replace('%V',val)}">${l}</button>`).join('')}</span>`;
+  h+=`<div class="sec" style="padding:11px 16px"><p style="font-size:12px;color:var(--tx2);margin:0;line-height:2">همه‌چیز یک قانون دارد: روی هر ردیف، وضعیت را با یک کلیک انتخاب کنید — <b>نمایش</b> / <b>👁 فقط مشاهده</b> (می‌بیند ولی نمی‌تواند تغییر دهد) / <b>🚫 مخفی</b> (اصلاً نمی‌بیند). تنظیم فردی روی تنظیم نقش اولویت دارد و در سرور هم اعمال می‌شود.</p></div>`;
+  h+=srchBox('aclx','جستجوی صفحه، بخش یا فرم…','— گروه‌های بی‌نتیجه پنهان می‌شوند','[data-sr="aclx"]','[data-srsec="aclx"]');
+  /* ── صفحه‌ها و داشبوردها ── */
+  h+=`<div class="sec" data-srsec="aclx"><h3 style="font-size:13.5px">🖥 صفحه‌ها و داشبوردها</h3><div class="aclrows">`;
+  VIEWS_ACL.forEach(([vk,vn])=>{
     const curV=(cfg.views||{})[vk]||'';
-    if(vk==='layout'||vk==='seclayout')return `<tr data-sr="aclv" data-srt="${esc(vn)}"><td>${vn}</td><td><select onchange="setAclView('${vk}',this.value)" style="max-width:190px">
-      <option value="" ${curV===''?'selected':''}>غیرفعال (پیش‌فرض)</option>
-      <option value="show" ${curV==='show'?'selected':''}>مجاز ✅</option></select></td></tr>`;
-    return `<tr data-sr="aclv" data-srt="${esc(vn)}"><td>${vn}</td><td><select onchange="setAclView('${vk}',this.value)" style="max-width:190px">
-      <option value="" ${curV===''?'selected':''}>نمایش (پیش‌فرض)</option>
-      <option value="hide" ${curV==='hide'?'selected':''}>مخفی 🚫</option></select></td></tr>`;
-  }).join('')}
-  </tbody></table></div>
-  <p style="font-size:11px;color:var(--tx2);margin-top:8px">با «مخفی»، آن صفحه/ابزار برای این ${t==='role'?'نقش':'کاربر'} از منو و نوار بالا حذف می‌شود. کنترل خودِ دیتابیس‌ها و تک‌تک فیلدهایشان در جدول‌های پایین است — دکمه «تنظیم فیلدها» جلوی هر بخش، همه فیلدهای همان بخش را باز می‌کند.</p></div>`;
-  // 🔭 محدوده داده (جداسازی اطلاعات بر اساس شرکت / کسب‌وکار / واحد)
-  {
-    const sc=cfg.scope||{};
-    const pick=(ent,ax,ic)=>{
-      const rows=byE(ent);
-      if(!rows.length)return `<p style="font-size:11px;color:var(--tx2)">موردی ثبت نشده</p>`;
-      return (rows.length>=10?srchBox('aclsc_'+ax,'جستجو در این فهرست…','','[data-sr="aclsc_'+ax+'"]'):'')
-        +`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px">`+rows.map(x=>
-        `<label data-sr="aclsc_${ax}" data-srt="${esc(x.d.title||'')}" style="display:flex;gap:6px;align-items:center;font-size:12px;cursor:pointer">
-          <input type="checkbox" ${((sc[ax]||[]).includes(x.id))?'checked':''} onchange="setAclScopeId('${ax}','${x.id}',this.checked);render()">
-          ${ic} ${esc(x.d.title||'—')}</label>`).join('')+`</div>`;
-    };
-    h+=`<div class="sec" style="border-inline-start:3px solid #8ec6ea"><h3>🔭 محدوده داده — جداسازی اطلاعات</h3>
-    <p style="font-size:12px;color:var(--tx2);margin-bottom:10px">با فعال‌کردن محدوده، این ${t==='role'?'نقش (گروه کاربران)':'کاربر'} فقط رکوردهای متصل به شرکت‌ها/کسب‌وکارها/واحدهای انتخاب‌شده را می‌بیند — در همه لیست‌ها، داشبوردها، تقویم و بخش‌های مالی. رکوردهایی که خودش ساخته یا مستقیم به او سپرده شده (مسئول/عضو) همیشه دیده می‌شوند. انتخاب یک شرکت یعنی واحدهای همان شرکت هم دیده می‌شوند.</p>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
-      <select onchange="setAclScopeOn(this.value==='1')" style="max-width:260px">
-        <option value="" ${!sc.on?'selected':''}>همه داده‌ها (پیش‌فرض)</option>
-        <option value="1" ${sc.on?'selected':''}>🔒 محدود به موارد انتخابی</option></select>
-      ${sc.on?`<label style="display:flex;gap:6px;align-items:center;font-size:12px;cursor:pointer">
-        <input type="checkbox" ${sc.strict?'checked':''} onchange="setAclScopeStrict(this.checked)">
-        رکوردهای بدون وابستگی سازمانی هم مخفی شوند (سخت‌گیرانه)</label>`:''}
-    </div>
-    ${sc.on?`
-      <h3 style="font-size:12.5px;margin-top:8px">🏢 شرکت‌های مجاز</h3>${pick('company','c','🏢')}
-      <h3 style="font-size:12.5px;margin-top:10px">🧢 کسب‌وکارهای مجاز</h3>${pick('business','b','🧢')}
-      <h3 style="font-size:12.5px;margin-top:10px">🧩 واحدهای سازمانی مجاز</h3>${pick('orgunit','u','🧩')}`:''}
-    </div>`;
-  }
-  h+=srchBox('acle','جستجوی بخش (دیتابیس) در همهٔ گروه‌ها…','— گروه‌های بی‌نتیجه موقتاً پنهان می‌شوند');
-  const _aclGroups=(()=>{ // 🧹 همهٔ گروه‌های دارای بخش واقعی — نه فقط گروه‌های منو
-    const base=allGroups();
+    const special=vk==='layout'||vk==='seclayout';
+    h+=`<div class="aclrow" data-sr="aclx" data-srt="${esc(vn)}"><span class="an">${vn}</span>
+      ${special?seg([['','غیرفعال'],['show','مجاز ✅']],curV,`setAclView('${vk}','%V');render()`)
+               :seg([['','نمایش'],['hide','🚫 مخفی']],curV,`setAclView('${vk}','%V');render()`)}</div>`;
+  });
+  h+=`</div></div>`;
+  /* ── بخش‌های داده و فرم‌ها ── */
+  const _aclGroups=(()=>{const base=allGroups();
     const extra=[...new Set(Object.values(E).filter(d=>!d.sub&&d.grp&&!base.includes(d.grp)).map(d=>d.grp))].sort((a,b)=>a.localeCompare(b,'fa'));
-    return base.concat(extra);
-  })();
-  _aclGroups.forEach((g,gi)=>{
-    if(!Object.values(E).some(d=>d.grp===g))return;
+    return base.concat(extra);})();
+  _aclGroups.forEach(g=>{
+    const ents=Object.entries(E).filter(([k,d])=>d.grp===g&&!d.sub);
+    if(!ents.length)return;
     const gHid=(cfg.grp||{})[g]==='hide';
-    h+=`<div class="sec" data-srsec="acle" style="${gHid?'opacity:.55':''}"><h3>${esc(grpLabel(g))}
+    h+=`<div class="sec" data-srsec="aclx" style="${gHid?'opacity:.6':''}"><h3 style="font-size:13.5px;display:flex;gap:9px;align-items:center;flex-wrap:wrap">${esc(grpLabel(g))}
       <span style="flex:1"></span>
-      <select onchange="setAclGrp('${g.replace(/'/g,"\\'")}',this.value)" style="max-width:190px;font-size:11.5px" title="یک‌ضرب کل گروه (همه بخش‌ها و داشبوردهایش) را برای این نقش مخفی کن">
-        <option value="" ${!gHid?'selected':''}>گروه: نمایش عادی</option>
-        <option value="hide" ${gHid?'selected':''}>🙈 کل گروه مخفی</option></select>
-      <select id="aclblk_${gi}" style="max-width:170px;font-size:11.5px">
-        ${LVLOPTS.map(([val,l])=>`<option value="${val}">${l}</option>`).join('')}</select>
-      <button class="btn gh sm" onclick="setAclGrpBulk('${g.replace(/'/g,"\\'")}',document.getElementById('aclblk_${gi}').value)" title="سطح انتخابی را یکجا به همه بخش‌های این گروه بده">↙ اعمال به همه</button></h3>
-    ${gHid?`<p style="font-size:11px;color:var(--bad);margin-bottom:6px">این گروه برای این نقش/کاربر کاملاً مخفی است — همه بخش‌ها و داشبوردهایش از منو حذف می‌شوند.</p>`:''}
-    <div class="tblwrap"><table><thead><tr><th>بخش</th><th>دسترسی</th><th>فیلدها</th></tr></thead><tbody>`;
-    Object.entries(E).filter(([k,d])=>d.grp===g).forEach(([ek,ed])=>{
+      ${seg([['','گروه: عادی'],['hide','🙈 کل گروه مخفی']],(cfg.grp||{})[g]||'',`setAclGrp('${g.replace(/'/g,"\\'")}','%V');render()`)}</h3>
+    <div class="aclrows">`;
+    ents.forEach(([ek,ed])=>{
       const cur=(cfg.ent||{})[ek]||'';
-      h+=`<tr data-sr="acle" data-srt="${esc(ed.n+' '+ek)}"><td>${ed.ic} ${ed.n}</td>
-        <td><select onchange="setAclEnt('${ek}',this.value)" style="max-width:190px">
-          ${LVLOPTS.map(([val,l])=>`<option value="${val}" ${cur===val?'selected':''}>${l}</option>`).join('')}</select></td>
-        <td><button class="btn gh sm" onclick="view.aclEnt=view.aclEnt==='${ek}'?null:'${ek}';render()">${view.aclEnt===ek?'بستن':'تنظیم فیلدها'}</button></td></tr>`;
-      if(view.aclEnt===ek){
+      const open=view.aclEnt===ek;
+      h+=`<div class="aclrow" data-sr="aclx" data-srt="${esc(ed.n+' '+ek)}"><span class="an">${ed.ic} ${ed.n}</span>
+        ${seg([['','پیش‌فرض'],['hide','🚫'],['read','👁'],['edit','✏️'],['full','🗑']],cur,`setAclEnt('${ek}','%V');render()`)}
+        <button class="btn gh sm" style="font-size:11px" onclick="view.aclEnt=view.aclEnt==='${ek}'?null:'${ek}';render()">${open?'بستن فیلدها ▴':'فیلدها ▾'}</button></div>`;
+      if(open){
         const _efs=ed.f.filter(f=>f.k!=='title');
-        h+=`<tr data-sr="acle" data-srt="${esc(ed.n+' '+ek)}"><td colspan="3" style="white-space:normal">
-          ${_efs.length>=10?srchBox('aclf','جستجوی فیلد در «'+ed.n+'»…','','[data-sr=\"aclf\"]'):''}
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;padding:6px 0">`;
-        _efs.forEach(f=>{
-          const fc=(cfg.fld||{})[ek+'.'+f.k]||'';
-          h+=`<div data-sr="aclf" data-srt="${esc(f.n+' '+f.k)}" style="display:flex;gap:6px;align-items:center;font-size:12px">
-            <span style="flex:1;color:var(--tx2)">${f.n}</span>
-            <select onchange="setAclFld('${ek}','${f.k}',this.value)" style="max-width:130px;padding:4px 6px;font-size:11.5px">
-              ${FLDOPTS.map(([val,l])=>`<option value="${val}" ${fc===val?'selected':''}>${l}</option>`).join('')}</select></div>`;
-        });
-        h+=`</div></td></tr>`;
+        h+=`<div class="aclflds">
+        <div style="font-size:11px;color:var(--tx2);margin-bottom:7px">وضعیت هر فیلد «${ed.n}» برای ${who}: عادی / 👁 فقط مشاهده / 🚫 مخفی</div>
+        ${_efs.map(f=>{const fc=(cfg.fld||{})[ek+'.'+f.k]||'';
+          return `<div class="aclrow sm"><span class="an">${f.n}</span>
+            ${seg([['','عادی'],['read','👁'],['hide','🚫']],fc,`setAclFld('${ek}','${f.k}','%V');render()`)}</div>`;}).join('')||'<div class="hint">فیلدی ندارد</div>'}
+        </div>`;
       }
     });
-    h+=`</tbody></table></div></div>`;
+    h+=`</div></div>`;
   });
+  /* ── محدوده داده (جمع‌شونده) ── */
+  h+=`<div class="sec" data-srsec="aclx"><h3 style="font-size:13.5px;cursor:pointer" onclick="view.aclScope=!view.aclScope;render()">🔭 محدوده داده — جداسازی بر اساس شرکت/کسب‌وکار/واحد ${view.aclScope?'▴':'▾'}</h3>`;
+  if(view.aclScope){
+    const sc=cfg.scope||{};
+    const pick=(ent,ax,ic)=>{const rows=byE(ent);
+      if(!rows.length)return `<p style="font-size:11px;color:var(--tx2)">موردی ثبت نشده</p>`;
+      return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px">`+rows.map(x=>
+        `<label style="display:flex;gap:6px;align-items:center;font-size:12px;cursor:pointer">
+          <input type="checkbox" ${((sc[ax]||[]).includes(x.id))?'checked':''} onchange="setAclScopeId('${ax}','${x.id}',this.checked);render()">
+          ${ic} ${esc(x.d.title||'—')}</label>`).join('')+`</div>`;};
+    h+=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:9px 0">
+      ${seg([['','همه داده‌ها'],['1','🔒 محدود به انتخاب‌ها']],sc.on?'1':'',`setAclScopeOn('%V'==='1');render()`)}
+      ${sc.on?`<label style="display:flex;gap:6px;align-items:center;font-size:12px;cursor:pointer"><input type="checkbox" ${sc.strict?'checked':''} onchange="setAclScopeStrict(this.checked);render()">رکوردهای بدون وابستگی سازمانی هم مخفی شوند</label>`:''}</div>
+    ${sc.on?`<h3 style="font-size:12.5px;margin-top:8px">🏢 شرکت‌های مجاز</h3>${pick('company','c','🏢')}
+      <h3 style="font-size:12.5px;margin-top:10px">🧢 کسب‌وکارهای مجاز</h3>${pick('business','b','🧢')}
+      <h3 style="font-size:12.5px;margin-top:10px">🧩 واحدهای مجاز</h3>${pick('orgunit','u','🧩')}`:''}`;
+  }
+  h+=`</div>`;
   return h;
 }
 
@@ -28391,6 +28381,11 @@ function schemaHTML(){
   <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">
     ${E[ek].f.map(f=>{
       const isC=custom.some(c=>c.k===f.k);
+      const isH=formHidden(ek).includes(f.k);
+      if(f.k!=='title')return `<span class="tag ${isC?'y':''}" style="font-size:10.5px;${isH?'opacity:.55;text-decoration:line-through':''}">${esc(f.n)} <i style="font-size:9px;color:var(--tx2)">(${(CF_TYPES.find(t=>t[0]===f.t)||[,f.t])[1]})</i>
+        <b style="cursor:pointer;color:var(--ac)" title="تغییر نام فیلد" onclick="renField('${ek}','${f.k}')">✏️</b>
+        <b style="cursor:pointer" title="${isH?'فعلاً مخفی است — کلیک: نمایش دوباره':'مخفی‌کردن موقت (بدون حذف — داده‌ها و فیلد می‌مانند)'}" onclick="fmHideFromSchema('${ek}','${f.k}')">${isH?'🚫':'👁'}</b>
+        ${isC?` <b style="cursor:pointer;color:var(--bad)" title="حذف فیلد سفارشی" onclick="rmCField('${ek}','${f.k}')">✕</b>`:''}</span>`;
       return `<span class="tag ${isC?'y':''}" style="font-size:10.5px">${esc(f.n)} <i style="font-size:9px;color:var(--tx2)">(${(CF_TYPES.find(t=>t[0]===f.t)||[,f.t])[1]})</i> <b style="cursor:pointer;color:var(--ac)" title="تغییر نام فیلد" onclick="renField('${ek}','${f.k}')">✏️</b>${isC?` <b style="cursor:pointer;color:var(--bad)" title="حذف فیلد سفارشی" onclick="rmCField('${ek}','${f.k}')">✕</b>`:''}</span>`;
     }).join('')}
   </div>
@@ -28818,6 +28813,13 @@ function fmHide(ek,fk){
   rebuildSchema();drawModal();
 }
 window.fmArrange=fmArrange;window.fmHide=fmHide;
+window.fmHideFromSchema=function(ek,fk){
+  if(fk==='title'){setSync('err','فیلد «عنوان» مخفی نمی‌شود');return;}
+  saveSchema(s=>{s.hidden=s.hidden||{};const cur=s.hidden[ek]||[];
+    s.hidden[ek]=cur.includes(fk)?cur.filter(x=>x!==fk):cur.concat(fk);});
+  setSync('ok','ثبت شد — این فیلد از فرم‌ها و لیست‌ها '+((schemaCfg().hidden[ek]||[]).includes(fk)?'مخفی شد (هر وقت خواستی از همین‌جا برگردان)':'دوباره نمایان شد'));
+  render();
+};
 function drawModal(){
   if(cur&&cur.e==='habit')rebuildHabitFields(); // لیست عادت‌های شخصی کاربر
   const e=cur.e, def=E[e], id=cur._new?null:cur.id;
