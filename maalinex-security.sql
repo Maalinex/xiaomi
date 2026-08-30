@@ -473,3 +473,68 @@ $$;
 
 revoke all on function public.admin_reset_password(text,text) from public, anon;
 grant execute on function public.admin_reset_password(text,text) to authenticated;
+
+-- ═══════════════════════════════════════════════════════════
+-- 🔐 v2.55 — «همگام‌سازی انتخابی» اسناد شخصی پرسنل (فاز ۳ معماری)
+-- این بخش را یک‌بار در SQL Editor اجرا کنید (سوپابیس ابری یا سرور داخلی).
+-- پس از اجرا، سرور دیگر «اصلاً» فیش حقوقی/قرارداد/حقوق/مرخصی دیگران را برای
+-- کاربر عادی ارسال نمی‌کند — یعنی داده حتی به دستگاه او نمی‌رسد و با ابزار
+-- توسعه‌دهنده مرورگر هم قابل دیدن نیست. مکمل دروازه نمایشی نسخه ۲.۵۴ در اپ.
+-- ═══════════════════════════════════════════════════════════
+
+-- آیا فیلد رابطه‌ای خالی است؟ (آرایه خالی/نال/رشته خالی — بدون خطا روی هر شکلی از داده)
+create or replace function public.app_rel_empty(d jsonb, k text) returns boolean
+language plpgsql immutable as $$
+begin
+  if d->k is null then return true; end if;
+  if jsonb_typeof(d->k)='array' then return jsonb_array_length(d->k)=0; end if;
+  return coalesce(d->>k,'')='';
+end $$;
+
+-- قاعده محرمانگی اسناد شخصی پرسنل (آینه دقیق privOK در اپ):
+--  قرارداد/فیش/حقوق/مرخصی + سندِ متصل به فرد → فقط خودِ فرد، ادمین،
+--  و برای مرخصی: تأییدکننده تعیین‌شده یا مدیر مستقیم (تا گردش تأیید نشکند).
+create or replace function public.app_hr_priv(ent text, d jsonb) returns boolean
+language plpgsql stable security definer set search_path=public as $$
+begin
+  if ent not in ('hrcontract','payslip','payroll','leave','doc') then return true; end if;
+  if app_is_admin() then return true; end if;
+  if ent='doc' and app_rel_empty(d,'person') then return true; end if; -- سند سازمانی
+  if lower(coalesce(d->>'_by',''))=app_email() then return true; end if; -- سازنده
+  if app_row_mine(d) then return true; end if; -- فرد/تأییدکنندهٔ خودِ رکورد
+  if ent='leave' then
+    -- مدیر مستقیمِ صاحب درخواست
+    if exists(select 1 from records p, app_my_hr() h
+       where p.entity='hr' and not p.deleted
+         and coalesce((d->'person')::text,'') like '%'||p.id::text||'%'
+         and coalesce((p.data->'manager')::text,'') like '%'||h::text||'%') then return true; end if;
+    -- درخواستِ بدون تأییدکننده مشخص → نقش‌های مدیریتی مجاز به تأیید
+    if app_rel_empty(d,'approver') and app_role() in ('مدیرارشد','مدیر') then return true; end if;
+  end if;
+  return false;
+end $$;
+
+-- app_priv_ok (که همهٔ سیاست‌های select/update صدایش می‌زنند) اکنون
+-- محرمانگی «رشد شخصی» + «اسناد شخصی پرسنل» هر دو را اعمال می‌کند.
+create or replace function public.app_priv_ok(ent text, d jsonb) returns boolean
+language sql stable security definer set search_path=public as
+$$ select (app_is_admin()
+     or not app_growth(ent)
+     or coalesce(d->>'_by','')=''
+     or lower(d->>'_by')=app_email())
+   and app_hr_priv(ent,d) $$;
+
+-- درج هم محافظت شود: کاربر عادی نتواند برای دیگری فیش/قرارداد/حقوق جعل کند
+drop policy if exists rec_insert on public.records;
+create policy rec_insert on public.records for insert to authenticated with check (
+  (select app_approved())
+  and (not app_is_meta(id) or (select app_is_admin())
+       or (id='00000000-0000-4000-8000-00000000aaaa'
+           and jsonb_array_length(app_users_list())=0))
+  and (app_is_meta(id) or app_ent_level(entity) not in ('hide','read'))
+  and (coalesce(data->>'_by','')='' or lower(data->>'_by')=app_email() or (select app_is_admin()))
+  and app_hr_priv(entity,data)
+  and app_in_scope(id,entity,data)
+);
+
+select '🔐 همگام‌سازی انتخابی v2.55 اعمال شد ✅' as status;
