@@ -429,11 +429,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.52</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.53</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.52</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.53</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2763,6 +2763,7 @@ const VIEWS_ACL=[
  ['custdash','🛍️ داشبورد مشتریان'],
  ['smdash','📈 داشبورد فروش'],
  ['invnew','🧾 صدور فاکتور فروش'],
+ ['invnewpf','📝 صدور پیش‌فاکتور'],
  ['plreport','💰 سود و زیان فروش'],
  ['distdash','🛵 داشبورد پخش و توزیع'],
  ['loyaldash','💎 باشگاه مشتریان'],
@@ -2944,7 +2945,7 @@ function modAutopostHTML(){
 function drawModcfg(){if(view&&view.type==='modcfg')document.getElementById('content').innerHTML=modcfgHTML();}
 window.openModcfg=openModcfg;window.toggleModule=toggleModule;window.saveBrand=saveBrand;
 const VIEW_GRP={
- smdash:'فروش',invnew:'فروش',plreport:'فروش',distdash:'فروش',saleswf:'فروش',
+ smdash:'فروش',invnew:'فروش',invnewpf:'فروش',plreport:'فروش',distdash:'فروش',saleswf:'فروش',purchwf:'کالا و انبار',claimdash:'CRM و مشتریان',wfcenter:'پرسنل و سازمان',orgchart:'پرسنل و سازمان',ucenter:'پرسنل و سازمان',geodash:'CRM و مشتریان',
  custdash:'CRM و مشتریان',claimdash:'CRM و مشتریان',loyaldash:'CRM و مشتریان',smsdash:'CRM و مشتریان',
  whdash:'کالا و انبار',pudash:'کالا و انبار',supdash:'کالا و انبار',pinvnew:'کالا و انبار',quotenew:'کالا و انبار',
  perfdash:'عملکرد و تارگت',targetdash:'عملکرد و تارگت',aligndash:'عملکرد و تارگت',
@@ -9963,9 +9964,9 @@ function wsMenu(g){
   if(g==='داشبوردها')return dashChips();
   if(g==='فروش')return (
     (canSee('invoice')&&canView('saleswf')?(()=>{const _wc=wfCount();return `<div class="nav-i ${view.type==='saleswf'?'on':''}" onclick="go('saleswf')">🔁 گردش فروش${_wc?` <span class="c" style="background:var(--ac);color:#fff">${_wc.toLocaleString('fa-IR')}</span>`:''}</div>`;})():'')+
-    (canSee('invoice')&&can('c','invoice')&&canView('invnew')?(()=>{const _pf=view.type==='invnew'&&((typeof invDraft!=='undefined'&&invDraft)?invDraft.kind==='پیش‌فاکتور':!!window._invPf);
-      return `<div class="nav-i ${view.type==='invnew'&&_pf?'on':''}" onclick="invDraft=null;window._invPf=1;go('invnew')">📝 صدور پیش‌فاکتور</div>
-      <div class="nav-i ${view.type==='invnew'&&!_pf?'on':''}" onclick="invDraft=null;window._invPf=0;go('invnew')">🧾 صدور فاکتور فروش</div>`;})():'')+
+    (canSee('invoice')&&can('c','invoice')&&(canView('invnew')||canView('invnewpf'))?(()=>{const _pf=view.type==='invnew'&&((typeof invDraft!=='undefined'&&invDraft)?invDraft.kind==='پیش‌فاکتور':!!window._invPf);
+      return (canView('invnewpf')?`<div class="nav-i ${view.type==='invnew'&&_pf?'on':''}" onclick="invDraft=null;window._invPf=1;go('invnew')">📝 صدور پیش‌فاکتور</div>`:'')+
+      (canView('invnew')?`<div class="nav-i ${view.type==='invnew'&&!_pf?'on':''}" onclick="invDraft=null;window._invPf=0;go('invnew')">🧾 صدور فاکتور فروش</div>`:'');})():'')+
     '');
   if(g==='CRM و مشتریان')return (
     canSee('claim')&&canView('claimdash')?(()=>{const _n=claimOpen().length;return `<div class="nav-i ${view.type==='claimdash'?'on':''}" onclick="go('claimdash')">↩️ مرجوعی و گارانتی${_n?` <span class="c" style="background:var(--warn);color:#000">${_n.toLocaleString('fa-IR')}</span>`:''}</div>`;})():'');
@@ -10212,7 +10213,10 @@ function render(){
   if(_mtEl){try{_mtEl.innerHTML=mtabsHTML();}catch(e){_mtEl.innerHTML='';}}
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
   const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',pldash:'pldash',bankdash:'bankdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',purchwf:'purchwf',claimdash:'claimdash',paydash:'paydash',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',ucenter:'ucenter',orgchart:'orgchart',geodash:'geodash',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
-  if(VG[view.type]&&!canView(VG[view.type])){
+  if(view.type==='invnew'&&!canView('invnew')&&!canView('invnewpf')){
+    c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
+  }
+  if(view.type!=='invnew'&&VG[view.type]&&!canView(VG[view.type])){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
   try{
@@ -15160,16 +15164,26 @@ function aclBodyHTML(){
   const seg=(opts,cur,fn)=>`<span class="asegs">${opts.map(([val,l,tip])=>`<button class="aseg ${cur===val?'on':''}" title="${tip||''}" onclick="${fn.replace('%V',val)}">${l}</button>`).join('')}</span>`;
   h+=`<div class="sec" style="padding:11px 16px"><p style="font-size:12px;color:var(--tx2);margin:0;line-height:2">همه‌چیز یک قانون دارد: روی هر ردیف، وضعیت را با یک کلیک انتخاب کنید — <b>نمایش</b> / <b>👁 فقط مشاهده</b> (می‌بیند ولی نمی‌تواند تغییر دهد) / <b>🚫 مخفی</b> (اصلاً نمی‌بیند). تنظیم فردی روی تنظیم نقش اولویت دارد و در سرور هم اعمال می‌شود.</p></div>`;
   h+=srchBox('aclx','جستجوی صفحه، بخش یا فرم…','— گروه‌های بی‌نتیجه پنهان می‌شوند','[data-sr="aclx"]','[data-srsec="aclx"]');
-  /* ── صفحه‌ها و داشبوردها ── */
-  h+=`<div class="sec" data-srsec="aclx"><h3 style="font-size:13.5px">🖥 صفحه‌ها و داشبوردها</h3><div class="aclrows">`;
-  VIEWS_ACL.forEach(([vk,vn])=>{
-    const curV=(cfg.views||{})[vk]||'';
-    const special=vk==='layout'||vk==='seclayout';
-    h+=`<div class="aclrow" data-sr="aclx" data-srt="${esc(vn)}"><span class="an">${vn}</span>
-      ${special?seg([['','غیرفعال'],['show','مجاز ✅']],curV,`setAclView('${vk}','%V');render()`)
-               :seg([['','نمایش'],['hide','🚫 مخفی']],curV,`setAclView('${vk}','%V');render()`)}</div>`;
+  /* ── صفحه‌ها و ابزارها — دسته‌بندی بر اساس حوزه ── */
+  const _vArea=(vk,vn)=>{
+    if(VIEW_GRP[vk])return VIEW_GRP[vk];
+    if(String(vn).includes('داشبورد:'))return '📊 داشبوردها';
+    return '🧰 عمومی و ابزارها';
+  };
+  const _vAreas=[...allGroups(),'📊 داشبوردها','🧰 عمومی و ابزارها'];
+  const _vBy={};VIEWS_ACL.forEach(([vk,vn])=>{const a=_vAreas.includes(_vArea(vk,vn))?_vArea(vk,vn):'🧰 عمومی و ابزارها';(_vBy[a]=_vBy[a]||[]).push([vk,vn]);});
+  _vAreas.forEach(area=>{
+    const list=_vBy[area]||[];if(!list.length)return;
+    h+=`<div class="sec" data-srsec="aclx"><h3 style="font-size:13.5px">🖥 صفحه‌های ${esc(_vAreas.slice(0,allGroups().length).includes(area)?('حوزهٔ '+grpLabel(area)):area.replace(/^[^ ]+ /,''))}</h3><div class="aclrows">`;
+    list.forEach(([vk,vn])=>{
+      const curV=(cfg.views||{})[vk]||'';
+      const special=vk==='layout'||vk==='seclayout';
+      h+=`<div class="aclrow" data-sr="aclx" data-srt="${esc(vn)}"><span class="an">${vn}</span>
+        ${special?seg([['','غیرفعال'],['show','مجاز ✅']],curV,`setAclView('${vk}','%V');render()`)
+                 :seg([['','نمایش'],['hide','🚫 مخفی']],curV,`setAclView('${vk}','%V');render()`)}</div>`;
+    });
+    h+=`</div></div>`;
   });
-  h+=`</div></div>`;
   /* ── بخش‌های داده و فرم‌ها ── */
   const _aclGroups=(()=>{const base=allGroups();
     const extra=[...new Set(Object.values(E).filter(d=>!d.sub&&d.grp&&!base.includes(d.grp)).map(d=>d.grp))].sort((a,b)=>a.localeCompare(b,'fa'));
