@@ -429,11 +429,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.58</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.59</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.58</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.59</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2968,13 +2968,19 @@ function canView(v){
   if(isPending())return false;
   if(VIEW_MOD[v]&&!viewEnabled(v))return false; // ماژول خاموش
   if(isAdmin())return true;
-  if(grpHidden(VIEW_GRP[v]))return false; // کل گروه برای این نقش مخفی است
-  const x=(aclFor().views||{})[v];if(x)return x!=='hide';
+  const x=(aclFor().views||{})[v];if(x)return x!=='hide'; // ✅ تنظیم صریح صفحه بر همه‌چیز اولویت دارد
+  if(grpHidden(VIEW_GRP[v]))return false; // کل گروه مخفی است (و صفحه تنظیم صریح ندارد)
   return !defHidden('views',v);
 }
 function entLevel(e){if(isAdmin())return null;return aclFor().ent[e]||null;} // hide|read|edit|full|null
 function fldMode(e,k){if(isAdmin())return null;return aclFor().fld[e+'.'+k]||null;} // hide|read|null
-function canSee(e){if(isPending())return false;if(!entEnabled(e))return false;if(!isAdmin()&&E[e]&&grpHidden(E[e].grp))return false;const l=entLevel(e);if(l)return l!=='hide';return !defHidden('ent',e);}
+/* 🎯 «نمایش ✅» صریح روی یک صفحه، دسترسی لازمهٔ همان صفحه را هم می‌دهد
+   (صفحهٔ صدور فاکتور بدون دیدن/ساختن فاکتور بی‌معنی است) */
+const VIEW_ENT_SEE={invnew:'invoice',invnewpf:'invoice',saleswf:'invoice',pinvnew:'purchinv',quotenew:'rfq',settlenew:'settle',claimdash:'claim',purchwf:'preq'};
+const VIEW_ENT_CREATE={invnew:'invoice',invnewpf:'invoice',pinvnew:'purchinv',quotenew:'rfq',settlenew:'settle',claimdash:'claim',purchwf:'preq'};
+function vExplicit(v){if(!session)return true;if(isPending())return false;const x=(aclFor().views||{})[v];return x==='show';}
+function vImplies(map,e){for(const v in map)if(map[v]===e&&vExplicit(v))return true;return false;}
+function canSee(e){if(isPending())return false;if(!entEnabled(e))return false;if(!isAdmin()&&vImplies(VIEW_ENT_SEE,e))return true;if(!isAdmin()&&E[e]&&grpHidden(E[e].grp))return false;const l=entLevel(e);if(l)return l!=='hide';return !defHidden('ent',e);}
 function visFields(e){return E[e].f.filter(f=>fldMode(e,f.k)!=='hide');}
 
 function can(a,e,rec){ // a: 'c' ایجاد | 'e' ویرایش | 'd' حذف
@@ -2982,6 +2988,7 @@ function can(a,e,rec){ // a: 'c' ایجاد | 'e' ویرایش | 'd' حذف
   if(r===PENDING)return false;
   if(!entEnabled(e))return false; // ماژول خاموش: نه ساخت، نه ویرایش، نه حذف
   if(r==='ادمین')return true;
+  if(a==='c'&&vImplies(VIEW_ENT_CREATE,e))return true; // 🎯 مجوز صریح صفحهٔ ثبت = مجوز ساختن سندش
   // هرکس پروفایل خودش را می‌تواند ویرایش کند
   if(a==='e'&&e==='hr'&&rec&&(rec.d.email||'').toLowerCase()===myEmail().toLowerCase())return true;
   // 🛡️ اهداف BSC و سنجه‌ها: هرکس فقط مالِ خودش را ویرایش می‌کند؛
@@ -15315,7 +15322,7 @@ function aclBodyHTML(){
       const special=vk==='layout'||vk==='seclayout';
       h+=`<div class="aclrow" data-sr="aclx" data-srt="${esc(vn)}"><span class="an">${vn}</span>
         ${special?seg([['','غیرفعال'],['show','مجاز ✅']],curV,`setAclView('${vk}','%V');render()`)
-                 :seg([['','نمایش'],['hide','🚫 مخفی']],curV,`setAclView('${vk}','%V');render()`)}</div>`;
+                 :seg([['','پیش‌فرض'],['show','نمایش ✅','حتی اگر پیش‌فرضِ نقش یا گروهش مخفی باشد، نشان داده می‌شود'],['hide','🚫 مخفی']],curV,`setAclView('${vk}','%V');render()`)}</div>`;
     });
     h+=`</div></div>`;
   });
