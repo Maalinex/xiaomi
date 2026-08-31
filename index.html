@@ -429,11 +429,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.59</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.60</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.59</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.60</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -15187,11 +15187,31 @@ function ucenterHTML(){
     ||`<div class="ucempty">📭 قاعده‌ای تعریف نشده — اسناد این کاربر مسیر عادی گردش را طی می‌کنند</div>`}
     <button class="btn sm" style="margin-top:11px" onclick="ucAprAdd('${esc(em)}')">＋ قاعدهٔ تأیید جدید</button></div>`;
   }
-  /* ═══ 🛡 دسترسی دقیق ═══ */
+  /* ═══ 🛡 دسترسی — فقط خلاصه؛ ویرایش در یک جا: «سطوح دسترسی» ═══ */
   if(tab==='acl'){
-    h+=`<div class="sec" style="border-inline-start:3px solid #5B2C93"><h3>🛡 دسترسی دقیق ${esc(dispName)}</h3>
-    <p style="font-size:12px;color:var(--tx2);line-height:2">هر صفحه، هر بخش و حتی <b>هر فیلد</b> را جداگانه تعیین کنید: عادی / فقط مشاهده / مخفی. تنظیم فردی روی تنظیم نقش اولویت دارد و در سرور هم اعمال می‌شود.</p></div>`;
-    h+=ucAclBody(u.email);
+    const em2=String(u.email||'').toLowerCase();
+    const a2=acl();
+    const ov=(a2.users||{})[em2]||{};
+    const nV=Object.keys(ov.views||{}).length, nE=Object.keys(ov.ent||{}).length,
+          nF=Object.keys(ov.fld||{}).length, nG=Object.keys(ov.grp||{}).length;
+    const nAll=nV+nE+nF+nG;
+    const rl=ROLE_LEGACY[u.role]||u.role;
+    const st=(v,l)=>`<div style="background:var(--bg3);border-radius:12px;padding:10px 14px;text-align:center;min-width:88px"><b style="font-size:17px">${v.toLocaleString('fa-IR')}</b><div style="font-size:10.5px;color:var(--tx2)">${l}</div></div>`;
+    h+=`<div class="sec" style="border-inline-start:3px solid #5B2C93;padding:14px 18px">
+      <h3>🛡 دسترسی ${esc(dispName)} — بدون دوباره‌کاری</h3>
+      <p style="font-size:12px;color:var(--tx2);line-height:2.1;margin:8px 0 12px">دسترسی این کاربر به‌صورت خودکار از نقشش می‌آید: <b>«${esc(rl)}»</b>. برای بیشترِ افراد همین کافی است و لازم نیست چیز دیگری تنظیم کنید.<br>فقط اگر این شخص باید <b>استثنا</b> داشته باشد (چیزی بیش یا کم از نقشش)، در «سطوح دسترسی» برای خودِ او تنظیم کنید — تعریفِ تکراری لازم نیست، هر دو صفحه یک حافظهٔ مشترک دارند.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        ${st(nV,'استثنای صفحه')}${st(nG,'استثنای گروه')}${st(nE,'استثنای بخش')}${st(nF,'استثنای فیلد')}
+      </div>
+      ${nAll?`<p style="font-size:11.5px;color:var(--tx2);margin-bottom:10px">این کاربر ${nAll.toLocaleString('fa-IR')} استثنای فردی دارد که بر قواعد نقش «${esc(rl)}» اولویت دارند.</p>`
+        :`<p style="font-size:11.5px;color:var(--ok,#1f8a4c);margin-bottom:10px">✅ هیچ استثنای فردی ندارد — دقیقاً مطابق نقش «${esc(rl)}» می‌بیند.</p>`}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="go('acl');view.aclT='user';view.aclV='${esc(em2)}';render()">🛡 ویرایش استثناهای این کاربر در «سطوح دسترسی»</button>
+        <button class="btn gh sm" onclick="go('acl');view.aclT='role';view.aclV='${esc(rl)}';render()">🎭 ویرایش قواعد نقش «${esc(rl)}»</button>
+        ${nAll?(view._ucAclRst===em2?`<b style="color:var(--bad);font-size:12px;align-self:center">همهٔ استثناها پاک شود؟</b>
+          <button class="btn bad sm" onclick="ucAclReset('${esc(em2)}')">بله</button><button class="btn gh sm" onclick="view._ucAclRst=null;render()">انصراف</button>`
+          :`<button class="btn bad sm" onclick="ucAclReset('${esc(em2)}')">♻️ پاک کردن همهٔ استثناهای فردی</button>`):''}
+      </div></div>`;
   }
   return h;
 }
@@ -15297,6 +15317,12 @@ function aclHTML(){
 }
 function ucAclBody(em){view.aclT='user';view.aclV=em;return aclBodyHTML();}
 window.ucAclBody=ucAclBody;
+window.ucAclReset=function(em){ // ♻️ حذف استثناهای فردی — کاربر به قواعد نقشش برمی‌گردد
+  em=String(em||'').toLowerCase();
+  if(view._ucAclRst!==em){view._ucAclRst=em;render();return;}
+  saveAcl(d=>{d.users=d.users||{};const c=d.users[em];if(c){delete c.views;delete c.ent;delete c.fld;delete c.grp;}});
+  view._ucAclRst=null;setSync('ok','استثناهای فردی پاک شد — دسترسی این کاربر اکنون دقیقاً مطابق نقش اوست');render();
+};
 function aclBodyHTML(){
   const {t,v}=aclTarget(); const cfg=aclCfg(); let h='';
   if(!v)return `<div class="empty">کاربری ثبت نشده است</div>`;
