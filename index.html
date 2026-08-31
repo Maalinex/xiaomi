@@ -429,11 +429,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.61</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.62</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.61</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.62</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1606,6 +1606,7 @@ swot:{ic:'🧭',n:'تحلیل استراتژیک (SWOT/PESTEL)',grp:'استرا�
  {k:'title',n:'عنوان عامل (مثل: رشد تقاضای انرژی پاک)',t:TXT},
  {k:'frame',n:'چارچوب',t:SEL,o:['SWOT','PESTEL']},
  {k:'kind',n:'نوع عامل',t:SEL,o:['قوت (S)','ضعف (W)','فرصت (O)','تهدید (T)','سیاسی (P)','اقتصادی (E)','اجتماعی (S)','فناورانه (T)','محیط‌زیستی (E)','قانونی (L)']},
+ {k:'pestel',n:'🧬 عامل متناظر PESTEL (هم‌زمان در بوم PESTEL هم دیده می‌شود)',t:SEL,o:['—','سیاسی (P)','اقتصادی (E)','اجتماعی (S)','فناورانه (T)','محیط‌زیستی (E)','قانونی (L)']},
  {k:'desc',n:'شرح و شواهد',t:LNG},
  {k:'scope',n:'سطح',t:SEL,o:['هلدینگ','خوشه/زیرهلدینگ','شرکت','کسب‌وکار','واحد','تیم','فرد']},
  {k:'cluster',n:'خوشه صنعت (در صورت تحلیل خوشه‌ای)',t:SEL,o:['۱. انرژی و منابع','۲. مالی و سرمایه','۳. صنعت و تولید','۴. فناوری و دیجیتال','۵. تجارت و خدمات']},
@@ -17216,8 +17217,38 @@ function swotParentChain(T){ // زنجیرهٔ سطوح بالادست: هلدی
 const SWOT_Q=[['قوت (S)','S','💪','#2ecc71','داخلی · مثبت'],['ضعف (W)','W','🩹','#e74c3c','داخلی · منفی'],['فرصت (O)','O','🌅','#5b93d3','بیرونی · مثبت'],['تهدید (T)','T','⚡','#e08b3d','بیرونی · منفی']];
 const PESTEL_Q=[['سیاسی (P)','P','🏛️','#c58cd8'],['اقتصادی (E)','E','💹','#e2b93b'],['اجتماعی (S)','S','👥','#5ca94f'],['فناورانه (T)','T','🤖','#5b93d3'],['محیط‌زیستی (E)','E','🌿','#3aa87c'],['قانونی (L)','L','⚖️','#d3705b']];
 function swotScore(x){return (+x.d.impact||0)*(+x.d.prob||0);}
+/* 📋 پرسشنامهٔ امتیازدهی ذینفعان — آرا روی خود رکورد جمع و میانگین‌گیری می‌شود */
+window.swotVote=function(id,dim,val){
+  const r=recs[id];if(!r||r.del)return;
+  const em=String(myEmail()||'').toLowerCase();
+  const v={...(r.d.votes||{})};
+  v[em]={...(v[em]||{}),[dim]:val,t:Date.now()};
+  const arr=Object.values(v);
+  const avg=k2=>{const xs=arr.map(x=>+x[k2]||0).filter(x=>x>0);return xs.length?Math.round(xs.reduce((a,b)=>a+b,0)/xs.length*10)/10:0;};
+  const ai=avg('i'),ap=avg('p');
+  r.d={...r.d,votes:v,...(ai?{impact:ai}:{}),...(ap?{prob:ap}:{})};
+  r.u=Date.now();put(r);render();
+};
+/* 🤖 ثبت استراتژی پیشنهادی از تلاقی دو عامل مشخص */
+window.swotAiMake=function(aId,bId,tows,T){
+  const fa=recs[aId],fb=recs[bId];if(!fa||!fb)return;
+  const tpl={SO:(a,b)=>'با تکیه بر «'+a+'» از فرصت «'+b+'» بهره‌برداری کنیم',
+    ST:(a,b)=>'با استفاده از «'+a+'» اثر تهدید «'+b+'» را خنثی کنیم',
+    WO:(a,b)=>'با بهره‌گیری از فرصت «'+b+'» ضعف «'+a+'» را جبران کنیم',
+    WT:(a,b)=>'با کاهش «'+a+'» از رویارویی با تهدید «'+b+'» پرهیز کنیم'};
+  let scope='هلدینگ',ex={};
+  if(T.startsWith('cl:')){scope='کسب‌وکار';}
+  else if(T[0]==='c'&&T[1]===':'){scope='شرکت';ex.company=[T.slice(2)];}
+  else if(T[0]==='b'){scope='کسب‌وکار';ex.biz=[T.slice(2)];}
+  else if(T[0]==='u'){scope='واحد';ex.orgu=[T.slice(2)];}
+  else if(T[0]==='p'){scope='فرد';ex.person=[T.slice(2)];}
+  openRecWith('bsc',{title:tpl[tows](fa.d.title,fb.d.title),kind:'استراتژی کلان',
+    desc:'استراتژی پیشنهادیِ سیستم از ماتریس TOWS ('+tows+'). عوامل پایه: '+fa.d.title+' + '+fb.d.title,
+    scope:scope,towstype:tows,swot:[aId,bId],status:'todo',
+    persp:(tows==='SO'||tows==='WO')?'یادگیری و رشد':'فرآیندهای داخلی',...ex});
+};
 function swotmapHTML(){
-  if(!view.swT)view.swT='_h';
+  if(!view.swT)view.swT=gBiz()&&recs[gBiz()]?'b:'+gBiz():(gCo()&&recs[gCo()]?'c:'+gCo():'_h'); // 🏢 پیش‌فرض = زمینهٔ فعال
   const T=view.swT;
   if(!view.swFrame)view.swFrame='SWOT';
   const all=byE('swot').filter(x=>x.d.status!=='بایگانی');
@@ -17233,6 +17264,7 @@ function swotmapHTML(){
     ${['SWOT','PESTEL'].map(f=>`<button class="btn sm ${view.swFrame===f?'':'gh'}" onclick="view.swFrame='${f}';render()">${f}</button>`).join('')}
     <span style="flex:1"></span>
     ${can('c','swot')?`<button class="btn sm" onclick="swotAdd('${view.swFrame}','${T}')">＋ عامل ${view.swFrame}</button>`:''}
+    <button class="btn ${view.swQ?'':'gh '}sm" onclick="view.swQ=!view.swQ;render()">📋 پرسشنامهٔ امتیازدهی ${view.swQ?'▴':'▾'}</button>
     <button class="btn gh sm" onclick="go('stratdash')">🏛️ داشبورد استراتژیک</button>
   </div>
   <p style="font-size:12px;color:var(--tx2);margin-bottom:10px">🧭 بوم <b>${view.swFrame}</b> در سطح «${esc(levelName)}». عوامل همین سطح پررنگ‌اند و عوامل <b>به‌ارث‌رسیده از سطوح بالادست</b> با قاب خط‌چین نشان داده می‌شوند تا آبشار از هلدینگ تا پایین یکپارچه بماند. با «شدت اثر × احتمال» اولویت هر عامل مشخص می‌شود.</p>`;
@@ -17256,10 +17288,38 @@ function swotmapHTML(){
         <span style="flex:1"></span><span class="tag" style="font-size:9px">${(ownRows.length+inhRows.length).toLocaleString('fa-IR')}</span></div>
       <div style="padding:7px 9px;flex:1">
         ${ownRows.length?ownRows.map(x=>rowHTML(x,false)).join(''):'<div style="font-size:10px;color:var(--tx2);padding:3px">عاملی در این سطح ثبت نشده</div>'}
+        ${(view.swFrame==='PESTEL'?paired.filter(x=>x.d.pestel===label):[]).map(x=>`<div onclick="go('rec','swot','${x.id}')" style="display:flex;align-items:center;gap:6px;padding:5px 7px;margin-top:4px;background:var(--bg2);border:1px dotted ${col};border-radius:8px;font-size:11px;cursor:pointer;opacity:.9">
+          <b style="min-width:26px;text-align:center;color:var(--tx2)">${swotScore(x)?(Math.round(swotScore(x)*10)/10).toLocaleString('fa-IR'):'—'}</b>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.d.title)}</span>
+          <span class="tag" style="font-size:8.5px" title="این عامل در بوم SWOT ثبت شده و متناظر PESTEL دارد">🧭 SWOT</span></div>`).join('')}
         ${inhRows.length?`<div style="font-size:9px;color:var(--tx2);margin-top:6px;border-top:1px dashed var(--line);padding-top:4px">به‌ارث از بالادست:</div>`+inhRows.map(x=>rowHTML(x,true)).join(''):''}
         ${can('c','swot')?`<div style="margin-top:6px"><button class="btn gh sm" style="font-size:9.5px;width:100%" onclick="swotAdd('${view.swFrame}','${T}','${label.replace(/'/g,"")}')">＋ افزودن ${code}</button></div>`:''}
       </div></div>`;
   };
+  if(view.swQ){
+    const em=String(myEmail()||'').toLowerCase();
+    const qrows=own.slice().sort((a,b)=>swotScore(b)-swotScore(a));
+    const segv=(x,dim,curV)=>[1,2,3,4,5].map(n=>`<button class="btn ${curV===n?'':'gh '}sm" style="min-width:30px;padding:2px 0;font-size:11px" onclick="swotVote('${x.id}','${dim}',${n})">${n.toLocaleString('fa-IR')}</button>`).join('');
+    h+=`<div class="sec" style="border-inline-start:3px solid #744DA9;padding:12px 16px;margin-bottom:10px">
+      <h3>📋 پرسشنامهٔ امتیازدهی ذینفعان — سطح «${esc(levelName)}»</h3>
+      <p style="font-size:11.5px;color:var(--tx2);line-height:2;margin:6px 0 10px">هر ذینفع برای هر عامل، <b>شدت اثر</b> و <b>احتمال/قطعیت</b> را از ۱ تا ۵ می‌زند. سیستم آرا را جمع و <b>میانگین</b> می‌گیرد و همان میانگین، نمرهٔ نهایی (اثر×احتمال) روی بوم اصلی و ماتریس TOWS می‌شود. رأی جدیدِ هر نفر، رأی قبلی خودش را جایگزین می‌کند.</p>
+      ${qrows.length?qrows.map(x=>{const mv=(x.d.votes||{})[em]||{};const nv=Object.keys(x.d.votes||{}).length;
+        return `<div style="border:1px solid var(--line);border-radius:11px;padding:9px 12px;margin-top:7px;background:var(--bg2)">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <b style="font-size:12px;flex:1;min-width:160px">${esc(x.d.title)}</b>
+            <span class="tag" style="font-size:9.5px">${esc(x.d.kind||'')}</span>
+            <span class="tag y" style="font-size:9.5px" title="اثر×احتمال (میانگین آرا)">نمره ${(swotScore(x)?(Math.round(swotScore(x)*10)/10).toLocaleString('fa-IR'):'—')}</span>
+            <span style="font-size:9.5px;color:var(--tx2)">${nv?nv.toLocaleString('fa-IR')+' رأی':'بدون رأی'}</span>
+          </div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:7px;font-size:10.5px">
+            <div style="display:flex;align-items:center;gap:5px"><span style="color:var(--tx2)">شدت اثر:</span>${segv(x,'i',+mv.i||0)}<b style="color:var(--tx2)">میانگین ${(+x.d.impact||0).toLocaleString('fa-IR')}</b></div>
+            <div style="display:flex;align-items:center;gap:5px"><span style="color:var(--tx2)">احتمال:</span>${segv(x,'p',+mv.p||0)}<b style="color:var(--tx2)">میانگین ${(+x.d.prob||0).toLocaleString('fa-IR')}</b></div>
+          </div>
+        </div>`;}).join(''):'<div class="empty" style="padding:14px">در این سطح و چارچوب هنوز عاملی ثبت نشده — اول عوامل را وارد کنید</div>'}
+    </div>`;
+  }
+  // 🧬 عوامل SWOT دارای متناظر PESTEL — در بوم PESTEL هم نمایش داده می‌شوند
+  const paired=view.swFrame==='PESTEL'?all.filter(x=>(x.d.frame||'SWOT')==='SWOT'&&x.d.pestel&&x.d.pestel!=='—'&&(swotInLevel(x,T)||parents.some(pt=>swotInLevel(x,pt)))):[];
   const cols=view.swFrame==='SWOT'?'repeat(auto-fit,minmax(230px,1fr))':'repeat(auto-fit,minmax(200px,1fr))';
   h+=`<div style="display:grid;grid-template-columns:${cols};gap:10px">${QS.map(cell).join('')}</div>`;
   // ===== ترکیب TOWS (فقط برای SWOT) — ساخت استراتژی از تلاقی عوامل =====
@@ -17282,8 +17342,18 @@ function swotmapHTML(){
         return `<div style="border:1px solid ${M[2]}66;border-radius:12px;padding:11px;background:var(--bg2)">
           <div style="display:flex;align-items:center;gap:7px"><b style="font-size:13px;color:${M[2]}">${M[0]}</b><span style="font-size:10.5px">${esc(M[1])}</span></div>
           <div style="font-size:10px;color:var(--tx2);margin-top:5px">${esc(M[5])} · ${nA.toLocaleString('fa-IR')}×${nB.toLocaleString('fa-IR')} عامل موجود</div>
-          ${ready?`<button class="btn sm" style="margin-top:8px;font-size:10.5px" onclick="swotMakeStrategy('${M[0]}','${T}')">＋ استراتژی ${M[0]}</button>`
-            :`<div style="font-size:9.5px;color:var(--tx2);margin-top:8px">برای این ترکیب، هر دو دسته عامل لازم است</div>`}
+          ${ready?(()=>{
+            const top=a2=>a2.slice().sort((x,y)=>swotScore(y)-swotScore(x)).slice(0,2);
+            const A=top(M[3]),B=top(M[4]);
+            const tpl={SO:(a,b)=>`با تکیه بر «${a}» از فرصت «${b}» بهره‌برداری کنیم`,ST:(a,b)=>`با استفاده از «${a}» اثر تهدید «${b}» را خنثی کنیم`,WO:(a,b)=>`با بهره‌گیری از فرصت «${b}» ضعف «${a}» را جبران کنیم`,WT:(a,b)=>`با کاهش «${a}» از رویارویی با تهدید «${b}» پرهیز کنیم`}[M[0]];
+            const pairs=[];A.forEach((fa,ii)=>{const fb=B[ii]||B[0];if(fb)pairs.push([fa,fb]);});
+            return `<div style="font-size:9.5px;color:var(--tx2);margin-top:7px">🤖 پیشنهاد هوشمند (از پررتبه‌ترین عوامل):</div>`+
+              pairs.map(p2=>`<div style="display:flex;align-items:flex-start;gap:6px;margin-top:5px;background:var(--bg);border:1px dashed ${M[2]}66;border-radius:8px;padding:6px 8px">
+                <span style="font-size:10.5px;flex:1;line-height:1.9">${esc(tpl(p2[0].d.title,p2[1].d.title))}</span>
+                ${can('c','bsc')?`<button class="btn gh sm" style="font-size:9.5px;white-space:nowrap" onclick="swotAiMake('${p2[0].id}','${p2[1].id}','${M[0]}','${T}')">➕ ثبت</button>`:''}
+              </div>`).join('')+
+              `<button class="btn sm" style="margin-top:8px;font-size:10.5px" onclick="swotMakeStrategy('${M[0]}','${T}')">＋ استراتژی ترکیبی ${M[0]}</button>`;
+          })():`<div style="font-size:9.5px;color:var(--tx2);margin-top:8px">برای این ترکیب، هر دو دسته عامل لازم است</div>`}
         </div>`;}).join('')}
       </div>
       ${levelStrats.length?`<div style="margin-top:11px;border-top:1px dashed var(--line);padding-top:9px"><b style="font-size:12px">🎯 استراتژی‌های زادهٔ SWOT در این سطح (${levelStrats.length.toLocaleString('fa-IR')})</b>
@@ -17900,6 +17970,10 @@ function openRec(e,id,preset){
   if(!id&&gBiz()&&recs[gBiz()]){const bf=(E[e].f||[]).find(f=>f.t===REL&&f.r==='business');if(bf&&!(cur.d[bf.k]&&cur.d[bf.k].length))cur.d[bf.k]=[gBiz()];}
   if(!id&&gCo()&&recs[gCo()]){const cf=(E[e].f||[]).find(f=>f.t===REL&&f.r==='company');if(cf&&!(cur.d[cf.k]&&cur.d[cf.k].length))cur.d[cf.k]=[gCo()];}
   if(!id&&gPrj()){const pf=(E[e].f||[]).find(f=>f.t===REL&&f.r==='eproject');if(pf&&!(cur.d[pf.k]&&cur.d[pf.k].length))cur.d[pf.k]=[gPrj()];}
+  if(e==='swot'&&!id&&!cur.d.scope){ // 🧭 سطح تحلیل از زمینهٔ فعال
+    if(cur.d.biz&&cur.d.biz.length)cur.d.scope='کسب‌وکار';
+    else if(cur.d.company&&cur.d.company.length)cur.d.scope='شرکت';
+  }
   // تسک جدید: تاریخ و ساعت ایجاد خودکار پر می‌شود (قابل ویرایش)
   if(e==='task'&&!id){
     const n=new Date(), p=x=>String(x).padStart(2,'0');
