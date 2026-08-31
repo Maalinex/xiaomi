@@ -429,11 +429,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.57</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.58</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.57</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.58</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -591,10 +591,9 @@ const KPI_NAMES=KPIC.flatMap(c=>c.subs.map(x=>x[0]));
 const KPI_DIR={};KPIC.forEach(c=>c.subs.forEach(x=>KPI_DIR[x[0]]=x[1]));
 const E={
 hr:{ic:'👥',n:'منابع انسانی',grp:'پرسنل و سازمان',f:[
- {k:'title',n:'نام و نام خانوادگی',t:TXT},{k:'role',n:'سمت',t:TXT},
+ {k:'title',n:'نام و نام خانوادگی',t:TXT},{k:'role',n:'سمت / عنوان شغلی (فقط توضیحی — دسترسی نمی‌دهد)',t:TXT},
  {k:'unit',n:'واحد',t:SEL,o:['مدیریت','مالی','اداری','بازرگانی','فنی']},
  {k:'wstatus',n:'وضعیت همکاری',t:SEL,o:['شاغل','مرخصی بلندمدت','بازنشسته','قطع همکاری']},
- {k:'wrole',n:'🔁 نقش در گردش فروش',t:SEL,o:['—','فروشنده','مدیر فروش','کارمند حسابداری','مدیر مالی','مدیر ارشد']},
  {k:'code',n:'کد تفصیل سپیدار (برای اتصال حسابداری)',t:TXT},
  {k:'email',n:'ایمیل',t:TXT},{k:'phone',n:'تلفن',t:TXT},
  {k:'hire',n:'تاریخ استخدام',t:DAT},{k:'quota',n:'سهمیه مرخصی سالانه',t:NUM},
@@ -5537,6 +5536,54 @@ function payslipPrint(id){
   <p style="font-size:11px;color:#555">تاریخ صدور: ${esc(iso2jstr(today()))} │ ${r.d.paid?'✅ پرداخت شده':'⏳ در انتظار پرداخت'}</p>
   <script>window.print();<\/script></body></html>`);
   w.document.close();
+}
+/* 🧭 فرآیند واحد «عنوان و دسترسی» — راهنمای مشترک + شناسنامه دسترسی روی پرونده HR */
+function accessGuideHTML(){
+  const open=!!view.acGuide;
+  const step=(n,ic,t,d,go2)=>`<div style="display:flex;gap:10px;align-items:flex-start;background:var(--bg3);border-radius:12px;padding:10px 12px">
+    <span style="background:var(--ac);color:#fff;border-radius:50%;min-width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">${n}</span>
+    <div style="flex:1"><b style="font-size:12.5px">${ic} ${t}</b><p style="font-size:11px;color:var(--tx2);margin:3px 0 0;line-height:2">${d}</p></div>
+    ${go2?`<button class="btn gh sm" onclick="${go2}">برو ↵</button>`:''}</div>`;
+  return `<div class="sec" style="padding:11px 16px">
+    <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="view.acGuide=!view.acGuide;render()">
+      <b style="font-size:13px">🧭 فرآیند تعیین عنوان و دسترسی — هر چیز فقط یک جا</b><span style="flex:1"></span>
+      <span style="color:var(--tx2);font-size:12px">${open?'بستن ▴':'نمایش راهنما ▾'}</span></div>
+    ${open?`<div style="display:grid;gap:8px;margin-top:11px">
+      ${step('۱','🪪','پرونده پرسنلی — فقط «کیستی»','نام، سمت/عنوان شغلی (صرفاً توضیحی)، واحد، مدیر مستقیم، ایمیل. هیچ دسترسی‌ای اینجا داده نمی‌شود.','go(\'list\',\'hr\')')}
+      ${step('۲','👤','کاربران و دسترسی — نقش سیستمی','برای هر ایمیل یک نقش پایه تعیین کنید (ادمین/مدیرارشد/مدیر/کارمند…). این نقش، پایهٔ همهٔ دسترسی‌هاست و پروندهٔ HR را هم به کاربر وصل می‌کند.','go(\'users\')')}
+      ${step('۳','🎛','مرکز فرمان کاربران — نقش در گردش‌ها','نقش فرد در هر گردش کاری (فروش/خرید/مرخصی)، مدیر بالادست و قواعد «تأیید از نفر مشخص» فقط اینجا تعریف می‌شود.','go(\'ucenter\')')}
+      ${step('۴','🛡','سطوح دسترسی — ریزتنظیم','اگر لازم شد چیزی بیش/کم از نقش پایه باشد: صفحه، بخش یا حتی یک فیلد را برای نقش یا شخصِ خاص باز/بسته کنید. تنظیم فردی بر نقش اولویت دارد.','go(\'acl\')')}
+      <p style="font-size:11px;color:var(--tx2);margin:2px 4px;line-height:2">💡 قاعدهٔ طلایی: «عنوان شغلی» فقط توضیح است؛ «نقش سیستمی» دسترسی پایه می‌دهد؛ «گردش‌ها» در مرکز فرمان؛ «استثناها» در سطوح دسترسی. برای هر نفر کارت خلاصهٔ همین چهار مورد، پایین پروندهٔ پرسنلی‌اش دیده می‌شود.</p>
+    </div>`:''}</div>`;
+}
+function hrIdCardHTML(r){
+  if(!r||r.e!=='hr')return '';
+  const em=ucEmailOfHr(r.id);
+  const u=em?usersList().find(x=>(x.email||'').toLowerCase()===em):null;
+  const srole=u?(ROLE_LEGACY[u.role]||u.role):'';
+  const mgr=relIds(r,'manager')[0];
+  const orgu=relIds(r,'orgu')[0];
+  const chip=(l,v,warn)=>`<div style="background:var(--bg3);border-radius:10px;padding:7px 11px;font-size:11.5px">
+    <span style="color:var(--tx2)">${l}:</span> <b style="${warn?'color:var(--warn,#b7892b)':''}">${v}</b></div>`;
+  let wfs='';
+  try{wfs=WFLOWS.map(f=>{const wr=em?wroleOf(f.k,em):'';return wr?`${f.n.replace(/^[^ ]+ /,'')}: ${esc(wr)}`:'';}).filter(Boolean).join(' · ');}catch(e){}
+  return `<div class="sec" style="padding:12px 16px">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px">
+      <b style="font-size:13px">🪪 شناسنامهٔ عنوان و دسترسی</b>
+      <span style="font-size:10.5px;color:var(--tx2)">خلاصهٔ چهار لایه — ویرایش هر مورد فقط در جای خودش</span><span style="flex:1"></span>
+      ${isAdmin()?`<button class="btn gh sm" onclick="go('users')">👤 نقش سیستمی</button>
+      ${em?`<button class="btn gh sm" onclick="go('ucenter');view.ucU='${esc(em)}';render()">🎛 مرکز فرمان</button>`:''}
+      <button class="btn gh sm" onclick="go('acl')">🛡 سطوح دسترسی</button>`:''}
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap">
+      ${chip('🪪 عنوان شغلی (توضیحی)',esc(r.d.role||'—'))}
+      ${chip('👤 نقش سیستمی',u?esc(srole):'به کاربری وصل نیست',!u)}
+      ${chip('🔁 نقش در گردش‌ها',wfs||'تعریف نشده',!wfs)}
+      ${chip('🧑‍💼 مدیر مستقیم',mgr&&recs[mgr]?esc(recs[mgr].d.title||'—'):'تعیین نشده',!mgr)}
+      ${chip('🧩 واحد سازمانی',orgu&&recs[orgu]?esc(recs[orgu].d.title||'—'):'—')}
+    </div>
+    ${!u?`<p style="font-size:11px;color:var(--warn,#b7892b);margin:8px 2px 0;line-height:2">⚠️ این پرونده به هیچ حساب کاربری وصل نیست — در «کاربران و دسترسی»، ستون «پرونده HR» را برای ایمیل این فرد تنظیم کنید تا میز کار، مرخصی و فیش حقوقی‌اش فعال شود.</p>`:''}
+  </div>`;
 }
 function hrWorkHTML(r){
   if(!r||r.e!=='hr')return '';
@@ -14055,7 +14102,7 @@ function recHTML(e,id){
   if(e==='bsc'&&r.d.target)chips.push(['مقدار فعلی / هدف',`<b>${fmtN(r.d.current||0)} / ${fmtN(r.d.target)} ${esc(r.d.unit||'')}</b>`]);
   if(chips.length)h+=`<div class="comp" style="margin-bottom:12px">${chips.map(c=>`<div class="chip">${c[0]}: ${c[1]}</div>`).join('')}</div>`;
   if(e==='saletarget'){try{h+=tgtAwardHTML(r);}catch(_e){}}
-  if(e==='hr'){try{h+=hrWorkHTML(r);}catch(_e){}}
+  if(e==='hr'){try{h+=hrIdCardHTML(r);}catch(_e){}try{h+=hrWorkHTML(r);}catch(_e){}}
   if(e==='invoice'&&r.d.status!=='باطل'){try{
     const t0=ds(r.d.date)?new Date(ds(r.d.date)).getTime():0;
     let tot=0;try{tot=invCalc(r).total;}catch(_e2){}
@@ -15247,6 +15294,7 @@ function aclBodyHTML(){
   const {t,v}=aclTarget(); const cfg=aclCfg(); let h='';
   if(!v)return `<div class="empty">کاربری ثبت نشده است</div>`;
   const who=t==='role'?'این نقش':'این کاربر';
+  h+=accessGuideHTML();
   /* 🧩 الگوی واحد: دکمه‌های سه‌حالته به‌جای منوهای بازشو */
   const seg=(opts,cur,fn)=>`<span class="asegs">${opts.map(([val,l,tip])=>`<button class="aseg ${cur===val?'on':''}" title="${tip||''}" onclick="${fn.replace('%V',val)}">${l}</button>`).join('')}</span>`;
   h+=`<div class="sec" style="padding:11px 16px"><p style="font-size:12px;color:var(--tx2);margin:0;line-height:2">همه‌چیز یک قانون دارد: روی هر ردیف، وضعیت را با یک کلیک انتخاب کنید — <b>نمایش</b> / <b>👁 فقط مشاهده</b> (می‌بیند ولی نمی‌تواند تغییر دهد) / <b>🚫 مخفی</b> (اصلاً نمی‌بیند). تنظیم فردی روی تنظیم نقش اولویت دارد و در سرور هم اعمال می‌شود.</p></div>`;
@@ -17658,7 +17706,8 @@ window.adminPwDo=async function(em){
 };
 function usersHTML(){
   const list=usersList();
-  let h=`<div class="sec"><h3>👤 کاربران و سطح دسترسی</h3>
+  let h=accessGuideHTML();
+  h+=`<div class="sec"><h3>👤 کاربران و سطح دسترسی</h3>
   <p style="font-size:12px;color:var(--tx2);margin-bottom:12px">هر کاربر با ایمیل و رمز خودش وارد می‌شود (بار اول در صفحه ورود، خودش ثبت‌نام می‌کند). اینجا نقش هر ایمیل را تعیین می‌کنید. ایمیلی که در این لیست نباشد، نقش «کاربر» می‌گیرد.</p>
   ${list.length>=8?srchBox('usr','جستجوی ایمیل، نقش یا نام پرونده…','','[data-sr=\"usr\"]'):''}
   <div class="tblwrap"><table><thead><tr><th>ایمیل</th><th>نقش</th><th>👥 پرونده منابع انسانی</th><th></th></tr></thead><tbody>`;
