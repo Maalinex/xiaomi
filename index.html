@@ -429,11 +429,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.67</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.68</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.67</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.68</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -3772,8 +3772,9 @@ window.invQuickCust=function(){
   const nm=((document.getElementById('qc_nm')||{}).value||'').trim();
   if(!nm){alert('نام مشتری را بنویسید');return;}
   const ph=((document.getElementById('qc_ph')||{}).value||'').trim();
+  const ad=((document.getElementById('qc_ad')||{}).value||'').trim();
   const id=uid();
-  put({id,e:'customer',d:{title:nm,phone:ph,biz:invDraft&&invDraft.biz?[invDraft.biz]:[],_by:myEmail()},u:Date.now()});
+  put({id,e:'customer',d:{title:nm,phone:ph,address:ad,biz:invDraft&&invDraft.biz?[invDraft.biz]:[],_by:myEmail()},u:Date.now()});
   if(invDraft)invDraft.customer=id;
   view.qc=0;render();
 };
@@ -5475,6 +5476,19 @@ function invBrief(inv){
 }
 function invLineBrief(l){return {label:'مبلغ ردیف',v:money(invLineAmt(l))};}
 window.invBrief=invBrief;window.invLineBrief=invLineBrief;
+/* 💵 ثبت وصولی/قسط روی فاکتور — paid افزایش می‌یابد و تاریخچه اقساط ذخیره می‌شود */
+window.invPayAdd=function(id,inputId){
+  const r=recs[id];if(!r||r.del)return;
+  const el=document.getElementById(inputId);
+  const amt=Number(faNum(String((el&&el.value)||'')).replace(/[٬,\s]/g,''))||0;
+  if(amt<=0){setSync('err','مبلغ وصولی را وارد کنید');return;}
+  const c=invCalc(r);
+  const pay=Math.min(amt,c.due);
+  r.d={...r.d,paid:(+r.d.paid||0)+pay,payments:[...(r.d.payments||[]),{t:Date.now(),amt:pay,by:myEmail()}]};
+  if(invCalc(r).due<=0)r.d.status='تسویه شده';
+  r.u=Date.now();put(r);
+  setSync('ok','💵 '+money(pay)+' وصول شد — مانده: '+money(invCalc(r).due));render();
+};
 /* 🧮 پانل ردیف‌ها و جمع فاکتور — بالای صفحهٔ هر فاکتور */
 function invTotalsPanel(r){
   const c=invCalc(r);
@@ -8157,7 +8171,7 @@ function invnewHTML(){
     <div><label ${lbl}>مشتری 🔍 <a href="#" style="font-size:10.5px;color:var(--ac);text-decoration:none" onclick="view.qc=!view.qc;render();return false">＋ مشتری جدید</a></label><input list="dl_invcust" value="${esc(custName)}" placeholder="بنویس تا جستجو شود…" onchange="invPickCust(this.value)">
       <datalist id="dl_invcust">${custs.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>
       <datalist id="dl_invprod">${prodDlOpts(prods)}</datalist>
-      ${view.qc?`<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap"><input id="qc_nm" placeholder="نام مشتری جدید" style="max-width:150px;font-size:12px"><input id="qc_ph" placeholder="تلفن (اختیاری)" style="max-width:120px;font-size:12px" dir="ltr"><button type="button" class="btn sm" onclick="invQuickCust()">ثبت</button></div>`:''}
+      ${view.qc?`<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap"><input id="qc_nm" placeholder="نام مشتری جدید" style="max-width:150px;font-size:12px"><input id="qc_ph" placeholder="تلفن (اختیاری)" style="max-width:120px;font-size:12px" dir="ltr"><input id="qc_ad" placeholder="🏠 آدرس (اختیاری)" style="min-width:220px;flex:1;font-size:12px"><button type="button" class="btn sm" onclick="invQuickCust()">ثبت</button></div>`:''}
       ${(()=>{if(!invDraft.customer||!recs[invDraft.customer])return'';const cr=+recs[invDraft.customer].d.credit||0;if(!cr)return'';const du=custReceivable(invDraft.customer);const ok=du<cr;
         return `<div style="font-size:10.5px;margin-top:4px;color:${ok?'var(--tx2)':'var(--bad)'}">💳 اعتبار: بدهی ${money(du)} از سقف ${money(cr)}${ok?'':' — سقف پر است!'}</div>`;})()}</div>
     <div><label ${lbl}>👤 فروشنده / فرد <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('seller',this.value)"><option value="">—</option>${sellers.map(x=>{const u=orguOf(x);return `<option value="${x.id}" ${x.id===invDraft.seller?'selected':''}>${esc(x.d.title)}${u?' · '+esc(u):''}</option>`;}).join('')}</select>
@@ -8196,7 +8210,6 @@ function invnewHTML(){
   <button class="btn gh sm" style="margin-top:8px" onclick="invAddLine()">➕ ردیف</button>
   ${invDraft.kind==='پیش‌فاکتور'?'':`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px">
     <div><label ${lbl}>تخفیف ٪ (نسبت به کل فاکتور)</label><input inputmode="decimal" value="${invDraft.discpct||''}" oninput="invDraft.discpct=this.value;render()" placeholder="۰"></div>
-    <div><label ${lbl}>تخفیف مبلغی (ریال) — اگر ٪ صفر بود</label><input data-k="inv_disc" inputmode="numeric" value="${invDraft.disc||''}" oninput="invDraft.disc=this.value;render()" placeholder="۰"></div>
     <div><label ${lbl}>مالیات ارزش افزوده ٪ ${invDraft.official==='رسمی'?'(خودکار از اطلاعات پایه)':''}</label><input inputmode="numeric" data-k="inv_taxpct" value="${invDraft.taxpct||''}" oninput="invDraft.taxpct=this.value;render()" placeholder="۰ (مثلاً ۱۰)"></div>
     <div><label ${lbl}>هزینه ارسال</label><input data-k="inv_ship" inputmode="numeric" value="${invDraft.ship||''}" oninput="invDraft.ship=this.value;render()" placeholder="۰"></div>
   </div>
@@ -10971,7 +10984,7 @@ function smHeaders(biz){
   const out=[];
   byE('invoice').forEach(v=>{if(v.d.kind==='پیش‌فاکتور'||v.d.status==='باطل')return;if(biz&&!relIds(v,'biz').includes(biz))return;
     const c=invCalc(v);let qty=0,cogs=0;invLinesOf(v.id).forEach(l=>{qty+=(+l.d.qty||0);cogs+=(+l.d.qty||0)*smUnitCost(relIds(l,'product')[0]);});
-    out.push({d:ds(v.d.date)||'',amt:c.base,qty,profit:c.base-cogs,disc:c.disc,due:c.due,cust:relIds(v,'customer')[0]||'',seller:relIds(v,'seller')[0]||'',chan:relIds(v,'gateway')[0]||'',id:v.id,e:'invoice'});});
+    out.push({d:ds(v.d.date)||'',amt:c.base,sub:c.sub,tot:c.total,qty,profit:c.base-cogs,disc:c.disc,due:c.due,cust:relIds(v,'customer')[0]||'',seller:relIds(v,'seller')[0]||'',chan:relIds(v,'gateway')[0]||'',id:v.id,e:'invoice'});});
   byE('sale').forEach(x=>{if(x.d._inv)return;if(biz&&!relIds(x,'biz').includes(biz))return;
     const amt=saleAmt(x),qty=+x.d.qty||0,cogs=qty*smUnitCost(relIds(x,'product')[0]);
     out.push({d:ds(x.d.date)||'',amt,qty,profit:amt-cogs,disc:0,due:(x.d.kind==='اعتباری'&&!x.d.settled)?amt:0,cust:relIds(x,'customer')[0]||'',seller:relIds(x,'seller')[0]||'',chan:relIds(x,'channel')[0]||'',id:x.id,e:'sale'});});
@@ -11002,12 +11015,13 @@ function smWin(biz,mode){ // بازه دوره جاری + دوره قبل هم�
 function smJp(t){t=faNum(String(t||'')).trim();const m=t.match(/(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);if(!m)return null;try{return _jgIso(+m[1],+m[2],+m[3]);}catch(e){return null;}}
 function smSetRange(f,t){if(f!=null){view.smFromJ=f;view.smFrom=smJp(f);}if(t!=null){view.smToJ=t;view.smTo=smJp(t);}render();}
 window.smSetRange=smSetRange;
-function smSeries(biz,mode,metric){
+function smSeries(biz,mode,metric,refIso){
+  const _sref=refIso||smRef(biz);
   const MN=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
-  const nowJ=g2j(...smRef(biz).split('-').map(Number));
+  const nowJ=g2j(..._sref.split('-').map(Number));
   let bounds=[];
-  if(mode==='d'){for(let i=29;i>=0;i--){const iso=_isoAdd(smRef(biz),-i);const j=g2j(...iso.split('-').map(Number));bounds.push([iso,iso,j[2]+' '+MN[j[1]-1]]);}}
-  else if(mode==='w'){for(let i=11;i>=0;i--){const t=_isoAdd(smRef(biz),-i*7);const f=_isoAdd(t,-6);const j=g2j(...t.split('-').map(Number));bounds.push([f,t,'ه'+MN[j[1]-1]+j[2]]);}}
+  if(mode==='d'){for(let i=29;i>=0;i--){const iso=_isoAdd(_sref,-i);const j=g2j(...iso.split('-').map(Number));bounds.push([iso,iso,j[2]+' '+MN[j[1]-1]]);}}
+  else if(mode==='w'){for(let i=11;i>=0;i--){const t=_isoAdd(_sref,-i*7);const f=_isoAdd(t,-6);const j=g2j(...t.split('-').map(Number));bounds.push([f,t,'ه'+MN[j[1]-1]+j[2]]);}}
   else if(mode==='q'){let y=nowJ[0],q=Math.ceil(nowJ[1]/3);for(let i=0;i<8;i++){const sm=(q-1)*3+1;const f=_jgIso(y,sm,1);const em=q*3;const t=_isoAdd(em===12?_jgIso(y+1,1,1):_jgIso(y,em+1,1),-1);bounds.unshift([f,t,'فصل'+q+' '+String(y).slice(2)]);q--;if(q<1){q=4;y--;}}}
   else if(mode==='y'){let y=nowJ[0];for(let i=0;i<5;i++){bounds.unshift([_jgIso(y,1,1),_jgIso(y,12,29),_faY(y)]);y--;}}
   else{let y=nowJ[0],m=nowJ[1];for(let i=0;i<12;i++){const f=_jgIso(y,m,1);const nx=m===12?_jgIso(y+1,1,1):_jgIso(y,m+1,1);bounds.unshift([f,_isoAdd(nx,-1),MN[m-1]+String(y).slice(2)]);m--;if(m<1){m=12;y--;}}}
@@ -11067,7 +11081,7 @@ function smdashHTML(){
     <input id="sm_to" value="${esc(view.smToJ||'')}" placeholder="تا: ۱۴۰۴/۱۲/۲۹" onchange="smSetRange(null,this.value)" style="max-width:118px;font-size:12px"><button class="btn gh sm" style="padding:4px 7px" onclick="openJcal('sm_to')">📅</button>`:''}
     <span style="font-size:11px;color:var(--tx2)">│ دوره: ${esc(W.label)} (مقایسه با دوره قبل)</span></div>`;
   // نمودار روند
-  const pts=smSeries(b,view.smMode,view.smMetric);
+  const pts=smSeries(b,view.smMode,view.smMetric,W.to);
   const MODES=[['d','روزانه'],['w','هفتگی'],['m','ماهیانه'],['q','فصلی'],['y','سالانه']];
   const METS=[['amount','مبلغ'],['orders','تعداد فاکتور'],['qty','تعداد کالا'],['profit','سود'],['cust','مشتری']];
   h+=`<div class="sec"><h3>📈 روند فروش <span style="flex:1"></span>
@@ -11089,6 +11103,44 @@ function smdashHTML(){
     ${kcard('chan','🛒 کانال/درگاه فروش',(()=>{const g={};cur.forEach(x=>{if(x.chan)g[x.chan]=1;});return Object.keys(g).length+' کانال';})(),false,'دیجی‌کالا، اسنپ‌پی و…')}
     ${kcard('prod','🏆 کالاهای پرفروش',L.length?'مشاهده':'—',false,'به تفکیک مبلغ/تعداد/سود')}
   </div>`;
+  // ═══ 🧑‍💼 عملکرد نمایندگان فروش + 💰 مطالبات و اقساط ═══
+  {
+    const gAg={};cur.forEach(x=>{if(!x.seller)return;const o=gAg[x.seller]||(gAg[x.seller]={amt:0,n:0,profit:0});o.amt+=x.amt;o.n++;o.profit+=x.profit;});
+    // مطالبات باز هر نماینده (کل تاریخچه، نه فقط دوره)
+    const dueAg={};
+    byE('invoice').forEach(v=>{if(v.d.kind==='پیش‌فاکتور'||v.d.status==='باطل')return;if(b&&!relIds(v,'biz').includes(b))return;
+      const se=relIds(v,'seller')[0];if(!se)return;const c2=invCalc(v);if(c2.due>0)dueAg[se]=(dueAg[se]||0)+c2.due;});
+    const agIds=[...new Set([...Object.keys(gAg),...Object.keys(dueAg)])];
+    if(agIds.length){
+      const arrA=agIds.map(id=>({id,...(gAg[id]||{amt:0,n:0,profit:0}),due:dueAg[id]||0})).sort((a2,b2)=>b2.amt-a2.amt);
+      const totA=arrA.reduce((a2,x)=>a2+x.amt,0)||1;
+      h+=`<div class="sec"><h3>🧑‍💼 عملکرد نمایندگان فروش <span style="font-size:11px;color:var(--tx2);font-weight:400">(فروش این دوره · مطالبات کل)</span></h3>
+      <div class="tblwrap"><table><thead><tr><th style="text-align:right">نماینده / فروشنده</th><th>فروش دوره</th><th>٪ سهم</th><th>تعداد فاکتور</th><th>سود</th><th>💰 مطالبات باز</th><th></th></tr></thead><tbody>
+      ${arrA.map(x=>`<tr><td style="text-align:right">${smNameOf(x.id)}</td><td><b>${money(x.amt)}</b></td>
+        <td><div style="display:inline-block;height:9px;background:var(--ac);border-radius:3px;width:${Math.max(3,Math.round(x.amt/totA*80))}px;vertical-align:middle;margin-inline-end:4px"></div>${(x.amt/totA*100).toLocaleString('fa-IR',{maximumFractionDigits:1})}٪</td>
+        <td>${x.n.toLocaleString('fa-IR')}</td><td style="color:${x.profit<0?'var(--bad)':'var(--ok)'}">${money(x.profit)}</td>
+        <td style="color:${x.due>0?'var(--bad)':'var(--ok)'};font-weight:700">${x.due>0?money(x.due):'✔ تسویه'}</td>
+        <td>${x.due>0?`<button class="btn ${view.smAg===x.id?'':'gh '}sm" onclick="view.smAg=view.smAg==='${x.id}'?null:'${x.id}';render()">💵 وصول اقساط ${view.smAg===x.id?'▴':'▾'}</button>`:''}</td></tr>`).join('')}
+      </tbody></table></div></div>`;
+      // 💵 اقساط/وصولی‌های نمایندهٔ انتخاب‌شده
+      if(view.smAg){
+        const openInv=byE('invoice').filter(v=>v.d.kind!=='پیش‌فاکتور'&&v.d.status!=='باطل'&&relIds(v,'seller')[0]===view.smAg&&(!b||relIds(v,'biz').includes(b))&&invCalc(v).due>0)
+          .sort((a2,b2)=>(ds(a2.d.date)||'').localeCompare(ds(b2.d.date)||''));
+        h+=`<div class="sec" style="border-inline-start:3px solid var(--warn)"><h3>💰 مطالبات از «${smNameOf(view.smAg)}» — ثبت وصولی/قسط</h3>
+        <p style="font-size:11px;color:var(--tx2);margin:4px 0 8px;line-height:2">هر مبلغی که نماینده پرداخت می‌کند را جلوی همان فاکتور ثبت کن؛ مانده خودکار کم می‌شود و تاریخچهٔ اقساط روی فاکتور می‌ماند.</p>
+        ${openInv.length?`<div class="tblwrap"><table><thead><tr><th style="text-align:right">فاکتور</th><th>مشتری</th><th>تاریخ</th><th>کل</th><th>وصول‌شده</th><th>مانده</th><th>اقساط</th><th style="min-width:170px">ثبت وصولی (ریال)</th></tr></thead><tbody>
+        ${openInv.map(v=>{const c2=invCalc(v);const pays=(v.d.payments||[]);
+          return `<tr><td style="text-align:right;cursor:pointer;color:var(--ac)" onclick="go('rec','invoice','${v.id}')">${esc(v.d.title||'—')}</td>
+          <td>${smNameOf(relIds(v,'customer')[0])}</td><td>${ds(v.d.date)?esc(iso2jstr(ds(v.d.date))):'—'}</td>
+          <td>${money(c2.total)}</td><td style="color:var(--ok)">${money(c2.paid)}</td>
+          <td style="color:var(--bad);font-weight:700">${money(c2.due)}</td>
+          <td title="${pays.map(p2=>iso2jstr(new Date(p2.t).toISOString().slice(0,10))+': '+money(p2.amt)).join('\n')}">${pays.length?pays.length.toLocaleString('fa-IR')+' قسط':'—'}</td>
+          <td><div style="display:flex;gap:4px"><input id="agp_${v.id}" inputmode="numeric" dir="ltr" placeholder="مبلغ…" style="max-width:110px;font-size:12px">
+          <button class="btn sm" onclick="invPayAdd('${v.id}','agp_${v.id}')">ثبت</button></div></td></tr>`;}).join('')}
+        </tbody></table></div>`:'<div class="empty" style="padding:12px">✔ این نماینده مطالبات بازی ندارد</div>'}</div>`;
+      }
+    }
+  }
   // جزئیات آبشاری
   const K=view.smCard;const q=(view.smQ||'').trim().toLowerCase();
   const sb=`<input data-search="smq" value="${esc(view.smQ||'')}" placeholder="🔍 جستجو…" oninput="view.smQ=this.value;clearTimeout(window._smT);window._smT=setTimeout(render,200)" style="margin-bottom:8px;width:100%;max-width:320px">`;
@@ -11115,7 +11167,12 @@ function smdashHTML(){
   else if(K==='units'){const g=grp(inWin(L,W.from,W.to),x=>x.pid);let arr=Object.entries(g).map(([pid,o])=>({pid,...o})).filter(x=>x.pid).sort((a,b2)=>b2.qty-a.qty);
     h+=tbl('📦 تعداد فروش به تفکیک کالا',arr,[['کالا',x=>smNameOf(x.pid),'text-align:right'],['تعداد',x=>`<b>${x.qty.toLocaleString('fa-IR')}</b>`],['مبلغ',x=>money(x.amt)]],true);}
   else if(K==='sales'){let arr=cur.slice().sort((a,b2)=>(b2.d||'').localeCompare(a.d||''));
-    h+=tbl('💰 فاکتورهای این دوره',arr,[['تاریخ',x=>x.d?esc(iso2jstr(x.d)):'—','text-align:right'],['مشتری',x=>smNameOf(x.cust)],['مبلغ',x=>money(x.amt)],['سود',x=>`<span style="color:${x.profit<0?'var(--bad)':'var(--ok)'}">${money(x.profit)}</span>`]],true);}
+    if(q)arr=arr.filter(x=>smNameOf(x.cust).toLowerCase().includes(q));
+    h+=tbl('💰 فاکتورهای این دوره',arr,[['تاریخ',x=>x.d?esc(iso2jstr(x.d)):'—','text-align:right'],['مشتری',x=>smNameOf(x.cust)],
+      ['اصل فاکتور',x=>money(x.sub!=null?x.sub:x.amt)],
+      ['بعد از تخفیف',x=>`<b>${money(x.amt)}</b>`],
+      ['با ارزش افزوده',x=>money(x.tot!=null?x.tot:x.amt)],
+      ['سود',x=>`<span style="color:${x.profit<0?'var(--bad)':'var(--ok)'}">${money(x.profit)}</span>`]],true);}
   // ================= 🧊 گزارش آبشاری: سال ← ماه ← روز ← سند =================
   {
     const _MN=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
@@ -18087,6 +18144,25 @@ function dashHTML(){
     ${card('⏰ تسک عقب‌افتاده',overdue.length,overdue.length?'var(--bad)':null,"go('list','task',null,'overdueTask')")}
   </div>`;
   if(!canView('dash_alerts'))return h;
+  // 📦 باکس مجزای کمبود موجودی — ابتدای مرکز هشدارها
+  try{
+    const lowSt=[];
+    byE('product').forEach(p=>{
+      if(p.d.minstock==null||p.d.minstock==='')return;
+      const st=stockNow(p);
+      if(st<+p.d.minstock)lowSt.push({p,st,min:+p.d.minstock});
+    });
+    if(lowSt.length){
+      h+=`<div class="sec" style="border:1.5px solid var(--warn);background:rgba(236,217,143,.08)">
+        <h3 style="color:var(--warn)">📦 هشدار کمبود موجودی <span class="c" style="background:var(--warn);color:#000">${lowSt.length.toLocaleString('fa-IR')}</span></h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:7px;margin-top:8px">
+        ${lowSt.sort((a,b2)=>(a.st/Math.max(1,a.min))-(b2.st/Math.max(1,b2.min))).map(x=>`<div onclick="go('rec','product','${x.p.id}')" style="cursor:pointer;border:1px solid var(--warn);border-radius:10px;padding:8px 11px;background:var(--bg2)">
+          <b style="font-size:12.5px">${esc(x.p.d.title||'کالا')}</b>
+          <div style="font-size:11px;margin-top:3px">مانده: <b style="color:var(--bad)">${x.st.toLocaleString('fa-IR')}</b> از حداقل <b>${x.min.toLocaleString('fa-IR')}</b>
+          ${x.st<=0?' — <b style=\"color:var(--bad)\">اتمام موجودی!</b>':''}</div></div>`).join('')}
+        </div></div>`;
+    }
+  }catch(_e){}
   // هشدارها
   h+=`<div class="sec"><h3>📜 هشدارهای کاری</h3>`;
   const alerts=[];
@@ -18095,12 +18171,6 @@ function dashHTML(){
   delayed.forEach(p=>alerts.push(['🐢 پروژه دارای تاخیر: '+p.d.title,'project',p.id]));
   crmDue.forEach(c=>alerts.push(['📞 پیگیری CRM سررسید شده: '+c.d.title,'crm',c.id]));
   lettersOpen.forEach(l=>alerts.push(['✉️ نامه وارده بدون اقدام: '+l.d.title,'letter',l.id]));
-  // 📦 هشدار کمبود موجودی انبار (زیر حداقل تعیین‌شده روی کالا)
-  try{byE('product').forEach(p=>{
-    if(p.d.minstock==null||p.d.minstock==='')return;
-    const st=stockNow(p);
-    if(st<+p.d.minstock)alerts.push(['📦 موجودی کم: '+(p.d.title||'کالا')+' — مانده '+st.toLocaleString('fa-IR')+' از حداقل '+(+p.d.minstock).toLocaleString('fa-IR'),'product',p.id]);
-  });}catch(_e){}
   // وابستگی‌ها: تسک/پروژه در جریان که پیش‌نیازش تمام نشده
   tasks.filter(t=>t.d.status==='In progress'&&relIds(t,'dep').some(id=>recs[id]&&recs[id].d.status!=='Done'))
     .forEach(t=>alerts.push(['⛓ تسک در جریان با پیش‌نیاز ناتمام: '+t.d.title,'task',t.id]));
