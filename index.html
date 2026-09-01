@@ -429,11 +429,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.68</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.69</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.68</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.69</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -5495,7 +5495,8 @@ function invTotalsPanel(r){
   const lines=invLinesOf(r.id);
   if(!lines.length&&!c.total)return '';
   return `<div class="sec" style="padding:12px 16px;border-inline-start:3px solid var(--ac)">
-    <h3 style="font-size:13px">🧮 ردیف‌ها و جمع این فاکتور</h3>
+    <h3 style="font-size:13px">🧮 ردیف‌ها و جمع این فاکتور <span style="flex:1"></span>
+    ${can('e','invoice',r)?`<button class="btn sm" onclick="invEdit('${r.id}')">✏️ ویرایش فاکتور</button>`:''}</h3>
     ${lines.length?`<div class="tblwrap" style="margin-top:8px"><table><thead><tr><th>کالا</th><th>تعداد</th><th>قیمت واحد</th><th>مبلغ ردیف</th></tr></thead><tbody>
       ${lines.map(l=>{const pid=relIds(l,'product')[0];return `<tr onclick="go('rec','invline','${l.id}')" style="cursor:pointer">
         <td style="text-align:right">${esc((pid&&recs[pid]&&recs[pid].d.title)||l.d.title||'—')}</td>
@@ -8051,6 +8052,37 @@ function invSave(status){
   const _wf=status==='__wf';if(_wf)status='صادر نشده';
   const valid=invDraft.lines.filter(l=>l.product&&(+l.qty||0)>0);
   if(!valid.length){alert('حداقل یک ردیف با کالا و تعداد لازم است');return;}
+  /* ✏️ حالت ویرایش: به‌روزرسانی درجا + ثبت در تاریخچه؛ وصولی‌ها و اقساط دست نمی‌خورند */
+  if(invDraft._editId){
+    const r=recs[invDraft._editId];if(!r||r.del){alert('فاکتور یافت نشد');return;}
+    const before=invCalc(r).total;
+    r.d={...r.d,title:invDraft.desc||r.d.title,biz:invDraft.biz?[invDraft.biz]:[],
+      customer:invDraft.customer?[invDraft.customer]:[],seller:invDraft.seller?[invDraft.seller]:[],
+      orgu:invDraft.orgu?[invDraft.orgu]:r.d.orgu||[],
+      official:invDraft.official||'غیررسمی',date:{s:parseJDate(invDraft.vdate,'')||invDraft.vdate},
+      due:invDraft.due?{s:parseJDate(invDraft.due,'')||invDraft.due}:null,
+      disc:+invDraft.disc||0,discpct:+invDraft.discpct||0,taxpct:+invDraft.taxpct||0,ship:+invDraft.ship||0,
+      note:invDraft.note,payterm:invDraft.payterm||'',payterms:invDraft.payterms||'',delivterms:invDraft.delivterms||''};
+    // آشتی ردیف‌ها: به‌روزرسانی/حذف/افزودن
+    const keep=new Set();
+    valid.forEach(l=>{
+      if(l._lineId&&recs[l._lineId]&&!recs[l._lineId].del){
+        const lr=recs[l._lineId];const p=recs[l.product];
+        lr.d={...lr.d,title:(p&&p.d&&p.d.title)||lr.d.title,product:[l.product],qty:+l.qty||0,price:+l.price||0,ldisc:+l.ldisc||0,mlen:+l.mlen||0};
+        lr.u=Date.now();put(lr);keep.add(l._lineId);
+      }else{
+        const p=recs[l.product];const nid=uid();
+        put({id:nid,e:'invline',d:{title:(p&&p.d&&p.d.title)||'',invoice:[r.id],product:[l.product],
+          biz:invDraft.biz?[invDraft.biz]:[],qty:+l.qty||0,price:+l.price||0,ldisc:+l.ldisc||0,mlen:+l.mlen||0},u:Date.now()});keep.add(nid);
+      }});
+    invLinesOf(r.id).forEach(l=>{if(!keep.has(l.id)){l.del=true;l.u=Date.now();put(l);}});
+    if(typeof _invLineIdx!=='undefined')_invLineIdx=null;
+    const after=invCalc(r).total;
+    r.d._log=[...(r.d._log||[]),{t:Date.now(),by:myEmail(),act:'✏️ ویرایش فاکتور — مبلغ از '+money(before)+' به '+money(after)}];
+    r.u=Date.now();put(r);
+    setSync('ok','✏️ فاکتور «'+(r.d.title||'')+'» به‌روزرسانی شد');
+    const _id=r.id;invDraft=null;go('rec','invoice',_id);return;
+  }
   if(!invDraft.customer&&!confirm('مشتری انتخاب نشده است. ادامه می‌دهید؟'))return;
   // 💳 سقف اعتبار مشتری
   if(invDraft.customer&&recs[invDraft.customer]){
@@ -8114,6 +8146,20 @@ function invSave(status){
   if((status||'صادر شده')==='صادر شده')try{postInvoice(iid,true);}catch(e){}
   invDraft=null;go('rec','invoice',iid);
 }
+/* ✏️ ویرایش فاکتور موجود — همان فرم صدور با ردیف‌ها و مبالغ */
+window.invEdit=function(id){
+  const r=recs[id];if(!r||r.del)return;
+  if(!can('e','invoice',r)){alert('سطح دسترسی شما اجازه ویرایش این فاکتور را نمی‌دهد');return;}
+  const lines=invLinesOf(id).map(l=>({_lineId:l.id,product:relIds(l,'product')[0]||'',qty:String(l.d.qty||''),price:String(l.d.price||''),ldisc:String(l.d.ldisc||''),mlen:String(l.d.mlen||'')}));
+  invDraft={_editId:id,desc:r.d.title||'',biz:relIds(r,'biz')[0]||'',customer:relIds(r,'customer')[0]||'',
+    seller:relIds(r,'seller')[0]||'',orgu:relIds(r,'orgu')[0]||'',kind:r.d.kind||'فاکتور فروش',
+    official:r.d.official||'غیررسمی',paymode:'',paidAmt:'',
+    vdate:(ds(r.d.date)||today()).slice(0,10),due:r.d.due&&ds(r.d.due)?iso2jstr(ds(r.d.due)):'',
+    disc:String(r.d.disc||''),discpct:String(r.d.discpct||''),taxpct:String(r.d.taxpct||''),ship:String(r.d.ship||''),
+    note:r.d.note||'',payterm:r.d.payterm||'نقد',payterms:r.d.payterms||'',delivterms:r.d.delivterms||'',validto:'',
+    lines:lines.length?lines:[{product:'',qty:'1',price:'',ldisc:'',mlen:''}]};
+  go('invnew');
+};
 window.invAddLine=invAddLine;window.invDelLine=invDelLine;window.invSetLine=invSetLine;window.invSetHead=invSetHead;window.invSave=invSave;
 function invPickCust(name){
   name=(name||'').trim();
@@ -8160,7 +8206,7 @@ function invnewHTML(){
       ۲) حساب شما هنوز توسط ادمین تایید نشده یا نقش/دسترسی‌ات تازه عوض شده — از ادمین بخواه در «👤 کاربران و دسترسی» نقش‌ات را چک کند، بعد یک‌بار خروج و ورود کن.</div>
       <button class="btn sm" style="margin-top:8px" onclick="pullAll(true)">🔄 دریافت کامل اطلاعات از سرور</button></div>`;
   }
-  h+=`<div class="sec"><h3>${invDraft.kind==='پیش‌فاکتور'?'📝 صدور پیش‌فاکتور — ارسال به گردش فروش':'🧾 صدور فاکتور'}</h3>
+  h+=`<div class="sec"><h3>${invDraft._editId?'✏️ ویرایش '+esc(recs[invDraft._editId]&&recs[invDraft._editId].d.title||'فاکتور')+' <span style="font-size:11px;color:var(--warn);font-weight:400">— تغییرات روی همین فاکتور ذخیره می‌شود؛ وصولی‌ها و اقساط ثبت‌شده حفظ می‌شوند</span>':invDraft.kind==='پیش‌فاکتور'?'📝 صدور پیش‌فاکتور — ارسال به گردش فروش':'🧾 صدور فاکتور'}</h3>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px">
     <div><label ${lbl}>نوع سند</label><div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">${invDraft.kind==='پیش‌فاکتور'?'📝 پیش‌فاکتور':'🧾 فاکتور فروش'}</div></div>
     ${invDraft.kind==='پیش‌فاکتور'?'':`<div><label ${lbl}>🏛 نوع فاکتور</label><select onchange="invSetOfficial(this.value)">
@@ -8179,7 +8225,7 @@ function invnewHTML(){
     <div><label ${lbl}>🧩 واحد / تیم <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('orgu',this.value)"><option value="">— (خودکار از فرد)</option>${byE('orgunit').map(u=>`<option value="${u.id}" ${u.id===invDraft.orgu?'selected':''}>${esc(unitPath(u.id))}</option>`).join('')}</select></div>
     <div><label ${lbl}>شماره/شرح</label><input value="${esc(invDraft.desc)}" oninput="invDraft.desc=this.value" placeholder="خودکار"></div>
     <div><label ${lbl}>تاریخ صدور</label><div style="display:flex;gap:4px"><input id="inv_vdate" value="${esc(invDraft.vdate&&/^\d{4}-/.test(invDraft.vdate)?iso2jstr(invDraft.vdate):invDraft.vdate||'')}" oninput="invDraft.vdate=this.value" placeholder="۱۴۰۴/۰۴/۲۵" style="flex:1"><button type="button" class="btn gh sm" style="padding:4px 8px" onclick="openJcal('inv_vdate')">📅</button></div></div>
-    ${invDraft.kind==='پیش‌فاکتور'?'':`<div><label ${lbl}>💳 وضعیت دریافت</label><select onchange="invDraft.paymode=this.value;render()"><option ${invDraft.paymode==='نقدی'?'selected':''}>نقدی</option><option ${invDraft.paymode==='اعتباری'?'selected':''}>اعتباری (نسیه)</option><option ${invDraft.paymode==='بخشی'?'selected':''}>دریافت بخشی</option></select></div>
+    ${invDraft.kind==='پیش‌فاکتور'||invDraft._editId?'':`<div><label ${lbl}>💳 وضعیت دریافت</label><select onchange="invDraft.paymode=this.value;render()"><option ${invDraft.paymode==='نقدی'?'selected':''}>نقدی</option><option ${invDraft.paymode==='اعتباری'?'selected':''}>اعتباری (نسیه)</option><option ${invDraft.paymode==='بخشی'?'selected':''}>دریافت بخشی</option></select></div>
     ${invDraft.paymode==='بخشی'?`<div><label ${lbl}>مبلغ دریافتی (ریال)</label><input inputmode="numeric" dir="ltr" value="${esc(invDraft.paidAmt||'')}" oninput="invDraft.paidAmt=this.value" placeholder="۰"></div>`:''}
     <div><label ${lbl}>سررسید ${invDraft.paymode!=='نقدی'?'(اعتبار)':''}</label><input value="${esc(invDraft.due||'')}" oninput="invDraft.due=this.value" placeholder="اختیاری"></div>`}
   </div>
@@ -8232,9 +8278,10 @@ function invnewHTML(){
   <div style="margin-top:10px"><label ${lbl}>توضیحات</label><input value="${esc(invDraft.note||'')}" oninput="invDraft.note=this.value" placeholder="اختیاری"></div>
   ${draftBuyHist(invDraft.lines)}
   <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-    <button class="btn gh sm" onclick="invSave('پیش‌نویس')">💾 پیش‌نویس</button>
+    ${invDraft._editId?'':`<button class="btn gh sm" onclick="invSave('پیش‌نویس')">💾 پیش‌نویس</button>`}
     <span style="flex:1"></span>
-    ${invDraft.kind==='پیش‌فاکتور'?`<button class="btn sm" onclick="invSave('__wf')">📤 ارسال به مدیر فروش</button>`:`<button class="btn sm" onclick="invSave('صادر شده')">✔️ صدور نهایی</button>`}
+    ${invDraft._editId?`<button class="btn gh sm" onclick="invDraft=null;go('rec','invoice','${invDraft._editId}')">انصراف</button><button class="btn sm" onclick="invSave()">💾 ذخیره تغییرات</button>`
+      :invDraft.kind==='پیش‌فاکتور'?`<button class="btn sm" onclick="invSave('__wf')">📤 ارسال به مدیر فروش</button>`:`<button class="btn sm" onclick="invSave('صادر شده')">✔️ صدور نهایی</button>`}
   </div>
   <p style="font-size:10.5px;color:var(--tx2);margin-top:8px">💡 با انتخاب کالا، قیمت فروش به‌صورت خودکار پر می‌شود و قابل ویرایش است. انتخاب کسب‌وکار، فهرست کالاها و مشتریان همان کسب‌وکار را فیلتر می‌کند.</p></div>`;
   return h;
