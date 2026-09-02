@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.76</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.77</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.76</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.77</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -14732,7 +14732,46 @@ function meHTML(){
           ${card('📈 فروش '+MN3[_j[1]-1],mN?abbrN(mAmt):'—',null,"go('smdash')")}
           ${card('⏳ مطالبات وصول‌نشده',due?abbrN(due):'۰',due>0?'var(--bad)':null,"view={type:'smdash',smCard:'due',smPer:'y'};render()")}
           ${_ls?card('📦 کمبود موجودی',_ls,'var(--warn)',"lowStockToggle()"):''}
-        </div></div>`;
+        </div>`;
+        // 🍩 سلامت وصول فاکتورها — نمودار حلقه‌ای (الهام از کارت «سلامت شرکت‌ها»)
+        try{
+          const invs=byE('invoice').filter(v=>v.d.kind!=='پیش‌فاکتور'&&v.d.status!=='باطل'&&(!gBiz()||relIds(v,'biz').includes(gBiz())));
+          if(invs.length){
+            let ok=0,open=0;invs.forEach(v=>{if(invCalc(v).due>0)open++;else ok++;});
+            const drafts=byE('invoice').filter(v=>v.d.kind!=='پیش‌فاکتور'&&v.d.status==='پیش‌نویس'&&(!gBiz()||relIds(v,'biz').includes(gBiz()))).length;
+            const pct=x=>Math.round(x/(invs.length||1)*100).toLocaleString('fa-IR')+'٪';
+            h+=`<div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+              ${donutSVG([{v:ok,c:'var(--ok)'},{v:open,c:'var(--bad)'},{v:drafts,c:'#8a97a8'}],invs.length.toLocaleString('fa-IR'),'فاکتور')}
+              <div style="display:flex;flex-direction:column;gap:7px;font-size:12px">
+                <div style="cursor:pointer" onclick="view={type:'smdash',smCard:'due',smPer:'y'};render()"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--ok);margin-inline-end:6px"></span>تسویه‌شده <b>${ok.toLocaleString('fa-IR')}</b> <span style="color:var(--tx2)">(${pct(ok)})</span></div>
+                <div style="cursor:pointer" onclick="view={type:'smdash',smCard:'due',smPer:'y'};render()"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--bad);margin-inline-end:6px"></span>دارای مانده <b>${open.toLocaleString('fa-IR')}</b> <span style="color:var(--tx2)">(${pct(open)})</span></div>
+                ${drafts?`<div><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#8a97a8;margin-inline-end:6px"></span>پیش‌نویس <b>${drafts.toLocaleString('fa-IR')}</b></div>`:''}
+              </div>
+              <span style="flex:1"></span>
+              <div style="font-size:11px;color:var(--tx2);max-width:220px;line-height:2">سلامت وصول: هر فاکتوری که مانده دارد در «مطالبات» داشبورد فروش قابل پیگیری و ثبت وصولی است.</div>
+            </div>`;
+          }
+        }catch(_e2){}
+        h+=`</div>`;
+        // 🕘 فعالیت‌های اخیر — با آیکون و زمان نسبی
+        try{
+          const FEED_E=['invoice','settle','customer','sale','product','task','letter','crm'];
+          const acts=[];
+          FEED_E.forEach(e=>{if(!canSee(e))return;byE(e).forEach(r=>{if(r.u)acts.push(r);});});
+          acts.sort((a,b2)=>(b2.u||0)-(a.u||0));
+          const top=acts.slice(0,8);
+          if(top.length){
+            h+=`<div class="sec"><h3>🕘 فعالیت‌های اخیر</h3>
+            <div style="display:flex;flex-direction:column;margin-top:6px">
+            ${top.map(r=>{const def=E[r.e]||{ic:'📄',n:r.e};
+              return `<div onclick="go('rec','${r.e}','${r.id}')" style="display:flex;align-items:center;gap:11px;padding:9px 6px;border-bottom:1px solid var(--line);cursor:pointer">
+                <span style="width:32px;height:32px;border-radius:10px;background:var(--bg);display:grid;place-items:center;font-size:15px;flex-shrink:0">${def.ic}</span>
+                <div style="flex:1;min-width:0"><b style="font-size:12.5px">${esc(r.d.title||'—')}</b>
+                <div style="font-size:10.5px;color:var(--tx2)">${esc(def.n)}</div></div>
+                <span style="font-size:10.5px;color:var(--tx2);flex-shrink:0">${agoFa(r.u)}</span></div>`;}).join('')}
+            </div></div>`;
+          }
+        }catch(_e3){}
       }
     }
   }catch(_e){}
@@ -18432,6 +18471,31 @@ function dashHTML(){
   alerts.slice(0,30).forEach(a=>h+=`<div class="alert" onclick="go('rec','${a[1]}','${a[2]}')">${esc(a[0])}</div>`);
   h+=`</div>`;
   return h;
+}
+function agoFa(u){ // زمان نسبی فارسی
+  const d=Date.now()-(+u||0);if(!u||d<0)return '';
+  const m=Math.floor(d/60000);
+  if(m<1)return 'همین حالا';
+  if(m<60)return m.toLocaleString('fa-IR')+' دقیقه پیش';
+  const h=Math.floor(m/60);
+  if(h<24)return h.toLocaleString('fa-IR')+' ساعت پیش';
+  const dy=Math.floor(h/24);
+  if(dy===1)return 'دیروز';
+  if(dy<31)return dy.toLocaleString('fa-IR')+' روز پیش';
+  try{return iso2jstr(new Date(+u).toISOString().slice(0,10));}catch(e){return '';}
+}
+function donutSVG(parts,centerV,centerL){ // parts: [{v,c,l}] — نمودار حلقه‌ای سبک
+  const tot=parts.reduce((a,p)=>a+p.v,0)||1;
+  const R=44,C=2*Math.PI*R;let off=0;
+  const segs=parts.filter(p=>p.v>0).map(p=>{
+    const len=p.v/tot*C;
+    const sg=`<circle cx="60" cy="60" r="${R}" fill="none" stroke="${p.c}" stroke-width="13" stroke-dasharray="${len.toFixed(1)} ${(C-len).toFixed(1)}" stroke-dashoffset="${(-off).toFixed(1)}" transform="rotate(-90 60 60)" stroke-linecap="butt"/>`;
+    off+=len;return sg;}).join('');
+  return `<svg viewBox="0 0 120 120" style="width:118px;height:118px;flex-shrink:0">
+    <circle cx="60" cy="60" r="44" fill="none" stroke="var(--bg3)" stroke-width="13"/>
+    ${segs}
+    <text x="60" y="58" text-anchor="middle" font-size="20" font-weight="800" fill="var(--tx)">${centerV}</text>
+    <text x="60" y="76" text-anchor="middle" font-size="9.5" fill="var(--tx2)">${centerL}</text></svg>`;
 }
 function card(l,v,col,click){return `<div class="card" ${click?`style="cursor:pointer" onclick="${click}"`:''}><div class="l">${l}</div><div class="v" style="${col?'color:'+col:''}">${typeof v==='number'?v.toLocaleString('fa-IR'):v}</div></div>`;}
 function stratNode(b,depth){
