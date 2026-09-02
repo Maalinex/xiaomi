@@ -429,11 +429,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.70</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.71</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.70</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.71</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -7458,6 +7458,7 @@ function pinvPickProd(i,name){
 window.pinvPickProd=pinvPickProd;
 function pinvnewHTML(){
   if(!pinvDraft)pinvNewDraft();
+  if(pinvDraft.biz!==(gBiz()||''))pinvDraft.biz=gBiz()||''; // 🧢 تک‌منبع: باکس بالای منو
   const prods=byE('product').filter(p=>{const b=relIds(p,'biz');return !pinvDraft.biz||!b.length||b.includes(pinvDraft.biz);});
   const t=pinvTotalsDraft();
   const lbl='style="font-size:11px;color:var(--tx2)"';
@@ -7466,7 +7467,9 @@ function pinvnewHTML(){
   const pName=id=>id&&recs[id]?recs[id].d.title:'';
   let h=`<div class="sec"><h3>🧾 ثبت فاکتور خرید</h3>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px">
-    <div><label ${lbl}>کسب‌وکار</label><select onchange="pinvSetHead('biz',this.value)"><option value="">—</option>${byE('business').map(x=>`<option value="${x.id}" ${x.id===pinvDraft.biz?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></div>
+    <div><label ${lbl}>کسب‌وکار <span style="opacity:.7">(از باکس بالای منو)</span></label>
+      ${gBiz()&&recs[gBiz()]?`<div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">🧢 ${esc(recs[gBiz()].d.title)}</div>`
+        :`<select onchange="setGBiz(this.value)"><option value="">— اول کسب‌وکار فعال را انتخاب کنید —</option>${byE('business').map(x=>`<option value="${x.id}">${esc(x.d.title)}</option>`).join('')}</select>`}</div>
     <div><label ${lbl}>تامین‌کننده 🔍</label><input list="dl_pinvsupp" value="${esc(suppName)}" placeholder="بنویس تا جستجو شود…" onchange="pinvPickSupp(this.value)">
       <datalist id="dl_pinvsupp">${supp.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>
       <datalist id="dl_pinvprod">${prodDlOpts(prods)}</datalist></div>
@@ -8198,6 +8201,7 @@ function invPickProd(i,name){
 window.invPickProd=invPickProd;
 function invnewHTML(){
   if(!invDraft){invNewDraft();if(window._invPf)invDraft.kind='پیش‌فاکتور';window._invPf=0;}
+  if(!invDraft._editId&&invDraft.biz!==(gBiz()||''))invDraft.biz=gBiz()||''; // 🧢 تک‌منبع: باکس بالای منو
   const prods=byE('product').filter(p=>{const b=relIds(p,'biz');return !invDraft.biz||!b.length||b.includes(invDraft.biz);});
   const custs=byE('customer').filter(c=>{const b=relIds(c,'biz');return !invDraft.biz||!b.length||b.includes(invDraft.biz);});
   let sellers=byE('hr').filter(hh=>{const b=relIds(hh,'biz');return !invDraft.biz||!b.length||b.includes(invDraft.biz);});
@@ -8222,7 +8226,9 @@ function invnewHTML(){
       <option ${(invDraft.official||'غیررسمی')==='غیررسمی'?'selected':''}>غیررسمی</option>
       <option ${invDraft.official==='رسمی'?'selected':''}>رسمی</option></select>
       ${invDraft.official==='رسمی'?`<div style="font-size:10px;color:var(--ac);margin-top:2px">ارزش افزوده ${fmtN(+invDraft.taxpct||0)}٪ خودکار اعمال شد</div>`:''}</div>`}
-    <div><label ${lbl}>کسب‌وکار</label><select onchange="invSetHead('biz',this.value)"><option value="">—</option>${byE('business').map(x=>`<option value="${x.id}" ${x.id===invDraft.biz?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></div>
+    <div><label ${lbl}>کسب‌وکار <span style="opacity:.7">(از باکس بالای منو)</span></label>
+      ${gBiz()&&recs[gBiz()]?`<div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">🧢 ${esc(recs[gBiz()].d.title)}</div>`
+        :`<select onchange="setGBiz(this.value)"><option value="">— اول کسب‌وکار فعال را انتخاب کنید —</option>${byE('business').map(x=>`<option value="${x.id}">${esc(x.d.title)}</option>`).join('')}</select>`}</div>
     <div><label ${lbl}>مشتری 🔍 <a href="#" style="font-size:10.5px;color:var(--ac);text-decoration:none" onclick="view.qc=!view.qc;render();return false">＋ مشتری جدید</a></label><input list="dl_invcust" value="${esc(custName)}" placeholder="بنویس تا جستجو شود…" onchange="invPickCust(this.value)">
       <datalist id="dl_invcust">${custs.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>
       <datalist id="dl_invprod">${prodDlOpts(prods)}</datalist>
