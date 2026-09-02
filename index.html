@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.73</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.74</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.73</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.74</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -9781,7 +9781,7 @@ function parseJDate(str,time){
   if(time&&/^\d{1,2}:\d{2}$/.test(time))iso+='T'+time.padStart(5,'0');
   return iso;
 }
-function iso2jstr(iso){if(!iso)return '';const [y,mo,d]=iso.slice(0,10).split('-').map(Number);const j=g2j(y,mo,d);return j[0]+'/'+String(j[1]).padStart(2,'0')+'/'+String(j[2]).padStart(2,'0');}
+function iso2jstr(iso){if(!iso)return '';const [y,mo,d]=iso.slice(0,10).split('-').map(Number);const j=g2j(y,mo,d);return (j[0]+'/'+String(j[1]).padStart(2,'0')+'/'+String(j[2]).padStart(2,'0')).replace(/\d/g,c=>'۰۱۲۳۴۵۶۷۸۹'[c]);}
 function isoTime(iso){return iso&&iso.includes('T')?iso.slice(11,16):'';}
 function dVal(v){if(!v)return null;if(typeof v==='string')return{s:v,e:null};return v.s||v.e?v:null;}
 function dNorm(v){ // نرمال‌سازی تاریخ: شمسیِ خام → ISO میلادی؛ میلادی دست‌نخورده
@@ -11101,10 +11101,7 @@ function ctrldashHTML(){
 }
 
 /* ===== 💼 داشبورد حرفه‌ای مدیریت فروش ===== */
-function smRef(biz){let mx='';
-  byE('invoice').forEach(v=>{if(v.d.kind==='پیش‌فاکتور'||v.d.status==='باطل')return;if(biz&&!relIds(v,'biz').includes(biz))return;const d=ds(v.d.date);if(d&&d>mx)mx=d;});
-  byE('sale').forEach(x=>{if(x.d._inv)return;if(biz&&!relIds(x,'biz').includes(biz))return;const d=ds(x.d.date);if(d&&d>mx)mx=d;});
-  return mx||today();}
+function smRef(biz){return today();} // «ماه جاری/فصل جاری/امسال» یعنی تقویم واقعی امروز؛ دوره‌های تاریخی از «📅 سال…» و بازه دلخواه
 function smUnitCost(pid){const p=pid&&recs[pid];return p?(+p.d.buy||0):0;}
 /* رویدادهای فروش یکپارچه: فاکتورها + فروش سریع */
 function smHeaders(biz){
@@ -11134,28 +11131,14 @@ function smWin(biz,mode){ // بازه دوره جاری + دوره قبل هم�
   if(mode==='d7'){to=ref;from=_isoAdd(ref,-6);pto=_isoAdd(from,-1);pfrom=_isoAdd(pto,-6);label='۷ روز اخیر';}
   else if(mode==='d30'){to=ref;from=_isoAdd(ref,-29);pto=_isoAdd(from,-1);pfrom=_isoAdd(pto,-29);label='۳۰ روز اخیر';}
   else if(mode==='q'){const q=Math.ceil(j[1]/3);const sm=(q-1)*3+1;from=_jgIso(j[0],sm,1);const em=q*3;to=_isoAdd(em===12?_jgIso(j[0]+1,1,1):_jgIso(j[0],em+1,1),-1);
-    const pq=q-1>0?q-1:4,py=q-1>0?j[0]:j[0]-1;const psm=(pq-1)*3+1;pfrom=_jgIso(py,psm,1);const pem=pq*3;pto=_isoAdd(pem===12?_jgIso(py+1,1,1):_jgIso(py,pem+1,1),-1);label='فصل '+q+' '+j[0];}
-  else if(mode==='y'){const Y=(+view.smYear||j[0]);from=_jgIso(Y,1,1);to=_jgIso(Y,12,29);pfrom=_jgIso(Y-1,1,1);pto=_jgIso(Y-1,12,29);label='سال '+_faY(Y);}
+    const pq=q-1>0?q-1:4,py=q-1>0?j[0]:j[0]-1;const psm=(pq-1)*3+1;pfrom=_jgIso(py,psm,1);const pem=pq*3;pto=_isoAdd(pem===12?_jgIso(py+1,1,1):_jgIso(py,pem+1,1),-1);label='فصل '+q.toLocaleString('fa-IR')+' '+_faY(j[0]);}
+  else if(mode==='y'){const Y=(+view.smYear||j[0]);from=_jgIso(Y,1,1);to=_isoAdd(_jgIso(Y+1,1,1),-1);pfrom=_jgIso(Y-1,1,1);pto=_isoAdd(from,-1);label='سال '+_faY(Y);}
   else{from=_jgIso(j[0],j[1],1);const nx=j[1]===12?_jgIso(j[0]+1,1,1):_jgIso(j[0],j[1]+1,1);to=_isoAdd(nx,-1);
-    const pm=j[1]-1>0?j[1]-1:12,py=j[1]-1>0?j[0]:j[0]-1;pfrom=_jgIso(py,pm,1);const pnx=pm===12?_jgIso(py+1,1,1):_jgIso(py,pm+1,1);pto=_isoAdd(pnx,-1);label=MN[j[1]-1]+' '+j[0];}
+    const pm=j[1]-1>0?j[1]-1:12,py=j[1]-1>0?j[0]:j[0]-1;pfrom=_jgIso(py,pm,1);const pnx=pm===12?_jgIso(py+1,1,1):_jgIso(py,pm+1,1);pto=_isoAdd(pnx,-1);label=MN[j[1]-1]+' '+_faY(j[0]);}
   return {from,to,pfrom,pto,label,ref};}
 function smJp(t){t=faNum(String(t||'')).trim();const m=t.match(/(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);if(!m)return null;try{return _jgIso(+m[1],+m[2],+m[3]);}catch(e){return null;}}
 function smSetRange(f,t){if(f!=null){view.smFromJ=f;view.smFrom=smJp(f);}if(t!=null){view.smToJ=t;view.smTo=smJp(t);}render();}
 window.smSetRange=smSetRange;
-function smSeries(biz,mode,metric,refIso){
-  const _sref=refIso||smRef(biz);
-  const MN=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
-  const nowJ=g2j(..._sref.split('-').map(Number));
-  let bounds=[];
-  if(mode==='d'){for(let i=29;i>=0;i--){const iso=_isoAdd(_sref,-i);const j=g2j(...iso.split('-').map(Number));bounds.push([iso,iso,j[2]+' '+MN[j[1]-1]]);}}
-  else if(mode==='w'){for(let i=11;i>=0;i--){const t=_isoAdd(_sref,-i*7);const f=_isoAdd(t,-6);const j=g2j(...t.split('-').map(Number));bounds.push([f,t,'ه'+MN[j[1]-1]+j[2]]);}}
-  else if(mode==='q'){let y=nowJ[0],q=Math.ceil(nowJ[1]/3);for(let i=0;i<8;i++){const sm=(q-1)*3+1;const f=_jgIso(y,sm,1);const em=q*3;const t=_isoAdd(em===12?_jgIso(y+1,1,1):_jgIso(y,em+1,1),-1);bounds.unshift([f,t,'فصل'+q+' '+String(y).slice(2)]);q--;if(q<1){q=4;y--;}}}
-  else if(mode==='y'){let y=nowJ[0];for(let i=0;i<5;i++){bounds.unshift([_jgIso(y,1,1),_jgIso(y,12,29),_faY(y)]);y--;}}
-  else{let y=nowJ[0],m=nowJ[1];for(let i=0;i<12;i++){const f=_jgIso(y,m,1);const nx=m===12?_jgIso(y+1,1,1):_jgIso(y,m+1,1);bounds.unshift([f,_isoAdd(nx,-1),MN[m-1]+String(y).slice(2)]);m--;if(m<1){m=12;y--;}}}
-  const H=smHeaders(biz);
-  return bounds.map(([f,t,lab])=>{let amt=0,orders=0,qty=0,profit=0;const custs=new Set();
-    H.forEach(h=>{if(!h.d||h.d<f||h.d>t)return;amt+=h.amt;orders++;qty+=h.qty;profit+=h.profit;if(h.cust)custs.add(h.cust);});
-    return {l:lab,v:metric==='orders'?orders:metric==='qty'?qty:metric==='profit'?profit:metric==='cust'?custs.size:amt};});}
 /* 📈 سری روند «دقیقاً» روی بازه انتخابی — دانه‌بندی خودکار: روز/هفته/ماه */
 function smSeries2(biz,W,metric){
   const MN=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
@@ -11174,7 +11157,7 @@ function smSeries2(biz,W,metric){
       const t=_isoAdd(nx,-1);
       const cf=f<W.from?W.from:f, ct=t>W.to?W.to:t;
       if(cf>W.to)break;
-      bounds.push([cf,ct,MN[jm-1]+' '+String(jy).slice(2)]);
+      bounds.push([cf,ct,MN[jm-1]+' '+_faY(jy).slice(2)]);
       if(t>=W.to)break;
       jm++;if(jm>12){jm=1;jy++;}
     }
@@ -11183,6 +11166,8 @@ function smSeries2(biz,W,metric){
     H.forEach(x=>{if(!x.d||x.d<f||x.d>t)return;amt+=x.amt;orders++;profit+=x.profit;});
     return {l:lab,v:metric==='orders'?orders:metric==='profit'?profit:amt};});
 }
+window.smJumpM=function(jy,jm){const f=_jgIso(jy,jm,1);const nx=jm===12?_jgIso(jy+1,1,1):_jgIso(jy,jm+1,1);const t=_isoAdd(nx,-1);
+  view.smPer='c';view.smYear=null;view.smFrom=f;view.smTo=t;view.smFromJ=iso2jstr(f);view.smToJ=iso2jstr(t);render();};
 function smNameOf(id){return id&&recs[id]?esc(recs[id].d.title||'—'):'—';}
 function smdashHTML(){
   const bizzes=byE('business');const b=gBiz();
@@ -11234,6 +11219,16 @@ function smdashHTML(){
     ${view.smPer==='c'?`<input id="sm_from" value="${esc(view.smFromJ||'')}" placeholder="از: ۱۴۰۴/۰۱/۰۱" onchange="smSetRange(this.value,null)" style="max-width:118px;font-size:12px"><button class="btn gh sm" style="padding:4px 7px" onclick="openJcal('sm_from')">📅</button>
     <input id="sm_to" value="${esc(view.smToJ||'')}" placeholder="تا: ۱۴۰۴/۱۲/۲۹" onchange="smSetRange(null,this.value)" style="max-width:118px;font-size:12px"><button class="btn gh sm" style="padding:4px 7px" onclick="openJcal('sm_to')">📅</button>`:''}
     <span style="font-size:11px;color:var(--tx2)">│ دوره: ${esc(W.label)} (مقایسه با دوره قبل)</span></div>`;
+  // 🔎 اگر در دورهٔ انتخابی فروشی نیست، به‌جای صفرهای گیج‌کننده راهنمای پرش بده
+  if(!cur.length){
+    const lastD=H.map(x=>x.d).filter(Boolean).sort().pop();
+    if(lastD){const lj=g2j(...lastD.split('-').map(Number));const MN2=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+    h+=`<div class="sec" style="border:1.5px dashed var(--warn);background:rgba(236,217,143,.07);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="font-size:12.5px">⚠️ در دورهٔ «${esc(W.label)}» فروشی ثبت نشده. آخرین فروش ثبت‌شده: <b>${esc(iso2jstr(lastD))}</b></span>
+      <span style="flex:1"></span>
+      <button class="btn sm" onclick="smJumpM(${lj[0]},${lj[1]})">📆 نمایش ${MN2[lj[1]-1]} ${_faY(lj[0])}</button>
+      <button class="btn gh sm" onclick="view.smPer='y';view.smYear=${lj[0]};render()">📅 نمایش سال ${_faY(lj[0])}</button></div>`;}
+  }
   // نمودار روند — دقیقاً هم‌بازه با دورهٔ انتخابی، دانه‌بندی خودکار
   if(!['amount','orders','profit'].includes(view.smMetric))view.smMetric='amount';
   const pts=smSeries2(b,W,view.smMetric);
