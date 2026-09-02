@@ -405,6 +405,8 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
 .frx .frx>span{padding:0 6px}
 .frx .frx>span:first-child{border-bottom:1.1px solid currentColor;padding-bottom:2px}
 .frx .frx>span:last-child{padding-top:2px}
+@keyframes lsp{0%,100%{box-shadow:0 0 0 0 rgba(224,82,82,.45)}50%{box-shadow:0 0 0 6px rgba(224,82,82,0)}}
+#lowstockbtn{animation:lsp 2s ease-in-out infinite}
 </style>
 </head>
 <body>
@@ -429,17 +431,18 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.72</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.73</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.72</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.73</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
       <button onclick="goBack()" title="بازگشت به صفحه قبل" style="background:var(--cd);border:1px solid var(--bd);color:var(--tx);border-radius:9px;padding:3px 10px;cursor:pointer;font-family:inherit;font-size:13px">→</button> <span id="ttl">اتاق کنترل</span><span class="sp"></span>
       <span id="who" style="font-size:11px;color:var(--tx2)"></span>
       <span id="synctxt"></span><span id="syncdot"></span>
+      <button class="btn sm" id="lowstockbtn" onclick="lowStockToggle()" style="display:none;border:1.5px solid var(--bad);color:var(--bad);background:rgba(224,82,82,.12);font-weight:800" title="هشدار کمبود موجودی — برای دیدن فهرست کلیک کنید">📦 کمبود <span id="lowstockn"></span></button>
       <span id="topmv_wrap" style="display:contents">
       <button class="btn gh sm topmv" id="mycalbtn" onclick="toggleMyCal()" title="تقویم من — برنامه روزهای پیش رو">📅</button>
       <button class="btn gh sm topmv" id="dashtop" onclick="openModule('داشبوردها')" title="مرکز داشبوردها — همه داشبوردها یک‌جا">📊 داشبوردها</button>
@@ -454,6 +457,7 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
 </div>
 
 <div id="jcal"></div>
+<div id="lowstockpop" style="display:none;position:fixed;top:52px;left:12px;right:auto;z-index:1200;max-width:420px;width:min(420px,92vw);max-height:70vh;overflow:auto;background:var(--cd);border:1.5px solid var(--bad);border-radius:14px;padding:12px;box-shadow:0 12px 34px rgba(0,0,0,.35)"></div>
 <div id="calpop" onclick="if(event.target===this)calPopClose()"><div class="cpcard" id="calpop_card"></div></div>
 <div id="mycal">
   <div style="display:flex;align-items:center"><b style="font-size:14px">📅 تقویم من</b><span style="flex:1"></span>
@@ -3073,6 +3077,7 @@ function whoami(){
   const lb=document.getElementById('laybtn');if(lb){lb.style.display=(!pend&&canSecLayout())?'':'none';lb.style.background=layMode?'rgba(212,175,55,.3)':'';}
   const ar=document.getElementById('arrbtn');if(ar)ar.style.display=pend?'none':'';
   try{applyTopOrder();}catch(e){} // اعمال ترتیب دلخواه دکمه‌های نوار بالا
+  try{lowStockTopUpd();}catch(e){} // 📦 نشانگر کمبود موجودی
 }
 async function authAction(){
   if(session){
@@ -5818,6 +5823,50 @@ function cartNewCnt(){ // 🔔 نامه‌های تازهٔ صندوق ورود�
     return fresh+aprCount();
   }catch(e){return 0;}
 }
+/* 📦 هشدار کمبود موجودی — نشانگر همیشه‌نما در نوار بالا */
+function lowStockList(){ // کالاهای زیر حداقل موجودی (با احترام به کسب‌وکار فعال از طریق byE)
+  const out=[];
+  try{
+    byE('product').forEach(p=>{
+      if(p.d.minstock==null||p.d.minstock==='')return;
+      const st=stockNow(p);
+      if(st<+p.d.minstock)out.push({p,st,min:+p.d.minstock});
+    });
+    out.sort((a,b)=>(a.st/Math.max(1,a.min))-(b.st/Math.max(1,b.min)));
+  }catch(e){}
+  return out;
+}
+function lowStockTopUpd(){ // فراخوانی در هر render (از whoami)
+  const b=document.getElementById('lowstockbtn');if(!b)return;
+  let ls=[];
+  try{if(!isPending()&&canSee('product'))ls=lowStockList();}catch(e){ls=[];}
+  window._lsCache=ls;
+  if(!ls.length){b.style.display='none';const pp=document.getElementById('lowstockpop');if(pp)pp.style.display='none';return;}
+  b.style.display='';
+  const zero=ls.some(x=>x.st<=0);
+  b.style.borderColor=zero?'var(--bad)':'var(--warn)';
+  b.style.color=zero?'var(--bad)':'var(--warn)';
+  b.style.background=zero?'rgba(224,82,82,.12)':'rgba(236,217,143,.12)';
+  const n=document.getElementById('lowstockn');if(n)n.textContent=ls.length.toLocaleString('fa-IR');
+}
+function lowStockToggle(){
+  const pp=document.getElementById('lowstockpop');if(!pp)return;
+  if(pp.style.display!=='none'){pp.style.display='none';return;}
+  const ls=window._lsCache&&window._lsCache.length?window._lsCache:lowStockList();
+  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b style="color:var(--bad)">📦 هشدار کمبود موجودی</b><span class="c" style="background:var(--bad);color:#fff">${ls.length.toLocaleString('fa-IR')}</span><span style="flex:1"></span><button class="btn gh sm" onclick="document.getElementById('lowstockpop').style.display='none'">✕</button></div>`;
+  if(!ls.length)h+=`<div class="empty">✅ همه کالاها بالای حداقل موجودی هستند</div>`;
+  ls.forEach(x=>{
+    h+=`<div onclick="document.getElementById('lowstockpop').style.display='none';go('rec','product','${x.p.id}')" style="cursor:pointer;border:1px solid ${x.st<=0?'var(--bad)':'var(--warn)'};border-radius:10px;padding:8px 11px;background:var(--bg2);margin-bottom:6px">
+      <b style="font-size:12.5px">${esc(x.p.d.title||'کالا')}</b>${x.p.d.sku?` <span style="font-size:10.5px;color:var(--tx2)">(${esc(String(x.p.d.sku))})</span>`:''}
+      <div style="font-size:11px;margin-top:3px">مانده: <b style="color:var(--bad)">${x.st.toLocaleString('fa-IR')}</b> از حداقل <b>${x.min.toLocaleString('fa-IR')}</b>${x.st<=0?' — <b style="color:var(--bad)">اتمام موجودی!</b>':''}</div></div>`;
+  });
+  h+=`<div style="margin-top:6px;text-align:left"><button class="btn gh sm" onclick="document.getElementById('lowstockpop').style.display='none';go('whdash')">📦 داشبورد انبار</button></div>`;
+  pp.innerHTML=h;pp.style.display='';
+}
+document.addEventListener('click',e=>{ // بستن پنل با کلیک بیرون
+  const pp=document.getElementById('lowstockpop');
+  if(pp&&pp.style.display!=='none'&&!pp.contains(e.target)&&!(e.target.closest&&e.target.closest('#lowstockbtn')))pp.style.display='none';
+});
 function fmtD(iso){if(!iso)return '—';try{const p=iso.slice(0,10).split('-').map(Number);const j=g2j(p[0],p[1],p[2]);return (j[0]+'/'+String(j[1]).padStart(2,'0')+'/'+String(j[2]).padStart(2,'0')).replace(/\d/g,c=>'۰۱۲۳۴۵۶۷۸۹'[c]);}catch(e){return iso;}}
 /* ═══ 📨 کارتابل نامه‌ها ═══ */
 function _hrName(id){return id&&recs[id]?(recs[id].d.title||'—'):'—';}
