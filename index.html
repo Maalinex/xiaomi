@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.85</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.86</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.85</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.86</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2836,6 +2836,7 @@ const VIEWS_ACL=[
  ['saleswf','🔁 کارتابل گردش فروش'],
  ['dayinv','🗓 فاکتورهای روز'],
  ['cartable','📨 کارتابل نامه‌ها'],
+ ['aidash','🤖 دستیار هوشمند'],
  ['lvreq','🌴 درخواست مرخصی'],
  ['bpm','🧩 فرآیندهای کاری'],
  ['custdash','🛍️ داشبورد مشتریان'],
@@ -5939,6 +5940,250 @@ document.addEventListener('click',e=>{ // بستن پنل با کلیک بیرو
   if(pp&&pp.style.display!=='none'&&!pp.contains(e.target)&&!(e.target.closest&&e.target.closest('#lowstockbtn')))pp.style.display='none';
 });
 function fmtD(iso){if(!iso)return '—';try{const p=iso.slice(0,10).split('-').map(Number);const j=g2j(p[0],p[1],p[2]);return (j[0]+'/'+String(j[1]).padStart(2,'0')+'/'+String(j[2]).padStart(2,'0')).replace(/\d/g,c=>'۰۱۲۳۴۵۶۷۸۹'[c]);}catch(e){return iso;}}
+/* ═══ 🤖 دستیار هوشمند — اتصال به هر سرویس سازگار با OpenAI Chat API ═══ */
+function aiCfg(){const m=recs[MO];return (m&&m.d&&m.d._ai)||{};}
+window.aiSaveCfg=function(){
+  const url=(document.getElementById('ai_url')||{}).value||'';
+  const key=(document.getElementById('ai_key')||{}).value||'';
+  const model=(document.getElementById('ai_model')||{}).value||'';
+  let m=recs[MO];if(!m||m.del)m={id:MO,e:'meta',d:{},u:Date.now()};
+  m.d={...m.d,_ai:{url:url.trim(),key:key.trim(),model:model.trim()}};m.u=Date.now();put(m);
+  setSync('ok','تنظیمات دستیار ذخیره شد');view.aiSet=false;render();
+};
+var aiChat=null,aiBusy=false,aiFile=null;
+function aiChatKey(){return 'xr_ai_'+String(myEmail()||'local').toLowerCase();}
+function aiLoad(){if(aiChat)return aiChat;try{aiChat=JSON.parse(localStorage.getItem(aiChatKey())||'[]');}catch(e){aiChat=[];}return aiChat;}
+function aiPersist(){try{localStorage.setItem(aiChatKey(),JSON.stringify(aiChat.slice(-40)));}catch(e){}}
+window.aiClear=function(){aiChat=[];aiPersist();render();};
+function aiSchemaBrief(){
+  const KEEP=['customer','product','invoice','invline','sale','purchinv','purchline','crm','settle','preq','po','rfq','task','hr','delivery','channel'];
+  return KEEP.filter(e=>E[e]).map(e=>{
+    const fs=E[e].f.filter(f=>f.t!==FIL).slice(0,18).map(f=>f.k+(f.t===REL?':ref('+f.r+')':f.t===DAT?':date':f.t===NUM?':num':f.t===SEL?':یکی از['+(f.o||[]).join('|')+']':'')).join('، ');
+    return '- '+e+' ('+E[e].n+'): '+fs;
+  }).join('\n');
+}
+function aiSys(){
+  const bz=gBiz()&&recs[gBiz()]?recs[gBiz()].d.title:'';
+  return `تو دستیار هوشمند نرم‌افزار مدیریت کسب‌وکار XIAOMI هستی. زبانت فارسی، دقیق و حرفه‌ای است. تاریخ امروز: ${iso2jstr(today())} شمسی (${today()} میلادی).${bz?' کسب‌وکار فعال: «'+bz+'».':''}
+دو راه پاسخ داری:
+۱) پاسخ متنی عادی (تحلیل، توصیه، گزارش) — می‌توانی از مارک‌دان ساده استفاده کنی.
+۲) اجرای عمل روی داده‌ها: فقط یک بلوک \`\`\`json در پاسخ بگذار، آرایه‌ای از اکشن‌ها:
+- {"action":"query","e":"<entity>","limit":200,"fields":["title","..."],"contains":"<متن اختیاری در نام>"} ← داده می‌گیری؛ نتیجه در پیام بعدی به تو داده می‌شود، بعد ادامه بده.
+- {"action":"apply","note":"<شرح>","recs":[{"e":"customer","id":"tmp1","d":{"title":"...","province":"...","city":"..."}} , ...]} ← ساخت/به‌روزرسانی رکورد. برای اتصال رکوردها: مقدار فیلدهای ref را «نام رکورد» بده (سیستم خودش پیدا می‌کند) یا id موقت مثل "tmp1" که در همین بسته ساخته‌ای. برای به‌روزرسانی رکورد موجود، "match":"<title>" بده تا با نام پیدا و ادغام شود. تاریخ‌ها را شمسی «۱۴۰۳/۰۱/۱۵» یا میلادی ISO بده.
+قواعد: قبل از apply بزرگ، اول با query وضعیت را بفهم. استان/شهر ایران را استاندارد بنویس. اعداد ریال بدون جداکننده. هر apply حداکثر ۳۰۰ رکورد.
+ساختار داده‌ها:
+${aiSchemaBrief()}`;
+}
+async function aiCall(messages){
+  const c=aiCfg();
+  const r=await fetch(c.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.key},
+    body:JSON.stringify({model:c.model,messages,temperature:0.2,max_tokens:4000})});
+  if(!r.ok)throw new Error('HTTP '+r.status+' — '+(await r.text()).slice(0,200));
+  const j=await r.json();
+  return ((j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'').trim();
+}
+function aiActs(txt){ // بلوک json داخل پاسخ
+  const m=txt.match(/```json\s*([\s\S]*?)```/);
+  if(!m)return null;
+  try{const a=JSON.parse(m[1]);return Array.isArray(a)?a:[a];}catch(e){return null;}
+}
+function aiRunQuery(a){
+  const e=a.e;if(!E[e])return {error:'بخش «'+e+'» وجود ندارد'};
+  let rows=byE(e);
+  if(a.contains)rows=rows.filter(r=>faNum(String(r.d.title||'')).includes(faNum(String(a.contains))));
+  const lim=Math.min(+a.limit||100,300);
+  const flds=(a.fields&&a.fields.length?a.fields:E[e].f.slice(0,8).map(f=>f.k));
+  const out=rows.slice(0,lim).map(r=>{
+    const o={_title:r.d.title||''};
+    flds.forEach(k=>{const f=E[e].f.find(x=>x.k===k);if(!f)return;let v=r.d[k];
+      if(f.t===REL)v=relIds(r,k).map(id=>recs[id]?recs[id].d.title:'').join('|');
+      else if(f.t===DAT)v=ds(v)||'';
+      if(v!=null&&v!=='')o[k]=v;});
+    return o;});
+  return {count:rows.length,shown:out.length,rows:out};
+}
+function aiRunApply(a){
+  const list=(a.recs||[]).slice(0,300);
+  if(!list.length)return {error:'رکوردی نیست'};
+  if(!confirm('🤖 دستیار می‌خواهد '+list.length.toLocaleString('fa-IR')+' رکورد ثبت/به‌روزرسانی کند'+(a.note?':\n'+a.note:'')+'\n\nتأیید می‌کنید؟'))return {error:'کاربر رد کرد'};
+  const NOW=Date.now();const tmp={};let made=0,upd=0,errs=[];
+  // پاس اول: id موقت
+  list.forEach(x=>{if(x.id&&String(x.id).startsWith('tmp'))tmp[x.id]=uid();});
+  const resolve=(e,k,v)=>{ // نام یا tmp → آرایه id
+    const f=E[e].f.find(ff=>ff.k===k);if(!f||f.t!==REL)return v;
+    const arr=Array.isArray(v)?v:[v];
+    const ids=arr.map(x=>{
+      x=String(x||'').trim();if(!x)return null;
+      if(tmp[x])return tmp[x];
+      if(recs[x]&&!recs[x].del)return x;
+      const t=byE(f.r).find(rr=>_pnorm(rr.d.title)===_pnorm(x));
+      return t?t.id:null;
+    }).filter(Boolean);
+    return ids;
+  };
+  list.forEach(x=>{
+    try{
+      const e=x.e;if(!E[e]){errs.push(e+'؟');return;}
+      let target=null;
+      if(x.match)target=byE(e).find(rr=>_pnorm(rr.d.title)===_pnorm(x.match));
+      const d={};
+      Object.entries(x.d||{}).forEach(([k,v])=>{
+        const f=E[e].f.find(ff=>ff.k===k);if(!f){d[k]=v;return;}
+        if(f.t===REL)d[k]=resolve(e,k,v);
+        else if(f.t===DAT)d[k]=v?{s:dNorm(String(v))||String(v)}:null;
+        else d[k]=v;
+      });
+      if(!d.biz&&E[e].f.some(f=>f.k==='biz')&&gBiz())d.biz=[gBiz()];
+      if(target){target.d={...target.d,...d};target.u=NOW;queue.push(target.id);upd++;}
+      else{const id=tmp[x.id]||uid();recs[id]={id,e,d:{_by:myEmail(),...d},u:NOW};queue.push(id);made++;}
+    }catch(err){errs.push(String(err).slice(0,60));}
+  });
+  queue=[...new Set(queue)];
+  try{_byRaw=null;}catch(e){}try{_invLineIdx=null;}catch(e){}try{_whQtyCache=null;}catch(e){}try{_fifoCache=null;}catch(e){}
+  saveLocal();saveQ();flush();
+  return {created:made,updated:upd,errors:errs.slice(0,5)};
+}
+async function aiReadFile(f){ // CSV/TSV/متن + xlsx (بدون کتابخانه، با DecompressionStream)
+  const name=(f.name||'').toLowerCase();
+  if(name.endsWith('.xlsx')){
+    try{return await aiXlsx(f);}catch(e){return '[خطا در خواندن اکسل: '+e.message+' — فایل را CSV ذخیره کنید]';}
+  }
+  return await f.text();
+}
+async function aiXlsx(f){
+  const buf=new Uint8Array(await f.arrayBuffer());
+  const dv=new DataView(buf.buffer);
+  // EOCD
+  let eo=-1;for(let i=buf.length-22;i>=0&&i>buf.length-66000;i--){if(dv.getUint32(i,true)===0x06054b50){eo=i;break;}}
+  if(eo<0)throw new Error('zip?');
+  const n=dv.getUint16(eo+10,true),cdOff=dv.getUint32(eo+16,true);
+  const files={};let p=cdOff;
+  for(let i=0;i<n;i++){
+    if(dv.getUint32(p,true)!==0x02014b50)break;
+    const method=dv.getUint16(p+10,true),csz=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),el=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lho=dv.getUint32(p+42,true);
+    const nm=new TextDecoder().decode(buf.subarray(p+46,p+46+nl));
+    files[nm]={method,csz,lho};p+=46+nl+el+cl;
+  }
+  async function get(nm){
+    const fe=files[nm];if(!fe)return null;
+    const lnl=dv.getUint16(fe.lho+26,true),lel=dv.getUint16(fe.lho+28,true);
+    const start=fe.lho+30+lnl+lel;
+    const raw=buf.subarray(start,start+fe.csz);
+    if(fe.method===0)return new TextDecoder().decode(raw);
+    const st=new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw')));
+    return await st.text();
+  }
+  const ssX=await get('xl/sharedStrings.xml');
+  const ss=[];if(ssX){const re=/<si[^>]*>([\s\S]*?)<\/si>/g;let m;while((m=re.exec(ssX))){ss.push((m[1].match(/<t[^>]*>([\s\S]*?)<\/t>/g)||[]).map(t=>t.replace(/<[^>]+>/g,'')).join('').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>'));}}
+  let out='';
+  for(const shn of ['xl/worksheets/sheet1.xml','xl/worksheets/sheet2.xml']){
+    const sx=await get(shn);if(!sx)continue;
+    out+='--- '+shn+' ---\n';
+    const rowRe=/<row[^>]*>([\s\S]*?)<\/row>/g;let rm;let cnt=0;
+    while((rm=rowRe.exec(sx))&&cnt<1500){
+      const cells=[];const cRe=/<c([^>]*)>([\s\S]*?)<\/c>/g;let cm;
+      while((cm=cRe.exec(rm[1]))){
+        const attrs=cm[1];const vM=cm[2].match(/<v>([\s\S]*?)<\/v>/);const tM=cm[2].match(/<t[^>]*>([\s\S]*?)<\/t>/);
+        let v=vM?vM[1]:(tM?tM[1]:'');
+        if(/t="s"/.test(attrs)&&v!=='')v=ss[+v]||'';
+        cells.push(String(v).replace(/&amp;/g,'&'));
+      }
+      out+=cells.join('\t')+'\n';cnt++;
+    }
+  }
+  return out||'(خالی)';
+}
+window.aiPick=function(inp){aiFile=inp.files&&inp.files[0]||null;render();};
+window.aiSend=async function(){
+  const inp=document.getElementById('ai_q');const q=(inp&&inp.value||'').trim();
+  if(!q&&!aiFile)return;
+  const c=aiCfg();
+  if(!c.url||!c.key||!c.model){view.aiSet=true;render();setSync('err','اول تنظیمات دستیار را کامل کنید');return;}
+  aiLoad();
+  let content=q;
+  if(aiFile){
+    setSync('sync','خواندن فایل…');
+    let txt='';try{txt=await aiReadFile(aiFile);}catch(e){txt='[خطای فایل: '+e.message+']';}
+    if(txt.length>60000)txt=txt.slice(0,60000)+'\n…[بریده شد]';
+    content+='\n\n[محتوای فایل «'+aiFile.name+'»]:\n'+txt;
+    aiFile=null;
+  }
+  aiChat.push({role:'user',content,t:Date.now()});
+  aiPersist();aiBusy=true;render();
+  try{
+    let rounds=0;
+    while(rounds++<4){
+      const msgs=[{role:'system',content:aiSys()}].concat(aiChat.slice(-16).map(m=>({role:m.role==='tool'?'user':m.role,content:m.content})));
+      const ans=await aiCall(msgs);
+      aiChat.push({role:'assistant',content:ans,t:Date.now()});
+      const acts=aiActs(ans);
+      if(!acts)break;
+      const results=acts.map(a=>{
+        try{
+          if(a.action==='query')return aiRunQuery(a);
+          if(a.action==='apply')return aiRunApply(a);
+          return {error:'اکشن ناشناخته'};
+        }catch(err){return {error:String(err).slice(0,120)};}
+      });
+      aiChat.push({role:'tool',content:'[نتیجه سیستم]\n'+JSON.stringify(results).slice(0,50000),t:Date.now()});
+      aiPersist();render();
+      const onlyApply=acts.every(a=>a.action==='apply');
+      if(onlyApply)break; // بعد از ثبت، خلاصه در پاسخ بعدی لازم نیست حلقه ادامه یابد مگر مدل بخواهد
+    }
+  }catch(err){
+    aiChat.push({role:'assistant',content:'⚠️ خطا: '+String(err.message||err),t:Date.now()});
+  }
+  aiBusy=false;aiPersist();render();
+};
+function aiMd(t){ // مارک‌دان خیلی ساده و امن
+  let h=esc(t);
+  h=h.replace(/```json[\s\S]*?```/g,m=>'<details style="margin:6px 0"><summary style="cursor:pointer;font-size:11px;color:var(--tx2)">🔧 جزئیات فنی اکشن</summary><pre style="font-size:10.5px;direction:ltr;text-align:left;overflow:auto;background:var(--bg);padding:8px;border-radius:8px">'+m.replace(/```json|```/g,'')+'</pre></details>');
+  h=h.replace(/```([\s\S]*?)```/g,'<pre style="font-size:11px;direction:ltr;text-align:left;overflow:auto;background:var(--bg);padding:8px;border-radius:8px">$1</pre>');
+  h=h.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  h=h.replace(/^### (.+)$/gm,'<b style="font-size:13.5px">$1</b>');
+  h=h.replace(/^## (.+)$/gm,'<b style="font-size:14px">$1</b>');
+  h=h.replace(/^[-•] (.+)$/gm,'&nbsp;• $1');
+  h=h.replace(/^\|(.+)\|$/gm,m=>m); // جدول‌ها ساده می‌مانند
+  return h.replace(/\n/g,'<br>');
+}
+function aidashHTML(){
+  aiLoad();
+  const c=aiCfg();const ok=c.url&&c.key&&c.model;
+  let h=`<div class="tools"><b style="font-size:13px">🤖 دستیار هوشمند</b>
+    <span style="font-size:11px;color:${ok?'var(--ok)':'var(--bad)'}">${ok?'● متصل به '+esc(c.model):'● پیکربندی نشده'}</span>
+    <span style="flex:1"></span>
+    ${aiChat.length?`<button class="btn gh sm" onclick="aiClear()">🧹 گفتگوی جدید</button>`:''}
+    ${isAdmin()?`<button class="btn gh sm" onclick="view.aiSet=!view.aiSet;render()">⚙️ تنظیمات</button>`:''}</div>`;
+  if(view.aiSet&&isAdmin()){
+    h+=`<div class="sec"><h3>⚙️ اتصال دستیار (سازگار با OpenAI / OpenRouter / Gemini-openai / سرویس‌های ایرانی)</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-top:8px">
+        <div><label>آدرس API (chat/completions)</label><input id="ai_url" dir="ltr" value="${esc(c.url||'https://api.openai.com/v1/chat/completions')}"></div>
+        <div><label>کلید API</label><input id="ai_key" dir="ltr" type="password" value="${esc(c.key||'')}" placeholder="sk-…"></div>
+        <div><label>نام مدل</label><input id="ai_model" dir="ltr" value="${esc(c.model||'gpt-4o-mini')}" placeholder="gpt-4o-mini"></div>
+      </div>
+      <div style="margin-top:10px"><button class="btn sm" onclick="aiSaveCfg()">💾 ذخیره</button></div>
+      <p style="font-size:11px;color:var(--tx2);margin-top:8px;line-height:2">هر سرویسی که Chat Completions سازگار با OpenAI بدهد کار می‌کند: OpenAI، OpenRouter، Groq، DeepSeek، Gemini (مسیر openai)، یا سرویس‌های واسط ایرانی. کلید فقط روی همین سیستم ذخیره می‌شود.</p></div>`;
+  }
+  h+=`<div class="sec" style="min-height:340px;display:flex;flex-direction:column">
+    <div style="flex:1;display:flex;flex-direction:column;gap:10px;overflow:auto;max-height:56vh;padding:4px" id="ai_log">`;
+  if(!aiChat.length)h+=`<div class="empty" style="margin:auto">🤖 سلام! من دستیار هوشمند شما هستم.<br><span style="font-size:11.5px">نمونه: «فایل اکسل مشتری‌ها را پیوست می‌کنم؛ استان و شهر هرکدام را تشخیص بده و ثبت کن» · «گزارش تحلیلی فروش ۱۴۰۳ بده» · «کدام مشتری‌ها ۳ ماه است خرید نکرده‌اند؟ توصیه بده»</span></div>`;
+  aiChat.forEach(m=>{
+    if(m.role==='tool'){h+=`<details style="font-size:10.5px;color:var(--tx2);align-self:center"><summary style="cursor:pointer">⚙️ داده ردوبدل‌شده با سیستم</summary><pre style="max-width:640px;overflow:auto;direction:ltr;text-align:left;background:var(--bg);padding:8px;border-radius:8px">${esc(m.content.slice(0,4000))}</pre></details>`;return;}
+    const me=m.role==='user';
+    h+=`<div style="align-self:${me?'flex-start':'flex-end'};max-width:82%;background:${me?'var(--ac)':'var(--bg)'};color:${me?'#fff':'var(--tx)'};border:1px solid var(--line);border-radius:${me?'14px 14px 14px 4px':'14px 14px 4px 14px'};padding:9px 13px;font-size:12.5px;line-height:2.1">${me?esc(m.content.length>900?m.content.slice(0,900)+' …':m.content).replace(/\n/g,'<br>'):aiMd(m.content)}</div>`;
+  });
+  if(aiBusy)h+=`<div style="align-self:flex-end;font-size:12px;color:var(--tx2)">🤖 در حال فکر کردن…</div>`;
+  h+=`</div>
+    <div style="display:flex;gap:7px;margin-top:10px;align-items:flex-end">
+      <label class="btn gh sm" style="cursor:pointer;padding:8px 10px" title="پیوست اکسل/CSV/متن">📎<input type="file" accept=".xlsx,.csv,.txt,.tsv" style="display:none" onchange="aiPick(this)"></label>
+      ${aiFile?`<span class="tag" style="font-size:10.5px">${esc(aiFile.name)}</span>`:''}
+      <textarea id="ai_q" rows="2" placeholder="از دستیار بخواه… (Ctrl+Enter برای ارسال)" style="flex:1;resize:vertical" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){aiSend();event.preventDefault();}"></textarea>
+      <button class="btn" onclick="aiSend()" ${aiBusy?'disabled':''}>ارسال ↵</button>
+    </div></div>`;
+  setTimeout(()=>{const l=document.getElementById('ai_log');if(l)l.scrollTop=l.scrollHeight;},30);
+  return h;
+}
+
 /* ═══ 📨 کارتابل نامه‌ها ═══ */
 function _hrName(id){return id&&recs[id]?(recs[id].d.title||'—'):'—';}
 function cartHTML(){
@@ -10549,6 +10794,7 @@ function nav(){
   h+=`<div class="nav-i ${view.type==='me'?'on':''}" onclick="go('me')">🗂️ میز کار من</div>`;
   if(canSee('leave')&&canView('lvreq'))h+=`<div class="nav-i ${view.type==='lvreq'?'on':''}" onclick="go('lvreq')">🌴 درخواست مرخصی</div>`;
   if(canSee('letter')&&canView('cartable')){const _ac=cartNewCnt();h+=`<div class="nav-i ${view.type==='cartable'?'on':''}" onclick="go('cartable')">📨 کارتابل نامه‌ها${_ac?` <span class="c" style="background:var(--warn);color:#000">${_ac.toLocaleString('fa-IR')}</span>`:''}</div>`;}
+  if(!isPending()&&(isAdmin()||vExplicit('aidash')))h+=`<div class="nav-i ${view.type==='aidash'?'on':''}" onclick="go('aidash')">🤖 دستیار هوشمند</div>`;
   h+=`
   ${canView('cal')?`<div class="nav-i ${view.type==='cal'?'on':''}" onclick="go('cal')">📅 تقویم</div>`:''}
   `;
@@ -10663,6 +10909,7 @@ function render(){
     view.type==='me'?'🗂️ میز کار من':
     view.type==='lvreq'?'🌴 درخواست مرخصی':
     view.type==='cartable'?'📨 کارتابل نامه‌ها و تأییدها':
+    view.type==='aidash'?'🤖 دستیار هوشمند':
     view.type==='dayinv'?'🗓 فاکتورهای روز':
     view.type==='saleswf'?'🔁 گردش فروش — پیش‌فاکتور تا صدور':
     view.type==='cal'?'📅 تقویم':
@@ -10726,7 +10973,7 @@ function render(){
   const _mtEl=document.getElementById('mtabs');
   if(_mtEl){try{_mtEl.innerHTML=mtabsHTML();}catch(e){_mtEl.innerHTML='';}}
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',pldash:'pldash',bankdash:'bankdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',purchwf:'purchwf',claimdash:'claimdash',paydash:'paydash',dayinv:'dayinv',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',ucenter:'ucenter',orgchart:'orgchart',geodash:'geodash',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
+  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',pldash:'pldash',bankdash:'bankdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',aidash:'aidash',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',purchwf:'purchwf',claimdash:'claimdash',paydash:'paydash',dayinv:'dayinv',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',ucenter:'ucenter',orgchart:'orgchart',geodash:'geodash',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
   if(view.type==='invnew'&&!canView('invnew')&&!canView('invnewpf')){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -10760,6 +11007,7 @@ function render(){
     }
     else if(view.type==='lvreq')c.innerHTML=lvreqHTML();
     else if(view.type==='cartable')c.innerHTML=cartHTML();
+    else if(view.type==='aidash')c.innerHTML=aidashHTML();
     else if(view.type==='dayinv')c.innerHTML=dayinvHTML();
     else if(view.type==='saleswf')c.innerHTML=swfHTML();
     else if(view.type==='cal')c.innerHTML=calHTML();
