@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.81</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.82</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.81</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.82</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2197,6 +2197,7 @@ function setSync(cls,txt){document.getElementById('syncdot').className=cls;docum
 function put(rec,push=true){const _old=recs[rec.id];recs[rec.id]=rec;_patchCaches(_old,rec);saveLocal();if(push){queue.push(rec.id);saveQ();flush();}render();}
 /* 🐎 وصله‌ی افزایشی کش‌ها برای یک رکورد — به‌جای بازسازی کامل روی داده‌ی حجیم */
 function _patchCaches(old,rec){
+  try{_bizInferCache={};}catch(e){}
   if(_byRaw){
     if(old&&old.e&&_byRaw[old.e]){const a=_byRaw[old.e];const i=a.findIndex(x=>x.id===rec.id);if(i>=0)a.splice(i,1);}
     if(rec.e&&!rec.del){if(!rec.d||typeof rec.d!=='object')rec.d={};(_byRaw[rec.e]||(_byRaw[rec.e]=[])).push(rec);}
@@ -2234,7 +2235,7 @@ function wasteOf(pid){ // همهٔ خروج‌های غیرفروشی: ضایع�
 }
 window.wIsGift=wIsGift;window.wIsOut=wIsOut;
 function wasteQtyOf(pid){return wasteOf(pid).reduce((a,x)=>a+(+x.d.qty||0),0);}
-function _rebuildByRaw(){_byRaw={};for(const id in recs){const r=recs[id];if(!r||r.del||!r.e)continue;if(!r.d||typeof r.d!=='object')r.d={};(_byRaw[r.e]||(_byRaw[r.e]=[])).push(r);}}
+function _rebuildByRaw(){_byRaw={};_bizInferCache={};for(const id in recs){const r=recs[id];if(!r||r.del||!r.e)continue;if(!r.d||typeof r.d!=='object')r.d={};(_byRaw[r.e]||(_byRaw[r.e]=[])).push(r);}}
 /* 🏢 دروازه سراسری «زمینه فعال»: با انتخاب شرکت/کسب‌وکار در بالای صفحه،
    همهٔ نمایش‌ها (لیست‌ها، داشبوردها، شمارنده‌ها، گردش‌ها) به همان زمینه شیفت می‌شوند.
    رکوردهای بدون شرکت/کسب‌وکار (مشترک) همیشه دیده می‌شوند. */
@@ -2246,12 +2247,41 @@ function _ctxFields(e){
   if(def)(def.f||[]).forEach(f=>{if(f.t===REL){if(f.r==='company'&&!out.c)out.c=f.k;if(f.r==='business'&&!out.b)out.b=f.k;}});
   return _ctxFCache[e]=out;
 }
+var _bizInferCache={};
+function _bizOfRec(r){ // 🧭 کسب‌وکارهای یک رکورد؛ اگر فیلد مستقیم خالی بود از روابط سطح ۱ استنتاج می‌شود
+  const key=r.id+'|'+(r.u||0);
+  const hit=_bizInferCache[key];if(hit)return hit;
+  let out=null;
+  const def=E[r.e];
+  if(def){
+    const cf=_ctxFields(r.e);
+    if(cf.b){const ids=relIds(r,cf.b);if(ids.length)out=ids;}
+    if(!out){
+      const found=new Set();
+      (def.f||[]).forEach(f=>{
+        if(f.t!==REL||f.r==='business'||f.r==='company'||CTX_SKIP[f.r])return;
+        relIds(r,f.k).forEach(id=>{
+          const t=recs[id];if(!t||t.del||!E[t.e])return;
+          const cf2=_ctxFields(t.e);
+          if(cf2.b)relIds(t,cf2.b).forEach(b=>found.add(b));
+        });
+      });
+      if(found.size)out=[...found];
+    }
+  }
+  out=out||[];
+  return _bizInferCache[key]=out;
+}
 function ctxFilter(e,rows){
   if(CTX_SKIP[e]||!E[e])return rows;
   const co=gCo(),bz=gBiz();
   if(!co&&!bz)return rows;
   const cf=_ctxFields(e);
-  if(bz&&cf.b)rows=rows.filter(r=>{const ids=relIds(r,cf.b);return !ids.length||ids.includes(bz);});
+  if(bz)rows=rows.filter(r=>{ // فیلد مستقیم؛ در نبودش استنتاج از روابط (استعلام←کالا، حواله←فاکتور و…)
+    if(cf.b){const ids=relIds(r,cf.b);if(ids.length)return ids.includes(bz);}
+    const inf=_bizOfRec(r);
+    return !inf.length||inf.includes(bz); // بدون هیچ ردپای کسب‌وکار = مشترک، همیشه دیده می‌شود
+  });
   if(co&&cf.c)rows=rows.filter(r=>{const ids=relIds(r,cf.c);return !ids.length||ids.includes(co);});
   return rows;
 }
