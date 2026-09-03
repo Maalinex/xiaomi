@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.86</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.87</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.86</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.87</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -5940,6 +5940,210 @@ document.addEventListener('click',e=>{ // بستن پنل با کلیک بیرو
   if(pp&&pp.style.display!=='none'&&!pp.contains(e.target)&&!(e.target.closest&&e.target.closest('#lowstockbtn')))pp.style.display='none';
 });
 function fmtD(iso){if(!iso)return '—';try{const p=iso.slice(0,10).split('-').map(Number);const j=g2j(p[0],p[1],p[2]);return (j[0]+'/'+String(j[1]).padStart(2,'0')+'/'+String(j[2]).padStart(2,'0')).replace(/\d/g,c=>'۰۱۲۳۴۵۶۷۸۹'[c]);}catch(e){return iso;}}
+/* ═══ 🧠 موتور آفلاین دستیار — رایگان، بدون اینترنت و بدون API ═══ */
+const AI_CITY_PROV={
+// ایران — شهر: استان
+'تهران':'تهران','ری':'تهران','شهرری':'تهران','ورامین':'تهران','اسلامشهر':'تهران','شهریار':'تهران','ملارد':'تهران','قدس':'تهران','پاکدشت':'تهران','دماوند':'تهران','آبسرد':'تهران','رودهن':'تهران','بومهن':'تهران','پردیس':'تهران','پرند':'تهران','رباط کریم':'تهران','فیروزکوه':'تهران','لواسان':'تهران','قرچک':'تهران',
+'مشهد':'خراسان رضوی','نیشابور':'خراسان رضوی','سبزوار':'خراسان رضوی','تربت حیدریه':'خراسان رضوی','قوچان':'خراسان رضوی','کاشمر':'خراسان رضوی','گناباد':'خراسان رضوی','تربت جام':'خراسان رضوی','چناران':'خراسان رضوی','طرقبه':'خراسان رضوی',
+'اصفهان':'اصفهان','کاشان':'اصفهان','خمینی شهر':'اصفهان','نجف آباد':'اصفهان','شاهین شهر':'اصفهان','فولادشهر':'اصفهان','سمیرم':'اصفهان','گلپایگان':'اصفهان','آران و بیدگل':'اصفهان','زرین شهر':'اصفهان','مبارکه':'اصفهان','خوانسار':'اصفهان','نطنز':'اصفهان','اردستان':'اصفهان','داران':'اصفهان',
+'شیراز':'فارس','مرودشت':'فارس','کازرون':'فارس','جهرم':'فارس','فسا':'فارس','داراب':'فارس','لار':'فارس','لامرد':'فارس','آباده':'فارس','اقلید':'فارس','نی ریز':'فارس','گراش':'فارس','فیروزآباد':'فارس','estahban':'فارس','استهبان':'فارس','سپیدان':'فارس',
+'تبریز':'آذربایجان شرقی','مراغه':'آذربایجان شرقی','مرند':'آذربایجان شرقی','میانه':'آذربایجان شرقی','اهر':'آذربایجان شرقی','بناب':'آذربایجان شرقی','سراب':'آذربایجان شرقی','شبستر':'آذربایجان شرقی','آذرشهر':'آذربایجان شرقی','هریس':'آذربایجان شرقی','جلفا':'آذربایجان شرقی','عجب شیر':'آذربایجان شرقی','ملکان':'آذربایجان شرقی','هشترود':'آذربایجان شرقی','اسکو':'آذربایجان شرقی','سهند':'آذربایجان شرقی',
+'ارومیه':'آذربایجان غربی','خوی':'آذربایجان غربی','میاندوآب':'آذربایجان غربی','مهاباد':'آذربایجان غربی','بوکان':'آذربایجان غربی','سلماس':'آذربایجان غربی','پیرانشهر':'آذربایجان غربی','نقده':'آذربایجان غربی','تکاب':'آذربایجان غربی','ماکو':'آذربایجان غربی','سردشت':'آذربایجان غربی','شاهین دژ':'آذربایجان غربی',
+'کرج':'البرز','فردیس':'البرز','نظرآباد':'البرز','هشتگرد':'البرز','محمدشهر':'البرز','ماهدشت':'البرز','اشتهارد':'البرز','طالقان':'البرز',
+'قم':'قم',
+'اهواز':'خوزستان','آبادان':'خوزستان','خرمشهر':'خوزستان','دزفول':'خوزستان','اندیمشک':'خوزستان','شوشتر':'خوزستان','بهبهان':'خوزستان','ماهشهر':'خوزستان','ایذه':'خوزستان','شوش':'خوزستان','رامهرمز':'خوزستان','سوسنگرد':'خوزستان','هندیجان':'خوزستان','امیدیه':'خوزستان','آغاجاری':'خوزستان','مسجدسلیمان':'خوزستان','باغملک':'خوزستان',
+'کرمانشاه':'کرمانشاه','اسلام آباد غرب':'کرمانشاه','سرپل ذهاب':'کرمانشاه','کنگاور':'کرمانشاه','هرسین':'کرمانشاه','سنقر':'کرمانشاه','جوانرود':'کرمانشاه','پاوه':'کرمانشاه','قصر شیرین':'کرمانشاه','صحنه':'کرمانشاه',
+'رشت':'گیلان','بندرانزلی':'گیلان','انزلی':'گیلان','لاهیجان':'گیلان','لنگرود':'گیلان','تالش':'گیلان','آستارا':'گیلان','رودسر':'گیلان','صومعه سرا':'گیلان','فومن':'گیلان','ماسال':'گیلان','رودبار':'گیلان','آستانه اشرفیه':'گیلان','سیاهکل':'گیلان','شفت':'گیلان','املش':'گیلان','رضوانشهر':'گیلان','خمام':'گیلان','لشت نشا':'گیلان',
+'ساری':'مازندران','بابل':'مازندران','آمل':'مازندران','امل':'مازندران','قائم شهر':'مازندران','قایم شهر':'مازندران','بهشهر':'مازندران','چالوس':'مازندران','نوشهر':'مازندران','بابلسر':'مازندران','تنکابن':'مازندران','رامسر':'مازندران','نکا':'مازندران','جویبار':'مازندران','فریدون کنار':'مازندران','فریدونکنار':'مازندران','محمودآباد':'مازندران','نور':'مازندران','سوادکوه':'مازندران','گلوگاه':'مازندران','کلاردشت':'مازندران','عباس آباد':'مازندران','سلمان شهر':'مازندران','چمستان':'مازندران','رویان':'مازندران','ایزدشهر':'مازندران',
+'زاهدان':'سیستان و بلوچستان','زابل':'سیستان و بلوچستان','چابهار':'سیستان و بلوچستان','ایرانشهر':'سیستان و بلوچستان','سراوان':'سیستان و بلوچستان','خاش':'سیستان و بلوچستان','کنارک':'سیستان و بلوچستان','نیک شهر':'سیستان و بلوچستان',
+'همدان':'همدان','ملایر':'همدان','نهاوند':'همدان','تویسرکان':'همدان','اسدآباد':'همدان','بهار':'همدان','کبودراهنگ':'همدان','رزن':'همدان','لالجین':'همدان',
+'کرمان':'کرمان','رفسنجان':'کرمان','سیرجان':'کرمان','جیرفت':'کرمان','بم':'کرمان','زرند':'کرمان','شهربابک':'کرمان','کهنوج':'کرمان','بردسیر':'کرمان','بافت':'کرمان','راور':'کرمان','انار':'کرمان',
+'یزد':'یزد','میبد':'یزد','اردکان':'یزد','بافق':'یزد','مهریز':'یزد','ابرکوه':'یزد','تفت':'یزد','اشکذر':'یزد','حمیدیا':'یزد',
+'اردبیل':'اردبیل','پارس آباد':'اردبیل','مشگین شهر':'اردبیل','خلخال':'اردبیل','گرمی':'اردبیل','بیله سوار':'اردبیل','نمین':'اردبیل','نیر':'اردبیل','سرعین':'اردبیل',
+'بندرعباس':'هرمزگان','میناب':'هرمزگان','قشم':'هرمزگان','کیش':'هرمزگان','بندر لنگه':'هرمزگان','بندرلنگه':'هرمزگان','رودان':'هرمزگان','جاسک':'هرمزگان','حاجی آباد':'هرمزگان','پارسیان':'هرمزگان','بستک':'هرمزگان',
+'اراک':'مرکزی','ساوه':'مرکزی','خمین':'مرکزی','محلات':'مرکزی','دلیجان':'مرکزی','شازند':'مرکزی','تفرش':'مرکزی','آشتیان':'مرکزی','مامونیه':'مرکزی','زرندیه':'مرکزی',
+'زنجان':'زنجان','ابهر':'زنجان','خرمدره':'زنجان','قیدار':'زنجان','طارم':'زنجان','ماهنشان':'زنجان','سلطانیه':'زنجان',
+'سنندج':'کردستان','سقز':'کردستان','مریوان':'کردستان','بانه':'کردستان','قروه':'کردستان','بیجار':'کردستان','کامیاران':'کردستان','دیواندره':'کردستان','دهگلان':'کردستان',
+'قزوین':'قزوین','تاکستان':'قزوین','آبیک':'قزوین','بویین زهرا':'قزوین','الوند':'قزوین','محمدیه':'قزوین','اقبالیه':'قزوین',
+'خرم آباد':'لرستان','خرم‌آباد':'لرستان','بروجرد':'لرستان','دورود':'لرستان','الیگودرز':'لرستان','کوهدشت':'لرستان','ازنا':'لرستان','نورآباد':'لرستان','پلدختر':'لرستان','الشتر':'لرستان',
+'گرگان':'گلستان','گنبد کاووس':'گلستان','گنبد':'گلستان','علی آباد کتول':'گلستان','بندر ترکمن':'گلستان','آق قلا':'گلستان','کردکوی':'گلستان','آزادشهر':'گلستان','مینودشت':'گلستان','کلاله':'گلستان','رامیان':'گلستان','بندرگز':'گلستان',
+'بوشهر':'بوشهر','برازجان':'بوشهر','گناوه':'بوشهر','کنگان':'بوشهر','دیلم':'بوشهر','خارگ':'بوشهر','عسلویه':'بوشهر','جم':'بوشهر','دشتستان':'بوشهر','اهرم':'بوشهر',
+'بجنورد':'خراسان شمالی','شیروان':'خراسان شمالی','اسفراین':'خراسان شمالی','آشخانه':'خراسان شمالی','جاجرم':'خراسان شمالی','فاروج':'خراسان شمالی',
+'بیرجند':'خراسان جنوبی','قائن':'خراسان جنوبی','قاین':'خراسان جنوبی','فردوس':'خراسان جنوبی','طبس':'خراسان جنوبی','نهبندان':'خراسان جنوبی','سربیشه':'خراسان جنوبی',
+'ایلام':'ایلام','دهلران':'ایلام','آبدانان':'ایلام','ایوان':'ایلام','مهران':'ایلام','دره شهر':'ایلام',
+'شهرکرد':'چهارمحال و بختیاری','بروجن':'چهارمحال و بختیاری','فارسان':'چهارمحال و بختیاری','لردگان':'چهارمحال و بختیاری','هفشجان':'چهارمحال و بختیاری','سامان':'چهارمحال و بختیاری',
+'یاسوج':'کهگیلویه و بویراحمد','گچساران':'کهگیلویه و بویراحمد','دوگنبدان':'کهگیلویه و بویراحمد','دهدشت':'کهگیلویه و بویراحمد','سی سخت':'کهگیلویه و بویراحمد','لیکک':'کهگیلویه و بویراحمد',
+'سمنان':'سمنان','شاهرود':'سمنان','دامغان':'سمنان','گرمسار':'سمنان','مهدیشهر':'سمنان','ایوانکی':'سمنان','سرخه':'سمنان','بسطام':'سمنان',
+'نافج':'چهارمحال و بختیاری','نافچ':'چهارمحال و بختیاری',
+// عراق و افغانستان
+'بغداد':'بغداد','بصره':'بصره','سلیمانیه':'سلیمانیه','اربیل':'اربیل','نجف':'نجف','کربلا':'کربلا','موصل':'نینوا','کرکوک':'کرکوک','دهوک':'دهوک','ناصریه':'ذی‌قار','حله':'بابل','رمادی':'انبار','سامرا':'صلاح‌الدین','عماره':'میسان','کوت':'واسط','دیوانیه':'قادسیه','بعقوبه':'دیاله','سماوه':'مثنی','تکریت':'صلاح‌الدین','فلوجه':'انبار','زاخو':'دهوک','حلبچه':'سلیمانیه','رانیه':'سلیمانیه',
+'کابل':'کابل','هرات':'هرات','قندهار':'قندهار','مزارشریف':'بلخ','مزار شریف':'بلخ','جلال آباد':'ننگرهار','قندوز':'قندوز','غزنی':'غزنی','بامیان':'بامیان','فیض آباد':'بدخشان','پلخمری':'بغلان','لشکرگاه':'هلمند','شبرغان':'جوزجان','چاریکار':'پروان','خوست':'خوست','گردیز':'پکتیا','فراه':'فراه','میمنه':'فاریاب','تالقان':'تخار','زرنج':'نیمروز'};
+const AI_IQ=['بغداد','بصره','نجف','کربلا','اربیل','سلیمانیه','دهوک','کرکوک','نینوا','انبار','دیاله','واسط','میسان','ذی‌قار','مثنی','قادسیه','بابل','صلاح‌الدین'];
+const AI_AF=['کابل','هرات','قندهار','بلخ','ننگرهار','قندوز','بدخشان','بغلان','بامیان','فراه','فاریاب','غزنی','غور','هلمند','جوزجان','کاپیسا','خوست','کنر','لغمان','لوگر','نیمروز','نورستان','پکتیکا','پکتیا','پنجشیر','پروان','سمنگان','سرپل','تخار','ارزگان','میدان وردک','زابل','دایکندی'];
+function aiGeoOf(text){ // از متن آدرس: استان/شهر/کشور/منطقه تهران
+  const t=' '+faNum(String(text||'')).replace(/[،,;؛\-–]/g,' ').replace(/\s+/g,' ')+' ';
+  const out={};
+  // استان صریح
+  const PROVS=E.customer.f.find(f=>f.k==='province').o.filter(p=>!p.startsWith('—'));
+  for(const p of PROVS){if(t.includes(p)){out.province=p;break;}}
+  // شهر (بلندترین تطبیق)
+  let best='';for(const c in AI_CITY_PROV){if(c.length>best.length&&t.includes(c))best=c;}
+  if(best){out.city=best;if(!out.province)out.province=AI_CITY_PROV[best];}
+  // کشور
+  if(t.includes('عراق')||AI_IQ.includes(out.province))out.country='عراق';
+  else if(t.includes('افغانستان')||AI_AF.includes(out.province))out.country='افغانستان';
+  else out.country='ایران';
+  // منطقه تهران
+  if(out.province==='تهران'){const m=t.match(/منطقه\s*(\d{1,2})/);if(m&&+m[1]>=1&&+m[1]<=22)out.district=String(+m[1]).replace(/\d/g,c=>'۰۱۲۳۴۵۶۷۸۹'[c]);}
+  return out;
+}
+function aiRows(fileText){ // متن فایل → آرایه ردیف‌ها (سلول‌ها)
+  const lines=String(fileText||'').split(/\r?\n/).filter(l=>l.trim()&&!l.startsWith('---'));
+  return lines.map(l=>l.split(/\t|,|؛|;/).map(c=>c.trim()));
+}
+function aiHeadIdx(rows,names){ // یافتن شماره ستون از روی سرستون
+  if(!rows.length)return {hdr:-1,idx:{}};
+  for(let r=0;r<Math.min(3,rows.length);r++){
+    const idx={};let hits=0;
+    rows[r].forEach((c,i)=>{const cn=faNum(c).trim();
+      Object.entries(names).forEach(([k,alts])=>{if(idx[k]==null&&alts.some(a=>cn.includes(a))){idx[k]=i;hits++;}});});
+    if(hits>=2)return {hdr:r,idx};
+  }
+  return {hdr:-1,idx:{}};
+}
+function aiFmtRial(v){return Number(v||0).toLocaleString('fa-IR')+' ریال';}
+/* سناریو ۱: تشخیص استان/شهر/کشور مشتری‌ها از فایل آدرس */
+function aiLocalGeo(q,fileText){
+  const rows=aiRows(fileText);
+  if(!rows.length)return 'برای تشخیص آدرس، فایل CSV/اکسل را با 📎 پیوست کنید (ستون نام مشتری + ستون آدرس).';
+  const {hdr,idx}=aiHeadIdx(rows,{name:['نام','مشتری'],addr:['آدرس','نشانی'],city:['شهر'],prov:['استان']});
+  const body=rows.slice(hdr>=0?hdr+1:0);
+  const recsOut=[];let noGeo=0,noName=0;
+  body.forEach(r=>{
+    const name=(idx.name!=null?r[idx.name]:r[0])||'';
+    if(!name.trim()){noName++;return;}
+    const addrTxt=[idx.addr!=null?r[idx.addr]:'',idx.city!=null?r[idx.city]:'',idx.prov!=null?r[idx.prov]:'',idx.addr==null?r.slice(1).join(' '):''].join(' ');
+    const g=aiGeoOf(addrTxt);
+    if(!g.province&&!g.city){noGeo++;return;}
+    const d={};
+    if(g.province)d.province=g.province;
+    if(g.city)d.city=g.city;
+    if(g.district)d.district=g.district;
+    if(idx.addr!=null&&r[idx.addr])d.address=r[idx.addr];
+    recsOut.push({e:'customer',match:name.trim(),id:'tmp'+recsOut.length,d:{title:name.trim(),...d}});
+  });
+  if(!recsOut.length)return 'در فایل، آدرس قابل تشخیصی پیدا نشد ('+noName.toLocaleString('fa-IR')+' ردیف بی‌نام، '+noGeo.toLocaleString('fa-IR')+' بدون شهر/استان شناخته‌شده). ستون آدرس یا شهر را کامل کنید.';
+  const res=aiRunApply({note:'تشخیص استان/شهر/کشور از آدرس '+recsOut.length.toLocaleString('fa-IR')+' مشتری',recs:recsOut});
+  if(res.error)return '⛔ '+res.error;
+  const sample=recsOut.slice(0,6).map(x=>'• '+x.match+' ← '+(x.d.province||'')+(x.d.city?' / '+x.d.city:'')).join('\n');
+  return '✅ انجام شد: **'+String(res.updated).replace(/\d/g,c=>'۰۱۲۳۴۵۶۷۸۹'[c])+'** مشتری به‌روزرسانی و **'+String(res.created).replace(/\d/g,c=>'۰۱۲۳۴۵۶۷۸۹'[c])+'** مشتری جدید ساخته شد.\n\nنمونه:\n'+sample+(noGeo?'\n\n⚠️ '+noGeo.toLocaleString('fa-IR')+' ردیف بدون شهر/استان قابل تشخیص رها شد.':'');
+}
+/* سناریو ۲: ثبت گروهی خرید/فاکتور از فایل */
+function aiLocalPurch(q,fileText){
+  const rows=aiRows(fileText);
+  if(!rows.length)return 'برای ثبت خریدها، فایل را با 📎 پیوست کنید (ستون‌ها: مشتری، کالا، تعداد، قیمت، تاریخ).';
+  const {hdr,idx}=aiHeadIdx(rows,{cust:['مشتری','نام','خریدار'],prod:['کالا','محصول','جنس'],qty:['تعداد','مقدار'],price:['قیمت','مبلغ','فی'],date:['تاریخ']});
+  if(idx.cust==null||idx.prod==null)return 'ستون «مشتری» و «کالا» در فایل پیدا نشد — سطر اول فایل باید سرستون داشته باشد (مشتری، کالا، تعداد، قیمت، تاریخ).';
+  const body=rows.slice(hdr+1);
+  const groups={};let skipped=0;
+  body.forEach(r=>{
+    const cust=(r[idx.cust]||'').trim(),prod=(r[idx.prod]||'').trim();
+    if(!cust||!prod){skipped++;return;}
+    const qty=+faNum(r[idx.qty!=null?idx.qty:'']||'1').replace(/[^\d.]/g,'')||1;
+    const price=+faNum(r[idx.price!=null?idx.price:'']||'0').replace(/[^\d.]/g,'')||0;
+    const dt=idx.date!=null?(dNorm(r[idx.date])||today()):today();
+    const key=cust+'|'+dt;
+    (groups[key]=groups[key]||{cust,dt,lines:[]}).lines.push({prod,qty,price});
+  });
+  const gs=Object.values(groups);
+  if(!gs.length)return 'ردیف معتبری در فایل نبود.';
+  const recsOut=[];let n=0;
+  const num0=Math.max(0,...byE('invoice').map(v=>+String(v.d.title).replace(/\D/g,'')||0));
+  gs.forEach((g,gi)=>{
+    const invId='tmpinv'+gi;
+    recsOut.push({e:'invoice',id:invId,d:{title:'فاکتور '+(num0+gi+1),kind:'فاکتور فروش',status:'صادر شده',date:g.dt,customer:g.cust,note:'ثبت گروهی توسط دستیار هوشمند'}});
+    g.lines.forEach((l,li)=>{recsOut.push({e:'invline',id:'tmpln'+gi+'_'+li,d:{title:l.prod,invoice:invId,product:l.prod,qty:l.qty,price:l.price}});n++;});
+  });
+  const res=aiRunApply({note:'ثبت '+gs.length.toLocaleString('fa-IR')+' فاکتور با '+n.toLocaleString('fa-IR')+' ردیف از فایل',recs:recsOut});
+  if(res.error)return '⛔ '+res.error;
+  return '✅ **'+gs.length.toLocaleString('fa-IR')+' فاکتور** با **'+n.toLocaleString('fa-IR')+' ردیف** ثبت شد'+(skipped?' ('+skipped.toLocaleString('fa-IR')+' ردیف ناقص رها شد)':'')+'. مشتری‌ها و کالاهای ناشناخته با همان نام ساخته شدند — از «فهرست فاکتورها» بررسی کنید.';
+}
+/* سناریو ۳: گزارش تحلیلی فروش */
+function aiLocalReport(q){
+  const H=smHeaders(gBiz());
+  if(!H.length)return 'هنوز فروشی ثبت نشده است.';
+  const ym=faNum(q).match(/1[34]\d{2}/);
+  const jy=ym?+ym[0]:g2j(...today().split('-').map(Number))[0];
+  const f=_jgIso(jy,1,1),t=_isoAdd(_jgIso(jy+1,1,1),-1);
+  const cur=H.filter(x=>x.d&&x.d>=f&&x.d<=t);
+  if(!cur.length){const lastD=H.map(x=>x.d).filter(Boolean).sort().pop();return 'در سال '+_faY(jy)+' فروشی نیست. آخرین فروش: '+iso2jstr(lastD)+' — بنویسید «گزارش فروش '+g2j(...lastD.split('-').map(Number))[0]+'».';}
+  const sum=k=>cur.reduce((a,x)=>a+(x[k]||0),0);
+  const gross=cur.reduce((a,x)=>a+(x.sub!=null?x.sub:x.amt),0),net=sum('amt'),disc=sum('disc'),due=sum('due');
+  const vat=cur.reduce((a,x)=>a+Math.max(0,(x.tot!=null?x.tot:x.amt)-x.amt),0);
+  // ماهانه
+  const MN=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+  const mo=Array(12).fill(0);cur.forEach(x=>{const j=g2j(...x.d.split('-').map(Number));if(j[0]===jy)mo[j[1]-1]+=x.amt;});
+  const bestM=mo.indexOf(Math.max(...mo)),worst=mo.map((v,i)=>[v,i]).filter(x=>x[0]>0).sort((a,b)=>a[0]-b[0])[0];
+  // مشتری و کالای برتر
+  const gc={};cur.forEach(x=>{if(x.cust)gc[x.cust]=(gc[x.cust]||0)+x.amt;});
+  const topC=Object.entries(gc).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const L=smLines(gBiz()).filter(x=>x.d>=f&&x.d<=t);
+  const gp={};L.forEach(x=>{if(x.pid)gp[x.pid]=(gp[x.pid]||{amt:0,qty:0});gp[x.pid].amt+=x.amt;gp[x.pid].qty+=x.qty;});
+  const topP=Object.entries(gp).sort((a,b)=>b[1].amt-a[1].amt).slice(0,5);
+  // سال قبل
+  const pf=_jgIso(jy-1,1,1),pt=_isoAdd(f,-1);
+  const pnet=H.filter(x=>x.d&&x.d>=pf&&x.d<=pt).reduce((a,x)=>a+x.amt,0);
+  const gr=pnet>0?Math.round((net-pnet)/pnet*100):null;
+  let r='## 📊 گزارش تحلیلی فروش سال '+_faY(jy)+'\n\n';
+  r+='**جمع کل فروش (اصل):** '+aiFmtRial(gross)+'\n**تخفیفات:** '+aiFmtRial(disc)+'\n**ارزش افزوده دریافتی:** '+aiFmtRial(vat)+'\n**💰 فروش واقعی:** '+aiFmtRial(net)+'\n**تعداد فاکتور:** '+cur.length.toLocaleString('fa-IR')+' (میانگین '+aiFmtRial(Math.round(net/cur.length))+')\n**مطالبات وصول‌نشده این دوره:** '+aiFmtRial(due)+(gr!=null?'\n**رشد نسبت به '+_faY(jy-1)+':** '+(gr>=0?'▲':'▼')+' '+Math.abs(gr).toLocaleString('fa-IR')+'٪':'')+'\n\n';
+  r+='**بهترین ماه:** '+MN[bestM]+' ('+aiFmtRial(Math.round(mo[bestM]))+')'+(worst?' — **ضعیف‌ترین:** '+MN[worst[1]]+' ('+aiFmtRial(Math.round(worst[0]))+')':'')+'\n\n';
+  r+='### 🏆 ۵ مشتری برتر\n'+topC.map((x,i)=>(i+1).toLocaleString('fa-IR')+'. '+smNameOf(x[0])+' — '+aiFmtRial(Math.round(x[1]))).join('\n')+'\n\n';
+  r+='### 📦 کالاهای پرفروش\n'+topP.map((x,i)=>(i+1).toLocaleString('fa-IR')+'. '+smNameOf(x[0])+' — '+x[1].qty.toLocaleString('fa-IR')+' عدد، '+aiFmtRial(Math.round(x[1].amt))).join('\n')+'\n\n';
+  r+='### 💡 توصیه‌ها\n'+aiLocalTips(cur,due,net);
+  return r;
+}
+function aiLocalTips(cur,due,net){
+  const tips=[];
+  if(due>net*0.3)tips.push('• مطالبات وصول‌نشده بالاست ('+Math.round(due/(net||1)*100).toLocaleString('fa-IR')+'٪ فروش) — از «وصول اقساط» در داشبورد فروش پیگیری کنید.');
+  try{const ls=lowStockList();if(ls.length)tips.push('• '+ls.length.toLocaleString('fa-IR')+' کالا زیر حداقل موجودی است — تأمین کنید.');}catch(e){}
+  try{const noPrice=byE('product').filter(p=>!(+p.d.sell));if(noPrice.length)tips.push('• کالاهای بدون قیمت فروش: '+noPrice.slice(0,4).map(p=>p.d.title).join('، ')+' — قیمت‌گذاری کنید.');}catch(e){}
+  const churn=aiChurnList();
+  if(churn.length)tips.push('• '+churn.length.toLocaleString('fa-IR')+' مشتری بیش از ۹۰ روز است خرید نکرده‌اند — تماس یا پیشنهاد ویژه بدهید (بنویسید «مشتریان غیرفعال» تا لیست را ببینید).');
+  return tips.length?tips.join('\n'):'• وضعیت متوازن است؛ روند را ادامه دهید.';
+}
+function aiChurnList(){
+  const H=smHeaders(gBiz());
+  const last={};H.forEach(x=>{if(x.cust&&x.d&&(!last[x.cust]||x.d>last[x.cust]))last[x.cust]=x.d;});
+  const cut=_isoAdd(today(),-90);
+  return Object.entries(last).filter(([id,d])=>d<cut).sort((a,b)=>a[1]<b[1]?-1:1);
+}
+/* سناریو ۴: توصیه / مشتریان غیرفعال */
+function aiLocalAdvise(q){
+  const churn=aiChurnList();
+  let r='';
+  if(/غیرفعال|نخرید|از دست|churn/.test(q)){
+    if(!churn.length)return 'همه مشتریان در ۹۰ روز اخیر خرید داشته‌اند 👍';
+    r='## 🔔 مشتریانی که +۹۰ روز است خرید نکرده‌اند ('+churn.length.toLocaleString('fa-IR')+' نفر)\n\n';
+    r+=churn.slice(0,20).map(([id,d])=>'• '+smNameOf(id)+' — آخرین خرید: '+iso2jstr(d)).join('\n');
+    if(churn.length>20)r+='\n… و '+(churn.length-20).toLocaleString('fa-IR')+' نفر دیگر';
+    r+='\n\n💡 پیشنهاد: تماس پیگیری، تخفیف بازگشت یا پیامک یادآوری.';
+    return r;
+  }
+  const H=smHeaders(gBiz());const net=H.reduce((a,x)=>a+x.amt,0),due=H.reduce((a,x)=>a+(x.due||0),0);
+  return '## 💡 توصیه‌های امروز\n\n'+aiLocalTips(H,due,net);
+}
+function aiLocal(q,fileText){ // مسیریاب آفلاین
+  const t=faNum(String(q||''));
+  const hasFile=!!(fileText&&fileText.trim());
+  if(/استان|شهر|آدرس|نشانی|منطقه|کشور/.test(t)&&hasFile)return aiLocalGeo(t,fileText);
+  if(/(ثبت|وارد).*(خرید|فاکتور|فروش)|خرید.*ثبت/.test(t)&&hasFile)return aiLocalPurch(t,fileText);
+  if(hasFile&&/تحلیل|بررسی/.test(t))return aiLocalGeo(t,fileText);
+  if(/گزارش|تحلیل|عملکرد/.test(t))return aiLocalReport(t);
+  if(/توصیه|پیشنهاد|غیرفعال|نخرید|هشدار/.test(t))return aiLocalAdvise(t);
+  if(/سلام|درود/.test(t)&&t.length<25)return 'سلام! 👋 آماده‌ام. یکی از این‌ها را بخواهید:\n• «استان و شهر مشتری‌ها را از این فایل تشخیص بده و ثبت کن» + 📎 فایل\n• «این خریدها را به‌صورت فاکتور ثبت کن» + 📎 فایل (ستون: مشتری، کالا، تعداد، قیمت، تاریخ)\n• «گزارش تحلیلی فروش ۱۴۰۳»\n• «مشتریان غیرفعال را نشان بده» یا «توصیه بده»';
+  return 'در حالت آفلاین این کارها را بلدم:\n\n**۱. 📍 تشخیص آدرس:** فایل مشتری‌ها را پیوست کنید و بنویسید «استان و شهر هر مشتری را تشخیص بده و ثبت کن» — استان، شهر، کشور و منطقه تهران را خودم پیدا و ثبت می‌کنم.\n**۲. 🧾 ثبت گروهی خرید:** فایل با ستون‌های مشتری/کالا/تعداد/قیمت/تاریخ + «این خریدها را ثبت کن» — فاکتورها ساخته می‌شوند.\n**۳. 📊 گزارش تحلیلی:** «گزارش فروش ۱۴۰۳» — کامل با مشتریان و کالاهای برتر و توصیه.\n**۴. 💡 توصیه:** «توصیه بده» یا «مشتریان غیرفعال».\n\n(اگر روزی خواستید سؤال‌های آزاد هم جواب بدهم، در ⚙️ تنظیمات یک سرویس هوش مصنوعی — حتی با کلید رایگان Groq یا Gemini — وصل کنید؛ اجباری نیست.)';
+}
+
 /* ═══ 🤖 دستیار هوشمند — اتصال به هر سرویس سازگار با OpenAI Chat API ═══ */
 function aiCfg(){const m=recs[MO];return (m&&m.d&&m.d._ai)||{};}
 window.aiSaveCfg=function(){
@@ -6098,18 +6302,26 @@ window.aiSend=async function(){
   const inp=document.getElementById('ai_q');const q=(inp&&inp.value||'').trim();
   if(!q&&!aiFile)return;
   const c=aiCfg();
-  if(!c.url||!c.key||!c.model){view.aiSet=true;render();setSync('err','اول تنظیمات دستیار را کامل کنید');return;}
+  const online=!!(c.url&&c.key&&c.model);
   aiLoad();
-  let content=q;
+  let content=q,fileTxt='';
   if(aiFile){
     setSync('sync','خواندن فایل…');
-    let txt='';try{txt=await aiReadFile(aiFile);}catch(e){txt='[خطای فایل: '+e.message+']';}
-    if(txt.length>60000)txt=txt.slice(0,60000)+'\n…[بریده شد]';
-    content+='\n\n[محتوای فایل «'+aiFile.name+'»]:\n'+txt;
+    try{fileTxt=await aiReadFile(aiFile);}catch(e){fileTxt='';content+='\n[خطای فایل: '+e.message+']';}
+    if(fileTxt.length>60000)fileTxt=fileTxt.slice(0,60000)+'\n…[بریده شد]';
+    if(online&&fileTxt)content+='\n\n[محتوای فایل «'+aiFile.name+'»]:\n'+fileTxt;
+    else if(fileTxt)content+='\n📎 '+aiFile.name;
     aiFile=null;
   }
   aiChat.push({role:'user',content,t:Date.now()});
   aiPersist();aiBusy=true;render();
+  if(!online){ // 🧠 حالت آفلاین رایگان — بدون هیچ سرویس بیرونی
+    try{
+      const ans=aiLocal(q,fileTxt);
+      aiChat.push({role:'assistant',content:ans,t:Date.now()});
+    }catch(err){aiChat.push({role:'assistant',content:'⚠️ خطا: '+String(err.message||err),t:Date.now()});}
+    aiBusy=false;aiPersist();render();return;
+  }
   try{
     let rounds=0;
     while(rounds++<4){
@@ -6150,7 +6362,7 @@ function aidashHTML(){
   aiLoad();
   const c=aiCfg();const ok=c.url&&c.key&&c.model;
   let h=`<div class="tools"><b style="font-size:13px">🤖 دستیار هوشمند</b>
-    <span style="font-size:11px;color:${ok?'var(--ok)':'var(--bad)'}">${ok?'● متصل به '+esc(c.model):'● پیکربندی نشده'}</span>
+    <span style="font-size:11px;color:var(--ok)">${ok?'● متصل به '+esc(c.model):'● حالت آفلاین (رایگان)'}</span>
     <span style="flex:1"></span>
     ${aiChat.length?`<button class="btn gh sm" onclick="aiClear()">🧹 گفتگوی جدید</button>`:''}
     ${isAdmin()?`<button class="btn gh sm" onclick="view.aiSet=!view.aiSet;render()">⚙️ تنظیمات</button>`:''}</div>`;
@@ -6162,11 +6374,11 @@ function aidashHTML(){
         <div><label>نام مدل</label><input id="ai_model" dir="ltr" value="${esc(c.model||'gpt-4o-mini')}" placeholder="gpt-4o-mini"></div>
       </div>
       <div style="margin-top:10px"><button class="btn sm" onclick="aiSaveCfg()">💾 ذخیره</button></div>
-      <p style="font-size:11px;color:var(--tx2);margin-top:8px;line-height:2">هر سرویسی که Chat Completions سازگار با OpenAI بدهد کار می‌کند: OpenAI، OpenRouter، Groq، DeepSeek، Gemini (مسیر openai)، یا سرویس‌های واسط ایرانی. کلید فقط روی همین سیستم ذخیره می‌شود.</p></div>`;
+      <p style="font-size:11px;color:var(--tx2);margin-top:8px;line-height:2">⭐ این تنظیمات <b>اختیاری</b> است — دستیار بدون آن هم در حالت آفلاین رایگان همه کارهای اصلی (تشخیص آدرس، ثبت گروهی، گزارش، توصیه) را انجام می‌دهد. اگر پاسخ آزاد به هر سؤالی خواستید، سرویسی با کلید <b>رایگان</b> مثل Groq یا Google Gemini وصل کنید. کلید فقط روی همین سیستم ذخیره می‌شود.</p></div>`;
   }
   h+=`<div class="sec" style="min-height:340px;display:flex;flex-direction:column">
     <div style="flex:1;display:flex;flex-direction:column;gap:10px;overflow:auto;max-height:56vh;padding:4px" id="ai_log">`;
-  if(!aiChat.length)h+=`<div class="empty" style="margin:auto">🤖 سلام! من دستیار هوشمند شما هستم.<br><span style="font-size:11.5px">نمونه: «فایل اکسل مشتری‌ها را پیوست می‌کنم؛ استان و شهر هرکدام را تشخیص بده و ثبت کن» · «گزارش تحلیلی فروش ۱۴۰۳ بده» · «کدام مشتری‌ها ۳ ماه است خرید نکرده‌اند؟ توصیه بده»</span></div>`;
+  if(!aiChat.length)h+=`<div class="empty" style="margin:auto">🤖 سلام! من دستیار هوشمند شما هستم — همین الان، رایگان و بدون اینترنت کار می‌کنم.<br><span style="font-size:11.5px">نمونه: «استان و شهر مشتری‌های این فایل را تشخیص بده و ثبت کن» + 📎 · «این خریدها را به‌صورت فاکتور ثبت کن» + 📎 · «گزارش تحلیلی فروش ۱۴۰۳» · «مشتریان غیرفعال» · «توصیه بده»</span></div>`;
   aiChat.forEach(m=>{
     if(m.role==='tool'){h+=`<details style="font-size:10.5px;color:var(--tx2);align-self:center"><summary style="cursor:pointer">⚙️ داده ردوبدل‌شده با سیستم</summary><pre style="max-width:640px;overflow:auto;direction:ltr;text-align:left;background:var(--bg);padding:8px;border-radius:8px">${esc(m.content.slice(0,4000))}</pre></details>`;return;}
     const me=m.role==='user';
