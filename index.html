@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.79</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.80</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.79</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.80</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -770,6 +770,7 @@ customer:{ic:'🛍️',n:'مشتریان کسب‌وکار',grp:'CRM و مشتر
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'kind',n:'نوع',t:SEL,o:['حقیقی','حقوقی']},
  {k:'mobile',n:'موبایل',t:TXT},
+ {k:'natid',n:'شناسه ملی / کد ملی (برای فاکتور رسمی)',t:TXT},
  {k:'phone',n:'تلفن ثابت',t:TXT},
  {k:'address',n:'آدرس',t:LNG},
  {k:'city',n:'شهر',t:TXT},
@@ -6047,6 +6048,7 @@ function invPrint(id){
     <span>وضعیت: <b>${esc(inv.d.status||'—')}</b></span>
     ${cu?`<span>مشتری: <b>${esc(cu.title||'—')}</b></span>`:''}
     ${cu&&cu.mobile?`<span>موبایل: <b>${esc(cu.mobile)}</b></span>`:''}
+    ${(inv.d.natid||(cu&&cu.natid))?`<span>شناسه ملی: <b dir="ltr">${esc(inv.d.natid||cu.natid)}</b></span>`:''}
     ${seName?`<span>فروشنده: <b>${esc(seName)}</b></span>`:''}
   </div>
   <table><thead><tr><th>#</th><th>کالا/خدمت</th><th>تعداد</th><th>قیمت واحد</th><th>تخفیف</th><th>مبلغ</th></tr></thead>
@@ -8177,7 +8179,8 @@ function invSave(status){
   if(invDraft._editId){
     const r=recs[invDraft._editId];if(!r||r.del){alert('فاکتور یافت نشد');return;}
     const before=invCalc(r).total;
-    r.d={...r.d,title:invDraft.desc||r.d.title,biz:invDraft.biz?[invDraft.biz]:[],
+    if(invDraft.customer&&recs[invDraft.customer]&&String(invDraft.natid||'').trim()&&String(recs[invDraft.customer].d.natid||'')!==String(invDraft.natid).trim()){const _c=recs[invDraft.customer];_c.d.natid=String(invDraft.natid).trim();_c.u=Date.now();put(_c);}
+    r.d={...r.d,natid:String(invDraft.natid||'').trim()||undefined,title:invDraft.desc||r.d.title,biz:invDraft.biz?[invDraft.biz]:[],
       customer:invDraft.customer?[invDraft.customer]:[],seller:invDraft.seller?[invDraft.seller]:[],
       orgu:invDraft.orgu?[invDraft.orgu]:r.d.orgu||[],
       official:invDraft.official||'غیررسمی',date:{s:dNorm(invDraft.vdate)||invDraft.vdate},
@@ -8240,7 +8243,8 @@ function invSave(status){
   const num=(Math.max(0,...byE('invoice').map(v=>+String(v.d.title).replace(/\D/g,'')||0))+1);
   const _tot=invTotalsDraft().total;
   const paid=invDraft.paymode==='نقدی'?_tot:invDraft.paymode==='بخشی'?Math.min(_tot,+faNum(String(invDraft.paidAmt||0)).replace(/[,،٬\s]/g,'')||0):0;
-  put({id:iid,e:'invoice',d:{title:invDraft.desc||('فاکتور '+num),biz:invDraft.biz?[invDraft.biz]:[],
+  if(invDraft.customer&&recs[invDraft.customer]&&String(invDraft.natid||'').trim()&&String(recs[invDraft.customer].d.natid||'')!==String(invDraft.natid).trim()){const _c=recs[invDraft.customer];_c.d.natid=String(invDraft.natid).trim();_c.u=Date.now();put(_c);}
+  put({id:iid,e:'invoice',d:{title:invDraft.desc||('فاکتور '+num),natid:String(invDraft.natid||'').trim()||undefined,biz:invDraft.biz?[invDraft.biz]:[],
     customer:invDraft.customer?[invDraft.customer]:[],seller:invDraft.seller?[invDraft.seller]:[],orgu:invDraft.orgu?[invDraft.orgu]:(invDraft.seller&&recs[invDraft.seller]?relIds(recs[invDraft.seller],'orgu'):[]),kind:invDraft.kind,status:status||'صادر شده',
     date:{s:dNorm(invDraft.vdate)||invDraft.vdate},due:invDraft.due?{s:dNorm(invDraft.due)||invDraft.due}:null,
     disc:+invDraft.disc||0,discpct:+invDraft.discpct||0,official:invDraft.official||'غیررسمی',taxpct:+invDraft.taxpct||0,ship:+invDraft.ship||0,paid,note:invDraft.note,
@@ -8275,6 +8279,7 @@ window.invEdit=function(id){
   invDraft={_editId:id,desc:r.d.title||'',biz:relIds(r,'biz')[0]||'',customer:relIds(r,'customer')[0]||'',
     seller:relIds(r,'seller')[0]||'',orgu:relIds(r,'orgu')[0]||'',kind:r.d.kind||'فاکتور فروش',
     official:r.d.official||'غیررسمی',paymode:'',paidAmt:'',
+    natid:String(r.d.natid||(relIds(r,'customer')[0]&&recs[relIds(r,'customer')[0]]?recs[relIds(r,'customer')[0]].d.natid||'':'')),
     vdate:(ds(r.d.date)||today()).slice(0,10),due:r.d.due&&ds(r.d.due)?iso2jstr(ds(r.d.due)):'',
     disc:String(r.d.disc||''),discpct:String(r.d.discpct||''),taxpct:String(r.d.taxpct||''),ship:String(r.d.ship||''),
     note:r.d.note||'',payterm:r.d.payterm||'نقد',payterms:r.d.payterms||'',delivterms:r.d.delivterms||'',validto:'',
@@ -8286,7 +8291,7 @@ function invPickCust(name){
   name=(name||'').trim();
   if(!name){invSetHead('customer','');return;}
   const c=byE('customer').find(x=>(x.d.title||'').trim()===name);
-  if(c)invSetHead('customer',c.id);
+  if(c){invDraft.natid=String(c.d.natid||'');invSetHead('customer',c.id);}
   else{alert('مشتری «'+name+'» پیدا نشد — از لیست پیشنهادی انتخاب کن یا اول در «مشتریان کسب‌وکار» بسازش');render();}
 }
 window.invPickCust=invPickCust;
@@ -8385,6 +8390,7 @@ function invnewHTML(){
       ${view.qc?`<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap"><input id="qc_nm" placeholder="نام مشتری جدید" style="max-width:150px;font-size:12px"><input id="qc_ph" placeholder="تلفن (اختیاری)" style="max-width:120px;font-size:12px" dir="ltr"><input id="qc_ad" placeholder="🏠 آدرس (اختیاری)" style="min-width:220px;flex:1;font-size:12px"><button type="button" class="btn sm" onclick="invQuickCust()">ثبت</button></div>`:''}
       ${(()=>{if(!invDraft.customer||!recs[invDraft.customer])return'';const cr=+recs[invDraft.customer].d.credit||0;if(!cr)return'';const du=custReceivable(invDraft.customer);const ok=du<cr;
         return `<div style="font-size:10.5px;margin-top:4px;color:${ok?'var(--tx2)':'var(--bad)'}">💳 اعتبار: بدهی ${money(du)} از سقف ${money(cr)}${ok?'':' — سقف پر است!'}</div>`;})()}</div>
+    <div><label ${lbl}>🆔 شناسه ملی مشتری <span style="opacity:.7">(برای فاکتور رسمی)</span></label><input dir="ltr" inputmode="numeric" value="${esc(invDraft.natid!=null?invDraft.natid:(invDraft.customer&&recs[invDraft.customer]?String(recs[invDraft.customer].d.natid||''):''))}" oninput="invDraft.natid=this.value" placeholder="مثلاً ۱۰۱۰۱۲۳۴۵۶۷"></div>
     <div><label ${lbl}>👤 فروشنده / فرد <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('seller',this.value)"><option value="">—</option>${sellers.map(x=>{const u=orguOf(x);return `<option value="${x.id}" ${x.id===invDraft.seller?'selected':''}>${esc(x.d.title)}${u?' · '+esc(u):''}</option>`;}).join('')}</select>
       ${invDraft.seller&&recs[invDraft.seller]?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">واحد/تیم فرد: ${esc(orguOf(recs[invDraft.seller])||'—')}</div>`:''}</div>
     <div><label ${lbl}>🧩 واحد / تیم <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('orgu',this.value)"><option value="">— (خودکار از فرد)</option>${byE('orgunit').map(u=>`<option value="${u.id}" ${u.id===invDraft.orgu?'selected':''}>${esc(unitPath(u.id))}</option>`).join('')}</select></div>
