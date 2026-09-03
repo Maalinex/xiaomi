@@ -538,3 +538,48 @@ create policy rec_insert on public.records for insert to authenticated with chec
 );
 
 select '🔐 همگام‌سازی انتخابی v2.55 اعمال شد ✅' as status;
+
+
+-- ═══════════ 🛡 v2.89 — بستن حفرهٔ «اولین کاربر = ادمین» ═══════════
+-- فقط این ایمیل می‌تواند در دیتابیس خالی، ادمینِ راه‌انداز شود. در صورت تغییر ادمین، این مقدار را عوض کنید.
+create or replace function public.app_boot_admin() returns text
+language sql immutable as
+$$ select 'khalaj.alireza@gmail.com' $$;
+
+create or replace function public.app_role() returns text
+language plpgsql stable security definer set search_path=public as $$
+declare lst jsonb; r text;
+begin
+  if app_email()='' then return ''; end if;
+  lst:=app_users_list();
+  if jsonb_array_length(lst)=0 then
+    if app_email()=lower(app_boot_admin()) then return 'ادمین'; end if; -- فقط ادمینِ تعیین‌شده
+    return 'در انتظار تایید';
+  end if;
+  select x->>'role' into r from jsonb_array_elements(lst) x
+   where lower(coalesce(x->>'email',''))=app_email() limit 1;
+  return coalesce(r,'در انتظار تایید');
+end $$;
+
+create or replace function public.enroll_me() returns text
+language plpgsql security definer set search_path=public as $$
+declare em text; d jsonb; lst jsonb; MU uuid:='00000000-0000-4000-8000-00000000aaaa';
+begin
+  em:=app_email(); if em='' then return 'no-auth'; end if;
+  select data into d from records where id=MU and not deleted;
+  if d is null then
+    if em<>lower(app_boot_admin()) then return 'pending-no-admin'; end if; -- غریبه در دیتابیس خالی ادمین نمی‌شود
+    insert into records(id,entity,data,updated_at,deleted)
+      values(MU,'_users', jsonb_build_object('list', jsonb_build_array(jsonb_build_object('email',em,'role','ادمین'))), now(), false)
+      on conflict (id) do update set data=excluded.data, updated_at=now(), deleted=false;
+    return 'admin-bootstrap';
+  end if;
+  lst:=coalesce(d->'list','[]'::jsonb);
+  if exists(select 1 from jsonb_array_elements(lst) x where lower(coalesce(x->>'email',''))=em) then
+    return 'already';
+  end if;
+  lst:=lst || jsonb_build_object('email',em,'role','در انتظار تایید');
+  update records set data=jsonb_set(d,'{list}',lst), updated_at=now() where id=MU;
+  return 'enrolled';
+end $$;
+grant execute on function public.enroll_me() to authenticated;

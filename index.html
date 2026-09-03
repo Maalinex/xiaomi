@@ -431,26 +431,26 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.88</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.89</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.88</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.89</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
       <button onclick="goBack()" title="بازگشت به صفحه قبل" style="background:var(--cd);border:1px solid var(--bd);color:var(--tx);border-radius:9px;padding:3px 10px;cursor:pointer;font-family:inherit;font-size:13px">→</button> <span id="ttl">اتاق کنترل</span><span class="sp"></span>
       <span id="who" style="font-size:11px;color:var(--tx2)"></span>
       <span id="synctxt"></span><span id="syncdot"></span>
-      <button class="btn gh sm" id="gsearchbtn" onclick="gsToggle()" title="جستجوی سراسری — مشتری، فاکتور، کالا و…">🔍</button>
+      <button class="btn gh sm" id="gsearchbtn" onclick="gsToggle()" aria-label="جستجوی سراسری" title="جستجوی سراسری — مشتری، فاکتور، کالا و…">🔍</button>
       <button class="btn sm" id="lowstockbtn" onclick="lowStockToggle()" style="display:none;border:1.5px solid var(--bad);color:var(--bad);background:rgba(224,82,82,.12);font-weight:800" title="هشدار کمبود موجودی — برای دیدن فهرست کلیک کنید">📦 کمبود <span id="lowstockn"></span></button>
       <span id="topmv_wrap" style="display:contents">
-      <button class="btn gh sm topmv" id="mycalbtn" onclick="toggleMyCal()" title="تقویم من — برنامه روزهای پیش رو">📅</button>
+      <button class="btn gh sm topmv" id="mycalbtn" onclick="toggleMyCal()" aria-label="تقویم من" title="تقویم من — برنامه روزهای پیش رو">📅</button>
       <button class="btn gh sm topmv" id="dashtop" onclick="openModule('داشبوردها')" title="مرکز داشبوردها — همه داشبوردها یک‌جا">📊 داشبوردها</button>
       <button class="btn gh sm topmv" id="pomobtn" onclick="togglePomo()">🍅 پومودورو</button>
       </span>
       <button class="btn gh sm" id="authbtn" onclick="authAction()">ورود</button>
-      <button class="btn gh sm" onclick="openSettings()">⚙️</button>
+      <button class="btn gh sm" onclick="openSettings()" aria-label="تنظیمات">⚙️</button>
     </div>
     <div id="mtabs"></div>
     <div id="content"></div>
@@ -4462,7 +4462,7 @@ function docSection(r){
       <button class="btn sm" onclick="docDownload('${r.id}')">⬇️ دانلود</button>
       ${can('e','doc',r)?`<label class="btn gh sm" style="cursor:pointer">🔁 جایگزینی<input type="file" style="display:none" onchange="docUpload('${r.id}',this)"></label>`:''}
     </div>
-    ${isImg?`<img src="data:${f.type};base64,${f.data}" style="max-width:100%;max-height:420px;border-radius:12px;border:1px solid var(--bd)">`:''}
+    ${isImg?`<img src="data:${f.type};base64,${f.data}" alt="پیوست تصویری" style="max-width:100%;max-height:420px;border-radius:12px;border:1px solid var(--bd)">`:''}
     ${isPdf?`<iframe src="data:application/pdf;base64,${f.data}" style="width:100%;height:480px;border:1px solid var(--bd);border-radius:12px"></iframe>`:''}`:
     (can('e','doc',r)?`<label class="btn" style="cursor:pointer">📤 بارگذاری فایل (حداکثر ۸۰۰KB — عکس/PDF/ورد)<input type="file" style="display:none" onchange="docUpload('${r.id}',this)"></label>`:'<div class="hint">فایلی پیوست نشده</div>')}
   </div>`;
@@ -11740,7 +11740,7 @@ function ctrldashHTML(){
   const ROOT=myRoots.length?[...CTRL_TREE,{c:'my',n:'شاخص‌های من',ic:'🧩',kids:myRoots}]:CTRL_TREE;
   let lvl=ROOT,crumb=[['🎛 داشبرد کنترلی',-1]],cur=null;
   view.cdPath.forEach((c,i)=>{const nd=lvl.find(x=>x.c===c);if(nd&&nd.kids){cur=nd;crumb.push([nd.n,i]);lvl=nd.kids;}});
-  const bizOpts=byE('business').map(r=>`<option value="${r.id}" ${r.id===view.cdBiz?'selected':''}>${r.d.title}</option>`).join('');
+  const bizOpts=byE('business').map(r=>`<option value="${r.id}" ${r.id===view.cdBiz?'selected':''}>${esc(r.d.title)}</option>`).join('');
   let h=`<div class="sec"><h3>🎛 داشبرد کنترلی <span style="flex:1"></span>
     <select class="inp sm" style="width:auto" onchange="view.cdBiz=this.value;render()"><option value="">همه کسب‌وکارها</option>${bizOpts}</select>
     <select class="inp sm" style="width:auto" onchange="view.cdYr=+this.value;render()">${yrs.map(y=>`<option ${y===view.cdYr?'selected':''}>${y}</option>`).join('')||'<option>—</option>'}</select>
