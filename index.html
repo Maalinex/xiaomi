@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.78</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.79</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.78</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.79</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -8113,6 +8113,24 @@ window.invSetOfficial=function(v){invDraft.official=v;
   invDraft.taxpct=v==='رسمی'?String(vatPct(invDraft.vdate)):'';render();};
 function invAddLine(){invDraft.lines.push({product:'',qty:'1',price:'',ldisc:''});render();}
 function invDelLine(i){invDraft.lines.splice(i,1);if(!invDraft.lines.length)invAddLine();render();}
+function invLiveTotals(){ // 🔄 به‌روزرسانی سبک جمع‌ها بدون رندر کامل (فوکوس و تایپ نمی‌پرد)
+  try{
+    const t=invTotalsDraft();
+    invDraft.lines.forEach((l,i)=>{
+      const a=document.getElementById('ln_amt_'+i);
+      if(a)a.textContent=fmtN(Math.max(0,(+faNum(String(l.qty||0)).replace(/[,،٬\s]/g,'')||0)*(+faNum(String(l.price||0)).replace(/[,،٬\s]/g,'')||0)-(+faNum(String(l.ldisc||0)).replace(/[,،٬\s]/g,'')||0)));
+      const m=document.getElementById('ln_mt_'+i);
+      if(m){const mt=(+l.qty||0)*(+l.mlen||0);m.textContent=mt?mt.toLocaleString('fa-IR',{maximumFractionDigits:1})+' م':'—';}
+    });
+    const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=money(v);};
+    set('tt_sub',t.sub);set('tt_disc',t.disc);set('tt_base',t.base);set('tt_tax',t.tax);set('tt_ship',t.ship);set('tt_total',t.total);
+    const mm=document.getElementById('tt_meters');if(mm&&t.meters!=null)mm.textContent=t.meters.toLocaleString('fa-IR',{maximumFractionDigits:1})+' متر';
+  }catch(e){}
+}
+function invSetLineLite(i,k,v){invDraft.lines[i][k]=v;invLiveTotals();}
+window.invSetLineLite=invSetLineLite;window.invLiveTotals=invLiveTotals;
+function invHeadLite(k,v){invDraft[k]=v;invLiveTotals();}
+window.invHeadLite=invHeadLite;
 function invSetLine(i,k,v){invDraft.lines[i][k]=v;
   if(k==='product'&&v){const p=recs[v];if(p&&p.d){if(!(+invDraft.lines[i].price)){const pl=plPriceOf(v);invDraft.lines[i].price=String((pl&&pl.price)||p.d.sell||'');}
     if(+p.d.mlen)invDraft.lines[i].mlen=String(p.d.mlen);}}
@@ -8272,15 +8290,56 @@ function invPickCust(name){
   else{alert('مشتری «'+name+'» پیدا نشد — از لیست پیشنهادی انتخاب کن یا اول در «مشتریان کسب‌وکار» بسازش');render();}
 }
 window.invPickCust=invPickCust;
-function prodByNameOrSku(name){ // 🏷 یافتن کالا با نام یا کد کالا (SKU)
-  name=(name||'').trim();if(!name)return null;
-  const nl=name.toLowerCase();
-  return byE('product').find(x=>(x.d.title||'').trim()===name)
-      ||byE('product').find(x=>String(x.d.sku||'').trim().toLowerCase()===nl)||null;
+function _pnorm(t){return faNum(String(t||'')).replace(/\s+/g,' ').trim().toLowerCase();}
+function prodByNameOrSku(name){ // 🏷 یافتن کالا با نام یا کد کالا (SKU) — با نرمال‌سازی فاصله و ارقام
+  const nn=_pnorm(name);if(!nn)return null;
+  return byE('product').find(x=>_pnorm(x.d.title)===nn)
+      ||byE('product').find(x=>_pnorm(x.d.sku)===nn)||null;
 }
-function prodDlOpts(prods){ // گزینه‌های جستجو: هم نام (با نمایش کد) هم خود کد
-  return prods.map(x=>`<option value="${esc(x.d.title||'')}">${x.d.sku?'🏷 '+esc(x.d.sku):''}</option>`+
-    (x.d.sku?`<option value="${esc(x.d.sku)}">${esc(x.d.title||'')}</option>`:'')).join('');
+function prodDupGroups(){ // گروه‌های کالای هم‌نام (تکراری)
+  const g={};
+  byE('product').forEach(p=>{const k=_pnorm(p.d.title);if(!k)return;(g[k]=g[k]||[]).push(p);});
+  return Object.values(g).filter(a=>a.length>1);
+}
+function prodMergeDupes(){ // 🧹 ادغام کالاهای تکراری: نگه‌داشتن پرارجاع‌ترین، اتصال همه اسناد به آن
+  const groups=prodDupGroups();
+  if(!groups.length){alert('کالای تکراری پیدا نشد ✔');return;}
+  const lines=groups.slice(0,12).map(a=>'• '+(a[0].d.title||'')+' × '+a.length.toLocaleString('fa-IR'));
+  if(!confirm('این گروه‌های تکراری پیدا شد:\n'+lines.join('\n')+(groups.length>12?'\n…':'')+'\n\nاز هر گروه فقط یک کالا می‌ماند؛ همهٔ فاکتورها، فروش‌ها و خریدها به همان وصل می‌شوند و موجودی اول دوره جمع می‌شود. ادامه؟'))return;
+  const NOW=Date.now();let relinked=0,removed=0;
+  const relMap=[];Object.entries(E).forEach(([e2,def])=>(def.f||[]).forEach(f=>{if(f.t===REL&&f.r==='product')relMap.push([e2,f.k]);}));
+  groups.forEach(arr=>{
+    const refCnt=id=>{let n=0;relMap.forEach(([e2,k])=>{byE(e2).forEach(r=>{if(relIds(r,k).includes(id))n++;});});return n;};
+    const scored=arr.map(p=>({p,n:refCnt(p.id)})).sort((a,b)=>b.n-a.n||(a.p.u||0)-(b.p.u||0));
+    const keep=scored[0].p,dups=scored.slice(1).map(x=>x.p);
+    const dupIds=new Set(dups.map(d=>d.id));
+    relMap.forEach(([e2,k])=>{byE(e2).forEach(r=>{
+      const ids=relIds(r,k);if(!ids.some(x=>dupIds.has(x)))return;
+      r.d[k]=[...new Set(ids.map(x=>dupIds.has(x)?keep.id:x))];
+      r.u=NOW;queue.push(r.id);relinked++;});});
+    let s0=+keep.d.stock0||0;
+    dups.forEach(dp=>{
+      s0+=(+dp.d.stock0||0);
+      ['sku','sell','buy','mlen','minstock','unit','grp','color','model','code'].forEach(k=>{if((keep.d[k]==null||keep.d[k]==='')&&dp.d[k]!=null&&dp.d[k]!=='')keep.d[k]=dp.d[k];});
+      dp.del=true;dp.u=NOW;queue.push(dp.id);removed++;});
+    if(s0)keep.d.stock0=s0;
+    keep.u=NOW;queue.push(keep.id);
+  });
+  queue=[...new Set(queue)];
+  try{_byRaw=null;}catch(e){}try{_whQtyCache=null;}catch(e){}try{_fifoCache=null;}catch(e){}try{_invLineIdx=null;}catch(e){}
+  saveLocal();saveQ();flush();render();
+  alert('✔ '+removed.toLocaleString('fa-IR')+' کالای تکراری حذف و '+relinked.toLocaleString('fa-IR')+' سند به کالای اصلی وصل شد.');
+}
+window.prodMergeDupes=prodMergeDupes;
+function prodDlOpts(prods){ // گزینه‌های جستجو: هم نام (با نمایش کد) هم خود کد — بدون تکرار
+  const seen=new Set(),out=[];
+  prods.forEach(x=>{
+    const t=(x.d.title||'').trim(),k=_pnorm(t);
+    if(t&&!seen.has('t:'+k)){seen.add('t:'+k);out.push(`<option value="${esc(t)}">${x.d.sku?'🏷 '+esc(x.d.sku):''}</option>`);}
+    const sk=String(x.d.sku||'').trim(),ks=_pnorm(sk);
+    if(sk&&!seen.has('s:'+ks)){seen.add('s:'+ks);out.push(`<option value="${esc(sk)}">${esc(t)}</option>`);}
+  });
+  return out.join('');
 }
 function invPickProd(i,name){
   name=(name||'').trim();
@@ -8352,29 +8411,29 @@ function invnewHTML(){
     h+=`<tr>
       <td>${(i+1).toLocaleString('fa-IR')}</td>
       <td><input list="dl_invprod" value="${esc(prodName(l.product))}" placeholder="🔍 کالا/خدمت…" onchange="invPickProd(${i},this.value)" style="min-width:170px"></td>
-      <td><input inputmode="numeric" value="${l.qty||''}" oninput="invSetLine(${i},'qty',this.value)" style="max-width:70px;text-align:center" placeholder="۱"></td>
-      ${_metric?`<td><input inputmode="decimal" value="${l.mlen||''}" oninput="invSetLine(${i},'mlen',this.value)" style="max-width:70px;text-align:center" placeholder="۵.۸"></td>
-      <td style="white-space:nowrap;font-weight:700;color:var(--ac)">${mtot?mtot.toLocaleString('fa-IR',{maximumFractionDigits:1})+' م':'—'}</td>`:''}
-      ${invDraft.kind==='پیش‌فاکتور'?'':`<td><input inputmode="numeric" value="${l.price||''}" oninput="invSetLine(${i},'price',this.value)" style="max-width:120px;text-align:left" placeholder="۰"></td>
-      <td><input inputmode="numeric" value="${l.ldisc||''}" oninput="invSetLine(${i},'ldisc',this.value)" style="max-width:100px;text-align:left" placeholder="۰"></td>
-      <td style="white-space:nowrap;color:var(--ok)">${fmtN(amt)}</td>`}
+      <td><input inputmode="numeric" dir="ltr" value="${l.qty||''}" oninput="invSetLineLite(${i},'qty',this.value)" onchange="render()" style="max-width:70px;text-align:center" placeholder="۱"></td>
+      ${_metric?`<td><input inputmode="decimal" dir="ltr" value="${l.mlen||''}" oninput="invSetLineLite(${i},'mlen',this.value)" onchange="render()" style="max-width:70px;text-align:center" placeholder="۵.۸"></td>
+      <td id="ln_mt_${i}" style="white-space:nowrap;font-weight:700;color:var(--ac)">${mtot?mtot.toLocaleString('fa-IR',{maximumFractionDigits:1})+' م':'—'}</td>`:''}
+      ${invDraft.kind==='پیش‌فاکتور'?'':`<td><input inputmode="numeric" dir="ltr" value="${l.price||''}" oninput="invSetLineLite(${i},'price',this.value)" onchange="render()" style="max-width:120px;text-align:left" placeholder="۰"></td>
+      <td><input inputmode="numeric" dir="ltr" value="${l.ldisc||''}" oninput="invSetLineLite(${i},'ldisc',this.value)" onchange="render()" style="max-width:100px;text-align:left" placeholder="۰"></td>
+      <td id="ln_amt_${i}" style="white-space:nowrap;color:var(--ok)">${fmtN(amt)}</td>`}
       <td><button class="btn bad sm" onclick="invDelLine(${i})">✕</button></td></tr>`;});
   h+=`</tbody></table></div>
   <button class="btn gh sm" style="margin-top:8px" onclick="invAddLine()">➕ ردیف</button>
   ${invDraft.kind==='پیش‌فاکتور'?'':`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px">
-    ${_bcfg.disc!=='مبلغی (ریال)'?`<div><label ${lbl}>تخفیف ٪ (نسبت به کل فاکتور)</label><input inputmode="decimal" value="${invDraft.discpct||''}" oninput="invDraft.discpct=this.value;render()" placeholder="۰"></div>`:''}
-    ${_bcfg.disc!=='درصدی'?`<div><label ${lbl}>تخفیف کل فاکتور (ریال)</label><input data-k="inv_disc" inputmode="numeric" value="${invDraft.disc||''}" oninput="invDraft.disc=this.value;render()" placeholder="۰"></div>`:''}
-    <div><label ${lbl}>مالیات ارزش افزوده ٪ ${invDraft.official==='رسمی'?'(خودکار از اطلاعات پایه)':''}</label><input inputmode="numeric" data-k="inv_taxpct" value="${invDraft.taxpct||''}" oninput="invDraft.taxpct=this.value;render()" placeholder="۰ (مثلاً ۱۰)"></div>
-    <div><label ${lbl}>هزینه ارسال</label><input data-k="inv_ship" inputmode="numeric" value="${invDraft.ship||''}" oninput="invDraft.ship=this.value;render()" placeholder="۰"></div>
+    ${_bcfg.disc!=='مبلغی (ریال)'?`<div><label ${lbl}>تخفیف ٪ (نسبت به کل فاکتور)</label><input inputmode="decimal" dir="ltr" value="${invDraft.discpct||''}" oninput="invHeadLite('discpct',this.value)" onchange="render()" placeholder="۰"></div>`:''}
+    ${_bcfg.disc!=='درصدی'?`<div><label ${lbl}>تخفیف کل فاکتور (ریال)</label><input data-k="inv_disc" inputmode="numeric" dir="ltr" value="${invDraft.disc||''}" oninput="invHeadLite('disc',this.value)" onchange="render()" placeholder="۰"></div>`:''}
+    <div><label ${lbl}>مالیات ارزش افزوده ٪ ${invDraft.official==='رسمی'?'(خودکار از اطلاعات پایه)':''}</label><input inputmode="numeric" dir="ltr" data-k="inv_taxpct" value="${invDraft.taxpct||''}" oninput="invHeadLite('taxpct',this.value)" onchange="render()" placeholder="۰ (مثلاً ۱۰)"></div>
+    <div><label ${lbl}>هزینه ارسال</label><input data-k="inv_ship" inputmode="numeric" dir="ltr" value="${invDraft.ship||''}" oninput="invHeadLite('ship',this.value)" onchange="render()" placeholder="۰"></div>
   </div>
   <div style="margin-top:12px;padding:12px;border-radius:10px;background:var(--bg3);line-height:2.1">
-    ${t.meters&&_bcfg.metric?`<div style="display:flex"><span style="flex:1;color:var(--tx2)">📏 جمع کل متراژ</span><b style="color:var(--ac)">${t.meters.toLocaleString('fa-IR',{maximumFractionDigits:1})} متر</b></div>`:''}
-    <div style="display:flex"><span style="flex:1;color:var(--tx2)">جمع ردیف‌ها</span><b>${money(t.sub)}</b></div>
-    <div style="display:flex"><span style="flex:1;color:var(--tx2)">− تخفیف کل${+invDraft.discpct?` (${fmtN(+invDraft.discpct)}٪)`:''}</span><b>${money(t.disc)}</b></div>
-    <div style="display:flex"><span style="flex:1;color:var(--tx2)">مبلغ مشمول</span><b>${money(t.base)}</b></div>
-    <div style="display:flex"><span style="flex:1;color:var(--tx2)">+ مالیات (${fmtN(+invDraft.taxpct||0)}٪)</span><b>${money(t.tax)}</b></div>
-    <div style="display:flex"><span style="flex:1;color:var(--tx2)">+ هزینه ارسال</span><b>${money(t.ship)}</b></div>
-    <div style="display:flex;border-top:1px solid var(--line);margin-top:6px;padding-top:6px;font-size:15px"><span style="flex:1">💰 مبلغ نهایی</span><b style="color:var(--ok)">${money(t.total)}</b></div>
+    ${t.meters&&_bcfg.metric?`<div style="display:flex"><span style="flex:1;color:var(--tx2)">📏 جمع کل متراژ</span><b id="tt_meters" style="color:var(--ac)">${t.meters.toLocaleString('fa-IR',{maximumFractionDigits:1})} متر</b></div>`:''}
+    <div style="display:flex"><span style="flex:1;color:var(--tx2)">جمع ردیف‌ها</span><b id="tt_sub">${money(t.sub)}</b></div>
+    <div style="display:flex"><span style="flex:1;color:var(--tx2)">− تخفیف کل${+invDraft.discpct?` (${fmtN(+invDraft.discpct)}٪)`:''}</span><b id="tt_disc">${money(t.disc)}</b></div>
+    <div style="display:flex"><span style="flex:1;color:var(--tx2)">مبلغ مشمول</span><b id="tt_base">${money(t.base)}</b></div>
+    <div style="display:flex"><span style="flex:1;color:var(--tx2)">+ مالیات (${fmtN(+invDraft.taxpct||0)}٪)</span><b id="tt_tax">${money(t.tax)}</b></div>
+    <div style="display:flex"><span style="flex:1;color:var(--tx2)">+ هزینه ارسال</span><b id="tt_ship">${money(t.ship)}</b></div>
+    <div style="display:flex;border-top:1px solid var(--line);margin-top:6px;padding-top:6px;font-size:15px"><span style="flex:1">💰 مبلغ نهایی</span><b id="tt_total" style="color:var(--ok)">${money(t.total)}</b></div>
   </div>`}
   ${invDraft.kind==='پیش‌فاکتور'?'':(()=>{const bl=blcLines();return bl.length?`<div style="margin-top:10px;border:1px solid var(--bad);background:rgba(240,86,74,.07);border-radius:12px;padding:10px 14px;font-size:12.5px;color:var(--bad)">
     ⚠️ <b>فروش زیر قیمت خرید:</b> ${bl.map(l=>{const p=recs[l.product];return esc((p&&p.d.title)||'کالا')+' (فروش '+money(+l.price||0)+' │ بهای تمام‌شده '+money(invCostOf(l.product))+')';}).join(' ، ')}
@@ -14056,6 +14115,7 @@ function listHTML(e){
   let h=`<div class="tools">
     ${can('c',e)?`<button class="btn" onclick="openRec('${e}')">＋ افزودن</button>`:''}
     ${can('c',e)?`<button class="btn gh sm" onclick="impOpen('${e}')" title="ورود گروهی داده از فایل اکسل یا CSV">📥 ورود از اکسل</button>`:''}
+    ${e==='product'&&isAdmin()?(()=>{try{const dg=prodDupGroups();return dg.length?`<button class="btn sm" style="background:var(--warn);color:#000" onclick="prodMergeDupes()" title="کالاهای هم‌نام را یکی می‌کند و همه اسناد را به آن وصل می‌کند">🧹 ادغام کالاهای تکراری (${dg.length.toLocaleString('fa-IR')})</button>`:'';}catch(_x){return '';}})():''}
     ${can('d',e)&&rows.length?(view.selMode?`<button class="btn gh sm" onclick="bulkSelCancel()">✕ لغو انتخاب</button>`:`<button class="btn bad sm" onclick="bulkSelStart('${e}')" title="کنار هر مورد یک چک‌باکس می‌آید؛ فقط موارد تیک‌خورده حذف می‌شوند">🗑 حذف گروهی</button>`):''}
     <div style="flex-basis:100%">${rptBarHTML(e)}</div>
     <input data-search="listq" placeholder="🔍 جستجو در همه فیلدها…" value="${esc(view.q||'')}" oninput="listSearch(this.value)">
