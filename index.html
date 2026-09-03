@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.87</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.88</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.87</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.88</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -6180,12 +6180,48 @@ ${aiSchemaBrief()}`;
 }
 async function aiCall(messages){
   const c=aiCfg();
-  const r=await fetch(c.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.key},
-    body:JSON.stringify({model:c.model,messages,temperature:0.2,max_tokens:4000})});
+  let r;
+  try{
+    if(/generativelanguage\.googleapis\.com/.test(c.url)){ // 🌐 مسیر بومی جمینای — بدون هدر Authorization (سازگارتر با مرورگر)
+      const sys=messages.filter(m=>m.role==='system').map(m=>m.content).join('\n');
+      const contents=messages.filter(m=>m.role!=='system').map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
+      const u='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(c.model)+':generateContent?key='+encodeURIComponent(c.key);
+      r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents,systemInstruction:sys?{parts:[{text:sys}]}:undefined,generationConfig:{temperature:0.2,maxOutputTokens:4000}})});
+      if(!r.ok)throw new Error('HTTP '+r.status+' — '+(await r.text()).slice(0,200));
+      const j=await r.json();
+      const cand=j.candidates&&j.candidates[0];
+      return ((cand&&cand.content&&cand.content.parts||[]).map(p=>p.text||'').join('')||'').trim();
+    }
+    r=await fetch(c.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.key},
+      body:JSON.stringify({model:c.model,messages,temperature:0.2,max_tokens:4000})});
+  }catch(err){
+    if(err&&/fetch|network/i.test(String(err.message||err)))throw new Error('اتصال به سرویس برقرار نشد — اینترنت یا تحریم‌شکن را بررسی کنید (باید روی همین مرورگر فعال باشد). تا آن موقع حالت آفلاین کار می‌کند.');
+    throw err;
+  }
   if(!r.ok)throw new Error('HTTP '+r.status+' — '+(await r.text()).slice(0,200));
   const j=await r.json();
   return ((j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'').trim();
 }
+window.aiTest=async function(){
+  const btn=document.getElementById('ai_testbtn');if(btn){btn.disabled=true;btn.textContent='در حال تست…';}
+  try{
+    // اول مقادیر فرم را ذخیره کن تا همان تست شود
+    aiSaveCfg();view.aiSet=true;
+    const ans=await aiCall([{role:'user',content:'فقط بنویس: سلام'}]);
+    alert('✅ اتصال برقرار است!\nپاسخ مدل: '+ans.slice(0,80));
+  }catch(err){
+    const m=String(err.message||err);
+    let hint='';
+    if(/401|403|API key/i.test(m))hint='\n\n💡 کلید اشتباه است یا تحریم‌شکن خاموش است.';
+    else if(/404|not found/i.test(m))hint='\n\n💡 نام مدل را بررسی کنید (مثلاً gemini-2.0-flash).';
+    else if(/429/.test(m))hint='\n\n💡 سهمیه رایگان موقتاً پر شده — یک دقیقه صبر کنید.';
+    else if(/اتصال|fetch/i.test(m))hint='\n\n💡 تحریم‌شکن باید روی همین مرورگر/دستگاه فعال باشد.';
+    alert('⛔ تست ناموفق:\n'+m.slice(0,220)+hint);
+  }
+  if(btn){btn.disabled=false;btn.textContent='🧪 تست اتصال';}
+  render();
+};
 function aiActs(txt){ // بلوک json داخل پاسخ
   const m=txt.match(/```json\s*([\s\S]*?)```/);
   if(!m)return null;
@@ -6373,7 +6409,7 @@ function aidashHTML(){
         <div><label>کلید API</label><input id="ai_key" dir="ltr" type="password" value="${esc(c.key||'')}" placeholder="sk-…"></div>
         <div><label>نام مدل</label><input id="ai_model" dir="ltr" value="${esc(c.model||'gpt-4o-mini')}" placeholder="gpt-4o-mini"></div>
       </div>
-      <div style="margin-top:10px"><button class="btn sm" onclick="aiSaveCfg()">💾 ذخیره</button></div>
+      <div style="margin-top:10px;display:flex;gap:8px"><button class="btn sm" onclick="aiSaveCfg()">💾 ذخیره</button><button class="btn gh sm" id="ai_testbtn" onclick="aiTest()">🧪 تست اتصال</button></div>
       <p style="font-size:11px;color:var(--tx2);margin-top:8px;line-height:2">⭐ این تنظیمات <b>اختیاری</b> است — دستیار بدون آن هم در حالت آفلاین رایگان همه کارهای اصلی (تشخیص آدرس، ثبت گروهی، گزارش، توصیه) را انجام می‌دهد. اگر پاسخ آزاد به هر سؤالی خواستید، سرویسی با کلید <b>رایگان</b> مثل Groq یا Google Gemini وصل کنید. کلید فقط روی همین سیستم ذخیره می‌شود.</p></div>`;
   }
   h+=`<div class="sec" style="min-height:340px;display:flex;flex-direction:column">
