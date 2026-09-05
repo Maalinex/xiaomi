@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.97</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.98</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.97</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.98</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -4725,7 +4725,7 @@ function whImpCommit(){
     const pid=uid();
     put({id:pid,e:'purchinv',d:{title,biz:bz,supplier:S.supIdx[x0.sup]?[S.supIdx[x0.sup]]:[],wh:whIdx[x0.wh]?[whIdx[x0.wh]]:[],
       status:'ثبت شده',origin:'داخلی',cur:'ریال',date:{s:x0.iso},ship:0,paid:0,
-      note:'ورود از رسید انبار سپیدار — رسید '+x0.num+' ('+x0.kind+')'+(shipTot?' │ کرایه حمل کل '+shipTot.toLocaleString('fa-IR')+' ریال در قیمت واحد ردیف‌ها سرشکن شد':'')},u:NOW});
+      note:'ورود از رسید انبار سپیدار — رسید '+x0.num+' ('+x0.kind+')'+(x0.sup?' │ کد تأمین‌کننده: '+x0.sup:'')+(shipTot?' │ کرایه حمل کل '+shipTot.toLocaleString('fa-IR')+' ریال در قیمت واحد ردیف‌ها سرشکن شد':'')},u:NOW});
     lines.forEach(l=>{const prid=S.skuIdx[l.prod];const unit=Math.round(l.fee+(l.qty?l.ship/l.qty:0));
       put({id:uid(),e:'purchline',d:{title:(recs[prid]&&recs[prid].d.title)||l.prod,purchinv:[pid],product:[prid],biz:bz,qty:l.qty,price:unit,ldisc:0},u:NOW});});
     nInv++;});
@@ -4785,6 +4785,40 @@ function whImpFixDupes(){ // 🧹 ادغام کالاهای تکراریِ سا�
   alert('✔ '+removed.toLocaleString('fa-IR')+' کالای تکراری حذف و '+relinked.toLocaleString('fa-IR')+' سند به کالای اصلی وصل شد.');
 }
 window.whImpFixDupes=whImpFixDupes;
+function whImpFixSups(){ // 🏭 ادغام تأمین‌کننده‌های جایگزینِ ایمپورت با تأمین‌کننده‌های اصلی (بر مبنای «کد سپیدار / تفصیل»)
+  if(!isAdmin()){alert('فقط ادمین');return;}
+  const isImp=c=>String(c.d.note||'').includes('ایمپورت رسید انبار سپیدار');
+  const g={};byE('crm').forEach(c=>{const k=String(c.d.code||'').trim();if(k)(g[k]=g[k]||[]).push(c);});
+  const groups=Object.values(g).filter(a=>a.length>1&&a.some(isImp)&&a.some(c=>!isImp(c)));
+  // فاکتورهای خرید ایمپورت که تأمین‌کننده‌شان خالی مانده و کدشان حالا در سیستم هست، وصل می‌شوند
+  const orphan=byE('purchinv').filter(v=>String(v.d.note||'').includes('رسید انبار سپیدار')&&!String(v.d.title||'').includes('موجودی اول دوره')&&!relIds(v,'supplier').length);
+  if(!groups.length&&!orphan.length){alert('تأمین‌کنندهٔ تکراری یا فاکتور بدون تأمین‌کننده از ایمپورت پیدا نشد ✔');return;}
+  if(!confirm('🏭 '+groups.length.toLocaleString('fa-IR')+' کد تأمین‌کننده هم در رکوردهای اصلی و هم در رکوردهای ساخته‌شده توسط ایمپورت هست'+(orphan.length?'؛ '+orphan.length.toLocaleString('fa-IR')+' فاکتور خرید هم بدون تأمین‌کننده است':'')+'.\n\nرکوردهای ساخته‌شده حذف و همهٔ فاکتورهای خرید به تأمین‌کنندهٔ اصلی وصل می‌شوند. ادامه؟'))return;
+  const NOW=Date.now();let relinked=0,removed=0;
+  const relMap=[];Object.entries(E).forEach(([e2,def])=>(def.f||[]).forEach(f=>{if(f.t===REL&&f.r==='crm')relMap.push([e2,f.k]);}));
+  groups.forEach(arr=>{
+    const keep=arr.find(c=>!isImp(c));
+    const dups=arr.filter(c=>isImp(c)&&c.id!==keep.id);
+    const dupIds=new Set(dups.map(d=>d.id));
+    relMap.forEach(([e2,k])=>{byE(e2).forEach(r=>{
+      const ids=relIds(r,k);if(!ids.some(x=>dupIds.has(x)))return;
+      r.d[k]=[...new Set(ids.map(x=>dupIds.has(x)?keep.id:x))];
+      r.u=NOW;queue.push(r.id);relinked++;});});
+    dups.forEach(dp=>{dp.del=true;dp.u=NOW;queue.push(dp.id);removed++;});
+    if(keep.d.rel!=='تامین‌کننده'&&!keep.d.rel){keep.d.rel='تامین‌کننده';}
+    keep.u=NOW;queue.push(keep.id);
+  });
+  invalidateByE();
+  // 🔗 وصل فاکتورهای بدون تأمین‌کننده از روی کدِ داخل توضیحات (اگر ثبت شده باشد)
+  let fixedOrphan=0;
+  const codeIdx={};byE('crm').forEach(c=>{const k=String(c.d.code||'').trim();if(k)codeIdx[k]=codeIdx[k]||c.id;});
+  orphan.forEach(v=>{const m=String(v.d.note||'').match(/کد تأمین[‌ ]?کننده[:\s]+(\d+)/);
+    if(m&&codeIdx[m[1]]){v.d.supplier=[codeIdx[m[1]]];v.u=NOW;queue.push(v.id);fixedOrphan++;}});
+  queue=[...new Set(queue)];
+  invalidateByE();saveLocal();saveQ();flush();render();
+  alert('✔ '+removed.toLocaleString('fa-IR')+' تأمین‌کنندهٔ تکراری حذف و '+relinked.toLocaleString('fa-IR')+' سند به تأمین‌کنندهٔ اصلی وصل شد'+(fixedOrphan?'؛ '+fixedOrphan.toLocaleString('fa-IR')+' فاکتور بدون تأمین‌کننده هم وصل شد':'')+'.');
+}
+window.whImpFixSups=whImpFixSups;
 function impcenterHTML(){
   const b=gBiz();
   let h=`<div class="sec"><h3>📥 مرکز ورود اکسل</h3>
@@ -4799,7 +4833,7 @@ function impcenterHTML(){
     <label style="font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:6px"><input type="checkbox" id="sepMaster" checked style="width:16px;height:16px">به‌روزرسانی اطلاعات پایه از فایل‌های «طرف حساب» و «الگوی کالا» (مشتری/تأمین‌کننده/کالا — سند مالی نیستند)</label>
     <div id="sepPrev"></div></div>`;
   if(isAdmin())h+=`<div class="sec" style="border-inline-start:3px solid var(--warn)"><h3>📦 ورود گردش انبار (رسید انبار سپیدار)
-    <span style="flex:1"></span><button class="btn gh sm" onclick="whImpFixDupes()" title="کالاهای تکراری که ایمپورت قبلی ساخته را به کالاهای اصلی ادغام می‌کند">🧹 اصلاح کالاهای تکراری ایمپورت</button><button class="btn sm" onclick="whImpOpen()">📂 شروع ورود</button></h3>
+    <span style="flex:1"></span><button class="btn gh sm" onclick="whImpFixDupes()" title="کالاهای تکراری که ایمپورت قبلی ساخته را به کالاهای اصلی ادغام می‌کند">🧹 اصلاح کالاهای تکراری</button><button class="btn gh sm" onclick="whImpFixSups()" title="تأمین‌کننده‌های جایگزین ایمپورت را با کد سپیدار به تأمین‌کننده‌های اصلی ادغام و فاکتورها را وصل می‌کند">🏭 اصلاح تأمین‌کننده‌ها</button><button class="btn sm" onclick="whImpOpen()">📂 شروع ورود</button></h3>
     <p style="font-size:12px;color:var(--tx2);line-height:2">فایل CSV آماده‌شدهٔ رسید انبار را وارد می‌کند: فاکتورهای خرید (با سرشکن کرایه حمل در قیمت تمام‌شده)، موجودی اول دوره به تفکیک انبار، و انتقال‌های بین انبار.</p></div>`;
   // 🤖 ورود خودکار از پوشه
   if(isAdmin()){
