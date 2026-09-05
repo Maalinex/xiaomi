@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.94</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.95</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.94</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.95</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -4631,6 +4631,127 @@ function sepfinHTML(){
     </tbody></table></div></div>`;
   return h;
 }
+
+/* ═══════════ 📦 ورود گردش انبار (رسید انبار سپیدار — CSV آماده‌شده) ═══════════ */
+let whImpState=null;
+const WHIMP_NAMES={'1':'انبار مرکزی','2':'انبار امانی','3':'انبار اختیاریه','4':'انبار ضایعات','5':'انبار تعمیرات','6':'انبار کارتن باز'};
+function whImpOpen(){
+  if(!isAdmin()){alert('این ورود فقط توسط ادمین انجام می‌شود');return;}
+  whImpState={rows:null};
+  const el=document.getElementById('imp');
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><b style="font-size:14px">📦 ورود گردش انبار (رسید انبار سپیدار)</b>
+    <span style="flex:1"></span><span onclick="impClose()" style="cursor:pointer;color:var(--tx2)">✕</span></div>
+  <p style="font-size:12px;color:var(--tx2);line-height:2.1;margin:8px 0">فایل CSV آماده‌شده با ستون‌های: نوع، شماره رسید، تاریخ میلادی، تاریخ شمسی، کد انبار، کد تامین‌کننده، کد کالا، تعداد، قیمت واحد، کرایه حمل.<br>
+  🧾 خریدها → فاکتور خرید (کرایه حمل بر تعداد تقسیم و در قیمت تمام‌شدهٔ هر واحد لحاظ می‌شود) │ 🏁 اول دوره → سند موجودی اول دوره به تفکیک انبار │ ↔️ انتقال‌ها → سند انتقال «بدون مبدأ» ثبت می‌شوند و تا وقتی مبدأ را تعیین و «تحویل شد» نکنی روی موجودی بی‌اثرند.<br>
+  کالا با «کد کالا (SKU)» و تامین‌کننده با «کد سپیدار / تفصیل» پیدا می‌شود؛ اگر نبود، خودکار ساخته می‌شود.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+    <label class="btn sm" style="cursor:pointer">📂 انتخاب فایل CSV<input type="file" accept=".csv" style="display:none" onchange="whImpFile(this)"></label>
+    <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--tx2);margin:0"><input type="checkbox" id="whimp_zero" checked style="width:auto"> «موجودی اول دورهٔ» قبلیِ کالاهای داخل فایل صفر شود (تا دوبار حساب نشود)</label>
+  </div>
+  <div id="whimp_prev"></div>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button class="btn" id="whimp_go" onclick="whImpCommit()" disabled>ثبت نهایی</button>
+    <button class="btn gh" onclick="impClose()">بستن</button>
+  </div>`;
+  el.classList.add('show');
+}
+window.whImpOpen=whImpOpen;
+function _whImpCsv(txt){
+  const out=[];let row=[],cell='',q=false;
+  txt=txt.replace(/^﻿/,'');
+  for(let i=0;i<txt.length;i++){const ch=txt[i];
+    if(q){if(ch==='"'){if(txt[i+1]==='"'){cell+='"';i++;}else q=false;}else cell+=ch;}
+    else if(ch==='"')q=true;
+    else if(ch===','){row.push(cell);cell='';}
+    else if(ch==='\n'||ch==='\r'){if(cell!==''||row.length){row.push(cell);out.push(row);row=[];cell='';}if(ch==='\r'&&txt[i+1]==='\n')i++;}
+    else cell+=ch;}
+  if(cell!==''||row.length){row.push(cell);out.push(row);}
+  return out.filter(r=>r.some(c=>String(c).trim()!==''));
+}
+async function whImpFile(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;inp.value='';
+  const rows=_whImpCsv(await f.text());
+  if(rows.length<2){document.getElementById('whimp_prev').innerHTML='<div class="empty">فایل خالی است</div>';return;}
+  const num=v=>+faNum(String(v||'')).replace(/[^\d.-]/g,'')||0;
+  const body=rows.slice(1).map((r,i)=>({n:i+2,kind:(r[0]||'').trim(),num:String(num(r[1])),iso:(r[2]||'').trim(),wh:String(num(r[4])),sup:String(r[5]||'').trim(),prod:faNum(String(r[6]||'')).trim().toUpperCase(),qty:num(r[7]),fee:num(r[8]),ship:num(r[9])}))
+    .filter(x=>x.prod&&x.qty>0&&/^\d{4}-\d\d-\d\d$/.test(x.iso));
+  const buy=body.filter(x=>x.kind.includes('خرید')||x.kind==='سایر');
+  const op=body.filter(x=>x.kind.includes('اول'));
+  const mv=body.filter(x=>x.kind.includes('انتقال'));
+  const prodCodes=[...new Set(body.map(x=>x.prod))];
+  const skuIdx={};byE('product').forEach(p=>{const k=faNum(String(p.d.sku||'')).trim().toUpperCase();if(k)skuIdx[k]=skuIdx[k]||p.id;});
+  const newProds=prodCodes.filter(c=>!skuIdx[c]);
+  const supIdx={};byE('crm').forEach(c=>{const k=String(c.d.code||'').trim();if(k)supIdx[k]=supIdx[k]||c.id;});
+  const supCodes=[...new Set(buy.map(x=>x.sup).filter(Boolean))];
+  const newSups=supCodes.filter(c=>!supIdx[c]);
+  const grpBuy={};buy.forEach(x=>{const k=x.kind+'|'+x.num+'|'+x.wh+'|'+x.iso;(grpBuy[k]=grpBuy[k]||[]).push(x);});
+  const grpOp={};op.forEach(x=>{(grpOp[x.num+'|'+x.wh]=grpOp[x.num+'|'+x.wh]||[]).push(x);});
+  whImpState={buy:grpBuy,op:grpOp,mv,skuIdx,supIdx,newProds,newSups,body};
+  const F=n=>n.toLocaleString('fa-IR');
+  document.getElementById('whimp_prev').innerHTML=`<div style="font-size:12.5px;line-height:2.2" class="sec">
+    ✅ ${F(body.length)} ردیف معتبر خوانده شد:<br>
+    🧾 <b>${F(Object.keys(grpBuy).length)}</b> فاکتور خرید (${F(buy.length)} ردیف) │ 🏁 <b>${F(Object.keys(grpOp).length)}</b> سند موجودی اول دوره (${F(op.length)} ردیف) │ ↔️ <b>${F(mv.length)}</b> انتقال بین انبار<br>
+    📦 کالاهای فایل: ${F(prodCodes.length)} — ${newProds.length?`<b style="color:var(--warn)">${F(newProds.length)} کالای جدید ساخته می‌شود</b>`:'همه در سیستم موجودند'}<br>
+    🏭 تامین‌کننده‌ها: ${F(supCodes.length)} — ${newSups.length?`<b style="color:var(--warn)">${F(newSups.length)} مورد جدید ساخته می‌شود (کد: ${newSups.slice(0,8).map(esc).join('، ')}${newSups.length>8?'…':''})</b>`:'همه با کد سپیدار پیدا شدند'}
+  </div>`;
+  const go=document.getElementById('whimp_go');go.disabled=false;go.textContent='ثبت نهایی '+F(body.length)+' ردیف';
+}
+window.whImpFile=whImpFile;
+function whImpCommit(){
+  const S=whImpState;if(!S||!S.body||!S.body.length)return;
+  const NOW=Date.now();const bz=gBiz()?[gBiz()]:[];
+  const zero=!!(document.getElementById('whimp_zero')||{}).checked;
+  // انبارها: بر اساس کد
+  const whIdx={};byE('whouse').forEach(w=>{const k=String(w.d.code||'').trim();if(k)whIdx[k]=whIdx[k]||w.id;});
+  Object.entries(WHIMP_NAMES).forEach(([code,name])=>{
+    if(whIdx[code])return;
+    const ex=byE('whouse').find(w=>(w.d.title||'').includes(name.replace('انبار ','')));
+    if(ex){if(!ex.d.code){ex.d.code=code;ex.u=NOW;put(ex);}whIdx[code]=ex.id;return;}
+    const id=uid();put({id,e:'whouse',d:{title:name,code,biz:bz,active:'فعال'},u:NOW});whIdx[code]=id;});
+  // کالاها و تامین‌کننده‌های جدید
+  S.newProds.forEach(c=>{const id=uid();put({id,e:'product',d:{title:'کالا '+c,sku:c,biz:bz,note:'ساخته‌شده از ایمپورت رسید انبار سپیدار — نام را اصلاح کنید'},u:NOW});S.skuIdx[c]=id;});
+  S.newSups.forEach(c=>{const id=uid();put({id,e:'crm',d:{title:'تامین‌کننده '+c,rel:'تامین‌کننده',kind:'حقوقی',code:c,note:'ساخته‌شده از ایمپورت رسید انبار سپیدار'},u:NOW});S.supIdx[c]=id;});
+  let nInv=0,nOp=0,nMv=0,nSkip=0;
+  const existsT=t=>byE('purchinv').some(v=>v.d.title===t);
+  // 🧾 فاکتورهای خرید
+  Object.entries(S.buy).forEach(([key,lines])=>{
+    const x0=lines[0];const title='خرید سپیدار '+x0.num+' — انبار '+x0.wh+' — '+x0.iso;
+    if(existsT(title)){nSkip++;return;}
+    const shipTot=lines.reduce((a,l)=>a+l.ship,0);
+    const pid=uid();
+    put({id:pid,e:'purchinv',d:{title,biz:bz,supplier:S.supIdx[x0.sup]?[S.supIdx[x0.sup]]:[],wh:whIdx[x0.wh]?[whIdx[x0.wh]]:[],
+      status:'ثبت شده',origin:'داخلی',cur:'ریال',date:{s:x0.iso},ship:0,paid:0,
+      note:'ورود از رسید انبار سپیدار — رسید '+x0.num+' ('+x0.kind+')'+(shipTot?' │ کرایه حمل کل '+shipTot.toLocaleString('fa-IR')+' ریال در قیمت واحد ردیف‌ها سرشکن شد':'')},u:NOW});
+    lines.forEach(l=>{const prid=S.skuIdx[l.prod];const unit=Math.round(l.fee+(l.qty?l.ship/l.qty:0));
+      put({id:uid(),e:'purchline',d:{title:(recs[prid]&&recs[prid].d.title)||l.prod,purchinv:[pid],product:[prid],biz:bz,qty:l.qty,price:unit,ldisc:0},u:NOW});});
+    nInv++;});
+  // 🏁 موجودی اول دوره — به تفکیک انبار
+  Object.entries(S.op).forEach(([key,lines])=>{
+    const x0=lines[0];const wt=(recs[whIdx[x0.wh]]&&recs[whIdx[x0.wh]].d.title)||('انبار '+x0.wh);
+    const title='موجودی اول دوره — '+wt+' (رسید '+x0.num+')';
+    if(existsT(title)){nSkip++;return;}
+    const pid=uid();
+    put({id:pid,e:'purchinv',d:{title,biz:bz,supplier:[],wh:whIdx[x0.wh]?[whIdx[x0.wh]]:[],status:'ثبت شده',origin:'داخلی',cur:'ریال',
+      date:{s:x0.iso},ship:0,paid:0,note:'موجودی اول دورهٔ '+wt+' از رسید انبار سپیدار — سند خرید نیست؛ برای ارزش‌گذاری FIFO'},u:NOW});
+    lines.forEach(l=>{const prid=S.skuIdx[l.prod];
+      put({id:uid(),e:'purchline',d:{title:(recs[prid]&&recs[prid].d.title)||l.prod,purchinv:[pid],product:[prid],biz:bz,qty:l.qty,price:Math.round(l.fee),ldisc:0},u:NOW});});
+    nOp++;});
+  // ↔️ انتقال‌ها — بدون مبدأ، بی‌اثر تا تکمیل
+  S.mv.forEach(l=>{
+    const title='انتقال سپیدار '+l.num+' — '+l.prod;
+    if(byE('whmove').some(m=>m.d.title===title)){nSkip++;return;}
+    put({id:uid(),e:'whmove',d:{title,product:[S.skuIdx[l.prod]],qty:l.qty,from:[],to:whIdx[l.wh]?[whIdx[l.wh]]:[],
+      status:WH_MVST[0],date:{s:l.iso},note:'مبدأ در فایل سپیدار نبود — «از انبار» را تعیین و وضعیت را «تحویل شد» کنید تا روی موجودی اثر کند'},u:NOW});
+    nMv++;});
+  // صفر کردن موجودی اول دورهٔ قبلی کالاهای فایل
+  let nZero=0;
+  if(zero){const inFile=new Set(S.body.map(x=>S.skuIdx[x.prod]).filter(Boolean));
+    inFile.forEach(id=>{const p=recs[id];if(p&&+p.d.stock0){p.d.stock0=0;p.u=Date.now();put(p);nZero++;}});}
+  invalidateByE();saveLocal();saveQ();flush();
+  impClose();go('whdash');
+  alert('📦 ورود گردش انبار انجام شد:\n🧾 '+nInv.toLocaleString('fa-IR')+' فاکتور خرید\n🏁 '+nOp.toLocaleString('fa-IR')+' سند موجودی اول دوره\n↔️ '+nMv.toLocaleString('fa-IR')+' انتقال (بدون مبدأ — از «انتقال بین انبارها» تکمیلشان کن)'+(nZero?'\n♻️ موجودی اول دورهٔ '+nZero.toLocaleString('fa-IR')+' کالا صفر شد':'')+(nSkip?'\n⏭ '+nSkip.toLocaleString('fa-IR')+' سند تکراری رد شد':''));
+}
+window.whImpCommit=whImpCommit;
 function impcenterHTML(){
   const b=gBiz();
   let h=`<div class="sec"><h3>📥 مرکز ورود اکسل</h3>
@@ -4644,6 +4765,9 @@ function impcenterHTML(){
     <p style="font-size:12px;color:var(--tx2);line-height:2">خروجی‌های اکسل سپیدار مستقیم و بدون تغییر این‌جا بارگذاری می‌شوند. <b>همهٔ اسناد مالی (فاکتور فروش، رسید/خروج انبار، دریافت و پرداخت) فقط در بخش «مدیریت مالی › اسناد حسابداری» ثبت می‌شوند</b> و هیچ رکورد عملیاتی (فاکتور، فروش، خرید، انتقال) نمی‌سازند — تا بعداً در «⚖️ تطبیق عملیات و حسابداری» با ثبت‌های واحدهای عملیاتی مقایسه شوند. رکورد تکراری هرگز دوباره وارد نمی‌شود.</p>
     <label style="font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:6px"><input type="checkbox" id="sepMaster" checked style="width:16px;height:16px">به‌روزرسانی اطلاعات پایه از فایل‌های «طرف حساب» و «الگوی کالا» (مشتری/تأمین‌کننده/کالا — سند مالی نیستند)</label>
     <div id="sepPrev"></div></div>`;
+  if(isAdmin())h+=`<div class="sec" style="border-inline-start:3px solid var(--warn)"><h3>📦 ورود گردش انبار (رسید انبار سپیدار)
+    <span style="flex:1"></span><button class="btn sm" onclick="whImpOpen()">📂 شروع ورود</button></h3>
+    <p style="font-size:12px;color:var(--tx2);line-height:2">فایل CSV آماده‌شدهٔ رسید انبار را وارد می‌کند: فاکتورهای خرید (با سرشکن کرایه حمل در قیمت تمام‌شده)، موجودی اول دوره به تفکیک انبار، و انتقال‌های بین انبار.</p></div>`;
   // 🤖 ورود خودکار از پوشه
   if(isAdmin()){
     const c=aiCfg();let log=[];try{log=JSON.parse(localStorage.getItem('xr_ailog')||'[]');}catch(e){}
@@ -12342,7 +12466,8 @@ function whQtyOf(pid){
     if(relIds(x,'product')[0]!==pid)return;
     const st=x.d.status||WH_MVST[0]; if(st===WH_MVST[2])return;   // لغو شده
     const q=+x.d.qty||0; if(!q)return;
-    add(relIds(x,'from')[0],-q);                                   // از مبدأ همان لحظهٔ خروج کسر می‌شود
+    const _fr=relIds(x,'from')[0]; if(!_fr)return;                 // 🛡 انتقال بدون مبدأ (ایمپورت سپیدار) تا تعیین مبدأ بی‌اثر است
+    add(_fr,-q);                                                   // از مبدأ همان لحظهٔ خروج کسر می‌شود
     if(st===WH_MVST[1])add(relIds(x,'to')[0],q);                   // به مقصد فقط پس از تحویل
   });
   byE('whcount').forEach(x=>{
