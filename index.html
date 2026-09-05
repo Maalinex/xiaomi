@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.89</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.91</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.89</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.91</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1312,6 +1312,7 @@ invoice:{ic:'🧾',n:'فاکتور و پیش‌فاکتور',grp:'فروش',sub:
  {k:'title',n:'شماره / شرح فاکتور',t:TXT},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'customer',n:'مشتری',t:REL,r:'customer',s:1},
+ {k:'referrer',n:'🤝 معرف (مشتری معرفی‌کننده)',t:REL,r:'customer',s:1},
  {k:'seller',n:'👤 فروشنده / فرد (تارگت و عملکرد)',t:REL,r:'hr',s:1},
  {k:'orgu',n:'🧩 واحد / تیم (تارگت و عملکرد)',t:REL,r:'orgunit',s:1},
  {k:'wh',n:'🏬 انبارِ خروج کالا',t:REL,r:'whouse',s:1},
@@ -4140,17 +4141,21 @@ function swfHTML(){
   const arch=all.filter(v=>[WF_ST.DONE,WF_ST.VOID].includes(v.d.wfst)).sort((a,b)=>(b.u||0)-(a.u||0));
   const mine=wfMine();
   const T=(k,l,n)=>`<button class="btn ${tab===k?'sm':'gh sm'}" onclick="view.wtab='${k}';render()">${l}${n?` <span class="c">${n.toLocaleString('fa-IR')}</span>`:''}</button>`;
-  const A=(id2,st)=>{
-    if(st===WF_ST.NEW&&(w==='مدیر فروش'||w==='ادمین'||w==='مدیر ارشد')){
-      const r0=recs[id2];const lines=invLinesOf(id2);const whs=byE('whouse');const curWh=relIds(r0,'wh')[0]||'';
-      return `
-      <div style="flex-basis:100%;border-top:1px dashed var(--line);padding-top:8px">
-        <b style="font-size:12px">💰 اعلام قیمت فروش (مدیر فروش)</b>
-        <div class="tblwrap" style="margin-top:6px"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالا</th><th>تعداد</th><th>قیمت واحد (ریال)</th><th>جمع ردیف</th></tr></thead><tbody>
+  const priceTbl=(id2,who)=>{ // 🏷 جدول قیمت‌گذاری — مدیر فروش و مدیر مالی
+    const lines=invLinesOf(id2);
+    return `<div class="tblwrap" style="margin-top:6px"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالا</th><th>تعداد</th><th>قیمت واحد (ریال)</th><th>جمع ردیف</th></tr></thead><tbody>
         ${lines.map(l=>{const pid=relIds(l,'product')[0];const pr=+l.d.price||0;const q2=+l.d.qty||0;
           const _pl=pid?plPriceOf(pid):null;
           return `<tr><td style="text-align:right">${esc((pid&&recs[pid]&&recs[pid].d.title)||l.d.title||'—')} <span style="font-size:10px;color:var(--tx2)">(تمام‌شده: ${money(invCostOf(pid))}${_pl?' │ مصوب: '+money(_pl.price)+(_pl.min?' │ حداقل: '+money(_pl.min):''):''})</span></td><td style="text-align:center">${q2.toLocaleString('fa-IR')}</td><td><input inputmode="numeric" dir="ltr" value="${pr||''}" onchange="wfSetPrice('${l.id}',this.value)" placeholder="قیمت فروش…" style="max-width:140px;text-align:left"></td><td style="white-space:nowrap">${money(pr*q2)}</td></tr>`;}).join('')}
-        </tbody></table></div>
+        </tbody></table></div>`;
+  };
+  const A=(id2,st)=>{
+    if(st===WF_ST.NEW&&['مدیر فروش','مدیر مالی','ادمین','مدیر ارشد'].includes(w)){
+      const r0=recs[id2];const lines=invLinesOf(id2);const whs=byE('whouse');const curWh=relIds(r0,'wh')[0]||'';
+      return `
+      <div style="flex-basis:100%;border-top:1px dashed var(--line);padding-top:8px">
+        <b style="font-size:12px">💰 اعلام قیمت فروش (مدیر فروش / مدیر مالی)</b>
+        ${priceTbl(id2)}
         <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:8px;font-size:12px">
           <span>🏬 انبار خروج: <select onchange="wfSetWh('${id2}',this.value)" style="max-width:180px"><option value="">— انتخاب —</option>${whs.map(x=>`<option value="${x.id}" ${x.id===curWh?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select></span>
           <label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="checkbox" ${r0.d.mgrdelok?'checked':''} onchange="wfChk('${id2}','mgrdelok',this.checked)"> ✅ تأیید شرایط تحویل</label>
@@ -4162,6 +4167,10 @@ function swfHTML(){
       <button class="btn gh sm" onclick="wfAct('${id2}','void')">⛔ ابطال</button>`;
     }
     if(st===WF_ST.FIN&&['کارمند حسابداری','مدیر مالی','ادمین','مدیر ارشد'].includes(w))return `
+      ${(w!=='کارمند حسابداری')?`<div style="flex-basis:100%;border-top:1px dashed var(--line);padding-top:8px">
+        <b style="font-size:12px">🏷 اصلاح/اعلام قیمت (مدیر مالی)</b>
+        ${priceTbl(id2)}
+      </div>`:''}
       <label class="btn gh sm" style="cursor:pointer">📎 پیوست پیش‌فاکتور سپیدار<input type="file" style="display:none" onchange="wfUpload('${id2}','sepfile',this)"></label>
       <button class="btn sm" onclick="wfFinSend('${id2}')">✅ تأیید و ارسال به مدیر فروش</button>
       <button class="btn gh sm" onclick="wfAct('${id2}','fix')">⛔ عدم تأیید (برگشت برای اصلاح)</button>
@@ -4189,12 +4198,13 @@ function swfHTML(){
     return '';
   };
   let body='';
-  if(tab==='me')body=mine.map(v=>wfCard(v,A(v.id,v.d.wfst))).join('')||'<div class="hint">موردی در کارتابل شما نیست. ✅</div>';
-  if(tab==='all')body=Object.values(WF_ST).filter(st=>![WF_ST.DONE,WF_ST.VOID].includes(st)).map(st=>{
+  if(!w&&!isAdmin())body+=`<div class="sec" style="border:1.5px dashed var(--warn);font-size:12px;padding:12px 16px">⚠️ نقش گردش‌کار شما تعریف نشده — برای دیدن فیلد قیمت‌گذاری و دکمه‌های تأیید، ادمین باید در «🎛️ مرکز فرمان کاربران» نقش شما را (مدیر فروش / مدیر مالی / کارمند حسابداری) تعیین کند.</div>`;
+  if(tab==='me')body+=mine.map(v=>wfCard(v,A(v.id,v.d.wfst))).join('')||'<div class="hint">موردی در کارتابل شما نیست. ✅</div>';
+  if(tab==='all')body+=Object.values(WF_ST).filter(st=>![WF_ST.DONE,WF_ST.VOID].includes(st)).map(st=>{
     const g=act.filter(v=>v.d.wfst===st);if(!g.length)return'';
     return `<div style="font-size:12px;font-weight:800;margin:12px 0 4px">${esc(st)} <span class="c">${g.length.toLocaleString('fa-IR')}</span></div>`+g.map(v=>wfCard(v,(w==='ادمین'||w==='مدیر ارشد')?A(v.id,v.d.wfst):'')).join('');
   }).join('')||'<div class="hint">پیش‌فاکتوری در جریان نیست.</div>';
-  if(tab==='arch')body=arch.slice(0,40).map(v=>wfCard(v,'')).join('')||'<div class="hint">بایگانی خالی است.</div>';
+  if(tab==='arch')body+=arch.slice(0,40).map(v=>wfCard(v,'')).join('')||'<div class="hint">بایگانی خالی است.</div>';
   return `<div class="sec"><h3>🔁 گردش فروش — کارتابل ${esc(w)}
     <span style="flex:1"></span>
     ${can('c','invoice')?`<button class="btn sm" onclick="invDraft=null;go('invnew')">📝 پیش‌فاکتور جدید</button>`:''}</h3>
@@ -8633,7 +8643,7 @@ function bizInvCfg(bid){
   const d=(b&&b.d)||{};
   return {metric:!!d.invmetric,disc:d.invdisc||'مبلغی (ریال)',official:!!d.invofficial};
 }
-function invNewDraft(){invDraft={desc:'',biz:gBiz()||'',customer:'',seller:'',orgu:'',kind:'فاکتور فروش',official:'غیررسمی',paymode:'نقدی',paidAmt:'',vdate:today(),due:'',disc:'',discpct:'',taxpct:'',ship:'',note:'',payterm:'نقد',payterms:'',delivterms:'',validto:'',lines:[{product:'',qty:'1',price:'',ldisc:'',mlen:''}]};}
+function invNewDraft(){invDraft={desc:'',biz:gBiz()||'',customer:'',referrer:'',seller:'',orgu:'',kind:'فاکتور فروش',official:'غیررسمی',paymode:'نقدی',paidAmt:'',vdate:today(),due:'',disc:'',discpct:'',taxpct:'',ship:'',note:'',payterm:'نقد',payterms:'',delivterms:'',validto:'',lines:[{product:'',qty:'1',price:'',ldisc:'',mlen:''}]};}
 window.invSetOfficial=function(v){invDraft.official=v;
   if(v==='رسمی')invDraft.taxpct=String(vatPct(invDraft.vdate));else if(invDraft.official!=='رسمی'&&v!=='رسمی'&&invDraft._taxAuto!==false)invDraft.taxpct='';render();};
 function invAddLine(){invDraft.lines.push({product:'',qty:'1',price:'',ldisc:''});render();}
@@ -8704,7 +8714,7 @@ function invSave(status){
     const before=invCalc(r).total;
     if(invDraft.customer&&recs[invDraft.customer]&&String(invDraft.natid||'').trim()&&String(recs[invDraft.customer].d.natid||'')!==String(invDraft.natid).trim()){const _c=recs[invDraft.customer];_c.d.natid=String(invDraft.natid).trim();_c.u=Date.now();put(_c);}
     r.d={...r.d,natid:String(invDraft.natid||'').trim()||undefined,title:invDraft.desc||r.d.title,biz:invDraft.biz?[invDraft.biz]:[],
-      customer:invDraft.customer?[invDraft.customer]:[],seller:invDraft.seller?[invDraft.seller]:[],
+      customer:invDraft.customer?[invDraft.customer]:[],referrer:invDraft.referrer?[invDraft.referrer]:[],seller:invDraft.seller?[invDraft.seller]:[],
       orgu:invDraft.orgu?[invDraft.orgu]:r.d.orgu||[],
       official:invDraft.official||'غیررسمی',date:{s:dNorm(invDraft.vdate)||invDraft.vdate},
       due:invDraft.due?{s:dNorm(invDraft.due)||invDraft.due}:null,
@@ -8768,7 +8778,7 @@ function invSave(status){
   const paid=invDraft.paymode==='نقدی'?_tot:invDraft.paymode==='بخشی'?Math.min(_tot,+faNum(String(invDraft.paidAmt||0)).replace(/[,،٬\s]/g,'')||0):0;
   if(invDraft.customer&&recs[invDraft.customer]&&String(invDraft.natid||'').trim()&&String(recs[invDraft.customer].d.natid||'')!==String(invDraft.natid).trim()){const _c=recs[invDraft.customer];_c.d.natid=String(invDraft.natid).trim();_c.u=Date.now();put(_c);}
   put({id:iid,e:'invoice',d:{title:invDraft.desc||('فاکتور '+num),natid:String(invDraft.natid||'').trim()||undefined,biz:invDraft.biz?[invDraft.biz]:[],
-    customer:invDraft.customer?[invDraft.customer]:[],seller:invDraft.seller?[invDraft.seller]:[],orgu:invDraft.orgu?[invDraft.orgu]:(invDraft.seller&&recs[invDraft.seller]?relIds(recs[invDraft.seller],'orgu'):[]),kind:invDraft.kind,status:status||'صادر شده',
+    customer:invDraft.customer?[invDraft.customer]:[],referrer:invDraft.referrer?[invDraft.referrer]:[],seller:invDraft.seller?[invDraft.seller]:[],orgu:invDraft.orgu?[invDraft.orgu]:(invDraft.seller&&recs[invDraft.seller]?relIds(recs[invDraft.seller],'orgu'):[]),kind:invDraft.kind,status:status||'صادر شده',
     date:{s:dNorm(invDraft.vdate)||invDraft.vdate},due:invDraft.due?{s:dNorm(invDraft.due)||invDraft.due}:null,
     disc:+invDraft.disc||0,discpct:+invDraft.discpct||0,official:invDraft.official||'غیررسمی',taxpct:+invDraft.taxpct||0,ship:+invDraft.ship||0,paid,note:invDraft.note,
     payterm:invDraft.payterm||'',payterms:invDraft.payterms||'',delivterms:invDraft.delivterms||'',validto:invDraft.validto?{s:invDraft.validto}:null,
@@ -8799,7 +8809,7 @@ window.invEdit=function(id){
   const r=recs[id];if(!r||r.del)return;
   if(!can('e','invoice',r)){alert('سطح دسترسی شما اجازه ویرایش این فاکتور را نمی‌دهد');return;}
   const lines=invLinesOf(id).map(l=>({_lineId:l.id,product:relIds(l,'product')[0]||'',qty:String(l.d.qty||''),price:String(l.d.price||''),ldisc:String(l.d.ldisc||''),mlen:String(l.d.mlen||'')}));
-  invDraft={_editId:id,desc:r.d.title||'',biz:relIds(r,'biz')[0]||'',customer:relIds(r,'customer')[0]||'',
+  invDraft={_editId:id,desc:r.d.title||'',biz:relIds(r,'biz')[0]||'',customer:relIds(r,'customer')[0]||'',referrer:relIds(r,'referrer')[0]||'',
     seller:relIds(r,'seller')[0]||'',orgu:relIds(r,'orgu')[0]||'',kind:r.d.kind||'فاکتور فروش',
     official:r.d.official||'غیررسمی',paymode:'',paidAmt:'',
     natid:String(r.d.natid||(relIds(r,'customer')[0]&&recs[relIds(r,'customer')[0]]?recs[relIds(r,'customer')[0]].d.natid||'':'')),
@@ -8818,6 +8828,14 @@ function invPickCust(name){
   else{alert('مشتری «'+name+'» پیدا نشد — از لیست پیشنهادی انتخاب کن یا اول در «مشتریان کسب‌وکار» بسازش');render();}
 }
 window.invPickCust=invPickCust;
+function invPickRef(name){ // 🤝 معرف: مشتری‌ای که این مشتری را معرفی کرده
+  name=(name||'').trim();
+  if(!name){invDraft.referrer='';render();return;}
+  const c=byE('customer').find(x=>(x.d.title||'').trim()===name);
+  if(c){if(c.id===invDraft.customer){alert('معرف نمی‌تواند خودِ مشتری فاکتور باشد');invDraft.referrer='';render();return;}invDraft.referrer=c.id;render();}
+  else{alert('معرف «'+name+'» در مشتریان پیدا نشد — از لیست پیشنهادی انتخاب کن');render();}
+}
+window.invPickRef=invPickRef;
 function _pnorm(t){return faNum(String(t||'')).replace(/\s+/g,' ').trim().toLowerCase();}
 function prodByNameOrSku(name){ // 🏷 یافتن کالا با نام یا کد کالا (SKU) — با نرمال‌سازی فاصله و ارقام
   const nn=_pnorm(name);if(!nn)return null;
@@ -8913,6 +8931,7 @@ function invnewHTML(){
       ${(()=>{if(!invDraft.customer||!recs[invDraft.customer])return'';const cr=+recs[invDraft.customer].d.credit||0;if(!cr)return'';const du=custReceivable(invDraft.customer);const ok=du<cr;
         return `<div style="font-size:10.5px;margin-top:4px;color:${ok?'var(--tx2)':'var(--bad)'}">💳 اعتبار: بدهی ${money(du)} از سقف ${money(cr)}${ok?'':' — سقف پر است!'}</div>`;})()}</div>
     <div><label ${lbl}>🆔 شناسه ملی مشتری <span style="opacity:.7">(برای فاکتور رسمی)</span></label><input dir="ltr" inputmode="numeric" value="${esc(invDraft.natid!=null?invDraft.natid:(invDraft.customer&&recs[invDraft.customer]?String(recs[invDraft.customer].d.natid||''):''))}" oninput="invDraft.natid=this.value" placeholder="مثلاً ۱۰۱۰۱۲۳۴۵۶۷"></div>
+    <div><label ${lbl}>🤝 معرف <span style="opacity:.7">(کدام مشتری معرفی کرده؟ اختیاری)</span></label><input list="dl_invcust" value="${esc(invDraft.referrer&&recs[invDraft.referrer]?recs[invDraft.referrer].d.title||'':'')}" placeholder="نام مشتری معرفی‌کننده…" onchange="invPickRef(this.value)"></div>
     <div><label ${lbl}>👤 فروشنده / فرد <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('seller',this.value)"><option value="">—</option>${sellers.map(x=>{const u=orguOf(x);return `<option value="${x.id}" ${x.id===invDraft.seller?'selected':''}>${esc(x.d.title)}${u?' · '+esc(u):''}</option>`;}).join('')}</select>
       ${invDraft.seller&&recs[invDraft.seller]?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">واحد/تیم فرد: ${esc(orguOf(recs[invDraft.seller])||'—')}</div>`:''}</div>
     <div><label ${lbl}>🧩 واحد / تیم <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('orgu',this.value)"><option value="">— (خودکار از فرد)</option>${byE('orgunit').map(u=>`<option value="${u.id}" ${u.id===invDraft.orgu?'selected':''}>${esc(unitPath(u.id))}</option>`).join('')}</select></div>
@@ -11765,7 +11784,7 @@ function smHeaders(biz){
   const out=[];
   byE('invoice').forEach(v=>{if(v.d.kind==='پیش‌فاکتور'||v.d.status==='باطل')return;if(biz&&!relIds(v,'biz').includes(biz))return;
     const c=invCalc(v);let qty=0,cogs=0;invLinesOf(v.id).forEach(l=>{qty+=(+l.d.qty||0);cogs+=(+l.d.qty||0)*smUnitCost(relIds(l,'product')[0]);});
-    out.push({d:ds(v.d.date)||'',amt:c.base,sub:c.sub,tot:c.total,qty,profit:c.base-cogs,disc:c.disc,due:c.due,cust:relIds(v,'customer')[0]||'',seller:relIds(v,'seller')[0]||'',chan:relIds(v,'gateway')[0]||'',id:v.id,e:'invoice'});});
+    out.push({d:ds(v.d.date)||'',amt:c.base,sub:c.sub,tot:c.total,qty,profit:c.base-cogs,disc:c.disc,due:c.due,cust:relIds(v,'customer')[0]||'',ref:relIds(v,'referrer')[0]||'',seller:relIds(v,'seller')[0]||'',chan:relIds(v,'gateway')[0]||'',id:v.id,e:'invoice'});});
   byE('sale').forEach(x=>{if(x.d._inv)return;if(biz&&!relIds(x,'biz').includes(biz))return;
     const amt=saleAmt(x),qty=+x.d.qty||0,cogs=qty*smUnitCost(relIds(x,'product')[0]);
     out.push({d:ds(x.d.date)||'',amt,sub:amt,tot:amt,qty,profit:amt-cogs,disc:0,due:(x.d.kind==='اعتباری'&&!x.d.settled)?amt:0,cust:relIds(x,'customer')[0]||'',seller:relIds(x,'seller')[0]||'',chan:relIds(x,'channel')[0]||'',id:x.id,e:'sale'});});
@@ -11918,6 +11937,7 @@ function smdashHTML(){
   ${view.smMore?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:6px">
     ${kcard('units','📦 کالای فروخته‌شده',units.toLocaleString('fa-IR'),false,grBadge(gr(units,punits)))}
     ${kcard('cust','👥 مشتریان خریدار',custSet.size.toLocaleString('fa-IR'),false,'در این دوره')}
+    ${kcard('ref','🤝 فروش با معرف',(()=>{const g={};let a2=0;cur.forEach(x=>{if(x.ref){g[x.ref]=1;a2+=x.amt;}});const n2=Object.keys(g).length;return n2?money(a2):'—';})(),false,(()=>{const g={};cur.forEach(x=>{if(x.ref)g[x.ref]=1;});const n2=Object.keys(g).length;return n2?n2.toLocaleString('fa-IR')+' معرف در این دوره':'معرفی ثبت نشده';})())}
     ${kcard('disc','💸 تخفیف اعطایی',money(disc),false,net+disc>0?(disc/(net+disc)*100).toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪ فروش':'')}
     ${tPct!=null?card('🎯 تحقق تارگت',Math.round(tPct).toLocaleString('fa-IR')+'٪',tPct<70,money(tActual)+' از '+money(tAmt)):''}
     ${convRate!=null?card('🔄 نرخ تبدیل پیش‌فاکتور',Math.round(convRate).toLocaleString('fa-IR')+'٪',convRate<40,profWin.length.toLocaleString('fa-IR')+' پیش‌فاکتور'):''}
@@ -11981,6 +12001,31 @@ function smdashHTML(){
     h+=`<div class="sec"><h3>🛒 فروش به تفکیک کانال/درگاه</h3><div class="tblwrap"><table><thead><tr><th style="text-align:right">کانال</th><th>فروش</th><th>٪ سهم</th><th>تعداد فاکتور</th></tr></thead><tbody>${arr.map(x=>`<tr><td style="text-align:right">${x.id?smNameOf(x.id):'بدون کانال'}</td><td>${money(x.amt)}</td><td><div style="display:inline-block;height:10px;background:var(--ac);border-radius:3px;width:${Math.round(x.amt/tot*100)}px;min-width:4px;vertical-align:middle;margin-inline-end:5px"></div>${(x.amt/tot*100).toLocaleString('fa-IR',{maximumFractionDigits:1})}٪</td><td>${x.n.toLocaleString('fa-IR')}</td></tr>`).join('')}</tbody></table></div></div>`;}
   else if(K==='cust'){const g=grp(cur,x=>x.cust);let arr=Object.entries(g).map(([id,o])=>({id,...o})).filter(x=>x.id);if(q)arr=arr.filter(x=>smNameOf(x.id).toLowerCase().includes(q));arr.sort((a,b2)=>b2.amt-a.amt);
     h+=tbl('👥 مشتریان این دوره (بیشترین خرید)',arr,[['مشتری',x=>smNameOf(x.id),'text-align:right'],['خرید',x=>`<b>${money(x.amt)}</b>`],['تعداد فاکتور',x=>x.n.toLocaleString('fa-IR')]],true);}
+  else if(K==='ref'){ // 🤝 گزارش معرف‌ها: خرید خودِ معرف + فروش معرفی‌شده در همین دوره
+    const g={};
+    cur.forEach(x=>{if(!x.ref)return;const o=g[x.ref]||(g[x.ref]={refAmt:0,refN:0,ownAmt:0,ownN:0});o.refAmt+=x.amt;o.refN++;});
+    cur.forEach(x=>{if(!x.cust||!g[x.cust])return;const o=g[x.cust];o.ownAmt+=x.amt;o.ownN++;});
+    let arr=Object.entries(g).map(([id,o])=>({id,...o})).sort((a,b2)=>b2.refAmt-a.refAmt);
+    if(q)arr=arr.filter(x=>smNameOf(x.id).toLowerCase().includes(q));
+    const tR=arr.reduce((a,x)=>a+x.refAmt,0),tO=arr.reduce((a,x)=>a+x.ownAmt,0);
+    h+=`<div class="sec"><h3>🤝 گزارش معرف‌ها <span style="font-size:11px;color:var(--tx2);font-weight:400">— در همین دورهٔ انتخابی: هم خرید خودِ معرف، هم فروش مشتریانی که معرفی کرده</span></h3>${arr.length>8?sb:''}
+    ${arr.length?`<div class="comp" style="margin-bottom:8px"><div class="chip">جمع فروش معرفی‌شده: <b style="color:var(--ok)">${money(tR)}</b></div><div class="chip">جمع خرید خودِ معرف‌ها: <b>${money(tO)}</b></div></div>
+    <div class="tblwrap" style="max-height:400px;overflow:auto"><table><thead><tr><th style="text-align:right">معرف (مشتری)</th><th>🛍 خرید خودش در دوره</th><th>تعداد فاکتور خودش</th><th>🤝 فروش معرفی‌شده</th><th>تعداد فاکتور معرفی‌شده</th><th></th></tr></thead><tbody>
+    ${arr.slice(0,200).map(x=>`<tr><td style="text-align:right;cursor:pointer;color:var(--ac)" onclick="go('rec','customer','${x.id}')">${smNameOf(x.id)}</td>
+      <td><b>${money(x.ownAmt)}</b></td><td>${x.ownN.toLocaleString('fa-IR')}</td>
+      <td><b style="color:var(--ok)">${money(x.refAmt)}</b></td><td>${x.refN.toLocaleString('fa-IR')}</td>
+      <td><button class="btn ${view.smRefId===x.id?'':'gh '}sm" onclick="view.smRefId=view.smRefId==='${x.id}'?null:'${x.id}';render()">فاکتورها ${view.smRefId===x.id?'▴':'▾'}</button></td></tr>`).join('')}
+    </tbody></table></div>`:'<div class="empty" style="padding:14px">در این دوره فاکتوری با معرف ثبت نشده — هنگام صدور فاکتور، فیلد «🤝 معرف» را پر کنید</div>'}`;
+    if(view.smRefId&&g[view.smRefId]){
+      const list=cur.filter(x=>x.ref===view.smRefId||x.cust===view.smRefId).sort((a,b2)=>(b2.d||'').localeCompare(a.d||''));
+      h+=`<div style="margin-top:10px"><b style="font-size:12.5px">📋 فاکتورهای مرتبط با «${smNameOf(view.smRefId)}» در این دوره</b>
+      <div class="tblwrap" style="max-height:300px;overflow:auto;margin-top:6px"><table><thead><tr><th style="text-align:right">تاریخ</th><th>مشتری</th><th>نوع</th><th>مبلغ</th><th></th></tr></thead><tbody>
+      ${list.map(x=>`<tr><td style="text-align:right">${x.d?esc(iso2jstr(x.d)):'—'}</td><td>${smNameOf(x.cust)}</td>
+        <td>${x.cust===view.smRefId?'🛍 خرید خودش':'🤝 معرفی‌شده'}</td><td>${money(x.amt)}</td>
+        <td><button class="btn gh sm" onclick="go('rec','${x.e}','${x.id}')">↗</button></td></tr>`).join('')}
+      </tbody></table></div></div>`;
+    }
+    h+=`</div>`;}
   else if(K==='disc'){let arr=cur.filter(x=>x.disc>0).sort((a,b2)=>b2.disc-a.disc);
     h+=tbl('💸 فاکتورهای دارای تخفیف',arr,[['مشتری',x=>smNameOf(x.cust),'text-align:right'],['مبلغ فاکتور',x=>money(x.amt)],['تخفیف',x=>`<b style="color:var(--bad)">${money(x.disc)}</b>`],['تاریخ',x=>x.d?esc(iso2jstr(x.d)):'—']],true);}
   else if(K==='due'){let arr=cur.filter(x=>x.due>0).sort((a,b2)=>b2.due-a.due);
