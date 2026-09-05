@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.92</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.93</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.92</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.93</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -3879,6 +3879,20 @@ function wfMine(){
   return act.filter(v=>[WF_ST.FIX,WF_ST.SELL].includes(v.d.wfst)&&mine(v));
 }
 function wfCount(){try{return wfMine().length;}catch(e){return 0;}}
+function wfDelete(id){ // 🗑 حذف کامل سند گردش فروش — فقط ادمین یا مدیر ارشد
+  const r=recs[id];if(!r||r.del)return;
+  if(!(isAdmin()||myWrole()==='مدیر ارشد')){alert('حذف سند گردش فروش فقط توسط ادمین یا مدیر ارشد ممکن است');return;}
+  let c={total:0};try{c=invCalc(r);}catch(e){}
+  if(!confirm('🗑 حذف کامل «'+(r.d.title||'سند')+'» به مبلغ '+money(c.total)+'؟\n\nسند و همهٔ ردیف‌هایش برای همیشه حذف می‌شوند و قابل بازگشت نیست.\n(اگر فقط می‌خواهی از جریان خارج شود، به‌جای حذف از «⛔ ابطال» استفاده کن.)'))return;
+  window._wfActing=1;
+  try{
+    invLinesOf(id).forEach(l=>{l.del=true;l.u=Date.now();put(l);});
+    r.del=true;r.u=Date.now();put(r);
+  }finally{window._wfActing=0;}
+  try{_invLineIdx=null;}catch(e){}
+  setSync('ok','🗑 سند گردش فروش حذف شد');render();
+}
+window.wfDelete=wfDelete;
 function wfCard(v,actions){
   let c={total:0};try{c=invCalc(v);}catch(e){}
   const cu=relIds(v,'customer')[0];const se=relIds(v,'seller')[0];
@@ -3892,6 +3906,7 @@ function wfCard(v,actions){
       <span style="flex:1"></span>
       ${v.d.sepfile?`<button class="btn gh sm" onclick="wfDownload('${v.id}','sepfile')">📎 پیش‌فاکتور سپیدار</button>`:''}
       ${v.d.payfile?`<button class="btn gh sm" onclick="wfDownload('${v.id}','payfile')">📎 اسناد پرداخت</button>`:''}
+      ${(isAdmin()||myWrole()==='مدیر ارشد')?`<button class="btn gh sm" style="color:var(--bad)" title="حذف کامل سند و ردیف‌هایش — فقط ادمین/مدیر ارشد" onclick="wfDelete('${v.id}')">🗑 حذف</button>`:''}
     </div>
     ${(v.d.payterm||v.d.delivterms||v.d.validto)?`<div style="font-size:11px;color:var(--tx2);margin-top:5px">${v.d.payterm?'💳 پرداخت: '+esc(v.d.payterm)+(v.d.payterms?' («'+esc(v.d.payterms)+'»)':''):''}${v.d.delivterms?' │ 🚚 تحویل: '+esc(v.d.delivterms):''}${ds(v.d.validto)?' │ ⏳ اعتبار تا '+iso2jstr(ds(v.d.validto)):''}${relIds(v,'wh')[0]&&recs[relIds(v,'wh')[0]]?' │ 🏬 '+esc(recs[relIds(v,'wh')[0]].d.title):''}</div>`:''}
     ${lg.length?`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">${lg.slice(-4).map(x=>`${esc(x.act)} — ${esc(x.by||'')}${x.note?' («'+esc(x.note)+'»)':''}`).join(' ⟵ ')}</div>`:''}
