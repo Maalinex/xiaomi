@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.01</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.02</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.01</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.02</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1329,7 +1329,6 @@ invoice:{ic:'🧾',n:'فاکتور و پیش‌فاکتور',grp:'فروش',sub:
  {k:'disc',n:'تخفیف کل فاکتور (ریال)',t:NUM},
  {k:'discpct',n:'تخفیف ٪ کل فاکتور',t:NUM},
  {k:'official',n:'نوع فاکتور',t:SEL,o:['غیررسمی','رسمی','آفلاین','آنلاین','همکار']},
- {k:'warranty',n:'🛡 وضعیت گارانتی',t:SEL,o:['با گارانتی','بدون گارانتی','تأیید اصالت کالا']},
  {k:'taxpct',n:'مالیات بر ارزش افزوده ٪',t:NUM},
  {k:'ship',n:'هزینه ارسال/بسته‌بندی (ریال)',t:NUM},
  {k:'paid',n:'مبلغ پرداخت‌شده (ریال)',t:NUM},
@@ -1344,8 +1343,9 @@ invline:{sub:1,ic:'➖',n:'ردیف فاکتور',grp:'فروش',sub:1,f:[
  {k:'product',n:'کالا/خدمت',t:REL,r:'product',s:1},
  {k:'qty',n:'تعداد',t:NUM},
  {k:'price',n:'قیمت واحد (ریال)',t:NUM},
- {k:'ldisc',n:'تخفیف این ردیف (ریال)',t:NUM}],
- cols:['title','invoice','qty','price'],comp:'invLineBrief'},
+ {k:'ldisc',n:'تخفیف این ردیف (ریال)',t:NUM},
+ {k:'warranty',n:'🛡 گارانتی',t:SEL,o:['با گارانتی','بدون گارانتی','تأیید اصالت کالا']}],
+ cols:['title','invoice','qty','price','warranty'],comp:'invLineBrief'},
 saletarget:{ic:'🎯',n:'تارگت فروش',grp:'عملکرد و تارگت',f:[
  {k:'title',n:'عنوان تارگت',t:TXT},
  {k:'scope',n:'سطح تارگت',t:SEL,o:['هلدینگ','شرکت','کسب‌وکار','واحد/تیم','فرد']},
@@ -6809,7 +6809,7 @@ function invPrint(id){
   const seName=sel&&recs[sel]?recs[sel].d.title:'';
   const kind=inv.d.kind||'فاکتور فروش';
   const rowsHTML=invLinesOf(id).map((l,i)=>{const pid=relIds(l,'product')[0];const pn=pid&&recs[pid]?recs[pid].d.title:(l.d.title||'—');
-    return `<tr><td>${(i+1).toLocaleString('fa-IR')}</td><td style="text-align:right">${esc(pn)}</td>
+    return `<tr><td>${(i+1).toLocaleString('fa-IR')}</td><td style="text-align:right">${esc(pn)}${l.d.warranty?`<div style="font-size:10px;color:#555">🛡 ${esc(l.d.warranty)}</div>`:''}</td>
       <td>${(l.d.qty||0).toLocaleString('fa-IR')}</td><td>${fmtN(l.d.price||0)}</td><td>${fmtN(l.d.ldisc||0)}</td>
       <td>${fmtN(invLineAmt(l))}</td></tr>`;}).join('');
   const row=(lbl,val,strong)=>`<tr${strong?' style="font-weight:800;font-size:14px"':''}><td colspan="4"></td><td style="text-align:right;color:#555">${lbl}</td><td>${moneyX(val)}</td></tr>`;
@@ -8904,10 +8904,10 @@ function bizInvCfg(bid){
   const d=(b&&b.d)||{};
   return {metric:!!d.invmetric,disc:d.invdisc||'مبلغی (ریال)',official:!!d.invofficial};
 }
-function invNewDraft(){invDraft={desc:'',biz:gBiz()||'',customer:'',referrer:'',warranty:'',seller:'',orgu:'',kind:'فاکتور فروش',official:'غیررسمی',paymode:'نقدی',paidAmt:'',vdate:today(),due:'',disc:'',discpct:'',taxpct:'',ship:'',note:'',payterm:'نقد',payterms:'',delivterms:'',validto:'',lines:[{product:'',qty:'1',price:'',ldisc:'',mlen:''}]};}
+function invNewDraft(){invDraft={desc:'',biz:gBiz()||'',customer:'',referrer:'',warranty:'',seller:'',orgu:'',kind:'فاکتور فروش',official:'غیررسمی',paymode:'نقدی',paidAmt:'',vdate:today(),due:'',disc:'',discpct:'',taxpct:'',ship:'',note:'',payterm:'نقد',payterms:'',delivterms:'',validto:'',lines:[{product:'',qty:'1',price:'',ldisc:'',mlen:'',warranty:''}]};}
 window.invSetOfficial=function(v){invDraft.official=v;
   if(v==='رسمی')invDraft.taxpct=String(vatPct(invDraft.vdate));else if(invDraft.official!=='رسمی'&&v!=='رسمی'&&invDraft._taxAuto!==false)invDraft.taxpct='';render();};
-function invAddLine(){invDraft.lines.push({product:'',qty:'1',price:'',ldisc:''});render();}
+function invAddLine(){invDraft.lines.push({product:'',qty:'1',price:'',ldisc:'',warranty:''});render();}
 function invDelLine(i){invDraft.lines.splice(i,1);if(!invDraft.lines.length)invAddLine();render();}
 function invLiveTotals(){ // 🔄 به‌روزرسانی سبک جمع‌ها بدون رندر کامل (فوکوس و تایپ نمی‌پرد)
   try{
@@ -8986,12 +8986,12 @@ function invSave(status){
     valid.forEach(l=>{
       if(l._lineId&&recs[l._lineId]&&!recs[l._lineId].del){
         const lr=recs[l._lineId];const p=recs[l.product];
-        lr.d={...lr.d,title:(p&&p.d&&p.d.title)||lr.d.title,product:[l.product],qty:+l.qty||0,price:+l.price||0,ldisc:+l.ldisc||0,mlen:+l.mlen||0};
+        lr.d={...lr.d,title:(p&&p.d&&p.d.title)||lr.d.title,product:[l.product],qty:+l.qty||0,price:+l.price||0,ldisc:+l.ldisc||0,mlen:+l.mlen||0,warranty:l.warranty||undefined};
         lr.u=Date.now();put(lr);keep.add(l._lineId);
       }else{
         const p=recs[l.product];const nid=uid();
         put({id:nid,e:'invline',d:{title:(p&&p.d&&p.d.title)||'',invoice:[r.id],product:[l.product],
-          biz:invDraft.biz?[invDraft.biz]:[],qty:+l.qty||0,price:+l.price||0,ldisc:+l.ldisc||0,mlen:+l.mlen||0},u:Date.now()});keep.add(nid);
+          biz:invDraft.biz?[invDraft.biz]:[],qty:+l.qty||0,price:+l.price||0,ldisc:+l.ldisc||0,mlen:+l.mlen||0,warranty:l.warranty||undefined},u:Date.now()});keep.add(nid);
       }});
     invLinesOf(r.id).forEach(l=>{if(!keep.has(l.id)){l.del=true;l.u=Date.now();put(l);}});
     if(typeof _invLineIdx!=='undefined')_invLineIdx=null;
@@ -9046,7 +9046,7 @@ function invSave(status){
     _blc:_blcFlag||undefined,blcap:_blcAp},u:Date.now()});
   valid.forEach(l=>{const p=recs[l.product];
     put({id:uid(),e:'invline',d:{title:(p&&p.d&&p.d.title)||'',invoice:[iid],product:[l.product],
-      biz:invDraft.biz?[invDraft.biz]:[],qty:+l.qty||0,price:+l.price||0,ldisc:+l.ldisc||0,mlen:+l.mlen||0},u:Date.now()});});
+      biz:invDraft.biz?[invDraft.biz]:[],qty:+l.qty||0,price:+l.price||0,ldisc:+l.ldisc||0,mlen:+l.mlen||0,warranty:l.warranty||undefined},u:Date.now()});});
   if(_wf){
     const nr=recs[iid];
     const me=_meHr();
@@ -9068,7 +9068,7 @@ function invSave(status){
 /* ✏️ ویرایش فاکتور موجود — همان فرم صدور با ردیف‌ها و مبالغ */
 window.invEdit=function(id){
   const r=recs[id];if(!r||r.del)return;
-  const lines=invLinesOf(id).map(l=>({_lineId:l.id,product:relIds(l,'product')[0]||'',qty:String(l.d.qty||''),price:String(l.d.price||''),ldisc:String(l.d.ldisc||''),mlen:String(l.d.mlen||'')}));
+  const lines=invLinesOf(id).map(l=>({_lineId:l.id,product:relIds(l,'product')[0]||'',qty:String(l.d.qty||''),price:String(l.d.price||''),ldisc:String(l.d.ldisc||''),mlen:String(l.d.mlen||''),warranty:l.d.warranty||''}));
   invDraft={_editId:id,desc:r.d.title||'',biz:relIds(r,'biz')[0]||'',customer:relIds(r,'customer')[0]||'',referrer:relIds(r,'referrer')[0]||'',
     seller:relIds(r,'seller')[0]||'',orgu:relIds(r,'orgu')[0]||'',kind:r.d.kind||'فاکتور فروش',
     official:r.d.official||'غیررسمی',warranty:r.d.warranty||'',paymode:'',paidAmt:'',
@@ -9215,7 +9215,6 @@ function invnewHTML(){
     <div><label ${lbl}>🏛 نوع فاکتور</label><select onchange="invSetOfficial(this.value)">
       ${['غیررسمی','رسمی','آفلاین','آنلاین','همکار'].map(o2=>`<option ${(invDraft.official||'غیررسمی')===o2?'selected':''}>${o2}</option>`).join('')}</select>
       ${invDraft.official==='رسمی'?`<div style="font-size:10px;color:var(--ac);margin-top:2px">ارزش افزوده ${fmtN(+invDraft.taxpct||0)}٪ خودکار اعمال شد</div>`:''}</div>
-    <div><label ${lbl}>🛡 وضعیت گارانتی</label><select onchange="invDraft.warranty=this.value"><option value="">—</option>${['با گارانتی','بدون گارانتی','تأیید اصالت کالا'].map(o2=>`<option ${invDraft.warranty===o2?'selected':''}>${o2}</option>`).join('')}</select></div>
     <div><label ${lbl}>کسب‌وکار <span style="opacity:.7">(از باکس بالای منو)</span></label>
       ${gBiz()&&recs[gBiz()]?`<div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">🧢 ${esc(recs[gBiz()].d.title)}</div>`
         :`<select onchange="setGBiz(this.value)"><option value="">— اول کسب‌وکار فعال را انتخاب کنید —</option>${byE('business').map(x=>`<option value="${x.id}">${esc(x.d.title)}</option>`).join('')}</select>`}</div>
@@ -9247,7 +9246,7 @@ function invnewHTML(){
 `;
   const _bcfg=bizInvCfg(invDraft.biz);
   const _metric=_bcfg.metric&&invDraft.lines.some(l=>+l.mlen>0);
-  h+=`<div class="tblwrap"><table><thead><tr><th>#</th><th>کالا/خدمت</th><th>${_bcfg.metric?'تعداد (شاخه/بسته)':'تعداد'}</th>${_metric?'<th>متر هر واحد</th><th>کل متراژ</th>':''}<th>قیمت واحد${invDraft.kind==='پیش‌فاکتور'?' <span style="font-weight:400;font-size:10px;color:var(--tx2)">(اختیاری)</span>':''}</th><th>تخفیف ردیف</th><th>مبلغ</th><th></th></tr></thead><tbody>`;
+  h+=`<div class="tblwrap"><table><thead><tr><th>#</th><th>کالا/خدمت</th><th>${_bcfg.metric?'تعداد (شاخه/بسته)':'تعداد'}</th>${_metric?'<th>متر هر واحد</th><th>کل متراژ</th>':''}<th>قیمت واحد${invDraft.kind==='پیش‌فاکتور'?' <span style="font-weight:400;font-size:10px;color:var(--tx2)">(اختیاری)</span>':''}</th><th>تخفیف ردیف</th><th>🛡 گارانتی</th><th>مبلغ</th><th></th></tr></thead><tbody>`;
   invDraft.lines.forEach((l,i)=>{const amt=Math.max(0,(+l.qty||0)*(+l.price||0)-(+l.ldisc||0));
     const mtot=(+l.qty||0)*(+l.mlen||0);
     h+=`<tr>
@@ -9258,6 +9257,7 @@ function invnewHTML(){
       <td id="ln_mt_${i}" style="white-space:nowrap;font-weight:700;color:var(--ac)">${mtot?mtot.toLocaleString('fa-IR',{maximumFractionDigits:1})+' م':'—'}</td>`:''}
       <td><input inputmode="numeric" dir="ltr" value="${l.price||''}" oninput="invSetLineLite(${i},'price',this.value)" onchange="render()" style="max-width:120px;text-align:left" placeholder="۰"></td>
       <td><input inputmode="numeric" dir="ltr" value="${l.ldisc||''}" oninput="invSetLineLite(${i},'ldisc',this.value)" onchange="render()" style="max-width:100px;text-align:left" placeholder="۰"></td>
+      <td><select onchange="invDraft.lines[${i}].warranty=this.value" style="font-size:11.5px;max-width:130px"><option value="">—</option>${['با گارانتی','بدون گارانتی','تأیید اصالت کالا'].map(o2=>`<option ${l.warranty===o2?'selected':''}>${o2}</option>`).join('')}</select></td>
       <td id="ln_amt_${i}" style="white-space:nowrap;color:var(--ok)">${fmtN(amt)}</td>
       <td><button class="btn bad sm" onclick="invDelLine(${i})">✕</button></td></tr>`;});
   h+=`</tbody></table></div>
