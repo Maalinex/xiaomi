@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.99</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.00</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 2.99</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.00</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -3074,8 +3074,6 @@ function can(a,e,rec){ // a: 'c' ایجاد | 'e' ویرایش | 'd' حذف
   if((a==='e'||a==='d')&&rec&&(e==='invoice')&&rec.d&&rec.d.wfst&&!['—','فاکتور صادر شد','باطل/بایگانی'].includes(rec.d.wfst)){
     if(!window._wfActing)return false;
   }
-  // 🔒 فاکتور نهایی‌شده (تسویه/باطل) دیگر ویرایش نمی‌شود — پیش از آن ویرایش آزاد و لاگ‌دار است
-  if(a==='e'&&rec&&e==='invoice'&&['تسویه شده','باطل'].includes(rec.d&&rec.d.status||''))return false;
   // 🔒 سند تاییدشده نهایی قفل است — اصلاح فقط با سند اصلاحی (ادمین در شاخه بالاتر مجاز است و لاگ می‌شود)
   if((a==='e'||a==='d')&&rec&&(e==='voucher'||e==='vline')){
     const v=e==='voucher'?rec:recs[relIds(rec,'voucher')[0]];
@@ -5761,10 +5759,9 @@ window.invPayAdd=function(id,inputId){
 function invTotalsPanel(r){
   const c=invCalc(r);
   const lines=invLinesOf(r.id);
-  if(!lines.length&&!c.total)return '';
   return `<div class="sec" style="padding:12px 16px;border-inline-start:3px solid var(--ac)">
     <h3 style="font-size:13px">🧮 ردیف‌ها و جمع این فاکتور <span style="flex:1"></span>
-    ${can('e','invoice',r)?`<button class="btn sm" onclick="invEdit('${r.id}')">✏️ ویرایش فاکتور</button>`:''}</h3>
+    <button class="btn sm" onclick="invEdit('${r.id}')">✏️ ویرایش فاکتور</button></h3>
     ${lines.length?`<div class="tblwrap" style="margin-top:8px"><table><thead><tr><th>کالا</th><th>تعداد</th><th>قیمت واحد</th><th>مبلغ ردیف</th></tr></thead><tbody>
       ${lines.map(l=>{const pid=relIds(l,'product')[0];return `<tr onclick="go('rec','invline','${l.id}')" style="cursor:pointer">
         <td style="text-align:right">${esc((pid&&recs[pid]&&recs[pid].d.title)||l.d.title||'—')}</td>
@@ -9069,7 +9066,6 @@ function invSave(status){
 /* ✏️ ویرایش فاکتور موجود — همان فرم صدور با ردیف‌ها و مبالغ */
 window.invEdit=function(id){
   const r=recs[id];if(!r||r.del)return;
-  if(!can('e','invoice',r)){alert('سطح دسترسی شما اجازه ویرایش این فاکتور را نمی‌دهد');return;}
   const lines=invLinesOf(id).map(l=>({_lineId:l.id,product:relIds(l,'product')[0]||'',qty:String(l.d.qty||''),price:String(l.d.price||''),ldisc:String(l.d.ldisc||''),mlen:String(l.d.mlen||'')}));
   invDraft={_editId:id,desc:r.d.title||'',biz:relIds(r,'biz')[0]||'',customer:relIds(r,'customer')[0]||'',referrer:relIds(r,'referrer')[0]||'',
     seller:relIds(r,'seller')[0]||'',orgu:relIds(r,'orgu')[0]||'',kind:r.d.kind||'فاکتور فروش',
@@ -9139,6 +9135,32 @@ function prodMergeDupes(){ // 🧹 ادغام کالاهای تکراری: نگ�
   alert('✔ '+removed.toLocaleString('fa-IR')+' کالای تکراری حذف و '+relinked.toLocaleString('fa-IR')+' سند به کالای اصلی وصل شد.');
 }
 window.prodMergeDupes=prodMergeDupes;
+
+/* 🔽 پیشنهادگر کالا در فاکتور — راست‌چین، جستجو با نام یا کد (بدون نمایش کد) */
+function prodSugHide(){const d=document.getElementById('prodsug');if(d)d.remove();}
+window.prodSugHide=prodSugHide;
+function prodSugShow(el,i){
+  const q=_pnorm(el.value);
+  const bz=(invDraft&&invDraft.biz)||'';
+  let prods=byE('product').filter(p=>{const b=relIds(p,'biz');return !bz||!b.length||b.includes(bz);});
+  const hits=prods.filter(p=>{if(!q)return true;return _pnorm(p.d.title).includes(q)||_pnorm(p.d.sku).includes(q)||Object.keys(p.d).some(k=>k!=='sku'&&/^x|code|ccode/.test(k)&&_pnorm(p.d[k]).includes(q));}).slice(0,14);
+  prodSugHide();
+  if(!hits.length)return;
+  const r=el.getBoundingClientRect();
+  const d=document.createElement('div');d.id='prodsug';
+  d.style.cssText='position:fixed;z-index:9999;right:'+(window.innerWidth-r.right)+'px;top:'+(r.bottom+2)+'px;min-width:'+Math.max(220,r.width)+'px;max-width:340px;max-height:280px;overflow:auto;background:var(--bg2,#fff);border:1px solid var(--line,#ccc);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);direction:rtl;text-align:right;font-size:12.5px';
+  hits.forEach(p=>{
+    const it=document.createElement('div');
+    it.style.cssText='padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--line,#eee)';
+    it.textContent=p.d.title||'—';
+    it.onmousedown=ev=>{ev.preventDefault();invSetLine(i,'product',p.id);prodSugHide();};
+    it.onmouseenter=()=>it.style.background='var(--bg3,rgba(0,0,0,.05))';
+    it.onmouseleave=()=>it.style.background='';
+    d.appendChild(it);
+  });
+  document.body.appendChild(d);
+}
+window.prodSugShow=prodSugShow;
 function prodDlOpts(prods){ // گزینه‌های جستجو: فقط نام کالا، راست‌چین و بدون نمایش کد (تایپ کد همچنان پیدا می‌کند)
   const seen=new Set(),out=[];
   prods.forEach(x=>{
@@ -9217,7 +9239,7 @@ function invnewHTML(){
     const mtot=(+l.qty||0)*(+l.mlen||0);
     h+=`<tr>
       <td>${(i+1).toLocaleString('fa-IR')}</td>
-      <td><input list="dl_invprod" dir="rtl" value="${esc(prodName(l.product))}" placeholder="🔍 کالا/خدمت…" onchange="invPickProd(${i},this.value)" style="min-width:170px;text-align:right;direction:rtl"></td>
+      <td style="position:relative"><input dir="rtl" autocomplete="off" value="${esc(prodName(l.product))}" placeholder="🔍 کالا/خدمت…" oninput="prodSugShow(this,${i})" onfocus="prodSugShow(this,${i})" onblur="setTimeout(prodSugHide,250)" onchange="invPickProd(${i},this.value)" style="min-width:170px;text-align:right;direction:rtl"></td>
       <td><input inputmode="numeric" dir="ltr" value="${l.qty||''}" oninput="invSetLineLite(${i},'qty',this.value)" onchange="render()" style="max-width:70px;text-align:center" placeholder="۱"></td>
       ${_metric?`<td><input inputmode="decimal" dir="ltr" value="${l.mlen||''}" oninput="invSetLineLite(${i},'mlen',this.value)" onchange="render()" style="max-width:70px;text-align:center" placeholder="۵.۸"></td>
       <td id="ln_mt_${i}" style="white-space:nowrap;font-weight:700;color:var(--ac)">${mtot?mtot.toLocaleString('fa-IR',{maximumFractionDigits:1})+' م':'—'}</td>`:''}
