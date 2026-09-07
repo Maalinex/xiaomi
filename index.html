@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.02</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.03</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.02</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.03</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -639,6 +639,7 @@ business:{ic:'🧢',n:'کسب‌وکارها',grp:'پرسنل و سازمان',f
  {k:'invmetric',n:'🧾 قالب فاکتور: فروش متری (ستون متراژ و جمع متراژ)',t:CHK},
  {k:'invdisc',n:'🧾 قالب فاکتور: نوع تخفیف',t:SEL,o:['مبلغی (ریال)','درصدی','هر دو']},
  {k:'invofficial',n:'🧾 قالب فاکتور: انتخاب رسمی/غیررسمی (ارزش افزوده خودکار)',t:CHK},
+ {k:'invnovat',n:'🧾 فاکتور رسمی بدون ارزش افزوده (مالیات خودکار اضافه نشود)',t:CHK},
  {k:'model',n:'مدل درآمدی',t:SEL,o:['کارمزدی','فروش','اشتراک','پروژه‌ای']},
  {k:'stage',n:'مرحله',t:SEL,o:['ایده','راه اندازی','رشد','بلوغ','افول']},
  {k:'company',n:'⬆ شرکت مادر (این کسب‌وکار ذیل آن است)',t:REL,r:'company',s:1},
@@ -8148,7 +8149,7 @@ function acctxTemplate(){loadXLSX().then(()=>{const rows=[['شرح','حساب','
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'تراکنش‌ها');XLSX.writeFile(wb,'قالب-تراکنش-صندوق.xlsx');});}
 window.acctxTemplate=acctxTemplate;
 function bankdashHTML(){
-  const b=gBiz();const bizzes=byE('business');
+  const b=gBiz();const bizzes=bizAll();
   const accs=byE('account').filter(a=>!b||relIds(a,'biz').includes(b)||!relIds(a,'biz').length);
   const totToman=accs.reduce((s,a)=>s+acctToman(a.id),0);
   const fxAccts=accs.filter(a=>['دلار','یورو','درهم'].includes(a.d.cur));
@@ -8198,7 +8199,7 @@ function bankdashHTML(){
   return h;
 }
 function cashdashHTML(){
-  const bizzes=byE('business');
+  const bizzes=bizAll();
   if(!view.cfCh)view.cfCh='all';
   const flows=cashFlows(gBiz(),view.cfCh);
   const totIn=flows.reduce((a,f)=>a+f.in,0),totOut=flows.reduce((a,f)=>a+f.out,0);
@@ -8240,7 +8241,7 @@ function cashdashHTML(){
 /* گزارش مانده طلب و بدهی */
 /* 💰 مرکز یکپارچهٔ طلب/بدهی و دریافت/پرداخت — آبشاری */
 function arapdashHTML(){
-  const bizzes=byE('business');const b=gBiz();
+  const bizzes=bizAll();const b=gBiz();
   const arRows=arGroups(b).map(g=>({id:g.id,n:g.name,bal:g.bal}));
   const apRows=apGroups(b).map(g=>({id:g.id,n:g.name,bal:g.bal}));
   const apS=apBuckets(b);
@@ -8356,7 +8357,7 @@ function pinvnewHTML(){
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px">
     <div><label ${lbl}>کسب‌وکار <span style="opacity:.7">(از باکس بالای منو)</span></label>
       ${gBiz()&&recs[gBiz()]?`<div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">🧢 ${esc(recs[gBiz()].d.title)}</div>`
-        :`<select onchange="setGBiz(this.value)"><option value="">— اول کسب‌وکار فعال را انتخاب کنید —</option>${byE('business').map(x=>`<option value="${x.id}">${esc(x.d.title)}</option>`).join('')}</select>`}</div>
+        :`<select onchange="setGBiz(this.value)"><option value="">— اول کسب‌وکار فعال را انتخاب کنید —</option>${bizAll().map(x=>`<option value="${x.id}">${esc(x.d.title)}</option>`).join('')}</select>`}</div>
     <div><label ${lbl}>تامین‌کننده 🔍</label><input list="dl_pinvsupp" value="${esc(suppName)}" placeholder="بنویس تا جستجو شود…" onchange="pinvPickSupp(this.value)">
       <datalist id="dl_pinvsupp">${supp.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>
       <datalist id="dl_pinvprod">${prodDlOpts(prods)}</datalist></div>
@@ -8739,7 +8740,7 @@ function tgPeriodMatch(t,per){return !per||per==='همه'||t.d.ptype===per;}
 function tgBizOk(t){const b=gBiz();if(!b)return true;return relIds(t,'biz').includes(b)||relIds(t,'biz').length===0||targetChildren(t).some(k=>relIds(k,'biz').includes(b));}
 function targetdashHTML(){
   const ts=byE('saletarget');
-  const bizzes=byE('business');
+  const bizzes=bizAll();
   const metric=view.tgMetric||'combined'; // amount | qty | combined
   const per=view.tgPer||'همه';
   const lvl=view.tgLevel||'';
@@ -8902,11 +8903,15 @@ let invDraft=null;
 function bizInvCfg(bid){
   const b=bid&&recs[bid]&&!recs[bid].del?recs[bid]:null;
   const d=(b&&b.d)||{};
-  return {metric:!!d.invmetric,disc:d.invdisc||'مبلغی (ریال)',official:!!d.invofficial};
+  return {metric:!!d.invmetric,disc:d.invdisc||'مبلغی (ریال)',official:!!d.invofficial,novat:!!d.invnovat};
 }
 function invNewDraft(){invDraft={desc:'',biz:gBiz()||'',customer:'',referrer:'',warranty:'',seller:'',orgu:'',kind:'فاکتور فروش',official:'غیررسمی',paymode:'نقدی',paidAmt:'',vdate:today(),due:'',disc:'',discpct:'',taxpct:'',ship:'',note:'',payterm:'نقد',payterms:'',delivterms:'',validto:'',lines:[{product:'',qty:'1',price:'',ldisc:'',mlen:'',warranty:''}]};}
 window.invSetOfficial=function(v){invDraft.official=v;
-  if(v==='رسمی')invDraft.taxpct=String(vatPct(invDraft.vdate));else if(invDraft.official!=='رسمی'&&v!=='رسمی'&&invDraft._taxAuto!==false)invDraft.taxpct='';render();};
+  const _nv=bizInvCfg(invDraft.biz).novat;
+  if(v==='رسمی'&&!_nv)invDraft.taxpct=String(vatPct(invDraft.vdate));
+  else if(v!=='رسمی'&&invDraft._taxAuto!==false)invDraft.taxpct='';
+  else if(_nv)invDraft.taxpct='';
+  render();};
 function invAddLine(){invDraft.lines.push({product:'',qty:'1',price:'',ldisc:'',warranty:''});render();}
 function invDelLine(i){invDraft.lines.splice(i,1);if(!invDraft.lines.length)invAddLine();render();}
 function invLiveTotals(){ // 🔄 به‌روزرسانی سبک جمع‌ها بدون رندر کامل (فوکوس و تایپ نمی‌پرد)
@@ -9214,10 +9219,10 @@ function invnewHTML(){
     <div><label ${lbl}>نوع سند</label><div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">${invDraft.kind==='پیش‌فاکتور'?'📝 پیش‌فاکتور':'🧾 فاکتور فروش'}</div></div>
     <div><label ${lbl}>🏛 نوع فاکتور</label><select onchange="invSetOfficial(this.value)">
       ${['غیررسمی','رسمی','آفلاین','آنلاین','همکار'].map(o2=>`<option ${(invDraft.official||'غیررسمی')===o2?'selected':''}>${o2}</option>`).join('')}</select>
-      ${invDraft.official==='رسمی'?`<div style="font-size:10px;color:var(--ac);margin-top:2px">ارزش افزوده ${fmtN(+invDraft.taxpct||0)}٪ خودکار اعمال شد</div>`:''}</div>
+      ${invDraft.official==='رسمی'?(bizInvCfg(invDraft.biz).novat?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">این کسب‌وکار: رسمی بدون ارزش افزودهٔ خودکار</div>`:`<div style="font-size:10px;color:var(--ac);margin-top:2px">ارزش افزوده ${fmtN(+invDraft.taxpct||0)}٪ خودکار اعمال شد</div>`):''}</div>
     <div><label ${lbl}>کسب‌وکار <span style="opacity:.7">(از باکس بالای منو)</span></label>
       ${gBiz()&&recs[gBiz()]?`<div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">🧢 ${esc(recs[gBiz()].d.title)}</div>`
-        :`<select onchange="setGBiz(this.value)"><option value="">— اول کسب‌وکار فعال را انتخاب کنید —</option>${byE('business').map(x=>`<option value="${x.id}">${esc(x.d.title)}</option>`).join('')}</select>`}</div>
+        :`<select onchange="setGBiz(this.value)"><option value="">— اول کسب‌وکار فعال را انتخاب کنید —</option>${bizAll().map(x=>`<option value="${x.id}">${esc(x.d.title)}</option>`).join('')}</select>`}</div>
     <div><label ${lbl}>مشتری 🔍 <a href="#" style="font-size:10.5px;color:var(--ac);text-decoration:none" onclick="view.qc=!view.qc;render();return false">＋ مشتری جدید</a></label><input list="dl_invcust" value="${esc(custName)}" placeholder="بنویس تا جستجو شود…" onchange="invPickCust(this.value)">
       <datalist id="dl_invcust">${custs.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>
       <datalist id="dl_invprod">${prodDlOpts(prods)}</datalist>
@@ -9297,7 +9302,7 @@ function invnewHTML(){
 }
 function salesdashHTML(){
   const invs=byE('invoice');
-  const bizzes=byE('business');
+  const bizzes=bizAll();
   
   const inScope=invs.filter(v=>!gBiz()||relIds(v,'biz').includes(gBiz()));
   const real=inScope.filter(v=>v.d.kind!=='پیش‌فاکتور'&&v.d.status!=='باطل');
@@ -9701,7 +9706,7 @@ function chqBoardBanner(){
     <button class="btn sm" onclick="go('chqdash')">تابلوی چک‌ها</button></div>`;
 }
 function chqdashHTML(){
-  const bizzes=byE('business');
+  const bizzes=bizAll();
   
   const all=byE('cheque').filter(c=>!gBiz()||relIds(c,'biz').includes(gBiz()));
   const recvOpen=all.filter(c=>c.d.kind==='دریافتنی'&&chqOpen(c)).sort((a,b)=>(dnorm(a.d.due)||'').localeCompare(dnorm(b.d.due)||''));
@@ -10378,7 +10383,7 @@ function plCalc(biz,from,to){
   return {count:invs.length+legacy.length,rev,cogs,gp,margin:rev>0?gp/rev*100:0,disc,tax,ship,byProd};
 }
 function plreportHTML(){
-  const bizzes=byE('business');
+  const bizzes=bizAll();
   
   const r=plCalc(gBiz(),view.plFrom,view.plTo);
   const card=(t,v,bad)=>`<div class="sec" style="text-align:center"><div style="font-size:11px;color:var(--tx2)">${t}</div><div style="font-size:18px;font-weight:800;margin-top:4px;color:${bad?'var(--bad)':'var(--tx)'}">${v}</div></div>`;
@@ -10905,6 +10910,11 @@ function drawArrange(){
 }
 window.openArrange=openArrange;window.moveGroup=moveGroup;window.moveTop=moveTop;window.resetMenus=resetMenus;window.closeArrange=closeArrange;
 /* 🏢 کسب‌وکار فعالِ سراسری — یک‌بار انتخاب، همه‌ی داشبوردها/گزارش‌ها/لیست‌ها روی همون فیلتر */
+function bizAll(){ // 🧢 فهرست کسب‌وکارها برای «انتخاب زمینه» — مستقل از سطوح دسترسی، تا هیچ کاربری پشت در نماند
+  if(typeof isPending==='function'&&isPending())return [];
+  try{return Object.values(recs).filter(r=>r&&r.e==='business'&&!r.del).sort((a,b)=>String(a.d.title||'').localeCompare(String(b.d.title||''),'fa'));}catch(e){return byE('business');}
+}
+window.bizAll=bizAll;
 function gBiz(){try{return localStorage.getItem('xr_bizsel')||'';}catch(e){return '';}}
 /* 🏗️ پروژه فعال EPCF — مثل کسب‌وکار فعال؛ لیست‌ها، فرم‌ها، ایمپورت و داشبورد EPCF روی آن فیلتر می‌شوند */
 function gPrj(){try{const id=localStorage.getItem('xr_prjsel')||'';return (id&&recs[id]&&!recs[id].del)?id:'';}catch(e){return '';}}
@@ -10919,7 +10929,7 @@ window.setGCo=setGCo;
 function bizSelPos(){try{return localStorage.getItem('xr_bizselpos')||'top';}catch(e){return 'top';}}
 function setBizSelPos(v){try{localStorage.setItem('xr_bizselpos',v);}catch(e){}nav();try{drawArrange();}catch(e){}}
 function bizSelectorHTML(){
-  const bl=byE('business');
+  const bl=bizAll();
   if(!bl.length||!(canSee('invoice')||canSee('product')||canSee('customer')||canSee('purchinv')||canSee('sale')))return '';
   const cl=byE('company');
   return `<div style="margin:9px 4px 6px;padding:7px 9px;background:var(--bg3);border:1px solid var(--ac);border-radius:10px">
@@ -11000,7 +11010,7 @@ function qkSave(){
 }
 function quickaddHTML(){
   if(!qd)qkReset('sale');
-  const bl=byE('business'),cl=byE('company');
+  const bl=bizAll(),cl=byE('company');
   const bar=`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px">${QOPS.map(o=>
     `<button class="btn ${o.k===qd.op?'':'gh'}" onclick="qkSetOp('${o.k}')" style="font-size:14px;padding:9px 16px">${o.ic} ${o.n}</button>`).join('')}</div>`;
   const dom=`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;font-size:11px;color:var(--tx2)">
@@ -12144,7 +12154,7 @@ window.smJumpM=function(jy,jm){const f=_jgIso(jy,jm,1);const nx=jm===12?_jgIso(j
   view.smPer='c';view.smYear=null;view.smFrom=f;view.smTo=t;view.smFromJ=iso2jstr(f);view.smToJ=iso2jstr(t);render();};
 function smNameOf(id){return id&&recs[id]?esc(recs[id].d.title||'—'):'—';}
 function smdashHTML(){
-  const bizzes=byE('business');const b=gBiz();
+  const bizzes=bizAll();const b=gBiz();
   view.smPer=view.smPer||'m';view.smMode=view.smMode||'m';view.smMetric=view.smMetric||'amount';
   const W=smWin(b,view.smPer);
   const H=smHeaders(b), L=smLines(b);
@@ -12440,7 +12450,7 @@ function custActiveSeries(biz,mode,metric){ // metric: 'cust'|'qty'|'amount'
     return {l:lab,v:metric==='qty'?qty:metric==='amount'?amt:set.size};});
 }
 function custdashHTML(){
-  const bizzes=byE('business');const b=gBiz();
+  const bizzes=bizAll();const b=gBiz();
   const st=custStats(b);
   const ref=custRefDate(b);
   const N=st.length;
@@ -12570,7 +12580,7 @@ function migrateWh(){
   _whMigDone=true;
   if(typeof isPending==='function'&&isPending())return 0;
   if(!can('c','whouse'))return 0;
-  const bizzes=byE('business');
+  const bizzes=bizAll();
   if(!bizzes.length)return 0;
   const active=new Set();
   byE('product').forEach(p=>relIds(p,'biz').forEach(b=>active.add(b)));
@@ -13021,7 +13031,7 @@ function puSupScore(b){
 }
 /* ===== 🏭 صفحهٔ اختصاصی تأمین‌کنندگان (ورود دستی + اکسل + امتیازدهی) ===== */
 function supdashHTML(){
-  const b=gBiz();const bizzes=byE('business');
+  const b=gBiz();const bizzes=bizAll();
   const list=puSupScore(b);
   const scored=list.filter(s=>s.n>0);
   const avg=scored.length?Math.round(scored.reduce((a,s)=>a+s.score,0)/scored.length):null;
@@ -13061,7 +13071,7 @@ function supdashHTML(){
   return h;
 }
 function pudashHTML(){
-  const bizzes=byE('business');
+  const bizzes=bizAll();
   const b=gBiz();
   const ref=whRefDate(b);
   const rows=whRows(b).map(r=>puRow(r,ref));
@@ -13199,7 +13209,7 @@ function pudashHTML(){
   return h;
 }
 function whdashHTML(){
-  const bizzes=byE('business');
+  const bizzes=bizAll();
   let _whTree='';try{_whTree=whTreeHTML();}catch(e){}
   const b=gBiz();
   view.whMode=view.whMode||'m';
@@ -14242,7 +14252,7 @@ function perfRelColor(v){return v==null?'var(--tx2)':v>=75?'#16c784':v>=50?'#9ac
 window.setPerfRelW=setPerfRelW;window.perfRankAll=perfRankAll;window.perfBlend=perfBlend;window.perfEntAchByKpi=perfEntAchByKpi;
 
 function perfdashHTML(){
-  const b=gBiz();const bizzes=byE('business');
+  const b=gBiz();const bizzes=bizAll();
   const kind=view.pfKind||'ppl';
   const per=view.pfPer||'همه';
   const LV=[['ppl','👤 فرد'],['unit','🧩 واحد/تیم'],['biz','🧢 کسب‌وکار'],['company','🏢 شرکت'],['hold','🏦 هلدینگ']];
@@ -18061,7 +18071,7 @@ function finTemplate(){loadXLSX().then(()=>{const rows=[['عنوان',...FMON,'�
 window.finTemplate=finTemplate;
 /* ===== داشبورد مالی ===== */
 function pldashHTML(){
-  const b=gBiz();const bizzes=byE('business');const years=plYears(b);
+  const b=gBiz();const bizzes=bizAll();const years=plYears(b);
   const yr=view.plYr&&years.includes(view.plYr)?view.plYr:(years[years.length-1]||null);
   const mode=view.plMode||'year'; // year | month | compare
   const mon=view.plMon||'کل سال';
