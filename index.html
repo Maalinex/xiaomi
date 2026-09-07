@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.03</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.04</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.03</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.04</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -5757,12 +5757,37 @@ window.invPayAdd=function(id,inputId){
   r.u=Date.now();put(r);
   setSync('ok','💵 '+moneyX(pay)+' وصول شد — مانده: '+moneyX(invCalc(r).due));render();
 };
+/* 🔁 تبدیل پیش‌فاکتور به فاکتور فروش — پس از اطمینان از واریز مشتری */
+window.invConvert=function(id){
+  const r=recs[id];if(!r||r.del)return;
+  if(r.d.kind!=='پیش‌فاکتور'){alert('این سند پیش‌فاکتور نیست');return;}
+  const lines=invLinesOf(id);
+  if(!lines.length){alert('این پیش‌فاکتور ردیف کالا ندارد');return;}
+  const noPrice=lines.filter(l=>!(+l.d.price>0));
+  if(noPrice.length&&!confirm('⚠️ '+noPrice.length.toLocaleString('fa-IR')+' ردیف هنوز قیمت ندارد. با همین وضعیت تبدیل شود؟'))return;
+  const c=invCalc(r);
+  if(!confirm('🔁 تبدیل «'+(r.d.title||'پیش‌فاکتور')+'» به فاکتور فروش؟\nمبلغ کل: '+moneyX(c.total)+'\n\n(بعد از تبدیل، موجودی انبار کم می‌شود و سند در فهرست فاکتورهای فروش می‌نشیند.)'))return;
+  const paidNow=confirm('آیا مبلغ واریز مشتری همین حالا به‌طور کامل دریافت شده؟\n\nتأیید = فاکتور «تسویه شده» ثبت می‌شود │ انصراف = «صادر شده» می‌ماند و بعداً وصولی ثبت می‌کنی');
+  window._wfActing=1;
+  try{
+    r.d={...r.d,kind:'فاکتور فروش',status:paidNow?'تسویه شده':'صادر شده',
+      paid:paidNow?c.total:(+r.d.paid||0),
+      wfst:r.d.wfst&&r.d.wfst!=='—'?WF_ST.DONE:r.d.wfst,
+      _log:[...(r.d._log||[]),{t:Date.now(),by:myEmail(),act:'🔁 تبدیل پیش‌فاکتور به فاکتور فروش پس از تأیید واریز'+(paidNow?' — تسویه کامل':'')}]};
+    if(paidNow)r.d.payments=[...(r.d.payments||[]),{t:Date.now(),amt:c.total,by:myEmail()}];
+    r.u=Date.now();put(r);
+    try{postInvoice(id,true);}catch(e){}
+  }finally{window._wfActing=0;}
+  setSync('ok','🔁 پیش‌فاکتور به فاکتور فروش تبدیل شد'+(paidNow?' و تسویه خورد':''));
+  go('rec','invoice',id);
+};
 /* 🧮 پانل ردیف‌ها و جمع فاکتور — بالای صفحهٔ هر فاکتور */
 function invTotalsPanel(r){
   const c=invCalc(r);
   const lines=invLinesOf(r.id);
   return `<div class="sec" style="padding:12px 16px;border-inline-start:3px solid var(--ac)">
     <h3 style="font-size:13px">🧮 ردیف‌ها و جمع این فاکتور <span style="flex:1"></span>
+    ${r.d.kind==='پیش‌فاکتور'?`<button class="btn sm" style="background:var(--ok);color:#fff" onclick="invConvert('${r.id}')" title="پس از اطمینان از واریز مشتری">💰 واریز شد — تبدیل به فاکتور</button>`:''}
     <button class="btn sm" onclick="invEdit('${r.id}')">✏️ ویرایش فاکتور</button></h3>
     ${lines.length?`<div class="tblwrap" style="margin-top:8px"><table><thead><tr><th>کالا</th><th>تعداد</th><th>قیمت واحد</th><th>مبلغ ردیف</th></tr></thead><tbody>
       ${lines.map(l=>{const pid=relIds(l,'product')[0];return `<tr onclick="go('rec','invline','${l.id}')" style="cursor:pointer">
@@ -15087,7 +15112,7 @@ function listHTML(e){
   if(!rows.length)return h+`<div class="empty">${q||Object.values(colFlt).some(Boolean)?'موردی با این فیلتر پیدا نشد':'هنوز موردی ثبت نشده — با «＋ افزودن» شروع کنید'}</div>`;
   // سربرگ ستون‌ها با امکان کلیک برای مرتب‌سازی
   const thSort=f=>`<th onclick="view.sort='${f.k}';view.sortDir=(view.sort==='${f.k}'&&view.sortDir!==-1?-1:1);render()" style="cursor:pointer;user-select:none" title="کلیک برای مرتب‌سازی">${esc(f.n)}${view.sort===f.k?(view.sortDir===-1?' ↓':' ↑'):''}</th>`;
-  const headRow=`<tr>${view.selMode?'<th style="width:36px;text-align:center" title="انتخاب برای حذف">☑</th>':''}${cols.map(thSort).join('')}${e==='measure'?'<th>سطح</th>':''}${def.prog?'<th>پیشرفت</th>':''}${def.comp?'<th>محاسبه</th>':''}</tr>`;
+  const headRow=`<tr>${view.selMode?'<th style="width:36px;text-align:center" title="انتخاب برای حذف">☑</th>':''}${cols.map(thSort).join('')}${e==='measure'?'<th>سطح</th>':''}${def.prog?'<th>پیشرفت</th>':''}${def.comp?'<th>محاسبه</th>':''}${e==='invoice'?'<th></th>':''}</tr>`;
   const rowHTML=r=>{
     let s;
     if(view.selMode){
@@ -15103,6 +15128,8 @@ function listHTML(e){
       s+=`<td>${sc?`${LVIC[sc]||''} ${sc}`:'<span style="color:var(--warn)">—</span>'}</td>`;}
     if(def.prog)s+=`<td>${pbarHTML(progOf(def.prog,r))}</td>`;
     if(def.comp){let c;try{c=typeof window[def.comp]==='function'?window[def.comp](r):null;}catch(e){c=null;}if(c)s+=`<td style="color:${c.bad?'var(--bad)':'var(--tx)'}">${c.v}</td>`;else s+=`<td>—</td>`;}
+    if(e==='invoice'&&r.d.kind==='پیش‌فاکتور'&&r.d.status!=='باطل')s+=`<td><button class="btn sm" style="background:var(--ok);color:#fff;white-space:nowrap" onclick="event.stopPropagation();invConvert('${r.id}')" title="پس از اطمینان از واریز مشتری">💰 تبدیل به فاکتور</button></td>`;
+    else if(e==='invoice')s+=`<td></td>`;
     return s+`</tr>`;
   };
   // ▦ نمای گروه‌بندی‌شده
