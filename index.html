@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.11</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.12</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.11</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.12</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1417,7 +1417,8 @@ purchline:{ic:'➕',n:'ردیف خرید',grp:'کالا و انبار',sub:1,f:[
  {k:'product',n:'کالا/خدمت',t:REL,r:'product',s:1},
  {k:'qty',n:'تعداد',t:NUM},
  {k:'price',n:'قیمت واحد (ریال)',t:NUM},
- {k:'ldisc',n:'تخفیف این ردیف (ریال)',t:NUM}],
+ {k:'ldisc',n:'تخفیف این ردیف (ریال)',t:NUM},
+ {k:'mlen',n:'متر هر واحد (فروش متری)',t:NUM}],
  cols:['title','purchinv','qty','price'],comp:'pinvLineBrief'},
 settle:{ic:'📂',n:'آرشیو دریافت/پرداخت‌ها',grp:'مالی',f:[
  {k:'title',n:'شرح',t:TXT},
@@ -7219,8 +7220,8 @@ function pinvBrief(p){const c=pinvCalc(p);const voided=p.d.status==='باطل';c
 function pinvLineBrief(l){return {label:'مبلغ ردیف',v:money(pinvLineAmt(l))};}
 window.pinvBrief=pinvBrief;window.pinvLineBrief=pinvLineBrief;
 let pinvDraft=null;
-function pinvNewDraft(){pinvDraft={desc:'',biz:'',supplier:'',cur:'ریال',fx:'',origin:'داخلی',paymode:'نقدی',paidAmt:'',vdate:today(),due:'',disc:'',taxpct:'',ship:'',note:'',lines:[{product:'',qty:'1',price:'',ldisc:''}]};}
-function pinvAddLine(){pinvDraft.lines.push({product:'',qty:'1',price:'',ldisc:''});render();}
+function pinvNewDraft(){pinvDraft={desc:'',biz:'',supplier:'',cur:'ریال',fx:'',origin:'داخلی',paymode:'نقدی',paidAmt:'',vdate:today(),due:'',disc:'',taxpct:'',ship:'',note:'',lines:[{product:'',qty:'1',price:'',ldisc:'',mlen:''}]};}
+function pinvAddLine(){pinvDraft.lines.push({product:'',qty:'1',price:'',ldisc:'',mlen:''});render();}
 function pinvDelLine(i){pinvDraft.lines.splice(i,1);if(!pinvDraft.lines.length)pinvAddLine();render();}
 function pinvSetLine(i,k,v){pinvDraft.lines[i][k]=v;
   if(k==='product'&&v){const p=recs[v];if(p&&p.d&&!(+pinvDraft.lines[i].price))pinvDraft.lines[i].price=String(p.d.buy||'');}
@@ -7247,7 +7248,7 @@ function pinvSave(status){
     disc:+pinvDraft.disc||0,taxpct:+pinvDraft.taxpct||0,ship:+pinvDraft.ship||0,paid:_ppaid,note:pinvDraft.note},u:Date.now()});
   valid.forEach(l=>{const p=recs[l.product];
     put({id:uid(),e:'purchline',d:{title:(p&&p.d&&p.d.title)||'',purchinv:[pid],product:[l.product],
-      biz:pinvDraft.biz?[pinvDraft.biz]:[],qty:+l.qty||0,price:+l.price||0,ldisc:+l.ldisc||0},u:Date.now()});});
+      biz:pinvDraft.biz?[pinvDraft.biz]:[],qty:+l.qty||0,price:+l.price||0,ldisc:+l.ldisc||0,mlen:+l.mlen||0},u:Date.now()});});
   if(pinvDraft.po&&recs[pinvDraft.po]){
     const pr=recs[pid];pr.d={...pr.d,po:[pinvDraft.po]};pr.u=Date.now();put(pr);
     const poR=recs[pinvDraft.po];
@@ -8374,6 +8375,7 @@ function pinvnewHTML(){
   if(pinvDraft.biz!==(gBiz()||''))pinvDraft.biz=gBiz()||''; // 🧢 تک‌منبع: باکس بالای منو
   const prods=byE('product').filter(p=>{const b=relIds(p,'biz');return !pinvDraft.biz||!b.length||b.includes(pinvDraft.biz);});
   const t=pinvTotalsDraft();
+  const _pmetric=bizInvCfg(pinvDraft.biz).metric;
   const lbl='style="font-size:11px;color:var(--tx2)"';
   const supp=byE('crm').filter(x=>['تامین‌کننده','پیمانکار','شریک تجاری'].includes(x.d.rel)||!x.d.rel);
   const suppName=pinvDraft.supplier&&recs[pinvDraft.supplier]?recs[pinvDraft.supplier].d.title:'';
@@ -8395,11 +8397,14 @@ function pinvnewHTML(){
     ${pinvDraft.paymode==='بخشی'?`<div><label ${lbl}>مبلغ پرداختی (ریال)</label><input inputmode="numeric" dir="ltr" value="${esc(pinvDraft.paidAmt||'')}" oninput="pinvDraft.paidAmt=this.value" placeholder="۰"></div>`:''}
     <div><label ${lbl}>سررسید</label><input value="${esc(pinvDraft.due||'')}" oninput="pinvDraft.due=this.value" placeholder="اختیاری"></div>
   </div>
-  <div class="tblwrap"><table><thead><tr><th>#</th><th>کالا/خدمت</th><th>تعداد</th><th>قیمت واحد</th><th>تخفیف ردیف</th><th>مبلغ</th><th></th></tr></thead><tbody>`;
+  <div class="tblwrap"><table><thead><tr><th>#</th><th>کالا/خدمت</th><th>${_pmetric?'تعداد (شاخه/بسته)':'تعداد'}</th>${_pmetric?'<th>متر هر واحد</th><th>کل متراژ</th>':''}<th>قیمت واحد</th><th>تخفیف ردیف</th><th>مبلغ</th><th></th></tr></thead><tbody>`;
   pinvDraft.lines.forEach((l,i)=>{const amt=Math.max(0,(+l.qty||0)*(+l.price||0)-(+l.ldisc||0));
+    const _pmt=(+l.qty||0)*(+l.mlen||0);
     h+=`<tr><td>${(i+1).toLocaleString('fa-IR')}</td>
       <td><input list="dl_pinvprod" value="${esc(pName(l.product))}" placeholder="🔍 کالا…" onchange="pinvPickProd(${i},this.value)" style="min-width:170px"></td>
       <td><input inputmode="numeric" value="${l.qty||''}" oninput="pinvSetLine(${i},'qty',this.value)" style="max-width:70px;text-align:center" placeholder="۱"></td>
+      ${_pmetric?`<td><input inputmode="decimal" dir="ltr" value="${l.mlen||''}" oninput="pinvSetLine(${i},'mlen',this.value)" style="max-width:70px;text-align:center" placeholder="۵.۸"></td>
+      <td style="white-space:nowrap;font-weight:700;color:var(--ac)">${_pmt?_pmt.toLocaleString('fa-IR',{maximumFractionDigits:1})+' م':'—'}</td>`:''}
       <td><input inputmode="numeric" value="${l.price||''}" oninput="pinvSetLine(${i},'price',this.value)" style="max-width:120px;text-align:left" placeholder="۰"></td>
       <td><input inputmode="numeric" value="${l.ldisc||''}" oninput="pinvSetLine(${i},'ldisc',this.value)" style="max-width:100px;text-align:left" placeholder="۰"></td>
       <td style="white-space:nowrap;color:var(--ok)">${fmtN(amt)}</td>
