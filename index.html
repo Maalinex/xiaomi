@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.10</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.11</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.10</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.11</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -15669,7 +15669,8 @@ function recHTML(e,id){
     const _dk=v=>{try{return ds(v.d.date)||'';}catch(_e){return '';}};
     const _mk=custMobKey(r);const _nm=_pnorm(r.d.title);
     const dupIds=new Set(byE('customer').filter(c=>(_mk&&custMobKey(c)===_mk)||(_nm&&_pnorm(c.d.title)===_nm)).map(c=>c.id));dupIds.add(id);
-    const invs=byE('invoice').filter(v=>{try{return relIds(v,'customer').some(x=>dupIds.has(x))&&v.d.status!=='باطل';}catch(_e){return false;}})
+    const _allInv=(()=>{try{const a=Object.values(recs).filter(x=>x&&x.e==='invoice'&&!x.del);return isAdmin()?a:a.filter(x=>{try{return inMyScope(x);}catch(_e){return true;}});}catch(_e){return byE('invoice');}})();
+    const invs=_allInv.filter(v=>{try{return relIds(v,'customer').some(x=>dupIds.has(x))&&v.d.status!=='باطل';}catch(_e){return false;}})
       .sort((a,b)=>_dk(b).localeCompare(_dk(a))||(b.u||0)-(a.u||0));
     const sales=invs.filter(v=>v.d.kind!=='پیش‌فاکتور');
     let tot=0,due=0;sales.forEach(v=>{const c2=_safeCalc(v);tot+=c2.total;due+=c2.due;});
@@ -15681,7 +15682,7 @@ function recHTML(e,id){
       ${shown.map(v=>{const c2=_safeCalc(v);const pf=v.d.kind==='پیش‌فاکتور';
         return `<tr style="cursor:pointer" onclick="go('rec','invoice','${v.id}')">
         <td style="text-align:right;color:var(--ac)">${esc(v.d.title||'—')}</td>
-        <td>${pf?'📝 پیش‌فاکتور':'🧾 فروش'}</td>
+        <td>${pf?'📝 پیش‌فاکتور':'🧾 فروش'}${(()=>{const b=relIds(v,'biz')[0];return b&&recs[b]?`<div style="font-size:10px;color:var(--tx2)">🧢 ${esc(recs[b].d.title||'')}</div>`:'';})()}</td>
         <td style="white-space:nowrap">${_safeDate(v)}</td>
         <td style="white-space:nowrap">${moneyX(c2.total)}</td>
         <td style="white-space:nowrap;color:${c2.due>0&&!pf?'var(--bad)':'var(--ok)'}">${pf?'—':(c2.due>0?moneyX(c2.due):'✔')}</td>
