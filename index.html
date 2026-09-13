@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.18</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.19</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.18</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.19</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -6833,13 +6833,21 @@ function chatSend(){
   const txt=String(el.value||'').trim();if(!txt)return;
   if(txt.length>2000){alert('پیام حداکثر ۲۰۰۰ حرف');return;}
   const cur=window._chatCur||'pub';
-  put({id:uid(),e:'chatmsg',u:Date.now(),d:{from:chatMe(),to:cur==='pub'?'':cur,text:txt,t:new Date().toISOString()}});
+  put({id:uid(),e:'chatmsg',u:Date.now(),d:{_by:chatMe(),from:chatMe(),to:cur==='pub'?'':cur,text:txt,t:new Date().toISOString()}});
   setTimeout(()=>{const i=document.getElementById('chatinp');if(i)i.focus();const b=document.getElementById('chatbody');if(b)b.scrollTop=b.scrollHeight;},50);
 }
 function chatDel(id){const r=recs[id];if(!r)return;const me=chatMe();if(!isAdmin()&&String(r.d.from||'').toLowerCase()!==me){alert('فقط پیام خودتان را می‌توانید حذف کنید');return;}if(!confirm('این پیام حذف شود؟'))return;r.del=true;r.u=Date.now();put(r);}
 function chatOpen(k){window._chatCur=k;render();setTimeout(()=>{const b=document.getElementById('chatbody');if(b)b.scrollTop=b.scrollHeight;const i=document.getElementById('chatinp');if(i)i.focus();},50);}
 function chatHTML(){
   chatPurge();
+  if(!window._chatResent){ // 🚑 بازارسال پیام‌های خودم که قبلاً توسط قوانین قدیمی سرور رد شده بودند
+    window._chatResent=1;
+    try{
+      const me0=chatMe();let n0=0;
+      Object.values(recs).forEach(r=>{if(r&&r.e==='chatmsg'&&!r.del&&r.d&&String(r.d.from||'').toLowerCase()===me0&&/^[0-9a-fA-F-]{36}$/.test(String(r.id))){if(!r.d._by){r.d._by=me0;r.u=Date.now();}queue.push(r.id);n0++;}});
+      if(n0){saveLocal();saveQ();flush();}
+    }catch(e){}
+  }
   const me=chatMe();const cur=window._chatCur=window._chatCur||'pub';
   const all=chatAll().filter(chatVisible);
   const seen=chatSeenGet();

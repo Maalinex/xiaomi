@@ -583,3 +583,59 @@ begin
   return 'enrolled';
 end $$;
 grant execute on function public.enroll_me() to authenticated;
+
+-- ═══════════════════════════════════════════════════════════
+-- 💬 v3.19 — چت داخلی و مکاتبه بین همه (این بخش را حتماً یک‌بار اجرا کنید)
+-- مشکل: «محدوده داده» سرور پیام‌های چت/نامه‌های ایمیلی را (چون به هیچ شرکت/واحدی
+-- وصل نیستند) برای کاربران محدودشده رد می‌کرد → پیام‌ها بین کاربران رد و بدل نمی‌شد.
+-- راه‌حل: چت و نامه از «محدوده داده» مستثنا می‌شوند و در عوض محرمانگی چتِ خصوصی
+-- همین‌جا در سرور اعمال می‌شود (پیام خصوصی فقط برای فرستنده/گیرنده/ادمین ارسال می‌شود).
+-- ═══════════════════════════════════════════════════════════
+
+-- محرمانگی چت: عمومی برای همه؛ خصوصی فقط دو طرف (+ ادمین)
+create or replace function public.app_chat_ok(ent text, d jsonb) returns boolean
+language plpgsql stable security definer set search_path=public as $$
+begin
+  if ent<>'chatmsg' then return true; end if;
+  if app_is_admin() then return true; end if;
+  if coalesce(d->>'to','')='' then return true; end if; -- گفتگوی عمومی
+  return lower(coalesce(d->>'from',''))=app_email()
+      or lower(coalesce(d->>'to',''))=app_email();
+end $$;
+
+-- app_priv_ok اکنون چت را هم پوشش می‌دهد
+create or replace function public.app_priv_ok(ent text, d jsonb) returns boolean
+language sql stable security definer set search_path=public as
+$$ select (app_is_admin()
+     or not app_growth(ent)
+     or coalesce(d->>'_by','')=''
+     or lower(d->>'_by')=app_email())
+   and app_hr_priv(ent,d)
+   and app_chat_ok(ent,d) $$;
+
+-- «محدوده داده»: چت و نامه (مکاتبه بین همه) مستثنا
+create or replace function public.app_in_scope(rid uuid, ent text, d jsonb) returns boolean
+language plpgsql stable security definer set search_path=public as $$
+declare sc jsonb; strict_m boolean; txt text;
+begin
+  if app_is_admin() then return true; end if;
+  if ent in ('chatmsg','letter') then return true; end if; -- 💬📨 ارتباط داخلی برای همه
+  sc:=app_scope();
+  if sc is null or coalesce((sc->>'on')::int,0)=0 then return true; end if;
+  if app_is_meta(rid) then return true; end if;
+  txt:=d::text;
+  if lower(coalesce(d->>'_by',''))=app_email() then return true; end if;
+  if ent='hr' and lower(coalesce(d->>'email',''))=app_email() then return true; end if;
+  if app_row_mine(d) then return true; end if;
+  if ent in ('company','business','orgunit') then
+    return exists(select 1 from app_scope_ids() a where a=rid);
+  end if;
+  if exists(select 1 from app_scope_ids() a where txt like '%'||a::text||'%') then return true; end if;
+  strict_m:=coalesce((sc->>'strict')::int,0)=1;
+  if strict_m then return false; end if;
+  return not exists(select 1 from records o
+     where o.entity in ('company','business','orgunit') and not o.deleted
+       and txt like '%'||o.id::text||'%');
+end $$;
+
+select '💬 چت و مکاتبه v3.19 اعمال شد ✅' as status;
