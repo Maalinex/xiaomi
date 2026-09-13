@@ -431,11 +431,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.16</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.17</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.16</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.17</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2844,6 +2844,7 @@ const VIEWS_ACL=[
  ['cartable','📨 کارتابل نامه‌ها'],
  ['aidash','🤖 دستیار هوشمند'],
  ['finnotif','🔔 فاکتورهای فروش (کارتابل مالی)'],
+ ['chat','💬 گفتگوی داخلی'],
  ['lvreq','🌴 درخواست مرخصی'],
  ['bpm','🧩 فرآیندهای کاری'],
  ['custdash','🛍️ داشبورد مشتریان'],
@@ -6798,6 +6799,77 @@ function finnotifHTML(){
   return h;
 }
 window.finnotifHTML=finnotifHTML;window.finnotifUnseen=finnotifUnseen;
+
+/* ================= 💬 گفتگوی داخلی (چت بین همه کاربران) =================
+   پیام‌ها به‌صورت رکورد e:'chatmsg' ذخیره و مثل بقیه داده‌ها همگام می‌شوند.
+   نگه‌داری: حداقل ۳ ماه (۹۲ روز)؛ پیام‌های قدیمی‌تر خودکار پاک می‌شوند. */
+const CHAT_KEEP_DAYS=92;
+function chatMe(){return (myEmail()||'').toLowerCase();}
+function chatUsers(){const me=chatMe();return usersList().filter(u=>u.email&&String(u.role||'')!==PENDING&&u.email.toLowerCase()!==me);}
+function chatName(em){em=String(em||'').toLowerCase();const u=usersList().find(x=>x.email&&x.email.toLowerCase()===em);return (u&&(u.name||u.email))||em||'—';}
+function chatAll(){return Object.values(recs).filter(r=>r&&r.e==='chatmsg'&&!r.del&&r.d&&r.d.t).sort((a,b)=>a.d.t<b.d.t?-1:1);}
+function chatKey(m){const me=chatMe();if(!m.d.to)return 'pub';return (String(m.d.from||'').toLowerCase()===me?String(m.d.to||''):String(m.d.from||'')).toLowerCase();}
+function chatVisible(m){const me=chatMe();if(!m.d.to)return true;return String(m.d.from||'').toLowerCase()===me||String(m.d.to||'').toLowerCase()===me;}
+function chatSeenGet(){try{return JSON.parse(localStorage.getItem('chatSeen')||'{}')||{};}catch(e){return {};}}
+function chatSeenSet(k,t){try{const o=chatSeenGet();if(!o[k]||o[k]<t)o[k]=t;localStorage.setItem('chatSeen',JSON.stringify(o));}catch(e){}}
+function chatUnseen(){try{const me=chatMe(),seen=chatSeenGet();return chatAll().filter(m=>chatVisible(m)&&String(m.d.from||'').toLowerCase()!==me&&m.d.t>(seen[chatKey(m)]||'')).length;}catch(e){return 0;}}
+function chatPurge(){ // پاکسازی خودکار پیام‌های قدیمی‌تر از ۹۲ روز (بدون رندر تودرتو)
+  try{
+    const lim=new Date(Date.now()-CHAT_KEEP_DAYS*864e5).toISOString();let n=0;
+    for(const r of Object.values(recs)){
+      if(n>=40)break;
+      if(r&&r.e==='chatmsg'&&!r.del&&r.d&&r.d.t&&r.d.t<lim){r.del=true;r.u=Date.now();queue.push(r.id);n++;}
+    }
+    if(n){saveLocal();saveQ();flush();}
+  }catch(e){}
+}
+function chatTime(t){try{const d=new Date(t);const hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');return iso2jstr(t)+' '+hm.replace(/\d/g,c=>'۰۱۲۳۴۵۶۷۸۹'[c]);}catch(e){return '';}}
+function chatSend(){
+  const el=document.getElementById('chatinp');if(!el)return;
+  const txt=String(el.value||'').trim();if(!txt)return;
+  if(txt.length>2000){alert('پیام حداکثر ۲۰۰۰ حرف');return;}
+  const cur=window._chatCur||'pub';
+  put({id:uid(),e:'chatmsg',u:Date.now(),d:{from:chatMe(),to:cur==='pub'?'':cur,text:txt,t:new Date().toISOString()}});
+  setTimeout(()=>{const i=document.getElementById('chatinp');if(i)i.focus();const b=document.getElementById('chatbody');if(b)b.scrollTop=b.scrollHeight;},50);
+}
+function chatDel(id){const r=recs[id];if(!r)return;const me=chatMe();if(!isAdmin()&&String(r.d.from||'').toLowerCase()!==me){alert('فقط پیام خودتان را می‌توانید حذف کنید');return;}if(!confirm('این پیام حذف شود؟'))return;r.del=true;r.u=Date.now();put(r);}
+function chatOpen(k){window._chatCur=k;render();setTimeout(()=>{const b=document.getElementById('chatbody');if(b)b.scrollTop=b.scrollHeight;const i=document.getElementById('chatinp');if(i)i.focus();},50);}
+function chatHTML(){
+  chatPurge();
+  const me=chatMe();const cur=window._chatCur=window._chatCur||'pub';
+  const all=chatAll().filter(chatVisible);
+  const seen=chatSeenGet();
+  const unseenOf=k=>all.filter(m=>chatKey(m)===k&&String(m.d.from||'').toLowerCase()!==me&&m.d.t>(seen[k]||'')).length;
+  const msgs=all.filter(m=>chatKey(m)===cur);
+  if(msgs.length)chatSeenSet(cur,msgs[msgs.length-1].d.t);
+  const convos=[['pub','👥 گفتگوی عمومی (همه)'],...chatUsers().map(u=>[u.email.toLowerCase(),'🧑 '+(u.name||u.email)])];
+  const side=convos.map(([k,n])=>{const un=k===cur?0:unseenOf(k);return `<div class="nav-i ${k===cur?'on':''}" style="margin:2px 0" onclick="chatOpen('${k}')">${esc(n)}${un?` <span class="c" style="background:var(--bad);color:#fff">${un.toLocaleString('fa-IR')}</span>`:''}</div>`;}).join('');
+  const body=msgs.length?msgs.map(m=>{
+    const mine=String(m.d.from||'').toLowerCase()===me;
+    return `<div style="display:flex;justify-content:${mine?'flex-start':'flex-end'};margin:6px 0">
+      <div style="max-width:72%;background:${mine?'var(--pri,#0a84ff)':'var(--card,#f1f1f4)'};color:${mine?'#fff':'inherit'};border:1px solid var(--line,#ddd);border-radius:12px;padding:8px 12px">
+        <div style="font-size:11px;opacity:.75;margin-bottom:3px">${esc(chatName(m.d.from))} · ${chatTime(m.d.t)}${(mine||isAdmin())?` <span style="cursor:pointer" onclick="chatDel('${m.id}')">✖</span>`:''}</div>
+        <div style="white-space:pre-wrap;word-break:break-word">${esc(m.d.text||'')}</div>
+      </div></div>`;
+  }).join(''):`<div class="empty">هنوز پیامی نیست — اولین پیام را بفرستید 🙂</div>`;
+  const hdr=cur==='pub'?'👥 گفتگوی عمومی — همه کاربران':'🧑 گفتگو با '+esc(chatName(cur));
+  return `<div style="display:flex;gap:12px;align-items:stretch;min-height:60vh;flex-wrap:wrap">
+    <div style="flex:0 0 230px;max-width:100%;border:1px solid var(--line,#ddd);border-radius:12px;padding:8px;overflow:auto">
+      <b style="display:block;margin-bottom:6px">💬 گفتگوها</b>${side}
+      <div style="font-size:11px;opacity:.7;margin-top:10px">پیام‌ها ۳ ماه (۹۲ روز) نگه‌داری و سپس خودکار پاک می‌شوند.</div>
+    </div>
+    <div style="flex:1;min-width:260px;display:flex;flex-direction:column;border:1px solid var(--line,#ddd);border-radius:12px">
+      <div style="padding:8px 12px;border-bottom:1px solid var(--line,#ddd);font-weight:700">${hdr}</div>
+      <div id="chatbody" style="flex:1;overflow:auto;padding:10px;max-height:55vh">${body}</div>
+      <div style="display:flex;gap:8px;padding:8px;border-top:1px solid var(--line,#ddd)">
+        <input id="chatinp" data-nogroup placeholder="پیام خود را بنویسید…" style="flex:1;padding:9px 12px;border:1px solid var(--line,#ddd);border-radius:10px" onkeydown="if(event.key==='Enter'){event.preventDefault();chatSend();}">
+        <button class="btn" onclick="chatSend()">ارسال ➤</button>
+      </div>
+    </div>
+  </div>`;
+}
+window.chatHTML=chatHTML;window.chatSend=chatSend;window.chatOpen=chatOpen;window.chatDel=chatDel;window.chatUnseen=chatUnseen;
+
 function aidashHTML(){
   aiLoad();
   const c=aiCfg();const ok=c.url&&c.key&&c.model;
@@ -11577,6 +11649,7 @@ function nav(){
   if(canSee('letter')&&canView('cartable')){const _ac=cartNewCnt();h+=`<div class="nav-i ${view.type==='cartable'?'on':''}" onclick="go('cartable')">📨 کارتابل نامه‌ها${_ac?` <span class="c" style="background:var(--warn);color:#000">${_ac.toLocaleString('fa-IR')}</span>`:''}</div>`;}
   if(!isPending()&&(isAdmin()||vExplicit('aidash')))h+=`<div class="nav-i ${view.type==='aidash'?'on':''}" onclick="go('aidash')">🤖 دستیار هوشمند</div>`;
   if(!isPending()&&finnotifCan()){const _fu=(()=>{try{return finnotifUnseen();}catch(e){return 0;}})();h+=`<div class="nav-i ${view.type==='finnotif'?'on':''}" onclick="go('finnotif')">🔔 فاکتورها (مالی)${_fu?`<span class="c" style="background:var(--bad);color:#fff">${_fu.toLocaleString('fa-IR')}</span>`:''}</div>`;}
+  if(!isPending()){const _cu=(()=>{try{return chatUnseen();}catch(e){return 0;}})();h+=`<div class="nav-i ${view.type==='chat'?'on':''}" onclick="go('chat')">💬 گفتگوی داخلی${_cu?`<span class="c" style="background:var(--bad);color:#fff">${_cu.toLocaleString('fa-IR')}</span>`:''}</div>`;}
   h+=`
   ${canView('cal')?`<div class="nav-i ${view.type==='cal'?'on':''}" onclick="go('cal')">📅 تقویم</div>`:''}
   `;
@@ -11693,6 +11766,7 @@ function render(){
     view.type==='cartable'?'📨 کارتابل نامه‌ها و تأییدها':
     view.type==='aidash'?'🤖 دستیار هوشمند':
     view.type==='finnotif'?'🔔 فاکتورهای فروش — کارتابل مالی':
+    view.type==='chat'?'💬 گفتگوی داخلی':
     view.type==='dayinv'?'🗓 فاکتورهای روز':
     view.type==='saleswf'?'🔁 گردش فروش — پیش‌فاکتور تا صدور':
     view.type==='cal'?'📅 تقویم':
@@ -11756,7 +11830,7 @@ function render(){
   const _mtEl=document.getElementById('mtabs');
   if(_mtEl){try{_mtEl.innerHTML=mtabsHTML();}catch(e){_mtEl.innerHTML='';}}
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',pldash:'pldash',bankdash:'bankdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',aidash:'aidash',finnotif:'finnotif',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',purchwf:'purchwf',claimdash:'claimdash',paydash:'paydash',dayinv:'dayinv',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',ucenter:'ucenter',orgchart:'orgchart',geodash:'geodash',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
+  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',pldash:'pldash',bankdash:'bankdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',aidash:'aidash',finnotif:'finnotif',chat:'chat',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',purchwf:'purchwf',claimdash:'claimdash',paydash:'paydash',dayinv:'dayinv',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',ucenter:'ucenter',orgchart:'orgchart',geodash:'geodash',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
   if(view.type==='invnew'&&!canView('invnew')&&!canView('invnewpf')){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -11792,6 +11866,7 @@ function render(){
     else if(view.type==='cartable')c.innerHTML=cartHTML();
     else if(view.type==='aidash')c.innerHTML=aidashHTML();
     else if(view.type==='finnotif')c.innerHTML=finnotifHTML();
+    else if(view.type==='chat')c.innerHTML=chatHTML();
     else if(view.type==='dayinv')c.innerHTML=dayinvHTML();
     else if(view.type==='saleswf')c.innerHTML=swfHTML();
     else if(view.type==='cal')c.innerHTML=calHTML();
