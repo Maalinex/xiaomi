@@ -395,6 +395,19 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
 }
 
 .fml bdi{font-family:'IRANSansX',Vazirmatn,Tahoma,sans-serif}
+#chatemo{position:absolute;bottom:calc(100% - 2px);inset-inline-start:8px;z-index:60;width:min(330px,calc(100vw - 32px));
+  background:var(--bg2,#fff);border:1px solid var(--bd,#ccc);border-radius:14px;box-shadow:var(--sh16,0 8px 24px rgba(0,0,0,.18));overflow:hidden}
+#chatemo[hidden]{display:none!important}
+#chatemo .emoji-tabs{display:flex;gap:2px;padding:6px;border-bottom:1px solid var(--line,#eee);background:var(--bg3,rgba(0,0,0,.03))}
+#chatemo .emoji-t{flex:1;background:transparent;border:none;border-radius:8px;padding:5px 0;font-size:17px;cursor:pointer;line-height:1.3}
+#chatemo .emoji-t.on{background:var(--bg2,#fff);box-shadow:var(--sh2,0 1px 3px rgba(0,0,0,.12))}
+#chatemo .emoji-rec{padding:6px 8px 2px;border-bottom:1px solid var(--line,#eee)}
+#chatemo .emoji-rec[hidden]{display:none}
+#chatemo .emoji-rl{font-size:10px;color:var(--tx2,#888);margin-bottom:2px}
+#chatemo .emoji-body{max-height:190px;overflow-y:auto;padding:6px 8px 8px}
+#chatemo .emoji-g[hidden]{display:none}
+#chatemo .emoji-b{background:transparent;border:none;border-radius:7px;padding:3px;font-size:20px;line-height:1.25;cursor:pointer;width:34px}
+#chatemo .emoji-b:hover{background:var(--bg3,rgba(0,0,0,.07))}
 .mx{direction:ltr;unicode-bidi:isolate;display:inline-block}
 .frx{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 5px;line-height:1.55}
 .frx>span{display:flex;align-items:center;justify-content:center;padding:1px 9px}
@@ -430,11 +443,11 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.21</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.22</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.21</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.22</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -6837,6 +6850,60 @@ function chatSend(){
 }
 function chatDel(id){const r=recs[id];if(!r)return;const me=chatMe();if(!isAdmin()&&String(r.d.from||'').toLowerCase()!==me){alert('فقط پیام خودتان را می‌توانید حذف کنید');return;}if(!confirm('این پیام حذف شود؟'))return;r.del=true;r.u=Date.now();put(r);}
 function chatOpen(k){window._chatCur=k;render();setTimeout(()=>{const b=document.getElementById('chatbody');if(b)b.scrollTop=b.scrollHeight;const i=document.getElementById('chatinp');if(i)i.focus();},50);}
+
+/* ================= 😊 ایموجی برای چت ================= */
+const CHAT_EMO=[
+ ['😊','چهره‌ها','😀 😃 😄 😁 😆 😅 🤣 😂 🙂 🙃 😉 😊 😇 🥰 😍 🤩 😘 😚 😋 😛 😜 🤪 😝 🤗 🤭 🤫 🤔 🤐 😐 😑 😶 😏 😒 🙄 😬 😮‍💨 😌 😔 😪 😴 😷 🤒 🤕 🤢 🥵 🥶 😵 🤯 🤠 🥳 😎 🤓 🧐 😕 😟 🙁 😮 😯 😲 😳 🥺 😦 😧 😨 😰 😥 😢 😭 😱 😖 😣 😞 😓 😩 😫 😤 😡 😠 🤬 😈 💀 👻 🤖 🎃'],
+ ['👍','دست و آدم','👍 👎 👌 ✌️ 🤞 🤟 🤘 🤙 👈 👉 👆 👇 ☝️ ✋ 🤚 🖐️ 🖖 👋 🤝 🙏 ✍️ 💪 👏 🙌 👐 🤲 🤦‍♂️ 🤷‍♀️ 🙋‍♂️ 🙇‍♂️ 💁‍♀️ 👨‍💻 👩‍💻 👨‍🔧 👷‍♂️ 🕵️‍♂️ 👮‍♂️ 🧑‍🏫 👨‍⚕️ 👶 🧑 👨 👩 🧔 👴 👵 👫 👪'],
+ ['❤️','احساس','❤️ 🧡 💛 💚 💙 💜 🖤 🤍 🤎 💔 ❤️‍🔥 💕 💞 💓 💗 💖 💘 💝 💯 💢 💥 💫 ⭐ 🌟 ✨ ⚡ 🔥 🎉 🎊 🎈 🎁 🏆 🥇 🥈 🥉 👑 💎 🌹 💐 🕊️'],
+ ['💼','کار و فروش','💼 📁 📂 📅 📆 🗓️ 📊 📈 📉 📋 📌 📎 📝 ✏️ 🖊️ 🧾 🧮 💰 💵 💳 🏦 🏧 🤑 💸 🛒 🛍️ 📦 🚚 🏪 🏬 🔖 🏷️ 🎯 ✅ ☑️ ❌ ⚠️ ❗ ❓ 🔔 🔕 📢 📣 📞 ☎️ 📱 💻 🖥️ ⌨️ 🖨️ 🔒 🔓 🔑 ⏰ ⏳ ⌛ 🔍 📤 📥 ✉️ 📧 🗑️ ♻️ 🆗 🆕 🔝 ➕ ➖ 🔄 ▶️ ⏸️'],
+ ['🍔','خوراکی','☕ 🍵 🧃 🥤 🍺 🍻 🥂 🍰 🎂 🍪 🍩 🍫 🍬 🍎 🍊 🍋 🍉 🍇 🍓 🥝 🍌 🥑 🍔 🍟 🍕 🌭 🥪 🌮 🍜 🍲 🍛 🍚 🍣 🍤 🥗 🧀 🥚 🍳 🍞 🧁 🍧 🍨'],
+ ['🚗','سایر','🚗 🚕 🚙 🚌 🏍️ 🚲 ✈️ 🚀 🚢 ⛽ 🏠 🏢 🏭 🏗️ 🌍 🌙 ☀️ ⛅ 🌧️ ⛈️ ❄️ 🌈 🌊 🌸 🌻 🌴 🌵 🐱 🐶 🐴 🦅 🐝 ⚽ 🏀 🏐 🎾 🎮 🎵 🎬 📷 🎨 💡 🔧 🔨 🪛 ⚙️ 🧲 🔋 🧭 🗺️ 🇮🇷']
+];
+function chatEmoRecentGet(){try{return (JSON.parse(localStorage.getItem('chatEmoRec')||'[]')||[]).slice(0,24);}catch(e){return [];}}
+function chatEmoRecentPut(e){try{const l=chatEmoRecentGet().filter(x=>x!==e);l.unshift(e);localStorage.setItem('chatEmoRec',JSON.stringify(l.slice(0,24)));}catch(_e){}}
+function chatEmoBtns(list){return list.map(e=>`<button type="button" class="emoji-b" onclick="chatEmoIns('${e}')">${e}</button>`).join('');}
+function chatEmoPanel(){
+  const rec=chatEmoRecentGet();
+  const tabs=CHAT_EMO.map((g,i)=>`<button type="button" class="emoji-t${i===0?' on':''}" data-g="${i}" title="${esc(g[1])}" onclick="chatEmoTab(${i})">${g[0]}</button>`).join('');
+  const grps=CHAT_EMO.map((g,i)=>`<div class="emoji-g" data-g="${i}" ${i?'hidden':''}>${chatEmoBtns(g[2].split(' ').filter(Boolean))}</div>`).join('');
+  return `<div id="chatemo" hidden>
+    <div class="emoji-tabs">${tabs}</div>
+    <div id="chatemorec" class="emoji-rec" ${rec.length?'':'hidden'}><div class="emoji-rl">اخیر</div>${chatEmoBtns(rec)}</div>
+    <div class="emoji-body">${grps}</div></div>`;
+}
+function chatEmoTab(i){
+  const p=document.getElementById('chatemo');if(!p)return;
+  p.querySelectorAll('.emoji-t').forEach(b=>b.classList.toggle('on',+b.dataset.g===i));
+  p.querySelectorAll('.emoji-g').forEach(g=>{g.hidden=(+g.dataset.g!==i);});
+}
+function chatEmoToggle(ev){
+  if(ev){ev.preventDefault();ev.stopPropagation();}
+  const p=document.getElementById('chatemo');if(!p)return;
+  p.hidden=!p.hidden;
+  if(!p.hidden){const i=document.getElementById('chatinp');if(i)i.focus();}
+}
+function chatEmoClose(){const p=document.getElementById('chatemo');if(p)p.hidden=true;}
+function chatEmoIns(e){
+  const i=document.getElementById('chatinp');if(!i)return;
+  const a=(i.selectionStart==null)?i.value.length:i.selectionStart;
+  const b=(i.selectionEnd==null)?a:i.selectionEnd;
+  i.value=i.value.slice(0,a)+e+i.value.slice(b);
+  const p=a+e.length;
+  i.focus();try{i.setSelectionRange(p,p);}catch(_e){}
+  window._lastEdit=Date.now(); // رندر خودکار وسط نوشتن پیام را قطع نکند
+  chatEmoRecentPut(e);
+  const r=document.getElementById('chatemorec');
+  if(r){r.innerHTML='<div class="emoji-rl">اخیر</div>'+chatEmoBtns(chatEmoRecentGet());r.hidden=false;}
+}
+if(!window._chatEmoWired){ // بستن پنل با کلیک بیرون یا Esc (یک‌بار برای همیشه)
+  window._chatEmoWired=1;
+  document.addEventListener('click',ev=>{const p=document.getElementById('chatemo');
+    if(p&&!p.hidden&&!p.contains(ev.target)&&!(ev.target.closest&&ev.target.closest('#chatemobtn')))chatEmoClose();},true);
+  document.addEventListener('keydown',ev=>{if(ev.key==='Escape')chatEmoClose();});
+}
+window.chatEmoToggle=chatEmoToggle;window.chatEmoIns=chatEmoIns;window.chatEmoTab=chatEmoTab;
+
 function chatHTML(){
   chatPurge();
   if(!window._chatResent){ // 🚑 بازارسال پیام‌های خودم که قبلاً توسط قوانین قدیمی سرور رد شده بودند
@@ -6872,9 +6939,11 @@ function chatHTML(){
     <div style="flex:1;min-width:260px;display:flex;flex-direction:column;border:1px solid var(--line,#ddd);border-radius:12px">
       <div style="padding:8px 12px;border-bottom:1px solid var(--line,#ddd);font-weight:700">${hdr}</div>
       <div id="chatbody" style="flex:1;overflow:auto;padding:10px;max-height:55vh">${body}</div>
-      <div style="display:flex;gap:8px;padding:8px;border-top:1px solid var(--line,#ddd)">
-        <input id="chatinp" data-nogroup placeholder="پیام خود را بنویسید…" style="flex:1;padding:9px 12px;border:1px solid var(--line,#ddd);border-radius:10px" onkeydown="if(event.key==='Enter'){event.preventDefault();chatSend();}">
+      <div style="position:relative;display:flex;gap:8px;padding:8px;border-top:1px solid var(--line,#ddd);align-items:center">
+        <button type="button" id="chatemobtn" class="btn gh" title="ایموجی" onclick="chatEmoToggle(event)" style="padding:6px 10px;font-size:18px;line-height:1.2">😊</button>
+        <input id="chatinp" data-nogroup placeholder="پیام خود را بنویسید…" style="flex:1;min-width:90px;padding:9px 12px;border:1px solid var(--line,#ddd);border-radius:10px" onkeydown="if(event.key==='Enter'){event.preventDefault();chatEmoClose();chatSend();}">
         <button class="btn" onclick="chatSend()">ارسال ➤</button>
+        ${chatEmoPanel()}
       </div>
     </div>
   </div>`;
