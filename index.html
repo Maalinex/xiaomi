@@ -448,11 +448,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.25</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.26</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.25</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.26</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -20398,9 +20398,21 @@ function drawModal(){
     });
   }
 }
+function relSource(rel){
+  /* 🏢 کسب‌وکار و شرکت «برچسب ساختاری» هستند نه دادهٔ محرمانه؛ اگر «محدودهٔ داده» آن‌ها را
+     فیلتر کند، کاربر با یک فهرست خالی روبه‌رو می‌شود و اصلاً نمی‌تواند رکورد جدید بسازد.
+     (همان منطقی که انتخابگر «کسب‌وکار فعال» بالای صفحه از bizAll استفاده می‌کند.) */
+  try{
+    if(rel==='business')return bizAll();
+    if(rel==='company')return Object.values(recs).filter(r=>r&&r.e==='company'&&!r.del)
+      .sort((a,b)=>String(a.d.title||'').localeCompare(String(b.d.title||''),'fa'));
+  }catch(e){}
+  return byE(rel);
+}
+window.relSource=relSource;
 function relPicker(f){
   const sel=relIds(cur,f.k);
-  let opts=byE(f.r).filter(o=>o.id!==cur.id) // جلوگیری از ارجاع به خود
+  let opts=relSource(f.r).filter(o=>o.id!==cur.id) // جلوگیری از ارجاع به خود
     .sort((a,b)=>(a.d.title||'').localeCompare(b.d.title||'','fa'));
   // 🏢 فیلتر کسب‌وکار فعالِ سراسری
   let bizFiltered=false;
@@ -20411,6 +20423,10 @@ function relPicker(f){
   // ساخت فهرست نامزدها با برچسب و کسب‌وکار/شرکتِ مرتبط (برای جستجو و اسکوپ)
   const cand=opts.map(o=>{const lbl=useLbl?relLabel(f.r,o.id):(o.d.title||'—');return {id:o.id,lbl,low:lbl.toLowerCase(),co:recCompanyId(o)};});
   window._relCand=window._relCand||{};window._relCand[f.k]=cand;
+  window._relEmpty=window._relEmpty||{};
+  window._relEmpty[f.k]=cand.length?'':('موردی برای انتخاب نیست.'
+    +(can('c',f.r)?' می‌توانید با «＋ ساخت جدید» همین‌جا بسازید.':'')
+    +((typeof myScope==='function'&&myScope())?' اگر مطمئنید این موارد ثبت شده‌اند، «محدودهٔ داده»ی نقش شما آن‌ها را پنهان کرده — از ادمین بخواهید در «👤 کاربران و دسترسی» محدودهٔ شما را اصلاح کند.':''));
   window._relScope=window._relScope||{};if(window._relScope[f.k]===undefined)window._relScope[f.k]='';
   window._relSel=window._relSel||{};window._relSel[f.k]=sel.slice();
   window._relSingle=window._relSingle||{};window._relSingle[f.k]=f.s?1:0;
@@ -20457,7 +20473,10 @@ function relRender(k){
   const shown=list.slice(0,REL_CAP);
   const box=document.getElementById('ro_'+k);if(!box)return;
   let h=shown.map(c=>`<div class="${selSet.has(c.id)?'sel':''}" onclick="toggleRel('${k}','${c.id}',${single})">${esc(c.lbl)}</div>`).join('');
-  if(!total)h=`<div style="color:var(--tx2);padding:7px 10px;font-size:12px">موردی پیدا نشد${q?' — نام را کامل بنویس و «＋ ساخت جدید» بزن':''}</div>`;
+  if(!total){
+    const em=(window._relEmpty||{})[k]||'';
+    h=`<div style="color:var(--tx2);padding:7px 10px;font-size:12px;line-height:1.9">${q?'موردی پیدا نشد — نام را کامل بنویس و «＋ ساخت جدید» بزن':esc(em||'موردی پیدا نشد')}</div>`;
+  }
   else if(total>REL_CAP)h+=`<div style="color:var(--tx2);padding:7px 10px;font-size:11px;border-top:1px dashed var(--line)">${(total-REL_CAP).toLocaleString('fa-IR')} مورد دیگر — برای یافتنش بیشتر بنویس یا شرکت را انتخاب کن</div>`;
   box.innerHTML=h;
 }

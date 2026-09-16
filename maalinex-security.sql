@@ -639,3 +639,35 @@ begin
 end $$;
 
 select '💬 چت و مکاتبه v3.19 اعمال شد ✅' as status;
+
+-- ═══════════════════════════════════════════════════════════
+-- 🏢 v3.26 — برچسب‌های سازمانی همیشه خوانا (این بخش را یک‌بار اجرا کنید)
+-- مشکل: «محدودهٔ داده» رکوردهای شرکت/کسب‌وکار/واحد را هم پنهان می‌کرد. نتیجه این بود که
+-- کاربر محدودشده (مثلاً کارمند مالی) هنگام ساخت کالای جدید در فیلد «کسب‌وکار» هیچ گزینه‌ای
+-- نمی‌دید و اصلاً نمی‌توانست رکورد بسازد؛ ضمن اینکه نام کسب‌وکارها روی بقیهٔ رکوردها خالی می‌ماند.
+-- این‌ها فقط «برچسب ساختاری» هستند (نام کسب‌وکار/واحد)، نه دادهٔ محرمانه — پس برای همهٔ
+-- کاربرانِ تاییدشده خوانا می‌شوند. محدودهٔ داده همچنان روی دادهٔ واقعی (فاکتور، مشتری، کالا…) برقرار است.
+-- ═══════════════════════════════════════════════════════════
+create or replace function public.app_in_scope(rid uuid, ent text, d jsonb) returns boolean
+language plpgsql stable security definer set search_path=public as $$
+declare sc jsonb; strict_m boolean; txt text;
+begin
+  if app_is_admin() then return true; end if;
+  if ent in ('chatmsg','letter') then return true; end if;         -- 💬📨 ارتباط داخلی برای همه
+  if ent in ('company','business','orgunit') then return true; end if; -- 🏢 برچسب‌های ساختاری
+  sc:=app_scope();
+  if sc is null or coalesce((sc->>'on')::int,0)=0 then return true; end if;
+  if app_is_meta(rid) then return true; end if;
+  txt:=d::text;
+  if lower(coalesce(d->>'_by',''))=app_email() then return true; end if;
+  if ent='hr' and lower(coalesce(d->>'email',''))=app_email() then return true; end if;
+  if app_row_mine(d) then return true; end if;
+  if exists(select 1 from app_scope_ids() a where txt like '%'||a::text||'%') then return true; end if;
+  strict_m:=coalesce((sc->>'strict')::int,0)=1;
+  if strict_m then return false; end if;
+  return not exists(select 1 from records o
+     where o.entity in ('company','business','orgunit') and not o.deleted
+       and txt like '%'||o.id::text||'%');
+end $$;
+
+select '🏢 برچسب‌های سازمانی v3.26 اعمال شد ✅' as status;
