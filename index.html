@@ -448,11 +448,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.26</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.27</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.26</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.27</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1247,6 +1247,20 @@ product:{ic:'📦',n:'کالا و خدمات',grp:'کالا و انبار',f:[
  {k:'minmargin',n:'حداقل حاشیه سود هدف (٪)',t:NUM},
  {k:'cover',n:'تصویر',t:FIL,img:1}],
  cols:['title','sku','biz','grp','sell'],comp:'productStat'},
+ lead:{ic:'🎯',n:'لیدها (سرنخ فروش)',grp:'فروش',f:[
+ {k:'title',n:'نام و نام خانوادگی / نام شرکت',t:TXT},
+ {k:'date',n:'تاریخ',t:DAT,one:1},
+ {k:'kind',n:'نوع',t:SEL,o:['حقیقی','حقوقی']},
+ {k:'phone',n:'شماره تلفن',t:TXT},
+ {k:'source',n:'📣 منبع لید (از کجا آمده؟)',t:SEL,o:['سایت','تلفن','معرفی دوستان','اینستاگرام','لینکدین']},
+ {k:'pcat',n:'دسته‌بندی محصول موردنظر',t:SEL,o:['عمومی','دیجیتال','پوشاک','خوراکی','خدمات','مواد اولیه']},
+ {k:'product',n:'کالای موردنظر',t:REL,r:'product',s:1},
+ {k:'lstatus',n:'وضعیت',t:SEL,o:['جدید','در حال پیگیری','تبدیل به مشتری','از دست رفته']},
+ {k:'seller',n:'کارشناس فروش',t:REL,r:'hr',s:1},
+ {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
+ {k:'customer',n:'مشتری (پس از خرید، خودکار پر می‌شود)',t:REL,r:'customer',s:1},
+ {k:'note',n:'توضیحات',t:LNG}],
+ cols:['title','date','kind','source','pcat','phone','lstatus'],comp:'leadBrief'},
  delivery:{ic:'🛵',n:'ارسال و توزیع',grp:'فروش',f:[
  {k:'title',n:'شرح ارسال',t:TXT},
  {k:'invoice',n:'فاکتور مرتبط',t:REL,r:'invoice',s:1},
@@ -2644,7 +2658,7 @@ const DEF_ACL={
    views:['bankdash','sepfin','sepdash','impcenter']},
  'مدیرارشد':{grp:[],ent:[],views:[]}
 };
-const EMP_EDIT=['task','rtask','worklog','leave','letter','crm','customer','contact','meeting','invoice','invline','note','idea','perfscore'];
+const EMP_EDIT=['lead','task','rtask','worklog','leave','letter','crm','customer','contact','meeting','invoice','invline','note','idea','perfscore'];
 function defHidden(kind,key){const r=myRole();const d=DEF_ACL[r];return !!(d&&d[kind]&&d[kind].includes(key));}
 const FIN=['bank','tx','budget','hrcontract','bizcontract'];
 const MIDSET=['project','task','rtask','meeting','idea','crm','contact','letter','leave','milestone','product','sale','purchase','channel','bsc','measure','efqm'];
@@ -2860,6 +2874,7 @@ const VIEWS_ACL=[
  ['mydash','📐 داشبوردهای شخصی'],['mbuilder','🧩 ساختارساز شاخص‌ها'],
  ['saleswf','🔁 کارتابل گردش فروش'],
  ['dayinv','🗓 فاکتورهای روز'],
+ ['leaddash','📊 گزارش لیدها و نرخ تبدیل'],
  ['cartable','📨 کارتابل نامه‌ها'],
  ['aidash','🤖 دستیار هوشمند'],
  ['finnotif','🔔 فاکتورهای فروش (کارتابل مالی)'],
@@ -3056,7 +3071,7 @@ const VIEW_GRP={
  whdash:'کالا و انبار',pudash:'کالا و انبار',supdash:'کالا و انبار',pinvnew:'کالا و انبار',quotenew:'کالا و انبار',
  perfdash:'عملکرد و تارگت',targetdash:'عملکرد و تارگت',aligndash:'عملکرد و تارگت',
  pldash:'مالی',bankdash:'مالی',arapdash:'مالی',settlenew:'مالی',chqdash:'مالی',paydash:'مالی',sepfin:'مالی',sepdash:'مالی',dualdash:'مالی',pfdash:'مالی',
- lvreq:'پرسنل و سازمان',cartable:'پرسنل و سازمان',bpm:'پرسنل و سازمان',dayinv:'فروش'};
+ lvreq:'پرسنل و سازمان',cartable:'پرسنل و سازمان',bpm:'پرسنل و سازمان',dayinv:'فروش',leaddash:'فروش'};
 function grpHidden(g){if(isAdmin()||!g)return false;const v=(aclFor().grp||{})[g];if(v)return v==='hide';return defHidden('grp',g);}
 function canView(v){
   if(isPending())return false;
@@ -3070,7 +3085,7 @@ function entLevel(e){if(isAdmin())return null;return aclFor().ent[e]||null;} // 
 function fldMode(e,k){if(isAdmin())return null;return aclFor().fld[e+'.'+k]||null;} // hide|read|null
 /* 🎯 «نمایش ✅» صریح روی یک صفحه، دسترسی لازمهٔ همان صفحه را هم می‌دهد
    (صفحهٔ صدور فاکتور بدون دیدن/ساختن فاکتور بی‌معنی است) */
-const VIEW_ENT_SEE={invnew:'invoice',invnewpf:'invoice',saleswf:'invoice',dayinv:'invoice',pinvnew:'purchinv',quotenew:'rfq',settlenew:'settle',claimdash:'claim',purchwf:'preq',cartable:'letter',lvreq:'leave'};
+const VIEW_ENT_SEE={invnew:'invoice',invnewpf:'invoice',saleswf:'invoice',dayinv:'invoice',leaddash:'lead',pinvnew:'purchinv',quotenew:'rfq',settlenew:'settle',claimdash:'claim',purchwf:'preq',cartable:'letter',lvreq:'leave'};
 const VIEW_ENT_CREATE={invnew:'invoice',invnewpf:'invoice',pinvnew:'purchinv',quotenew:'rfq',settlenew:'settle',claimdash:'claim',purchwf:'preq',lvreq:'leave'};
 function vExplicit(v){if(!session)return true;if(isPending())return false;const x=(aclFor().views||{})[v];return x==='show';}
 function vImplies(map,e){for(const v in map)if(map[v]===e&&vExplicit(v))return true;return false;}
@@ -5624,10 +5639,21 @@ setInterval(()=>{
 
 /* ================= گزینه‌های سفارشی فیلدها ================= */
 function customOpts(ent,fk){const m=recs[MO];return (m&&!m.del&&m.d[ent+'.'+fk])||[];}
-function optsFor(ent,f){const c=customOpts(ent,f.k).filter(o=>!f.o.includes(o));return f.o.concat(c);}
+function optsFor(ent,f){
+  let base=f.o;
+  if(ent==='lead'&&f.k==='pcat'){try{const pf=(E.product.f||[]).find(x=>x.k==='grp');if(pf)base=[...new Set([...f.o,...optsFor('product',pf)])];}catch(e){}}
+  let c=customOpts(ent,f.k).filter(o=>!base.includes(o));
+  if(ent==='lead'&&(f.k==='source'||f.k==='pcat')){ // 🎯 مقادیر جدیدی که کارمندان ثبت کرده‌اند برای همه قابل انتخاب شوند
+    try{Object.values(recs).forEach(r=>{if(r&&r.e==='lead'&&!r.del){const v=String(r.d[f.k]||'').trim();if(v&&!base.includes(v)&&!c.includes(v))c.push(v);}});}catch(e){}}
+  return base.concat(c);
+}
 function addOpt(fk){
   const val=prompt('گزینه جدید:'); if(!val||!val.trim())return;
   harvest();
+  if(!isAdmin()){ // کاربر عادی اجازهٔ نوشتن تنظیمات سراسری را ندارد → مقدار جدید روی همین رکورد می‌نشیند
+    const f=(E[cur.e].f||[]).find(x=>x.k===fk);
+    if(f&&f.t===MUL)cur.d[fk]=[...new Set([...(cur.d[fk]||[]),val.trim()])];else cur.d[fk]=val.trim();
+    drawModal();return;}
   const m=recs[MO]||{id:MO,e:'_opts',d:{}};
   const key=cur.e+'.'+fk, arr=(m.d[key]||[]).slice();
   if(!arr.includes(val.trim()))arr.push(val.trim());
@@ -6160,6 +6186,253 @@ function dayinvHTML(){
    :`<div class="empty">در ${iso2jstr(D)} فاکتوری صادر نشده است</div>`}`;
 }
 window.dayinvHTML=dayinvHTML;
+/* ═══════════ 🎯 لیدها (سرنخ‌های فروش) ═══════════
+   ثبت تماس‌ها و مراجعات سایت ← پیگیری ← تبدیل خودکار به مشتری هنگام خرید ← گزارش و نرخ تبدیل */
+const LEAD_SRC=['سایت','تلفن','معرفی دوستان','اینستاگرام','لینکدین'];
+const LEAD_ST=['جدید','در حال پیگیری','تبدیل به مشتری','از دست رفته'];
+const LEAD_CONV='تبدیل به مشتری', LEAD_LOST='از دست رفته';
+function leadKey(p){const m=faNum(String(p||'')).replace(/\D/g,'');return m.length>=10?m.slice(-10):'';}
+function leadDate(l){let d=null;try{d=ds(l.d.date);}catch(e){}return String(d||new Date(l.u||Date.now()).toISOString()).slice(0,10);}
+function leadIsConv(l){return !!(l&&l.d&&l.d.lstatus===LEAD_CONV);}
+function leadSaleInv(v){ // فاکتور فروشِ واقعی (نه پیش‌فاکتور، نه باطل)
+  if(!v||!v.d)return false;
+  const k=v.d.kind||'';
+  if(k===INV_KIND_PROF||v.d.status==='باطل')return false;
+  try{if(v.d.wfst===WF_ST.VOID)return false;}catch(e){}
+  return !k||k===INV_KIND_SALE;
+}
+function leadInvDate(v){let d=null;try{d=ds(v.d.date)||ds(v.d.vdate);}catch(e){}return String(d||new Date(v.u||Date.now()).toISOString()).slice(0,10);} // تاریخ صدور فاکتور در d.date ذخیره می‌شود
+let _leadSyncT=0;
+function leadSync(force){ // 🔄 تشخیص خودکار خرید: اولین فاکتور فروشِ مشتریِ هم‌شماره (یا متصل) پس از تاریخ لید
+  const now=Date.now();if(!force&&now-_leadSyncT<3000)return 0;_leadSyncT=now;
+  let n=0;
+  try{
+    const leads=byE('lead').filter(l=>!leadIsConv(l));
+    if(!leads.length)return 0;
+    const byKey={};
+    Object.values(recs).forEach(c=>{if(c&&c.e==='customer'&&!c.del){const k=custMobKey(c);if(k)(byKey[k]=byKey[k]||[]).push(c.id);}});
+    const invBy={};
+    Object.values(recs).forEach(v=>{if(!v||v.e!=='invoice'||v.del||!leadSaleInv(v))return;const c=relIds(v,'customer')[0];if(c)(invBy[c]=invBy[c]||[]).push(v);});
+    leads.forEach(l=>{
+      const cands=new Set(relIds(l,'customer'));
+      const k=leadKey(l.d.phone);if(k&&byKey[k])byKey[k].forEach(x=>cands.add(x));
+      const ld=leadDate(l);let best=null;
+      cands.forEach(cid=>(invBy[cid]||[]).forEach(v=>{const vd=leadInvDate(v);if(vd<ld)return;if(!best||vd<best.vd)best={v,vd,cid};}));
+      if(best){
+        l.d={...l.d,lstatus:LEAD_CONV,customer:[best.cid],inv:[best.v.id],convdate:best.vd};
+        l.u=Date.now();queue.push(l.id);n++;
+      }
+    });
+    if(n){saveLocal();saveQ();flush();}
+  }catch(e){}
+  return n;
+}
+function leadMakeCust(id){ // 👤 لید ← مشتری (یا اتصال به مشتری هم‌شماره)
+  const l=recs[id];if(!l||l.del)return null;
+  let cid=relIds(l,'customer')[0];
+  if(!(cid&&recs[cid]&&!recs[cid].del)){
+    cid=null;
+    const k=leadKey(l.d.phone);
+    if(k){const ex=Object.values(recs).find(c=>c&&c.e==='customer'&&!c.del&&custMobKey(c)===k);if(ex)cid=ex.id;}
+    if(!cid){
+      if(!can('c','customer')){alert('سطح دسترسی شما اجازهٔ ساخت مشتری را نمی‌دهد');return null;}
+      cid=uid();
+      const kind=l.d.kind||'حقیقی';
+      let ttl=String(l.d.title||'').trim()||'مشتری بدون نام';
+      try{if(kind==='حقوقی')ttl=corpName(ttl);}catch(e){}
+      recs[cid]={id:cid,e:'customer',u:Date.now(),d:{title:ttl,kind,mobile:String(l.d.phone||'').trim(),
+        biz:relIds(l,'biz').slice(0,1),segment:'تازه‌وارد',_by:myEmail(),_lead:id,
+        note:'🎯 ایجادشده از لید «'+(l.d.title||'')+'» — منبع: '+(l.d.source||'—')}};
+      queue.push(cid);
+    }
+  }
+  const st=l.d.lstatus;
+  l.d={...l.d,customer:[cid],lstatus:(st===LEAD_CONV)?st:((!st||st==='جدید'||st===LEAD_LOST)?'در حال پیگیری':st)};
+  l.u=Date.now();queue.push(l.id);
+  invalidateByE();saveLocal();saveQ();flush();
+  return cid;
+}
+window.leadBuy=function(id){ // 🛒 خرید: مشتری خودکار + فاکتور فروش جدید برای همان مشتری
+  const cid=leadMakeCust(id);if(!cid)return;
+  window._invPf=0;invDraft=null;invNewDraft();
+  try{const b=relIds(recs[id],'biz')[0];if(b)invDraft.biz=b;}catch(e){}
+  invDraft.customer=cid;try{invApplyNatid(cid);}catch(e){}
+  setSync('ok','🎯 لید به مشتری تبدیل شد — فاکتور را کامل و ذخیره کنید');
+  go('invnew');
+};
+window.leadToCust=function(id){const cid=leadMakeCust(id);if(cid){setSync('ok','👤 مشتری ساخته/متصل شد');go('rec','customer',cid);}};
+window.leadLost=function(id){
+  const l=recs[id];if(!l||l.del)return;
+  const why=prompt('علت از دست رفتن لید (اختیاری):','');if(why===null)return;
+  l.d={...l.d,lstatus:LEAD_LOST,lostwhy:String(why||'').trim()};l.u=Date.now();put(l);setSync('ok','ثبت شد');
+};
+window.leadReopen=function(id){const l=recs[id];if(!l||l.del)return;l.d={...l.d,lstatus:'در حال پیگیری'};l.u=Date.now();put(l);};
+function leadPanel(r){ // پنل وضعیت روی صفحهٔ هر لید
+  leadSync(true);
+  const st=r.d.lstatus||'جدید', conv=leadIsConv(r);
+  const col=conv?'var(--ok)':st===LEAD_LOST?'var(--bad)':st==='در حال پیگیری'?'var(--warn)':'var(--ac)';
+  const cid=relIds(r,'customer')[0], iv=relIds(r,'inv')[0];
+  let days='';
+  if(conv&&r.d.convdate){try{const a=Date.parse(leadDate(r)),b=Date.parse(r.d.convdate);if(a&&b)days=Math.max(0,Math.round((b-a)/864e5));}catch(e){}}
+  let hint='';
+  if(!conv&&!cid){const k=leadKey(r.d.phone);if(k){const ex=Object.values(recs).find(c=>c&&c.e==='customer'&&!c.del&&custMobKey(c)===k);if(ex)hint=`<div class="hint" style="margin-top:6px">ℹ️ این شماره متعلق به مشتری موجود «<b style="cursor:pointer" onclick="go('rec','customer','${ex.id}')">${esc(ex.d.title||'')}</b>» است — با اولین خریدش، لید خودکار «تبدیل‌شده» می‌شود.</div>`;}}
+  return `<div class="sec" style="border-inline-start:4px solid ${col}"><h3>🎯 وضعیت لید</h3>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span class="tag" style="font-weight:800;color:${col}">${esc(st)}</span>
+      ${r.d.source?`<span class="tag">📣 ${esc(r.d.source)}</span>`:''}
+      <span class="tag">📅 ${esc(iso2jstr(leadDate(r)))}</span>
+      ${cid&&recs[cid]?`<span class="tag" style="cursor:pointer" onclick="go('rec','customer','${cid}')">👤 مشتری: <b>${esc(recs[cid].d.title||'')}</b></span>`:''}
+      ${iv&&recs[iv]?`<span class="tag" style="cursor:pointer" onclick="go('rec','invoice','${iv}')">🧾 اولین خرید: ${esc(recs[iv].d.title||'')} — ${money((()=>{try{return invCalc(recs[iv]).total;}catch(e){return 0;}})())}</span>`:''}
+      ${conv&&r.d.convdate?`<span class="tag">✅ تبدیل در ${esc(iso2jstr(r.d.convdate))}${days!==''?' (پس از '+days.toLocaleString('fa-IR')+' روز)':''}</span>`:''}
+      ${st===LEAD_LOST&&r.d.lostwhy?`<span class="tag" style="color:var(--bad)">علت: ${esc(r.d.lostwhy)}</span>`:''}
+    </div>
+    ${!conv?`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
+      ${can('c','invoice')?`<button class="btn sm" onclick="leadBuy('${r.id}')">🛒 ثبت خرید (مشتری خودکار + فاکتور)</button>`:''}
+      <button class="btn gh sm" onclick="leadToCust('${r.id}')">👤 ${cid?'نمایش مشتری':'فقط ساخت مشتری'}</button>
+      ${st===LEAD_LOST?`<button class="btn gh sm" onclick="leadReopen('${r.id}')">↩️ بازگشایی لید</button>`:`<button class="btn gh sm" style="color:var(--bad)" onclick="leadLost('${r.id}')">⛔ از دست رفته</button>`}
+    </div>`:''}
+    ${hint}
+    <div class="hint" style="margin-top:8px">وقتی این لید خرید کند (فاکتور فروش برای مشتریِ هم‌شماره یا متصل)، خودکار در فهرست مشتریان می‌نشیند و «تبدیل به مشتری» می‌شود.</div>
+  </div>`;
+}
+/* ── 📊 گزارش لیدها ── */
+function leadJ(iso){try{const p=String(iso).slice(0,10).split('-').map(Number);return g2j(p[0],p[1],p[2]);}catch(e){return [0,0,0];}}
+function leadGroups(){
+  const pref=[['source','📣 منبع لید'],['kind','👥 نوع (حقیقی/حقوقی)'],['pcat','🗂 دسته‌بندی محصول'],['product','📦 کالا'],['lstatus','🚦 وضعیت'],['seller','🧑‍💼 کارشناس فروش'],['biz','🧢 کسب‌وکار']];
+  const extra=(E.lead.f||[]).filter(f=>[SEL,REL,TXT,STA].includes(f.t)&&!['title','phone','note','lostwhy'].includes(f.k)&&!pref.some(p=>p[0]===f.k)).map(f=>[f.k,f.n]);
+  return [...pref.filter(p=>(E.lead.f||[]).some(f=>f.k===p[0])),...extra,['_day','📅 روز'],['_month','📆 ماه'],['_year','🗓 سال']];
+}
+function leadGval(l,g){ // {key,label}
+  const d=leadDate(l);
+  if(g==='_day')return {key:d,label:iso2jstr(d)};
+  if(g==='_month'){const j=leadJ(d);return {key:j[0]+'-'+String(j[1]).padStart(2,'0'),label:JMON[j[1]-1]+' '+faNumStr(j[0])};}
+  if(g==='_year'){const j=leadJ(d);return {key:String(j[0]),label:'سال '+faNumStr(j[0])};}
+  const f=(E.lead.f||[]).find(x=>x.k===g);
+  if(f&&f.t===REL){const ids=relIds(l,g);const t=ids.map(id=>(recs[id]&&recs[id].d.title)||'').filter(Boolean).join('، ');return {key:t||'~',label:t||'— نامشخص —'};}
+  const v=l.d[g];const s=(v==null||v==='')?'':String(v);return {key:s||'~',label:s||'— نامشخص —'};
+}
+function leadPeriod(){ // بازهٔ گزارش بر اساس انتخاب کاربر → {from,to,label}
+  const P=view.ldP||'month';const td=today().slice(0,10);const jt=leadJ(td);
+  if(P==='day'){const D=view.ldD||td;return {from:D,to:D,label:'روز '+iso2jstr(D)};}
+  if(P==='month'){const y=+(view.ldY||jt[0]),m=+(view.ldM||jt[1]);
+    const a=j2g(y,m,1),b=m<12?j2g(y,m+1,1):j2g(y+1,1,1);const iso=x=>x[0]+'-'+String(x[1]).padStart(2,'0')+'-'+String(x[2]).padStart(2,'0');
+    const endD=new Date(Date.parse(iso(b))-864e5).toISOString().slice(0,10);
+    return {from:iso(a),to:endD,label:JMON[m-1]+' '+faNumStr(y)};}
+  if(P==='year'){const y=+(view.ldY||jt[0]);const a=j2g(y,1,1),b=j2g(y+1,1,1);const iso=x=>x[0]+'-'+String(x[1]).padStart(2,'0')+'-'+String(x[2]).padStart(2,'0');
+    return {from:iso(a),to:new Date(Date.parse(iso(b))-864e5).toISOString().slice(0,10),label:'سال '+faNumStr(y)};}
+  if(P==='range'){const f=view.ldF?ds(view.ldF):null,t=view.ldT?ds(view.ldT):null;
+    return {from:f||'0000-01-01',to:t||'9999-12-31',label:(f?iso2jstr(f):'ابتدا')+' تا '+(t?iso2jstr(t):'امروز')};}
+  return {from:'0000-01-01',to:'9999-12-31',label:'همهٔ زمان‌ها'};
+}
+window.ldSet=function(k,v){view[k]=v;render();};
+window.ldDay=function(v){const iso=parseJDate(v,'');if(iso){view.ldD=String(iso).slice(0,10);render();}};
+window.ldShift=function(n){view.ldD=_isoAdd(view.ldD||today().slice(0,10),n);render();};
+window.ldRange=function(){view.ldF=((document.getElementById('ld_f')||{}).value||'').trim();view.ldT=((document.getElementById('ld_t')||{}).value||'').trim();render();};
+function leadReportData(){
+  leadSync();
+  const per=leadPeriod();
+  const all=byE('lead');
+  const list=all.filter(l=>{const d=leadDate(l);return d>=per.from&&d<=per.to;}).sort((a,b)=>leadDate(b).localeCompare(leadDate(a))||(b.u||0)-(a.u||0));
+  const g=view.ldG||'source';
+  const gr={};
+  list.forEach(l=>{const x=leadGval(l,g);(gr[x.key]=gr[x.key]||{key:x.key,label:x.label,n:0,c:0,lost:0}).n++;if(leadIsConv(l))gr[x.key].c++;if(l.d.lstatus===LEAD_LOST)gr[x.key].lost++;});
+  const dateG=g.startsWith('_');
+  const rows=Object.values(gr).sort((a,b)=>dateG?b.key.localeCompare(a.key):(b.n-a.n||a.label.localeCompare(b.label,'fa')));
+  const conv=list.filter(leadIsConv);
+  const rev=conv.reduce((s,l)=>{const iv=relIds(l,'inv')[0];try{return s+(iv&&recs[iv]?invCalc(recs[iv]).total:0);}catch(e){return s;}},0);
+  let dsum=0,dn=0;conv.forEach(l=>{try{const a=Date.parse(leadDate(l)),b=Date.parse(l.d.convdate);if(a&&b){dsum+=Math.max(0,(b-a)/864e5);dn++;}}catch(e){}});
+  return {per,list,rows,g,conv:conv.length,lost:list.filter(l=>l.d.lstatus===LEAD_LOST).length,rev,avgDays:dn?dsum/dn:null};
+}
+const pct=(a,b)=>b?Math.round(a*1000/b)/10:0;
+window.leadExport=function(){
+  const D=leadReportData();const gl=(leadGroups().find(x=>x[0]===D.g)||[D.g,D.g])[1].replace(/^[^\s]+\s/,'');
+  const sum=[['گزارش لیدها'],['بازه',D.per.label],['تعداد لید',D.list.length],['تبدیل به مشتری',D.conv],['نرخ تبدیل (%)',pct(D.conv,D.list.length)],
+    ['از دست رفته',D.lost],['فروش اولین خریدِ لیدهای تبدیل‌شده (ریال)',D.rev],['میانگین روز تا تبدیل',D.avgDays==null?'—':Math.round(D.avgDays*10)/10]];
+  const grp=[[gl,'تعداد لید','تبدیل‌شده','نرخ تبدیل (%)','از دست رفته','سهم از کل (%)'],...D.rows.map(r=>[r.label,r.n,r.c,pct(r.c,r.n),r.lost,pct(r.n,D.list.length)])];
+  const det=[['تاریخ','نام و نام خانوادگی','نوع','منبع','دسته‌بندی محصول','کالا','تلفن','وضعیت','کارشناس فروش','مشتری','تاریخ تبدیل','توضیحات'],
+    ...D.list.map(l=>[iso2jstr(leadDate(l)),l.d.title||'',l.d.kind||'',l.d.source||'',l.d.pcat||'',leadGval(l,'product').label.replace('— نامشخص —',''),
+      String(l.d.phone||''),l.d.lstatus||'جدید',leadGval(l,'seller').label.replace('— نامشخص —',''),leadGval(l,'customer').label.replace('— نامشخص —',''),
+      l.d.convdate?iso2jstr(l.d.convdate):'',String(l.d.note||'')])];
+  const fname='گزارش-لیدها-'+D.per.label.replace(/[\\/:*?"<>|\s]+/g,'-');
+  loadXLSX().then(()=>{
+    const wb=XLSX.utils.book_new();wb.Workbook={Views:[{RTL:true}]};
+    const add=(aoa,name,w)=>{const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=aoa[0].map((_,i)=>({wch:w[i]||16}));XLSX.utils.book_append_sheet(wb,ws,name);};
+    add(sum,'خلاصه',[38,22]);add(grp,('بر اساس '+gl).slice(0,30),[26,12,12,14,12,14]);add(det,'فهرست لیدها',[12,24,9,14,16,20,14,14,18,22,12,30]);
+    XLSX.writeFile(wb,fname+'.xlsx');
+  }).catch(()=>{
+    const csv='﻿'+[...sum,[],...grp,[],...det].map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\r\n')+'\r\n';
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=fname+'.csv';document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),500);
+  });
+};
+function leaddashHTML(){
+  if(!canSee('lead'))return `<div class="empty">دسترسی به لیدها ندارید</div>`;
+  return leadDashUI();
+}
+function leadDashUI(){
+  const D=leadReportData();
+  const P=view.ldP||'month', td=today().slice(0,10), jt=leadJ(td);
+  const PB=(k,l)=>`<button class="btn ${P===k?'sm':'gh sm'}" onclick="ldSet('ldP','${k}')">${l}</button>`;
+  let perCtl='';
+  if(P==='day'){const Dd=view.ldD||td;perCtl=`<button class="btn gh sm" onclick="ldShift(-1)">‹ روز قبل</button>
+    <input id="ld_d" value="${iso2jstr(Dd)}" style="max-width:120px;text-align:center" onchange="ldDay(this.value)">
+    <button class="btn gh sm" style="padding:4px 7px" onclick="openJcal('ld_d')">📅</button>
+    <button class="btn gh sm" onclick="ldDay(document.getElementById('ld_d').value)">نمایش</button>
+    <button class="btn gh sm" onclick="ldShift(1)">روز بعد ›</button>`;}
+  const yrs=[];for(let y=jt[0];y>=jt[0]-5;y--)yrs.push(y);
+  const ySel=`<select onchange="ldSet('ldY',this.value)" style="max-width:110px">${yrs.map(y=>`<option value="${y}" ${(+(view.ldY||jt[0]))===y?'selected':''}>${faNumStr(y)}</option>`).join('')}</select>`;
+  if(P==='month')perCtl=`<select onchange="ldSet('ldM',this.value)" style="max-width:120px">${JMON.map((m,i)=>`<option value="${i+1}" ${(+(view.ldM||jt[1]))===i+1?'selected':''}>${m}</option>`).join('')}</select>${ySel}`;
+  if(P==='year')perCtl=ySel;
+  if(P==='range')perCtl=`<span style="font-size:12px">از</span><input id="ld_f" value="${esc(view.ldF||'')}" placeholder="۱۴۰۵/۰۱/۰۱" style="max-width:115px">
+    <button class="btn gh sm" style="padding:4px 7px" onclick="openJcal('ld_f')">📅</button>
+    <span style="font-size:12px">تا</span><input id="ld_t" value="${esc(view.ldT||'')}" placeholder="۱۴۰۵/۱۲/۲۹" style="max-width:115px">
+    <button class="btn gh sm" style="padding:4px 7px" onclick="openJcal('ld_t')">📅</button>
+    <button class="btn sm" onclick="ldRange()">اعمال</button>`;
+  const G=leadGroups();
+  const rate=pct(D.conv,D.list.length);
+  const K=(t,v,sub,col)=>`<div style="background:var(--bg3);border-radius:12px;padding:10px 14px;${col?'border:1px solid '+col:''}"><div style="font-size:11px;color:var(--tx2)">${t}</div><div style="font-size:21px;font-weight:800;${col?'color:'+col:''}">${v}</div>${sub?`<div style="font-size:10.5px;color:var(--tx2)">${sub}</div>`:''}</div>`;
+  const gl=(G.find(x=>x[0]===D.g)||[D.g,D.g])[1];
+  const maxN=Math.max(1,...D.rows.map(r=>r.n));
+  const grpTbl=D.rows.length?`<div class="tblwrap"><table style="font-size:12px"><thead><tr><th style="text-align:right">${esc(gl)}</th><th>تعداد لید</th><th>تبدیل‌شده</th><th>نرخ تبدیل</th><th>از دست رفته</th><th style="min-width:130px">سهم</th></tr></thead><tbody>
+    ${D.rows.map(r=>`<tr><td style="text-align:right;font-weight:700">${esc(r.label)}</td><td>${r.n.toLocaleString('fa-IR')}</td><td style="color:var(--ok)">${r.c.toLocaleString('fa-IR')}</td>
+      <td><b>${pct(r.c,r.n).toLocaleString('fa-IR')}٪</b></td><td style="color:var(--bad)">${r.lost?r.lost.toLocaleString('fa-IR'):'—'}</td>
+      <td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:8px;border-radius:5px;background:var(--line);overflow:hidden"><div style="height:100%;width:${Math.round(r.n*100/maxN)}%;background:var(--ac);border-radius:5px;position:relative"><div style="position:absolute;inset:0;width:${r.n?Math.round(r.c*100/r.n):0}%;background:var(--ok)"></div></div></div><span style="font-size:10.5px;color:var(--tx2)">${pct(r.n,D.list.length).toLocaleString('fa-IR')}٪</span></div></td></tr>`).join('')}
+    </tbody></table></div><div style="font-size:10.5px;color:var(--tx2);margin-top:4px">نوار آبی: تعداد لید │ بخش سبز: سهم تبدیل‌شده‌ها</div>`:'<div class="empty">در این بازه لیدی ثبت نشده</div>';
+  _srchSel['ldq']='[data-sr="ldq"]';
+  const det=D.list.map(l=>{const c=leadIsConv(l);const st=l.d.lstatus||'جدید';const col=c?'var(--ok)':st===LEAD_LOST?'var(--bad)':st==='در حال پیگیری'?'var(--warn)':'var(--ac)';
+    return `<tr data-sr="ldq" style="cursor:pointer" onclick="go('rec','lead','${l.id}')"><td>${esc(iso2jstr(leadDate(l)))}</td><td style="text-align:right;font-weight:700">${esc(l.d.title||'—')}</td><td>${esc(l.d.kind||'—')}</td>
+      <td>${esc(l.d.source||'—')}</td><td>${esc(l.d.pcat||'—')}</td><td>${esc(leadGval(l,'product').label)}</td><td dir="ltr">${esc(faNumStr(l.d.phone||''))}</td>
+      <td style="color:${col};font-weight:700">${esc(st)}</td><td>${esc(leadGval(l,'seller').label)}</td></tr>`;}).join('');
+  return `<div class="sec"><h3>📊 گزارش لیدها و نرخ تبدیل
+    <span style="flex:1"></span>
+    ${can('c','lead')?`<button class="btn sm" onclick="openRec('lead')">＋ ثبت لید جدید</button>`:''}
+    <button class="btn gh sm" onclick="go('list','lead')">🎯 فهرست لیدها</button>
+    <button class="btn sm" style="background:var(--ok);color:#fff" onclick="leadExport()">📗 خروجی اکسل</button></h3>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+      <b style="font-size:12px">بازه:</b>${PB('day','روزانه')}${PB('month','ماهانه')}${PB('year','سالانه')}${PB('range','دوره‌ای')}${PB('all','همه')}
+      <span style="width:10px"></span>${perCtl}</div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:10px">📅 ${esc(D.per.label)}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:6px">
+      ${K('تعداد لید',D.list.length.toLocaleString('fa-IR'))}
+      ${K('تبدیل به مشتری',D.conv.toLocaleString('fa-IR'),'','var(--ok)')}
+      ${K('نرخ تبدیل لید ← مشتری',rate.toLocaleString('fa-IR')+'٪',D.conv.toLocaleString('fa-IR')+' از '+D.list.length.toLocaleString('fa-IR'),'var(--ac)')}
+      ${K('از دست رفته',D.lost.toLocaleString('fa-IR'),'','var(--bad)')}
+      ${K('فروش اولین خرید',D.rev?money(D.rev):'—','لیدهای تبدیل‌شده')}
+      ${K('میانگین زمان تبدیل',D.avgDays==null?'—':(Math.round(D.avgDays*10)/10).toLocaleString('fa-IR')+' روز')}
+    </div></div>
+  <div class="sec"><h3>▦ گزارش بر اساس
+    <select onchange="ldSet('ldG',this.value)" style="max-width:220px;margin-inline-start:8px">${G.map(g=>`<option value="${g[0]}" ${D.g===g[0]?'selected':''}>${esc(g[1])}</option>`).join('')}</select></h3>
+    ${grpTbl}</div>
+  <div class="sec"><h3>🎯 فهرست لیدهای این بازه <span class="c">${D.list.length.toLocaleString('fa-IR')}</span></h3>
+    ${srchBox('ldq','جستجو (نام، تلفن، منبع، کالا، وضعیت…)','روی هر ردیف بزنید تا مشخصات کامل را ببینید','[data-sr="ldq"]','')}
+    ${D.list.length?`<div class="tblwrap"><table style="font-size:12px"><thead><tr><th>تاریخ</th><th style="text-align:right">نام و نام خانوادگی</th><th>نوع</th><th>منبع</th><th>دسته‌بندی</th><th>کالا</th><th>تلفن</th><th>وضعیت</th><th>کارشناس</th></tr></thead><tbody>${det}</tbody></table></div>`:'<div class="empty">لیدی نیست</div>'}
+  </div>`;
+}
+window.leaddashHTML=leaddashHTML;window.leadSync=leadSync;window.leadPanel=leadPanel;window.leadMakeCust=leadMakeCust;window.leadKey=leadKey;window.leadIsConv=leadIsConv;window.leadDate=leadDate;
+/* 🔄 پس از هر ذخیرهٔ فاکتور، لیدها بررسی شوند */
+(function(){const _o=invSave;invSave=function(){const r=_o.apply(this,arguments);try{setTimeout(()=>leadSync(true),30);}catch(e){}return r;};window.invSave=invSave;})();
+function leadBrief(r){const st=(r&&r.d&&r.d.lstatus)||'جدید';return {label:'وضعیت لید',v:st+(r.d.source?' │ '+r.d.source:''),bad:st===LEAD_LOST};}
+window.leadBrief=leadBrief;
+
 /* 🖨️ چاپ / PDF فاکتور — پنجره‌ی جدا با قالب تمیز و برند نسخه */
 // ─── ⛳ مرخصی، ⏱️ کارکرد و 🧾 فیش حقوقی ───
 function jYearOf(iso){if(!iso)return null;const p=String(iso).slice(0,10).split('-').map(Number);if(!p[0])return null;return g2j(p[0],p[1]||1,p[2]||1)[0];}
@@ -9655,7 +9928,10 @@ function invPickCust(name){
   if(!name){invSetHead('customer','');return;}
   const c=byE('customer').find(x=>(x.d.title||'').trim()===name);
   if(c){invSetHead('customer',c.id);}
-  else{alert('مشتری «'+name+'» پیدا نشد — از لیست پیشنهادی انتخاب کن یا اول در «مشتریان کسب‌وکار» بسازش');render();}
+  else{
+    try{const ld=byE('lead').find(l=>!leadIsConv(l)&&String(l.d.title||'').trim()===name);
+      if(ld){const cid=leadMakeCust(ld.id);if(cid){setSync('ok','🎯 لید «'+name+'» خودکار به فهرست مشتریان اضافه شد');invSetHead('customer',cid);return;}}}catch(_e){}
+    alert('مشتری «'+name+'» پیدا نشد — از لیست پیشنهادی انتخاب کن یا اول در «مشتریان کسب‌وکار» بسازش');render();}
 }
 window.invPickCust=invPickCust;
 function invPickRef(name){ // 🤝 معرف: مشتری‌ای که این مشتری را معرفی کرده
@@ -9839,7 +10115,7 @@ function invnewHTML(){
       ${gBiz()&&recs[gBiz()]?`<div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">🧢 ${esc(recs[gBiz()].d.title)}</div>`
         :`<select onchange="setGBiz(this.value)"><option value="">— اول کسب‌وکار فعال را انتخاب کنید —</option>${bizAll().map(x=>`<option value="${x.id}">${esc(x.d.title)}</option>`).join('')}</select>`}</div>
     <div><label ${lbl}>مشتری 🔍 <a href="#" style="font-size:10.5px;color:var(--ac);text-decoration:none" onclick="view.qc=!view.qc;render();return false">＋ مشتری جدید</a></label><input list="dl_invcust" value="${esc(custName)}" placeholder="بنویس تا جستجو شود…" onchange="invPickCust(this.value)">
-      <datalist id="dl_invcust">${custs.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>
+      <datalist id="dl_invcust">${custs.map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}${(()=>{try{const cn=new Set(custs.map(x=>String(x.d.title||'').trim()));return byE('lead').filter(l=>!leadIsConv(l)&&l.d.title&&!cn.has(String(l.d.title).trim())).map(l=>`<option value="${esc(l.d.title)}" label="🎯 لید${l.d.phone?' — '+esc(faNumStr(l.d.phone)):''}">`).join('');}catch(e){return '';}})()}</datalist>
       <datalist id="dl_invprod">${prodDlOpts(prods)}</datalist>
       ${view.qc?`<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap"><input id="qc_nm" placeholder="نام مشتری جدید" style="max-width:150px;font-size:12px"><input id="qc_ph" placeholder="تلفن (اختیاری)" style="max-width:120px;font-size:12px" dir="ltr"><input id="qc_ad" placeholder="🏠 آدرس (اختیاری)" style="min-width:220px;flex:1;font-size:12px"><button type="button" class="btn sm" onclick="invQuickCust()">ثبت</button></div>`:''}
       ${(()=>{if(!invDraft.customer||!recs[invDraft.customer])return'';const cr=+recs[invDraft.customer].d.credit||0;if(!cr)return'';const du=custReceivable(invDraft.customer);const ok=du<cr;
@@ -11410,7 +11686,7 @@ try{const _sv=JSON.parse(localStorage.getItem('xr_view')||'null');
 /* 🪗 جمع‌شوندگی گروه‌های منو بر اساس موضوع */
 let navCol=null;
 try{navCol=JSON.parse(localStorage.getItem('xr_navcol')||'null');}catch(e){navCol=null;}
-const DASH_GRP={saleswf:'فروش',invnew:'فروش',quotenew:'کالا و انبار',purchwf:'کالا و انبار',pinvnew:'کالا و انبار',paydash:'مالی',settlenew:'مالی',bpm:'پرسنل و سازمان',wfcenter:'پرسنل و سازمان',orgchart:'پرسنل و سازمان',ceodash:'داشبوردها',charts:'داشبوردها',smdash:'داشبوردها',plreport:'داشبوردها',targetdash:'داشبوردها',distdash:'داشبوردها',custdash:'داشبوردها',geodash:'داشبوردها',loyaldash:'داشبوردها',smsdash:'داشبوردها',whdash:'داشبوردها',pudash:'داشبوردها',supdash:'داشبوردها',pldash:'داشبوردها',bankdash:'داشبوردها',arapdash:'داشبوردها',chqdash:'داشبوردها',sepfin:'داشبوردها',sepdash:'داشبوردها',dualdash:'داشبوردها',pfdash:'داشبوردها',gldash:'داشبوردها',perfdash:'داشبوردها',aligndash:'داشبوردها',riskdash:'داشبوردها',stratdash:'داشبوردها',bscmap:'داشبوردها',bsccanvas:'داشبوردها',swotmap:'داشبوردها',procmap:'داشبوردها',mydash:'داشبوردها',glnew:'حسابداری',bizdash:'داشبوردها'};
+const DASH_GRP={saleswf:'فروش',leaddash:'فروش',invnew:'فروش',quotenew:'کالا و انبار',purchwf:'کالا و انبار',pinvnew:'کالا و انبار',paydash:'مالی',settlenew:'مالی',bpm:'پرسنل و سازمان',wfcenter:'پرسنل و سازمان',orgchart:'پرسنل و سازمان',ceodash:'داشبوردها',charts:'داشبوردها',smdash:'داشبوردها',plreport:'داشبوردها',targetdash:'داشبوردها',distdash:'داشبوردها',custdash:'داشبوردها',geodash:'داشبوردها',loyaldash:'داشبوردها',smsdash:'داشبوردها',whdash:'داشبوردها',pudash:'داشبوردها',supdash:'داشبوردها',pldash:'داشبوردها',bankdash:'داشبوردها',arapdash:'داشبوردها',chqdash:'داشبوردها',sepfin:'داشبوردها',sepdash:'داشبوردها',dualdash:'داشبوردها',pfdash:'داشبوردها',gldash:'داشبوردها',perfdash:'داشبوردها',aligndash:'داشبوردها',riskdash:'داشبوردها',stratdash:'داشبوردها',bscmap:'داشبوردها',bsccanvas:'داشبوردها',swotmap:'داشبوردها',procmap:'داشبوردها',mydash:'داشبوردها',glnew:'حسابداری',bizdash:'داشبوردها'};
 function activeGrp(){ // گروهی که صفحه فعلی به آن تعلق دارد (همیشه باز نمایش داده می‌شود)
   if(view.type==='module')return view.flt||null;
   if(view.type==='mydash')return 'داشبوردها';
@@ -11902,6 +12178,7 @@ function wsMenu(g){
       (canView('invnew')?`<div class="nav-i ${view.type==='invnew'&&!_pf?'on':''}" onclick="invDraft=null;window._invPf=0;go('invnew')">🧾 صدور فاکتور فروش</div>`:'');})():'')+
     (canSee('invoice')?`<div class="nav-i ${(view.type==='list'&&view.e==='invoice')?'on':''}" onclick="invGo(INV_KIND_SALE)">🧾 فهرست فاکتورها<span class="c">${invKindCount(INV_KIND_SALE).toLocaleString('fa-IR')}</span></div>`:'')+
     (canSee('invoice')&&canView('dayinv')?`<div class="nav-i ${view.type==='dayinv'?'on':''}" onclick="go('dayinv')">🗓 فاکتورهای روز</div>`:'')+
+    (canSee('lead')&&canView('leaddash')?`<div class="nav-i ${view.type==='leaddash'?'on':''}" onclick="go('leaddash')">📊 گزارش لیدها</div>`:'')+
     '');
   if(g==='CRM و مشتریان')return (
     canSee('claim')&&canView('claimdash')?(()=>{const _n=claimOpen().length;return `<div class="nav-i ${view.type==='claimdash'?'on':''}" onclick="go('claimdash')">↩️ مرجوعی و گارانتی${_n?` <span class="c" style="background:var(--warn);color:#000">${_n.toLocaleString('fa-IR')}</span>`:''}</div>`;})():'');
@@ -12104,6 +12381,7 @@ function render(){
     view.type==='finnotif'?'🔔 فاکتورهای فروش — کارتابل مالی':
     view.type==='chat'?'💬 گفتگوی داخلی':
     view.type==='dayinv'?'🗓 فاکتورهای روز':
+    view.type==='leaddash'?'📊 گزارش لیدها و نرخ تبدیل':
     view.type==='saleswf'?'🔁 گردش فروش — پیش‌فاکتور تا صدور':
     view.type==='cal'?'📅 تقویم':
     view.type==='bizdash'?'🏪 داشبورد کسب‌وکار':
@@ -12166,7 +12444,7 @@ function render(){
   const _mtEl=document.getElementById('mtabs');
   if(_mtEl){try{_mtEl.innerHTML=mtabsHTML();}catch(e){_mtEl.innerHTML='';}}
   // محافظ صفحات ویژه بر اساس ماتریس دسترسی
-  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',pldash:'pldash',bankdash:'bankdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',aidash:'aidash',finnotif:'finnotif',chat:'chat',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',purchwf:'purchwf',claimdash:'claimdash',paydash:'paydash',dayinv:'dayinv',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',ucenter:'ucenter',orgchart:'orgchart',geodash:'geodash',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
+  const VG={me:'me',myhub:'myhub',cal:'cal',charts:'charts',bizdash:'bizdash',bscmap:'bscmap',bsccanvas:'bsccanvas',pldash:'pldash',bankdash:'bankdash',procmap:'procmap',riskdash:'riskdash',gldash:'gldash',glnew:'glnew',salesdash:'salesdash',invnew:'invnew',targetdash:'targetdash',pinvnew:'pinvnew',settlenew:'settlenew',arapdash:'arapdash',cashdash:'cashdash',chqdash:'chqdash',plreport:'plreport',ceodash:'ceodash',mbuilder:'mbuilder',mydash:'mydash',quickadd:'quickadd',whdash:'whdash',pudash:'pudash',supdash:'supdash',custdash:'custdash',smdash:'smdash',pfdash:'pfdash',sepdash:'sepdash',sepfin:'sepfin',perfdash:'perfdash',aligndash:'aligndash',saleswf:'saleswf',lvreq:'lvreq',cartable:'cartable',aidash:'aidash',finnotif:'finnotif',chat:'chat',dualdash:'dualdash',distdash:'distdash',loyaldash:'loyaldash',smsdash:'smsdash',impcenter:'impcenter',quotenew:'quotenew',purchwf:'purchwf',claimdash:'claimdash',paydash:'paydash',dayinv:'dayinv',leaddash:'leaddash',bpm:'bpm',basedash:'basedash',wfcenter:'wfcenter',ucenter:'ucenter',orgchart:'orgchart',geodash:'geodash',swotmap:'swotmap',stratdash:'stratdash',glnew:'glnew'};
   if(view.type==='invnew'&&!canView('invnew')&&!canView('invnewpf')){
     c.innerHTML=`<div class="empty">دسترسی شما به این صفحه توسط ادمین محدود شده است</div>`;whoami();return;
   }
@@ -12204,6 +12482,7 @@ function render(){
     else if(view.type==='finnotif')c.innerHTML=finnotifHTML();
     else if(view.type==='chat')c.innerHTML=chatHTML();
     else if(view.type==='dayinv')c.innerHTML=dayinvHTML();
+    else if(view.type==='leaddash')c.innerHTML=leaddashHTML();
     else if(view.type==='saleswf')c.innerHTML=swfHTML();
     else if(view.type==='cal')c.innerHTML=calHTML();
     else if(view.type==='bizdash')c.innerHTML=bizdashHTML();
@@ -16146,6 +16425,7 @@ function recHTML(e,id){
   if(e==='hr'){try{h+=hrIdCardHTML(r);}catch(_e){}try{h+=hrWorkHTML(r);}catch(_e){}}
   if(e==='invoice'){try{h+=invTotalsPanel(r);}catch(_e){}}
   if(e==='purchinv'){try{h+=pinvLifePanel(r);}catch(_e){}}
+  if(e==='lead'){try{h+=leadPanel(r);}catch(_e){}}
   if(e==='invoice'&&r.d.status!=='باطل'){try{
     const t0=ds(r.d.date)?new Date(ds(r.d.date)).getTime():0;
     let tot=0;try{tot=invCalc(r).total;}catch(_e2){}
@@ -20169,6 +20449,7 @@ function openRec(e,id,preset){
     if(cur.d.biz&&cur.d.biz.length)cur.d.scope='کسب‌وکار';
     else if(cur.d.company&&cur.d.company.length)cur.d.scope='شرکت';
   }
+  if(e==='lead'&&!id){cur.d.date=cur.d.date||{s:today().slice(0,10)};cur.d.lstatus=cur.d.lstatus||'جدید';try{const me=_meHr();if(me&&!(cur.d.seller&&cur.d.seller.length))cur.d.seller=[me];}catch(_e){}}
   // تسک جدید: تاریخ و ساعت ایجاد خودکار پر می‌شود (قابل ویرایش)
   if(e==='task'&&!id){
     const n=new Date(), p=x=>String(x).padStart(2,'0');
@@ -20184,6 +20465,9 @@ function openRecWith(e,dObj){ // باز کردن فرم رکورد جدید با
 window.openRecWith=openRecWith;
 function dateInputHTML(f){
   const d=dVal(cur.d[f.k])||{};
+  if(f.one)return `<div style="display:flex;gap:5px;max-width:260px">
+    <input id="di_${f.k}_sd" data-dk="${f.k}" data-p="sd" dir="ltr" placeholder="۱۴۰۵/۰۶/۳۱" value="${iso2jstr(d.s)}" style="flex:1">
+    <button type="button" class="btn gh sm" style="padding:4px 8px" onclick="openJcal('di_${f.k}_sd')" title="انتخاب از تقویم">📅</button></div>`;
   return `<div style="display:grid;grid-template-columns:1fr 34px 100px;gap:5px">
     <input id="di_${f.k}_sd" data-dk="${f.k}" data-p="sd" dir="ltr" placeholder="شروع: ۱۴۰۵/۰۳/۱۱" value="${iso2jstr(d.s)}">
     <button type="button" class="btn gh sm" style="padding:4px" onclick="openJcal('di_${f.k}_sd')">📅</button>
