@@ -448,11 +448,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.27</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.28</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.27</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.28</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -3127,6 +3127,8 @@ function can(a,e,rec){ // a: 'c' ایجاد | 'e' ویرایش | 'd' حذف
     return false; // read / hide
   }
   // ۲) پیش‌فرض‌های داخلی
+  // 🎯 لید: ثبت و ویرایش برای همهٔ کاربرانِ تاییدشده باز است (هر نقشی، حتی نقش سفارشی) — مگر ادمین در «سطوح دسترسی» صریحاً محدود کند
+  if(e==='lead')return a!=='d';
   if(GROWTH.includes(e))return a!=='d'||(rec&&rec.d._by===myEmail()); // یادداشت/عادت شخصی: حذف مالِ خود آزاد
   if(r==='مدیرارشد')return a!=='d'; // 🗑 حذف اسناد فقط برای ادمین (یا سطح «کامل» صریح در سطوح دسترسی)
   if(r==='مدیر')return a!=='d';
@@ -20436,7 +20438,8 @@ function stratNode(b,depth){
 let cur=null;
 function openRec(e,id,preset){
   _srchQ['mfld']='';
-  if(!can(id?'e':'c',e,id?recs[id]:null)){alert('سطح دسترسی شما ('+myRole()+') اجازه این کار را نمی‌دهد');return;}
+  if(!can(id?'e':'c',e,id?recs[id]:null)){
+    alert('سطح دسترسی شما («'+myRole()+'») اجازهٔ '+(id?'ویرایش':'ثبت')+' «'+((E[e]&&E[e].n)||e)+'» را نمی‌دهد.\n\nاگر تازه وارد شده‌اید یک‌بار صفحه را تازه کنید؛ در غیر این صورت از ادمین بخواهید در «👤 کاربران و دسترسی» این بخش را برای نقش شما باز کند.');return;}
   cur=id?JSON.parse(JSON.stringify(recs[id])):{id:uid(),e,d:{},u:0,_new:true};
   if(preset&&preset.k&&!id)cur.d[preset.k]=[preset.id];
   if(preset&&preset.dk&&!id)cur.d[preset.dk]={s:preset.diso+'T'+(preset.dtime||'09:00')};
