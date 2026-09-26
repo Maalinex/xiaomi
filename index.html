@@ -448,11 +448,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.28</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.29</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.28</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.29</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -526,6 +526,7 @@ const PRESET={url:'https://rybcusmcwwifciciuvvv.supabase.co',key:'eyJhbGciOiJIUz
 const SEL='sel',MUL='mul',TXT='text',LNG='long',NUM='num',DAT='date',REL='rel',STA='sta',CHK='chk',FIL='fil',URLF='url';
 const STATUS=['Not started','In progress','Done'];
 const LV_APPR=['در انتظار تأیید','تأیید شد','رد شد'];
+const LV_CANCEL='لغو شد'; // 🚫 مرخصی‌ای که کارمند یا مدیر لغو کرده — از سهمیه کسر نمی‌شود
 const SEP_KINDS=['فاکتور فروش','رسید انبار (خرید)','خروج انبار','رسید دریافت','اعلامیه پرداخت'];
 const SEP_MSTAT=['تطبیق نشده','تطبیق شد','مغایرت'];
 const STATFA={'Not started':'شروع نشده','In progress':'در جریان','Done':'انجام شد'};
@@ -924,7 +925,7 @@ budget:{ic:'💹',n:'بودجه‌ها (قدیمی)',grp:'مالی',sub:1,f:[
 leave:{ic:'⛳',n:'مرخصی‌ها',grp:'پرسنل و سازمان',f:[
  {k:'title',n:'درخواست مرخصی',t:TXT},
  {k:'kind',n:'نوع',t:SEL,o:['استحقاقی','استعلاجی','بدون حقوق','ساعتی']},
- {k:'appr',n:'وضعیت تأیید',t:SEL,o:LV_APPR},
+ {k:'appr',n:'وضعیت تأیید',t:SEL,o:[...LV_APPR,LV_CANCEL]},
  {k:'range',n:'تاریخ شروع',t:DAT},
  {k:'days',n:'تعداد روز (برای ساعتی خودکار محاسبه می‌شود)',t:NUM},
  {k:'hours',n:'مدت به ساعت (فقط مرخصی ساعتی)',t:NUM},
@@ -3100,6 +3101,9 @@ function can(a,e,rec){ // a: 'c' ایجاد | 'e' ویرایش | 'd' حذف
   if(a==='c'&&vImplies(VIEW_ENT_CREATE,e))return true; // 🎯 مجوز صریح صفحهٔ ثبت = مجوز ساختن سندش
   // هرکس پروفایل خودش را می‌تواند ویرایش کند
   if(a==='e'&&e==='hr'&&rec&&(rec.d.email||'').toLowerCase()===myEmail().toLowerCase())return true;
+  // 🌴 هرکس درخواست مرخصی خودش را می‌تواند ویرایش/لغو کند (مستقل از نقش)
+  if(a==='e'&&e==='leave'&&rec){try{const p=relIds(rec,'person')[0];
+    if((p&&[...myHRids()].includes(p))||(rec.d._by||'').toLowerCase()===myEmail().toLowerCase())return true;}catch(_e){}}
   // 🛡️ اهداف BSC و سنجه‌ها: هرکس فقط مالِ خودش را ویرایش می‌کند؛
   // دستکاری مال دیگران فقط برای ادمین یا کسی که ادمین در سطوح دسترسی صریحاً «ویرایش/کامل» داده باشد
   if((a==='e'||a==='d')&&rec&&(e==='bsc'||e==='measure')){
@@ -6619,8 +6623,8 @@ function hrWorkHTML(r){
     h+=`<div style="font-size:12px;color:var(--tx2);margin:6px 0 4px">آخرین مرخصی‌ها</div><div class="tblwrap"><table style="font-size:11.5px"><thead><tr><th>عنوان</th><th>نوع</th><th>شروع</th><th>مدت</th><th>وضعیت</th><th></th></tr></thead><tbody>
       ${lv.map(l=>`<tr><td style="text-align:right;cursor:pointer" onclick="go('rec','leave','${l.id}')">${esc(l.d.title||'—')}</td><td>${esc(l.d.kind||'—')}</td>
         <td>${esc(iso2jstr(dOf(l,'range'))||'—')}</td><td>${lvDur(l)}</td>
-        <td>${l.d.appr===LV_APPR[1]?'✅':(l.d.appr===LV_APPR[2]?'❌':'⏳')} ${esc(l.d.appr||LV_APPR[0])}</td>
-        <td>${(l.d.appr||LV_APPR[0])===LV_APPR[0]&&can('e','leave',l)?(view._lvRej===l.id?`<input id="lvn_${l.id}" placeholder="دلیل رد (الزامی)" style="max-width:130px;font-size:11px" onclick="event.stopPropagation()"><button class="btn bad sm" onclick="event.stopPropagation();lvApprove('${l.id}',0)">⛔ ثبت رد</button><button class="btn gh sm" onclick="event.stopPropagation();view._lvRej=null;render()">انصراف</button>`:`<button class="btn gh sm" onclick="event.stopPropagation();lvApprove('${l.id}',1)">✅</button><button class="btn gh sm" onclick="event.stopPropagation();lvApprove('${l.id}',0)">❌</button>`):''}</td></tr>`).join('')}
+        <td>${l.d.appr===LV_APPR[1]?'✅':(l.d.appr===LV_APPR[2]?'❌':(l.d.appr===LV_CANCEL?'🚫':'⏳'))} ${esc(l.d.appr||LV_APPR[0])}</td>
+        <td>${l.d.appr===LV_APPR[1]&&can('e','leave',l)?`<button class="btn gh sm" style="color:var(--bad)" onclick="event.stopPropagation();lvCancelReq('${l.id}')">🚫 لغو</button>`:''}${(l.d.appr||LV_APPR[0])===LV_APPR[0]&&can('e','leave',l)?(view._lvRej===l.id?`<input id="lvn_${l.id}" placeholder="دلیل رد (الزامی)" style="max-width:130px;font-size:11px" onclick="event.stopPropagation()"><button class="btn bad sm" onclick="event.stopPropagation();lvApprove('${l.id}',0)">⛔ ثبت رد</button><button class="btn gh sm" onclick="event.stopPropagation();view._lvRej=null;render()">انصراف</button>`:`<button class="btn gh sm" onclick="event.stopPropagation();lvApprove('${l.id}',1)">✅</button><button class="btn gh sm" onclick="event.stopPropagation();lvApprove('${l.id}',0)">❌</button>`):''}</td></tr>`).join('')}
       </tbody></table></div>`;
   }
   if(ps.length){
@@ -6643,7 +6647,11 @@ function lvreqHTML(){
   const mgr=relIds(hr,'manager')[0];
   const mgrName=mgr&&recs[mgr]?recs[mgr].d.title:null;
   const mine=byE('leave').filter(l=>relIds(l,'person')[0]===me).sort((x,y)=>(y.u||0)-(x.u||0)).slice(0,10);
-  const st=x=>x===LV_APPR[1]?'<span style="color:var(--ac)">✅ تأیید شد</span>':x===LV_APPR[2]?'<span style="color:var(--bad)">⛔ رد شد</span>':'<span style="color:var(--warn)">⏳ در انتظار تأیید</span>';
+  const st=x=>x===LV_APPR[1]?'<span style="color:var(--ac)">✅ تأیید شد</span>':x===LV_APPR[2]?'<span style="color:var(--bad)">⛔ رد شد</span>':x===LV_CANCEL?'<span style="color:var(--tx2)">🚫 لغو شد</span>':'<span style="color:var(--warn)">⏳ در انتظار تأیید</span>';
+  // ✏️ حالت ویرایش یک درخواست قبلی
+  const ed=(view.lvEdit&&recs[view.lvEdit]&&!recs[view.lvEdit].del&&recs[view.lvEdit].e==='leave'&&(lvOwn(recs[view.lvEdit])||isAdmin()))?recs[view.lvEdit]:null;
+  if(view.lvEdit&&!ed)view.lvEdit=null;
+  const edH=!!(ed&&ed.d.kind==='ساعتی');
   return `<div class="sec"><h3>🌴 درخواست مرخصی — ${esc(hr.d.title||'')}</h3>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px">
       <div style="background:var(--bg3);border-radius:12px;padding:10px 14px"><div style="font-size:11px;color:var(--tx2)">سهمیهٔ سال ${b.jy.toLocaleString('fa-IR')}</div><div style="font-size:20px;font-weight:800">${b.quota.toLocaleString('fa-IR')} روز</div></div>
@@ -6651,22 +6659,62 @@ function lvreqHTML(){
       <div style="background:var(--bg3);border-radius:12px;padding:10px 14px;border:1px solid ${b.left<3?'var(--bad)':'var(--ac)'}"><div style="font-size:11px;color:var(--tx2)">ماندهٔ مرخصی</div><div style="font-size:20px;font-weight:800;color:${b.left<0?'var(--bad)':'var(--ac)'}">${lvFmtDH(b.left)}</div><div style="font-size:11px;color:var(--tx2)">معادل ${(Math.round(b.left*LV_DAYH*10)/10).toLocaleString('fa-IR')} ساعت — هر ${LV_DAYH.toLocaleString('fa-IR')} ساعت = ۱ روز</div></div>
     </div>
     <div class="row" style="margin-bottom:8px">
-      <div><label>نوع مرخصی</label><select id="lv_kind" onchange="lvKindSwitch(this.value)"><option>استحقاقی</option><option>استعلاجی</option><option>بدون حقوق</option><option>ساعتی</option></select></div>
-      <div><label>تاریخ شروع (شمسی)</label><div style="display:flex;gap:4px"><input id="lv_date" value="${iso2jstr(today()).replace(/\d/g,c=>'۰۱۲۳۴۵۶۷۸۹'[c])}" dir="ltr" placeholder="۱۴۰۵/۰۵/۳۰" style="flex:1"><button type="button" class="btn gh sm" style="padding:4px 8px" onclick="openJcal('lv_date')">📅</button></div></div>
-      <div id="lv_dwrap"><label>مدت (روز)</label><input id="lv_days" type="number" value="1" step="0.5" min="0"></div>
-      <div id="lv_swrap" style="display:none"><label>ساعت شروع</label><input id="lv_stime" placeholder="مثلاً ۱۰:۳۰" dir="ltr"></div>
-      <div id="lv_hwrap" style="display:none"><label>مدت (ساعت) <span style="opacity:.7">— هر ${LV_DAYH.toLocaleString('fa-IR')} ساعت = ۱ روز</span></label><input id="lv_hours" type="number" step="0.5" min="0" max="${LV_DAYH}" placeholder="مثلاً ۴" oninput="lvHoursCalc(this.value)"><div id="lv_hcalc" style="font-size:11px;color:var(--tx2);margin-top:3px"></div></div>
-      <div style="grid-column:1/-1"><label>توضیح / علت</label><textarea id="lv_note" rows="2" style="width:100%"></textarea></div>
+      <div><label>نوع مرخصی</label><select id="lv_kind" onchange="lvKindSwitch(this.value)">${['استحقاقی','استعلاجی','بدون حقوق','ساعتی'].map(k=>`<option ${ed&&ed.d.kind===k?'selected':''}>${k}</option>`).join('')}</select></div>
+      <div><label>تاریخ شروع (شمسی)</label><div style="display:flex;gap:4px"><input id="lv_date" value="${ed?esc(iso2jstr(dOf(ed,'range'))):iso2jstr(today())}" dir="ltr" placeholder="۱۴۰۵/۰۵/۳۰" style="flex:1"><button type="button" class="btn gh sm" style="padding:4px 8px" onclick="openJcal('lv_date')">📅</button></div></div>
+      <div id="lv_dwrap" style="${edH?'display:none':''}"><label>مدت (روز)</label><input id="lv_days" type="number" value="${ed?(edH?'':esc(String(+ed.d.days||1))):'1'}" step="0.5" min="0"></div>
+      <div id="lv_swrap" style="${edH?'':'display:none'}"><label>ساعت شروع</label><input id="lv_stime" value="${ed&&ed.d.stime?esc(ed.d.stime):''}" placeholder="مثلاً ۱۰:۳۰" dir="ltr"></div>
+      <div id="lv_hwrap" style="${edH?'':'display:none'}"><label>مدت (ساعت) <span style="opacity:.7">— هر ${LV_DAYH.toLocaleString('fa-IR')} ساعت = ۱ روز</span></label><input id="lv_hours" type="number" value="${edH?esc(String(+ed.d.hours||'')):''}" step="0.5" min="0" max="${LV_DAYH}" placeholder="مثلاً ۴" oninput="lvHoursCalc(this.value)"><div id="lv_hcalc" style="font-size:11px;color:var(--tx2);margin-top:3px">${edH?'کسر از سهمیه: '+lvFmtDH((+ed.d.hours||0)/LV_DAYH):''}</div></div>
+      <div style="grid-column:1/-1"><label>توضیح / علت</label><textarea id="lv_note" rows="2" style="width:100%">${ed?esc(lvNoteClean(ed)):''}</textarea></div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <button class="btn" onclick="lvreqSend()">📤 ارسال درخواست به مدیر</button>
-      <span style="font-size:12px;color:var(--tx2)">${mgrName?'گیرنده: <b>'+esc(mgrName)+'</b> (مدیر مستقیم شما)':'⚠️ مدیر مستقیم در پروندهٔ HR شما تعیین نشده — درخواست برای همهٔ مدیران قابل‌مشاهده است'}</span>
+      ${ed?`<button class="btn" onclick="lvreqSend()">💾 ذخیرهٔ تغییرات</button>
+        <button class="btn gh" onclick="lvEditCancel()">انصراف از ویرایش</button>
+        <span style="font-size:12px;color:var(--warn)">✏️ در حال ویرایش درخواست ${esc(iso2jstr(dOf(ed,'range'))||'')}${ed.d.appr===LV_APPR[1]?' — چون تأیید شده بود، پس از ذخیره دوباره برای تأیید مدیر می‌رود':''}</span>`
+      :`<button class="btn" onclick="lvreqSend()">📤 ارسال درخواست به مدیر</button>
+        <span style="font-size:12px;color:var(--tx2)">${mgrName?'گیرنده: <b>'+esc(mgrName)+'</b> (مدیر مستقیم شما)':'⚠️ مدیر مستقیم در پروندهٔ HR شما تعیین نشده — درخواست برای همهٔ مدیران قابل‌مشاهده است'}</span>`}
     </div>
   </div>
   <div class="sec"><h3>🗂 درخواست‌های قبلی من</h3>
-    <table><thead><tr><th>تاریخ ثبت</th><th>نوع</th><th>شروع</th><th>مدت</th><th>وضعیت</th></tr></thead><tbody>
-    ${mine.map(l=>`<tr><td>${fmtD(new Date(l.u||Date.now()).toISOString().slice(0,10))}</td><td>${esc(l.d.kind||'—')}</td><td>${fmtD(dOf(l,'range'))}</td><td>${lvDur(l)}${lvIsHourly(l)?`<div style="font-size:10px;color:var(--tx2)">کسر: ${lvFmtDH((+l.d.hours||0)/LV_DAYH)}</div>`:''}</td><td>${st(l.d.appr)}</td></tr>`).join('')||'<tr><td colspan="5" style="color:var(--tx2)">درخواستی ثبت نشده</td></tr>'}
-    </tbody></table></div>`;
+    <table><thead><tr><th>تاریخ ثبت</th><th>نوع</th><th>شروع</th><th>مدت</th><th>وضعیت</th><th>اقدام</th></tr></thead><tbody>
+    ${mine.map(l=>`<tr${view.lvEdit===l.id?' style="outline:2px solid var(--warn)"':''}><td>${fmtD(new Date(l.u||Date.now()).toISOString().slice(0,10))}</td><td>${esc(l.d.kind||'—')}</td><td>${fmtD(dOf(l,'range'))}</td><td>${lvDur(l)}${lvIsHourly(l)?`<div style="font-size:10px;color:var(--tx2)">کسر: ${lvFmtDH((+l.d.hours||0)/LV_DAYH)}</div>`:''}</td><td>${st(l.d.appr)}</td><td>${lvRowActs(l)}</td></tr>`).join('')||'<tr><td colspan="6" style="color:var(--tx2)">درخواستی ثبت نشده</td></tr>'}
+    </tbody></table>
+    <div class="hint" style="margin-top:6px">می‌توانید درخواست ثبت‌شده را ویرایش کنید یا اگر نرفتید لغوش کنید. لغو مرخصیِ تأییدشده، مدت آن را به سهمیه برمی‌گرداند؛ ویرایش مرخصیِ تأییدشده دوباره برای تأیید مدیر می‌رود.</div></div>`;
+}
+function lvOwn(l){try{const p=relIds(l,'person')[0];return (p&&[...myHRids()].includes(p))||(l.d._by||'').toLowerCase()===myEmail().toLowerCase();}catch(e){return false;}}
+function lvNoteClean(l){ // پیشوند قدیمیِ «ساعت شروع: …» از متن توضیح برداشته شود تا در ویرایش تکرار نشود
+  return String(l.d.note||'').replace(/^ساعت شروع:\s*[^—]*(—\s*)?/,'');
+}
+window.lvEditReq=function(id){
+  const l=recs[id];if(!l||l.del)return;
+  if(!(lvOwn(l)||isAdmin()||can('e','leave',l))){setSync('err','فقط صاحب درخواست یا مدیر می‌تواند ویرایش کند');return;}
+  if((l.d.appr||LV_APPR[0])===LV_CANCEL){setSync('err','این درخواست لغو شده — درخواست جدید ثبت کنید');return;}
+  view.lvEdit=id;render();
+  try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){}
+};
+window.lvEditCancel=function(){view.lvEdit=null;render();};
+window.lvCancelReq=function(id){
+  const l=recs[id];if(!l||l.del)return;
+  if(!(lvOwn(l)||isAdmin()||can('e','leave',l))){setSync('err','اجازهٔ لغو این درخواست را ندارید');return;}
+  const was=l.d.appr||LV_APPR[0];
+  if(was===LV_CANCEL)return;
+  const msg=was===LV_APPR[1]
+    ?'این مرخصیِ تأییدشده لغو شود؟\nمدت آن به سهمیهٔ مرخصی برمی‌گردد.'
+    :'این درخواست لغو شود؟';
+  if(!confirm(msg))return;
+  window._wfActing=1;
+  try{l.d={...l.d,appr:LV_CANCEL};
+    try{wfLog(l,was===LV_APPR[1]?'🚫 لغو مرخصی تأییدشده (بازگشت به سهمیه)':'🚫 انصراف از درخواست مرخصی','');}catch(e){}
+    l.u=Date.now();put(l);}finally{window._wfActing=0;}
+  if(view.lvEdit===id)view.lvEdit=null;
+  setSync('ok','🚫 لغو شد'+(was===LV_APPR[1]?' — سهمیه برگشت':''));
+};
+function lvRowActs(l){
+  if(!(lvOwn(l)||isAdmin()||can('e','leave',l)))return '';
+  const a=l.d.appr||LV_APPR[0];
+  if(a===LV_CANCEL)return '<span style="font-size:11px;color:var(--tx2)">لغو شده</span>';
+  return `<div style="display:flex;gap:5px;flex-wrap:wrap">
+    <button class="btn gh sm" onclick="lvEditReq('${l.id}')">✏️ ویرایش</button>
+    <button class="btn gh sm" style="color:var(--bad)" onclick="lvCancelReq('${l.id}')">🚫 ${a===LV_APPR[1]?'لغو مرخصی':'انصراف'}</button></div>`;
 }
 window.lvKindSwitch=function(v){
   const h=v==='ساعتی';
@@ -6699,8 +6747,25 @@ window.lvreqSend=function(){
   const note=document.getElementById('lv_note').value;
   if(!days||!date){setSync('err','تاریخ (شمسی) و مدت را وارد کن');return;}
   const b=leaveBalance(me);
-  if(kind==='استحقاقی'&&days>b.left){if(!window._lvOverOk){window._lvOverOk=1;setSync('err','مدت درخواست ('+days+' روز) از مانده ('+b.left+' روز) بیشتر است — اگر مطمئنی دوباره «ارسال» بزن');return;}window._lvOverOk=0;}
-  put({id:uid(),e:'leave',u:Date.now(),d:{title:'درخواست مرخصی '+(kind==='ساعتی'?'ساعتی ':'')+(hr.d.title||''),kind,appr:LV_APPR[0],range:date,days,hours:kind==='ساعتی'?hours:null,stime:kind==='ساعتی'?stime:null,person:[me],approver:mgr?[mgr]:[],note:(kind==='ساعتی'&&stime?('ساعت شروع: '+stime+(note?' — ':'')):'')+note}});
+  const edId=(view.lvEdit&&recs[view.lvEdit]&&!recs[view.lvEdit].del)?view.lvEdit:null;
+  let selfD=0; // سهمِ خودِ همین درخواست که قبلاً کسر شده (تا در ویرایش دوبار حساب نشود)
+  if(edId){const r0=recs[edId];if(r0.d.appr===LV_APPR[1]&&r0.d.kind!=='بدون حقوق')selfD=lvIsHourly(r0)?((+r0.d.hours||0)/LV_DAYH):(+r0.d.days||1);}
+  if(kind==='استحقاقی'&&days>b.left+selfD){if(!window._lvOverOk){window._lvOverOk=1;setSync('err','مدت درخواست ('+days+' روز) از مانده ('+Math.round((b.left+selfD)*100)/100+' روز) بیشتر است — اگر مطمئنی دوباره بزن');return;}window._lvOverOk=0;}
+  const ttl='درخواست مرخصی '+(kind==='ساعتی'?'ساعتی ':'')+(hr.d.title||'');
+  if(edId){ // ✏️ ویرایش درخواست موجود
+    const r=recs[edId], wasAppr=r.d.appr===LV_APPR[1];
+    window._wfActing=1;
+    try{
+      r.d={...r.d,title:ttl,kind,range:date,days,hours:kind==='ساعتی'?hours:null,stime:kind==='ساعتی'?stime:null,
+        note,appr:LV_APPR[0],rejnote:'',approver:relIds(r,'approver').length?r.d.approver:(mgr?[mgr]:[])};
+      try{wfLog(r,wasAppr?'✏️ ویرایش مرخصی تأییدشده — ارسال مجدد برای تأیید':'✏️ ویرایش درخواست مرخصی','');}catch(e){}
+      r.u=Date.now();put(r);
+    }finally{window._wfActing=0;}
+    view.lvEdit=null;
+    setSync('ok',wasAppr?'✅ تغییرات ثبت شد — برای تأیید مجدد مدیر ارسال شد':'✅ تغییرات ثبت شد');
+    render();return;
+  }
+  put({id:uid(),e:'leave',u:Date.now(),d:{title:ttl,kind,appr:LV_APPR[0],range:date,days,hours:kind==='ساعتی'?hours:null,stime:kind==='ساعتی'?stime:null,person:[me],approver:mgr?[mgr]:[],note}});
   setSync('ok','✅ درخواست ثبت شد و برای تأیید مدیر ارسال شد');
   render();
 };
@@ -16399,6 +16464,8 @@ function recHTML(e,id){
     ${(e==='leave'||e==='worklog')&&(r.d.appr||LV_APPR[0])===LV_APPR[0]&&can('e',e,r)?`<button class="btn gh sm" onclick="lvApprove('${id}',1)">✅ تأیید</button><button class="btn gh sm" onclick="lvApprove('${id}',0)">❌ رد</button>`:''}
     ${(e==='leave'||e==='worklog')&&r.d.appr===LV_APPR[1]?`<span class="tag g" style="align-self:center">✅ تأیید شد</span>`:''}
     ${(e==='leave'||e==='worklog')&&r.d.appr===LV_APPR[2]?`<span class="tag r" style="align-self:center">❌ رد شد</span>`:''}
+    ${e==='leave'&&r.d.appr===LV_CANCEL?`<span class="tag" style="align-self:center">🚫 لغو شد</span>`:''}
+    ${e==='leave'&&[LV_APPR[0],LV_APPR[1],LV_APPR[2]].includes(r.d.appr||LV_APPR[0])&&(lvOwn(r)||can('e','leave',r))?`<button class="btn gh sm" onclick="lvEditReq('${id}');go('lvreq')">✏️ ویرایش درخواست</button><button class="btn gh sm" style="color:var(--bad)" onclick="lvCancelReq('${id}')">🚫 لغو</button>`:''}
     ${e==='payslip'?`<button class="btn gh sm" onclick="payslipPrint('${id}')">🖨️ چاپ فیش</button>`:''}
     ${can('e',e,r)?`<button class="btn sm" onclick="openRec('${e}','${id}')">✏️ ویرایش</button>`:''}</div>`;
   // computed chips
@@ -20917,6 +20984,13 @@ function saveRec(){
     cur.d._log=old._log||[];
     if(chg.length)cur.d._log=cur.d._log.concat([{t:Date.now(),by:myEmail(),c:chg.slice(0,12)}]).slice(-40);
   }
+  // 🌴 مرخصیِ تأییدشده که ویرایش می‌شود باید دوباره تأیید شود (جلوگیری از تغییر بی‌اطلاعِ مدیر)
+  if(cur.e==='leave'&&!cur._new&&!isAdmin()){
+    try{const old=(recs[cur.id]&&recs[cur.id].d)||{};
+      if(old.appr===LV_APPR[1]&&['range','days','hours','kind','stime'].some(k=>JSON.stringify(old[k]??null)!==JSON.stringify(cur.d[k]??null))){
+        cur.d.appr=LV_APPR[0];cur.d.rejnote='';wfLog(cur,'✏️ ویرایش پس از تأیید — نیازمند تأیید مجدد','');}
+    }catch(_e){}
+  }
   cur.u=Date.now();delete cur._new;
   const _saved=cur;
   put(cur);closeModal();
@@ -21360,7 +21434,7 @@ function drawMyCal(){
   // پیگیری‌های وقایع ثبت‌شده توسط من
   byMe('evt').filter(v=>ds(v.d.follow)).forEach(v=>push(v.d.follow,'🔔','پیگیری: '+(v.d.subjT?v.d.subjT+' — ':'')+(v.d.title||''),'',`go('rec','evt','${v.id}')`));
   // مرخصی‌های من
-  [...new Set([...mine('leave','person'),...byMe('leave')])].filter(l=>ds(l.d.range)).forEach(l=>push(l.d.range,'⛳',l.d.title,'',''));
+  [...new Set([...mine('leave','person'),...byMe('leave')])].filter(l=>ds(l.d.range)&&l.d.appr!==LV_CANCEL).forEach(l=>push(l.d.range,'⛳',l.d.title,'',''));
   // مکاتبات با مهلت اقدام
   mine('letter','owner').filter(l=>l.d.astatus!=='Done'&&ds(l.d.due)).forEach(l=>push(l.d.due,'✉️','مهلت اقدام: '+(l.d.title||''),'',`go('rec','letter','${l.id}')`));
   const T=today(), horizon=new Date(new Date(T).getTime()+14*86400000).toISOString().slice(0,10);
@@ -21443,7 +21517,7 @@ function calEvents(){
   if(canSee('crm'))byE('crm').forEach(c=>push(c.d.next,'پیگیری: '+c.d.title,'🧑‍🤝‍🧑','crm',c.id,'#2f9e6e'));
   if(canSee('milestone'))byE('milestone').filter(m=>m.d.status!=='Done').forEach(m=>push(m.d.date,'🚩 '+m.d.title,'🚩','milestone',m.id,'#d9a441'));
   visE('plan').filter(p=>p.d.status!=='Done').forEach(p=>push(p.d.due,'برنامه: '+p.d.title,'🗓️','plan',p.id,'#b48a1e'));
-  visE('leave').forEach(l=>push(l.d.range,'مرخصی: '+l.d.title,'⛳','leave',l.id,'#98a096'));
+  visE('leave').filter(l=>l.d.appr!==LV_CANCEL).forEach(l=>push(l.d.range,'مرخصی: '+l.d.title,'⛳','leave',l.id,'#98a096'));
   visE('reminder').filter(r=>!r.d.done).forEach(r=>push(r.d.at,'⏰ '+r.d.title,'⏰','reminder',r.id,'#e06a5f'));
   if(canSee('evt'))byE('evt').filter(v=>ds(v.d.follow)).forEach(v=>push(v.d.follow,'🔔 پیگیری: '+(v.d.subjT?v.d.subjT+' — ':'')+(v.d.title||'').slice(0,40),'🔔','evt',v.id,'#e0a13f'));
   return ev;
