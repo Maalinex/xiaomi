@@ -448,11 +448,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.29</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.30</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.29</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.30</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -13119,6 +13119,265 @@ function smSeries2(biz,W,metric){
 window.smJumpM=function(jy,jm){const f=_jgIso(jy,jm,1);const nx=jm===12?_jgIso(jy+1,1,1):_jgIso(jy,jm+1,1);const t=_isoAdd(nx,-1);
   view.smPer='c';view.smYear=null;view.smFrom=f;view.smTo=t;view.smFromJ=iso2jstr(f);view.smToJ=iso2jstr(t);render();};
 function smNameOf(id){return id&&recs[id]?esc(recs[id].d.title||'—'):'—';}
+/* ═════ 🎨 v3.30 — طرح بصری داشبورد مدیریت فروش (هم‌سان با طرح مرجع) ═════ */
+const SMD_PAL=['#2E6FE0','#17B26A','#7A5AF8','#F79009','#06AED4','#E3008C','#F04438','#12B76A','#6172F3','#FDB022','#0BA5EC','#DD2590'];
+const SMD_MN=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const SMD_MN3=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
+function smdFa(n,dg){return (+n||0).toLocaleString('fa-IR',{maximumFractionDigits:dg==null?0:dg});}
+function smdCss(){return `<style id="smdcss">
+.smd{--smd-card:var(--bg2);--smd-line:var(--line)}
+.smd-hd{background:linear-gradient(135deg,#102542 0%,#1B3B63 55%,#24507F 100%);border-radius:18px;padding:20px 22px;color:#fff;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:var(--sh16);margin-bottom:12px}
+.smd-hd h2{font-size:20px;font-weight:800;margin:0;color:#fff}
+.smd-hd p{font-size:12.5px;opacity:.78;margin-top:5px}
+.smd-chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;white-space:nowrap}
+.smd-g{display:grid;gap:12px;margin-bottom:12px}
+.smd-k{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:15px 16px;box-shadow:var(--sh2)}
+.smd-k .ic{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:10px}
+.smd-k .lb{font-size:12px;color:var(--tx2);font-weight:600}
+.smd-k .vl{font-size:19px;line-height:1.35;font-weight:800;margin-top:3px;letter-spacing:-.3px}
+.smd-k .un{font-size:11px;color:var(--tx2);margin-top:2px}
+.smd-dl{display:inline-block;margin-top:9px;font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 9px}
+.smd-c{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:16px 17px;box-shadow:var(--sh2);margin-bottom:12px}
+.smd-c > .t{font-size:14px;font-weight:800;margin-bottom:2px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.smd-c > .s{font-size:11.5px;color:var(--tx2);margin-bottom:12px}
+.smd-lg{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--tx2);margin-top:10px;justify-content:center}
+.smd-lg i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-inline-end:5px;vertical-align:-1px}
+.smd-tb{width:100%;border-collapse:collapse;font-size:12.5px}
+.smd-tb th{text-align:center;font-size:11px;color:var(--tx2);font-weight:700;padding:8px 6px;border-bottom:1px solid var(--line)}
+.smd-tb td{text-align:center;padding:10px 6px;border-bottom:1px solid var(--line)}
+.smd-tb tr:last-child td{border-bottom:0}
+.smd-rk{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:#fff}
+.smd-bar{height:8px;border-radius:99px;background:var(--bg3);overflow:hidden;min-width:70px}
+.smd-bar i{display:block;height:100%;border-radius:99px}
+.smd-ft{background:linear-gradient(135deg,#102542 0%,#1B3B63 100%);border-radius:18px;padding:18px 22px;color:#fff;display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:4px}
+.smd-ft .f{display:flex;align-items:center;gap:9px;font-size:12.5px;opacity:.9}
+.smd-ft .f b{font-size:13px;display:block;opacity:1}
+.smd-ft .f span{font-size:11px;opacity:.7}
+.smd-cta{background:#fff;color:#102542;border:0;border-radius:999px;padding:9px 18px;font-weight:800;font-size:12.5px;cursor:pointer;font-family:inherit}
+.smd-nm{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line)}
+.smd-nm:last-child{border-bottom:0}
+.smd-nm .n{width:24px;height:24px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:#fff;flex:none}
+@media(max-width:700px){.smd-hd h2{font-size:17px}.smd-k .vl{font-size:18px}}
+</style>`;}
+/* کارت شاخص */
+function smdKpi(ic,col,lab,val,unit,dl){
+  return `<div class="smd-k"><div class="ic" style="background:${col}1F;color:${col}">${ic}</div>
+  <div class="lb">${lab}</div><div class="vl" style="color:${col}">${val}</div>
+  ${unit?`<div class="un">${unit}</div>`:''}${dl||''}</div>`;}
+function smdDelta(a,p,lbl){
+  if(!(p>0))return `<span class="smd-dl" style="background:var(--bg3);color:var(--tx2)">دورهٔ قبل داده‌ای ندارد</span>`;
+  const g=(a-p)/p*100,up=g>=0;
+  return `<span class="smd-dl" style="background:${up?'rgba(23,178,106,.13)':'rgba(240,68,56,.13)'};color:${up?'#17B26A':'#F04438'}">${up?'↑':'↓'} ${smdFa(Math.abs(g),Math.abs(g)<10?1:0)}٪ ${lbl||'نسبت به دورهٔ قبل'}</span>`;}
+/* نمودار میله‌ای گروهی: ماه‌ها × سال‌ها */
+function smdBarsYears(H,maxYears){
+  const g={},ys=new Set();
+  H.forEach(x=>{if(!x.d)return;let j;try{j=g2j(...x.d.split('-').map(Number));}catch(e){return;}
+    ys.add(j[0]);const k=j[0]+'|'+j[1];g[k]=(g[k]||0)+(x.amt||0);});
+  let years=[...ys].sort((a,b)=>a-b);
+  if(years.length>(maxYears||5))years=years.slice(-(maxYears||5));
+  if(!years.length)return '';
+  let mx=0;years.forEach(y=>{for(let m=1;m<=12;m++)mx=Math.max(mx,g[y+'|'+m]||0);});
+  if(!mx)mx=1;
+  const W=980,Hh=300,padR=58,padL=14,padT=12,padB=42;
+  const iw=W-padR-padL,ih=Hh-padT-padB;
+  const gw=iw/12,bw=Math.max(3,(gw-10)/years.length);
+  let svg=`<svg viewBox="0 0 ${W} ${Hh}" style="width:100%;height:auto" role="img">`;
+  for(let i=0;i<=4;i++){const y=padT+ih-ih*i/4;
+    svg+=`<line x1="${padL}" x2="${W-padR}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/>`;
+    svg+=`<text x="${W-padR+6}" y="${y+4}" font-size="10.5" fill="var(--tx2)">${smdFa(mx*i/4/1e6)}م</text>`;}
+  for(let m=1;m<=12;m++){
+    const x0=padL+(m-1)*gw;
+    years.forEach((y,yi)=>{const v=g[y+'|'+m]||0;const bh=Math.max(v>0?2:0,ih*v/mx);
+      const bx=x0+(gw-bw*years.length)/2+yi*bw;
+      svg+=`<rect x="${bx.toFixed(1)}" y="${(padT+ih-bh).toFixed(1)}" width="${(bw-1.5).toFixed(1)}" height="${bh.toFixed(1)}" rx="2.5" fill="${SMD_PAL[yi%SMD_PAL.length]}"><title>${SMD_MN[m-1]} ${_faY(y)}: ${money(v)}</title></rect>`;});
+    svg+=`<text x="${(x0+gw/2).toFixed(1)}" y="${padT+ih+18}" font-size="11" fill="var(--tx2)" text-anchor="middle">${SMD_MN3[m-1]}</text>`;}
+  svg+=`<line x1="${padL}" x2="${W-padR}" y1="${padT+ih}" y2="${padT+ih}" stroke="var(--bd)" stroke-width="1"/></svg>`;
+  svg+=`<div class="smd-lg">${years.map((y,i)=>`<span><i style="background:${SMD_PAL[i%SMD_PAL.length]}"></i>${_faY(y)}</span>`).join('')}</div>`;
+  return svg;}
+/* دونات */
+function smdDonut(items,size,cx0){
+  const tot=items.reduce((a,x)=>a+x.v,0);
+  const S=size||210,R=S/2-6,r=R*0.6,C=S/2;
+  if(!tot)return `<div class="empty" style="margin:0">داده‌ای برای نمایش نیست</div>`;
+  let a0=-Math.PI/2,svg=`<svg viewBox="0 0 ${S} ${S}" style="width:${S}px;max-width:100%;height:auto">`;
+  items.forEach((x,i)=>{const ang=x.v/tot*Math.PI*2,a1=a0+ang;const c=x.c||SMD_PAL[i%SMD_PAL.length];
+    const p=(rr,a)=>[(C+rr*Math.cos(a)).toFixed(2),(C+rr*Math.sin(a)).toFixed(2)].join(' ');
+    const big=ang>Math.PI?1:0;
+    if(ang>=Math.PI*2-1e-6){svg+=`<circle cx="${C}" cy="${C}" r="${(R+r)/2}" fill="none" stroke="${c}" stroke-width="${R-r}"/>`;}
+    else svg+=`<path d="M ${p(R,a0)} A ${R} ${R} 0 ${big} 1 ${p(R,a1)} L ${p(r,a1)} A ${r} ${r} 0 ${big} 0 ${p(r,a0)} Z" fill="${c}"><title>${esc(x.n)}: ${money(x.v)} (${smdFa(x.v/tot*100,1)}٪)</title></path>`;
+    a0=a1;});
+  svg+=`<text x="${C}" y="${C-2}" text-anchor="middle" font-size="13" font-weight="800" fill="var(--tx)">${money(tot)}</text>
+  <text x="${C}" y="${C+16}" text-anchor="middle" font-size="10.5" fill="var(--tx2)">جمع کل</text></svg>`;
+  svg+=`<div class="smd-lg" style="flex-direction:column;align-items:flex-start;gap:6px">${items.map((x,i)=>`<span style="display:flex;align-items:center;gap:6px"><i style="background:${x.c||SMD_PAL[i%SMD_PAL.length]}"></i><span style="color:var(--tx)">${esc(x.n)}</span><b style="color:var(--tx2);font-weight:700">${smdFa(x.v/tot*100,1)}٪</b></span>`).join('')}</div>`;
+  return `<div style="display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap">${svg}</div>`;}
+/* گیج نیم‌دایره */
+function smdGauge(pct){
+  const p=Math.max(0,Math.min(150,pct||0));const shown=Math.min(100,p);
+  const W=300,Hh=172,C=W/2,CY=150,R=120,th=22;
+  const col=p>=90?'#17B26A':p>=60?'#F79009':'#F04438';
+  const pt=(rr,a)=>[(C+rr*Math.cos(a)).toFixed(2),(CY+rr*Math.sin(a)).toFixed(2)].join(' ');
+  const a0=Math.PI,a1=Math.PI+Math.PI*shown/100;
+  let svg=`<svg viewBox="0 0 ${W} ${Hh}" style="width:100%;max-width:300px;height:auto">
+  <path d="M ${pt(R,Math.PI)} A ${R} ${R} 0 0 1 ${pt(R,2*Math.PI)}" fill="none" stroke="var(--bg3)" stroke-width="${th}" stroke-linecap="round"/>`;
+  if(shown>0.5)svg+=`<path d="M ${pt(R,a0)} A ${R} ${R} 0 ${shown>50?1:0} 1 ${pt(R,a1)}" fill="none" stroke="${col}" stroke-width="${th}" stroke-linecap="round"/>`;
+  svg+=`<text x="${C}" y="${CY-26}" text-anchor="middle" font-size="34" font-weight="800" fill="${col}">${smdFa(pct,0)}٪</text>
+  <text x="${C}" y="${CY-6}" text-anchor="middle" font-size="11.5" fill="var(--tx2)">میزان تحقق</text>
+  <text x="${C-R}" y="${CY+20}" text-anchor="middle" font-size="10.5" fill="var(--tx2)">۰٪</text>
+  <text x="${C+R}" y="${CY+20}" text-anchor="middle" font-size="10.5" fill="var(--tx2)">۱۰۰٪</text></svg>`;
+  return svg;}
+/* میله‌های افقی */
+function smdHBars(items,unit){
+  const mx=Math.max(1,...items.map(x=>x.v));
+  return `<div style="display:flex;flex-direction:column;gap:11px">${items.map((x,i)=>`
+   <div style="display:flex;align-items:center;gap:10px">
+    <span style="width:105px;font-size:12px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.n)}</span>
+    <span class="smd-bar" style="flex:1"><i style="width:${Math.max(2,x.v/mx*100).toFixed(1)}%;background:${SMD_PAL[i%SMD_PAL.length]}"></i></span>
+    <b style="font-size:11.5px;width:96px;text-align:left;flex:none">${unit==='n'?smdFa(x.v):money(x.v)}</b>
+   </div>`).join('')}</div>`;}
+/* نمودار خطی دوگانه: فروش + سود */
+function smdDual(pts,pts2){
+  if(!pts.length)return '';
+  const W=980,Hh=280,padL=14,padR=58,padT=14,padB=36;
+  const iw=W-padL-padR,ih=Hh-padT-padB;
+  const mx=Math.max(1,...pts.map(p=>p.v),...pts2.map(p=>p.v));
+  const X=i=>padL+(pts.length===1?iw/2:iw*i/(pts.length-1));
+  const Y=v=>padT+ih-ih*(v/mx);
+  const line=(arr)=>arr.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.v).toFixed(1)).join(' ');
+  let svg=`<svg viewBox="0 0 ${W} ${Hh}" style="width:100%;height:auto">
+  <defs><linearGradient id="smdga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2E6FE0" stop-opacity=".30"/><stop offset="1" stop-color="#2E6FE0" stop-opacity="0"/></linearGradient></defs>`;
+  for(let i=0;i<=4;i++){const y=padT+ih-ih*i/4;
+    svg+=`<line x1="${padL}" x2="${W-padR}" y1="${y}" y2="${y}" stroke="var(--line)"/>`;
+    svg+=`<text x="${W-padR+6}" y="${y+4}" font-size="10.5" fill="var(--tx2)">${smdFa(mx*i/4/1e6)}م</text>`;}
+  svg+=`<path d="${line(pts)} L ${X(pts.length-1).toFixed(1)} ${padT+ih} L ${X(0).toFixed(1)} ${padT+ih} Z" fill="url(#smdga)"/>`;
+  svg+=`<path d="${line(pts)}" fill="none" stroke="#2E6FE0" stroke-width="2.5" stroke-linejoin="round"/>`;
+  svg+=`<path d="${line(pts2)}" fill="none" stroke="#17B26A" stroke-width="2.5" stroke-dasharray="6 4" stroke-linejoin="round"/>`;
+  pts.forEach((p,i)=>{svg+=`<circle cx="${X(i).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="3.2" fill="#2E6FE0"><title>${esc(p.l)} — فروش: ${money(p.v)}</title></circle>`;
+    svg+=`<circle cx="${X(i).toFixed(1)}" cy="${Y(pts2[i]?pts2[i].v:0).toFixed(1)}" r="3.2" fill="#17B26A"><title>${esc(p.l)} — سود: ${money(pts2[i]?pts2[i].v:0)}</title></circle>`;});
+  const step=Math.ceil(pts.length/12);
+  pts.forEach((p,i)=>{if(i%step)return;svg+=`<text x="${X(i).toFixed(1)}" y="${padT+ih+18}" font-size="10.5" fill="var(--tx2)" text-anchor="middle">${esc(p.l)}</text>`;});
+  svg+=`</svg><div class="smd-lg"><span><i style="background:#2E6FE0"></i>فروش</span><span><i style="background:#17B26A"></i>سود</span></div>`;
+  return svg;}
+/* ═══ بدنهٔ طرح ═══ */
+function smdBoard(b,W,H,L,cur,prev){
+  const sum=(a,k)=>a.reduce((s,x)=>s+(x[k]||0),0);
+  const net=sum(cur,'amt'),pnet=sum(prev,'amt');
+  const profit=sum(cur,'profit'),pprofit=sum(prev,'profit');
+  const orders=cur.length,porders=prev.length;
+  const margin=net>0?profit/net*100:0,pmargin=pnet>0?pprofit/pnet*100:0;
+  const custs=new Set(cur.map(x=>x.cust).filter(Boolean)),pcusts=new Set(prev.map(x=>x.cust).filter(Boolean));
+  const due=sum(cur,'due');
+  let h='<div class="smd">'+smdCss();
+  /* ① سربرگ */
+  h+=`<div class="smd-hd"><div style="flex:1;min-width:210px">
+    <h2>داشبورد مدیریت فروش${b&&recs[b]?' — '+esc(recs[b].d.title):''}</h2>
+    <p>تحلیل عملکرد فروش، سود و مشتریان در یک نگاه</p></div>
+    <span class="smd-chip">📅 ${esc(W.label)}</span>
+    <span class="smd-chip">${esc(iso2jstr(W.from))} تا ${esc(iso2jstr(W.to))}</span></div>`;
+  /* ② کارت‌های شاخص */
+  h+=`<div class="smd-g" style="grid-template-columns:repeat(auto-fit,minmax(178px,1fr))">
+    ${smdKpi('💰','#2E6FE0','کل فروش',money(net),'مبلغ خالص دوره',smdDelta(net,pnet))}
+    ${smdKpi('💎','#17B26A','سود از فروش',money(profit),'سود ناخالص',smdDelta(profit,pprofit))}
+    ${smdKpi('📊','#7A5AF8','درصد سود',smdFa(margin,1)+'٪','حاشیهٔ سود ناخالص',smdDelta(margin,pmargin))}
+    ${smdKpi('🧾','#F79009','تعداد کل فاکتور',smdFa(orders),'فاکتور فروش ثبت‌شده',smdDelta(orders,porders))}
+    ${smdKpi('👥','#06AED4','تعداد مشتریان',smdFa(custs.size),'مشتری خریدار در دوره',smdDelta(custs.size,pcusts.size))}
+  </div>`;
+  /* ③ مقایسه فروش در ماه‌های مختلف (چند سال) */
+  const bars=smdBarsYears(H,5);
+  if(bars)h+=`<div class="smd-c"><div class="t">📊 مقایسه فروش در ماه‌های مختلف</div>
+    <div class="s">مبلغ فروش هر ماه شمسی به تفکیک سال — بر پایهٔ همهٔ فاکتورهای ثبت‌شده</div>${bars}</div>`;
+  /* ④ سهم هر محصول + ⑤ گیج تحقق */
+  const gP={};L.forEach(x=>{if(!x.d||x.d<W.from||x.d>W.to)return;if(!x.pid)return;gP[x.pid]=(gP[x.pid]||0)+(x.amt||0);});
+  let prodArr=Object.keys(gP).map(id=>({n:smNameOf(id),v:gP[id],id})).sort((a,c)=>c.v-a.v);
+  const prodTop=prodArr.slice(0,6);
+  if(prodArr.length>6){const rest=prodArr.slice(6).reduce((a,x)=>a+x.v,0);if(rest>0)prodTop.push({n:'سایر کالاها',v:rest,c:'#98A2B3'});}
+  let tAmt=0,tActual=0;try{byE('saletarget').forEach(t=>{if(b&&relIds(t,'biz').length&&!relIds(t,'biz').includes(b))return;const pr=targetProgress(t);tAmt+=(+t.d.tamount||0);tActual+=pr.amount;});}catch(e){}
+  const tPct=tAmt>0?tActual/tAmt*100:null;
+  h+=`<div class="smd-g" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+   <div class="smd-c" style="margin:0"><div class="t">🍩 سهم هر محصول از کل فروش</div><div class="s">در دورهٔ ${esc(W.label)}</div>${smdDonut(prodTop,210)}</div>
+   <div class="smd-c" style="margin:0"><div class="t">🎯 میزان تحقق فروش</div><div class="s">${tPct!=null?'نسبت فروش محقق‌شده به تارگت ثبت‌شده':'برای نمایش، تارگت فروش ثبت کنید'}</div>
+    <div style="display:flex;justify-content:center">${smdGauge(tPct||0)}</div>
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <div style="flex:1;background:var(--bg3);border-radius:12px;padding:10px;text-align:center"><div style="font-size:10.5px;color:var(--tx2)">هدف فروش</div><div style="font-size:14px;font-weight:800;margin-top:3px">${tAmt?money(tAmt):'—'}</div></div>
+      <div style="flex:1;background:rgba(23,178,106,.10);border-radius:12px;padding:10px;text-align:center"><div style="font-size:10.5px;color:var(--tx2)">فروش محقق‌شده</div><div style="font-size:14px;font-weight:800;margin-top:3px;color:#17B26A">${money(tActual)}</div></div>
+    </div>
+    ${canSee('saletarget')?`<div style="text-align:center;margin-top:9px"><button class="btn gh sm" onclick="go('list','saletarget')">🎯 مدیریت تارگت‌های فروش</button></div>`:''}</div>
+  </div>`;
+  /* ⑥ مناطق */
+  const gR={};cur.forEach(x=>{const c=x.cust&&recs[x.cust];const p=c?(c.d.province||c.d.city||''):'';const k=p&&!/^—/.test(p)?p:'نامشخص';gR[k]=(gR[k]||0)+(x.amt||0);});
+  const regArr=Object.keys(gR).map(n=>({n,v:gR[n]})).sort((a,c)=>c.v-a.v).slice(0,8);
+  /* ⑦ روند سود و فروش */
+  const ptsA=smSeries2(b,W,'amount'),ptsP=smSeries2(b,W,'profit');
+  h+=`<div class="smd-g" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+   <div class="smd-c" style="margin:0"><div class="t">📍 مقایسه فروش به تفکیک مناطق</div><div class="s">بر پایهٔ استان/شهر مشتری — ${esc(W.label)}</div>
+    ${regArr.length?smdHBars(regArr):'<div class="empty" style="margin:0">استان مشتریان ثبت نشده</div>'}</div>
+   <div class="smd-c" style="margin:0"><div class="t">📈 روند سود و فروش</div><div class="s">${esc(W.label)}</div>${smdDual(ptsA,ptsP)}</div>
+  </div>`;
+  /* ⑧ عملکرد فروشندگان */
+  const gA={};cur.forEach(x=>{if(!x.seller)return;const o=gA[x.seller]||(gA[x.seller]={amt:0,n:0,profit:0});o.amt+=x.amt;o.n++;o.profit+=x.profit;});
+  const agArr=Object.keys(gA).map(id=>({id,...gA[id]})).sort((a,c)=>c.amt-a.amt);
+  const totA=agArr.reduce((a,x)=>a+x.amt,0)||1;
+  if(agArr.length)h+=`<div class="smd-c"><div class="t">🏆 عملکرد فروشندگان</div><div class="s">رتبه‌بندی بر پایهٔ مبلغ فروش دوره</div>
+   <div class="tblwrap"><table class="smd-tb"><thead><tr><th>رتبه</th><th style="text-align:right">فروشنده</th><th>مبلغ فروش</th><th>سهم از کل</th><th>تعداد فاکتور</th><th>سود</th></tr></thead><tbody>
+   ${agArr.map((x,i)=>`<tr><td><span class="smd-rk" style="background:${i===0?'#F79009':i===1?'#98A2B3':i===2?'#B54708':'#2E6FE0'}">${smdFa(i+1)}</span></td>
+    <td style="text-align:right;font-weight:700">${smNameOf(x.id)}</td><td><b>${money(x.amt)}</b></td>
+    <td><div style="display:flex;align-items:center;gap:7px;justify-content:center"><span class="smd-bar" style="width:70px"><i style="width:${(x.amt/totA*100).toFixed(1)}%;background:${SMD_PAL[i%SMD_PAL.length]}"></i></span><span style="font-size:11px">${smdFa(x.amt/totA*100,1)}٪</span></div></td>
+    <td>${smdFa(x.n)}</td><td style="color:${x.profit<0?'var(--bad)':'#17B26A'};font-weight:700">${money(x.profit)}</td></tr>`).join('')}
+   </tbody></table></div></div>`;
+  /* ⑨ مقایسه محصولات پرفروش */
+  if(prodArr.length){const top=prodArr.slice(0,8);const mxP=top[0].v||1;
+   h+=`<div class="smd-g" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+    <div class="smd-c" style="margin:0"><div class="t">📦 مقایسه محصولات پرفروش</div><div class="s">${esc(W.label)} — بر پایهٔ مبلغ فروش</div>
+     ${top.map((x,i)=>`<div class="smd-nm"><span class="n" style="background:${SMD_PAL[i%SMD_PAL.length]}">${smdFa(i+1)}</span>
+      <span style="flex:1;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.n}</span>
+      <span class="smd-bar" style="width:74px"><i style="width:${Math.max(3,x.v/mxP*100).toFixed(1)}%;background:${SMD_PAL[i%SMD_PAL.length]}"></i></span>
+      <b style="font-size:11.5px;width:92px;text-align:left">${money(x.v)}</b></div>`).join('')}</div>
+    <div class="smd-c" style="margin:0"><div class="t">🍩 سهم محصولات پرفروش</div><div class="s">${esc(W.label)}</div>${smdDonut(top.slice(0,6),200)}</div>
+   </div>`;}
+  /* ⑩ داده‌های تکمیلی خودِ ما — با همین قالب */
+  const ex=[];
+  // نرخ تبدیل لید به مشتری
+  try{const lds=byE('lead').filter(l=>{const d=leadDate(l);return d>=W.from&&d<=W.to;});
+    const cv=lds.filter(leadIsConv).length;
+    if(lds.length)ex.push(smdKpi('🎯','#DD2590','نرخ تبدیل لید به مشتری',smdFa(cv/lds.length*100,1)+'٪',smdFa(cv)+' از '+smdFa(lds.length)+' سرنخ',''));
+  }catch(e){}
+  // پیش‌فاکتورهای باز
+  try{const pf=byE('invoice').filter(v=>v.d.kind==='پیش‌فاکتور'&&v.d.status!=='باطل'&&(!b||relIds(v,'biz').includes(b)));
+    const pfw=pf.filter(v=>{const d=ds(v.d.date);return d&&d>=W.from&&d<=W.to;});
+    let pa=0;pfw.forEach(v=>{try{pa+=invCalc(v).base;}catch(e){}});
+    ex.push(smdKpi('📝','#6172F3','پیش‌فاکتورهای باز',smdFa(pfw.length),money(pa)+' ارزش بالقوه',''));}catch(e){}
+  // مطالبات
+  let dueAll=0;try{byE('invoice').forEach(v=>{if(v.d.kind==='پیش‌فاکتور'||v.d.status==='باطل')return;if(b&&!relIds(v,'biz').includes(b))return;const c=invCalc(v);if(c.due>0)dueAll+=c.due;});}catch(e){}
+  ex.push(smdKpi('⏳','#F04438','مطالبات وصول‌نشده',money(dueAll),'کل تاریخچه · '+money(due)+' در این دوره',''));
+  // مرجوعی
+  try{const cl=byE('claim').filter(c=>{const d=ds(c.d.date);return d&&d>=W.from&&d<=W.to;});
+    if(cl.length||canSee('claim'))ex.push(smdKpi('↩️','#B54708','مرجوعی و گارانتی',smdFa(cl.length),'درخواست در این دوره',''));}catch(e){}
+  // میانگین هر فاکتور
+  ex.push(smdKpi('🧮','#0BA5EC','میانگین هر فاکتور',money(orders?Math.round(net/orders):0),'ارزش متوسط سبد خرید',''));
+  // تخفیف
+  ex.push(smdKpi('💸','#F79009','تخفیف اعطایی',money(sum(cur,'disc')),'در این دوره',''));
+  if(ex.length)h+=`<div class="smd-c" style="background:transparent;border:0;box-shadow:none;padding:0"><div class="t" style="margin-bottom:10px">➕ شاخص‌های تکمیلی سامانهٔ ما</div>
+    <div class="smd-g" style="grid-template-columns:repeat(auto-fit,minmax(178px,1fr))">${ex.join('')}</div></div>`;
+  // سهم هر کسب‌وکار + مشتریان برتر
+  const bizArr=(function(){const g={};cur.forEach(x=>{const v=recs[x.id];const bs=v?relIds(v,'biz'):[];const k=bs[0]||'';g[k]=(g[k]||0)+(x.amt||0);});
+    return Object.keys(g).map(id=>({n:id&&recs[id]?esc(recs[id].d.title):'بدون کسب‌وکار',v:g[id]})).sort((a,c)=>c.v-a.v);})();
+  const gC={};cur.forEach(x=>{if(!x.cust)return;gC[x.cust]=(gC[x.cust]||0)+(x.amt||0);});
+  const custArr=Object.keys(gC).map(id=>({n:smNameOf(id),v:gC[id]})).sort((a,c)=>c.v-a.v).slice(0,8);
+  h+=`<div class="smd-g" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+   <div class="smd-c" style="margin:0"><div class="t">🏢 سهم هر کسب‌وکار از فروش</div><div class="s">${esc(W.label)}</div>
+    ${bizArr.length>1?smdDonut(bizArr,200):(bizArr.length?smdHBars(bizArr):'<div class="empty" style="margin:0">داده‌ای نیست</div>')}</div>
+   <div class="smd-c" style="margin:0"><div class="t">👑 مشتریان برتر</div><div class="s">${esc(W.label)} — بر پایهٔ مبلغ خرید</div>
+    ${custArr.length?smdHBars(custArr):'<div class="empty" style="margin:0">داده‌ای نیست</div>'}</div>
+  </div>`;
+  /* ⑪ نوار پایانی */
+  h+=`<div class="smd-ft">
+    <div class="f">📊<span><b>گزارش‌های تحلیلی</b><span>روند، سهم و مقایسهٔ دوره‌ای</span></span></div>
+    <div class="f">🎯<span><b>پایش تارگت</b><span>تحقق اهداف فروش لحظه‌ای</span></span></div>
+    <div class="f">📥<span><b>خروجی اکسل</b><span>از همهٔ گزارش‌های تفصیلی</span></span></div>
+    <span style="flex:1"></span>
+    <button class="smd-cta" onclick="var el=document.getElementById('smdetail');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})">مشاهدهٔ گزارش‌های تفصیلی ↓</button></div>`;
+  h+='</div>';
+  return h;}
+
 function smdashHTML(){
   const bizzes=bizAll();const b=gBiz();
   view.smPer=view.smPer||'m';view.smMode=view.smMode||'m';view.smMetric=view.smMetric||'amount';
@@ -13169,6 +13428,9 @@ function smdashHTML(){
     ${view.smPer==='c'?`<input id="sm_from" value="${esc(view.smFromJ||'')}" placeholder="از: ۱۴۰۴/۰۱/۰۱" onchange="smSetRange(this.value,null)" style="max-width:118px;font-size:12px"><button class="btn gh sm" style="padding:4px 7px" onclick="openJcal('sm_from')">📅</button>
     <input id="sm_to" value="${esc(view.smToJ||'')}" placeholder="تا: ۱۴۰۴/۱۲/۲۹" onchange="smSetRange(null,this.value)" style="max-width:118px;font-size:12px"><button class="btn gh sm" style="padding:4px 7px" onclick="openJcal('sm_to')">📅</button>`:''}
     <span style="font-size:11px;color:var(--tx2)">│ دوره: ${esc(W.label)} (مقایسه با دوره قبل)</span></div>`;
+  // ═══ 🎨 v3.30 — طرح بصری داشبورد (هم‌سان با طرح مرجع) ═══
+  h+=smdBoard(b,W,H,L,cur,prev);
+  h+=`<div id="smdetail" style="display:flex;align-items:center;gap:9px;margin:16px 0 8px"><b style="font-size:13.5px">🔎 گزارش‌های تفصیلی</b><span style="flex:1;height:1px;background:var(--line)"></span></div>`;
   // 🔎 اگر در دورهٔ انتخابی فروشی نیست، به‌جای صفرهای گیج‌کننده راهنمای پرش بده
   if(!cur.length){
     const lastD=H.map(x=>x.d).filter(Boolean).sort().pop();
