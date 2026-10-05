@@ -448,11 +448,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.31</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.32</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.31</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.32</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -5969,6 +5969,107 @@ function invLinesOf(invId){
   return _invLineIdx[invId]||[];
 }
 function invLineAmt(l){return Math.max(0,(l.d.qty||0)*(l.d.price||0)-(l.d.ldisc||0));}
+/* ═══ 🔢 v3.32 — شماره‌گذاری یکتای اسناد (فاکتور فروش، فاکتور خرید، سند حسابداری) ═══
+   باگ قدیمی: شمارهٔ بعدی از byE(...) گرفته می‌شد؛ byE محدودهٔ داده، زمینهٔ فعال (کسب‌وکار/شرکت)
+   و رکوردهای حذف‌شده را فیلتر می‌کند ⇒ هر کاربر/کسب‌وکار شمارندهٔ جداگانه می‌گرفت و شماره‌ها تکراری می‌شد.
+   راهکار: شمارنده از «همهٔ» رکوردها (شاملِ حذف‌شده و خارج از محدوده) خوانده می‌شود،
+   ارقام فارسی هم فهمیده می‌شود، و شمارهٔ عددی در فیلد seq ذخیره می‌شود تا دیگر نیاز به تجزیهٔ متن نباشد. */
+function serRaw(e){const out=[];for(const id in recs){const r=recs[id];if(r&&r.e===e&&r.d&&typeof r.d==='object')out.push(r);}return out;}
+function serOf(r,key){
+  if(r.d.seq!=null&&!isNaN(+r.d.seq)&&+r.d.seq>0)return Math.floor(+r.d.seq);
+  let s='';try{s=faNum(String(r.d[key||'title']||''));}catch(e){s=String(r.d[key||'title']||'');}
+  s=s.trim();
+  let n=0;
+  // عدد انتهای عنوان («فاکتور ۱۲۳») — ولی نه جزئی از تاریخ/کد مثل ۱۴۰۵/۰۶/۱۲
+  const m=s.match(/(?:^|[\s#:،,])(\d{1,7})\s*$/);
+  if(m)n=+m[1];
+  if(!n){const m2=s.match(/^\s*(\d{1,7})(?![\d\/\-.])/);if(m2)n=+m2[1];}
+  return n>999999?0:n;                          // عدد بزرگ (تاریخ/کد) شمارهٔ سند نیست
+}
+function serNew(e,key){                         // شمارهٔ آزاد بعدی — هرگز تکراری
+  key=key||'title';
+  const used=new Set();let mx=0;
+  serRaw(e).forEach(r=>{const n=serOf(r,key);if(n){used.add(n);if(n>mx)mx=n;}});
+  let x=mx+1,g=0;while(used.has(x)&&g++<100000)x++;
+  return x;
+}
+window.serNew=serNew;
+/* 🔎 یافتن شماره‌های تکراری (فقط رکوردهای فعال) */
+function serDups(e,key){
+  key=key||'title';
+  const g={};
+  serRaw(e).forEach(r=>{if(r.del)return;const n=serOf(r,key);if(!n)return;(g[n]||(g[n]=[])).push(r);});
+  return Object.keys(g).filter(n=>g[n].length>1).sort((a,b)=>+a-+b).map(n=>({no:+n,recs:g[n].slice().sort((a,b)=>(a.u||0)-(b.u||0))}));
+}
+/* ♻️ اصلاح: به هر سندِ تکراری (جز قدیمی‌ترین) شمارهٔ آزاد تازه بده */
+function serFixOne(r,key,newNo){
+  key=key||'title';
+  const old=String(r.d[key]||'');
+  let t;try{t=faNum(old);}catch(e){t=old;}
+  if(/(\d{1,7})\s*$/.test(t.trim()))t=t.trim().replace(/(\d{1,7})\s*$/,String(newNo));
+  else if(/^\s*(\d{1,7})(?!\d)/.test(t))t=t.replace(/^(\s*)(\d{1,7})/,'$1'+newNo);
+  else t=(t.trim()?t.trim()+' ':'')+newNo;
+  r.d[key]=t;r.d.seq=newNo;
+  r.d.wflog=(r.d.wflog||[]).concat([{t:Date.now(),by:(typeof myEmail==='function'?myEmail():''),act:'اصلاح شمارهٔ تکراری: «'+old+'» ← «'+t+'»'}]);
+  r.u=Date.now();put(r);
+  return t;
+}
+window.serFixAll=function(e,key){
+  const d=serDups(e,key);
+  if(!d.length){alert('هیچ شمارهٔ تکراری‌ای پیدا نشد ✅');return;}
+  const n=d.reduce((a,x)=>a+x.recs.length-1,0);
+  if(!confirm('🔢 '+d.length.toLocaleString('fa-IR')+' شمارهٔ تکراری پیدا شد.\n'+n.toLocaleString('fa-IR')+' سند شمارهٔ تازه می‌گیرند (قدیمی‌ترین سندِ هر شماره دست‌نخورده می‌ماند).\n\nادامه می‌دهید؟'))return;
+  let done=0;
+  d.forEach(gr=>{gr.recs.slice(1).forEach(r=>{const no=serNew(e,key);serFixOne(r,key,no);done++;});});
+  alert('✅ '+done.toLocaleString('fa-IR')+' سند شماره‌گذاری مجدد شد.');
+  _byRaw=null;render();
+};
+window.serFixRec=function(e,key,id){
+  const r=recs[id];if(!r)return;
+  const no=serNew(e,key);
+  if(!confirm('شمارهٔ این سند به '+no.toLocaleString('fa-IR')+' تغییر کند؟'))return;
+  serFixOne(r,key,no);_byRaw=null;render();
+};
+const SER_DOCS=[
+  {e:'invoice',key:'title',n:'🧾 فاکتور و پیش‌فاکتور فروش'},
+  {e:'purchinv',key:'title',n:'🧾 فاکتور خرید'},
+  {e:'voucher',key:'num',n:'📒 اسناد حسابداری'},
+];
+function docnoHTML(){
+  let h=`<div class="tools"><b style="font-size:13px">🔢 بررسی و اصلاح شمارهٔ اسناد</b><span style="flex:1"></span></div>
+  <div class="sec" style="border-inline-start:3px solid var(--ac)"><div style="font-size:12px;line-height:1.9">
+    شمارهٔ اسناد تا نسخهٔ ۳.۳۱ از فهرستِ «قابل‌مشاهده برای کاربر» گرفته می‌شد؛ به همین دلیل وقتی کسب‌وکار فعال عوض می‌شد یا کاربر محدودهٔ دادهٔ محدود داشت، شمارندهٔ هر نفر جدا می‌شد و شماره‌ها تکراری می‌شدند.<br>
+    از این نسخه شماره از <b>همهٔ</b> اسناد (شامل حذف‌شده‌ها) گرفته می‌شود و در فیلد عددی ذخیره می‌شود؛ پس تکرار تازه رخ نمی‌دهد. این صفحه برای اصلاح تکرارهای قبلی است.
+  </div></div>`;
+  SER_DOCS.forEach(D=>{
+    if(!E[D.e])return;
+    const all=serRaw(D.e).filter(r=>!r.del);
+    const dups=serDups(D.e,D.key);
+    const bad=dups.reduce((a,x)=>a+x.recs.length-1,0);
+    h+=`<div class="sec"><h3>${D.n} <span class="c">${all.length.toLocaleString('fa-IR')}</span>
+      <span style="flex:1"></span>
+      ${dups.length?`<button class="btn sm" onclick="serFixAll('${D.e}','${D.key}')">♻️ اصلاح خودکار ${bad.toLocaleString('fa-IR')} سند</button>`:''}</h3>
+      ${dups.length?`<div style="font-size:12px;color:var(--bad);margin-bottom:8px">⚠️ ${dups.length.toLocaleString('fa-IR')} شماره تکراری است (${bad.toLocaleString('fa-IR')} سند باید شمارهٔ تازه بگیرد)</div>
+      <div class="tblwrap" style="max-height:420px;overflow:auto"><table><thead><tr><th>شماره</th><th style="text-align:right">اسناد با این شماره</th><th>تاریخ</th><th>مبلغ</th><th></th></tr></thead><tbody>
+      ${dups.slice(0,200).map(gr=>gr.recs.map((r,i)=>{
+        let amt='—';try{amt=D.e==='invoice'?money(invCalc(r).total):D.e==='purchinv'?money(pinvCalc(r).total):(r.d.amount?money(+r.d.amount):'—');}catch(e){}
+        const dt=ds(r.d.date)||ds(r.d.vdate)||'';
+        return `<tr style="${i?'':'background:rgba(16,124,16,.06)'}">
+          <td>${i?'':`<b>${gr.no.toLocaleString('fa-IR')}</b>`}</td>
+          <td style="text-align:right"><span style="cursor:pointer;color:var(--ac)" onclick="openRec('${D.e}','${r.id}')">${esc(String(r.d[D.key]||'—'))}</span>
+            ${i?'':'<span style="font-size:10px;color:var(--ok)"> ← قدیمی‌ترین (دست‌نخورده می‌ماند)</span>'}</td>
+          <td style="font-size:11px">${dt?esc(iso2jstr(dt)):'—'}</td>
+          <td style="font-size:11.5px">${amt}</td>
+          <td>${i?`<button class="btn gh sm" onclick="serFixRec('${D.e}','${D.key}','${r.id}')">🔢 شمارهٔ تازه</button>`:''}</td></tr>`;}).join('')).join('')}
+      </tbody></table></div>
+      ${dups.length>200?`<div style="font-size:11px;color:var(--tx2);margin-top:6px">۲۰۰ مورد اول نمایش داده شد — «اصلاح خودکار» همه را درست می‌کند</div>`:''}`
+      :`<div class="empty" style="margin:0">✅ شمارهٔ تکراری ندارد — شمارهٔ بعدی: <b>${serNew(D.e,D.key).toLocaleString('fa-IR')}</b></div>`}
+    </div>`;
+  });
+  return h;
+}
+window.docnoHTML=docnoHTML;
+
 function invCalc(inv){
   const lines=invLinesOf(inv.id);
   const sub=lines.reduce((a,l)=>a+invLineAmt(l),0);
@@ -7009,10 +7110,10 @@ function aiLocalPurch(q,fileText){
   const gs=Object.values(groups);
   if(!gs.length)return 'ردیف معتبری در فایل نبود.';
   const recsOut=[];let n=0;
-  const num0=Math.max(0,...byE('invoice').map(v=>+String(v.d.title).replace(/\D/g,'')||0));
+  const num0=serNew('invoice','title')-1;
   gs.forEach((g,gi)=>{
     const invId='tmpinv'+gi;
-    recsOut.push({e:'invoice',id:invId,d:{title:'فاکتور '+(num0+gi+1),kind:'فاکتور فروش',status:'صادر شده',date:g.dt,customer:g.cust,note:'ثبت گروهی توسط دستیار هوشمند'}});
+    recsOut.push({e:'invoice',id:invId,d:{title:'فاکتور '+(num0+gi+1),seq:num0+gi+1,kind:'فاکتور فروش',status:'صادر شده',date:g.dt,customer:g.cust,note:'ثبت گروهی توسط دستیار هوشمند'}});
     g.lines.forEach((l,li)=>{recsOut.push({e:'invline',id:'tmpln'+gi+'_'+li,d:{title:l.prod,invoice:invId,product:l.prod,qty:l.qty,price:l.price}});n++;});
   });
   const res=aiRunApply({note:'ثبت '+gs.length.toLocaleString('fa-IR')+' فاکتور با '+n.toLocaleString('fa-IR')+' ردیف از فایل',recs:recsOut});
@@ -7776,8 +7877,8 @@ window.prjSetupCOA=prjSetupCOA;
 function prjAcct(pid,base){const pr=recs[pid];return pr?acctByCode(base+'-'+prjCode(pr)):'';}
 function _prjVoucher(title,dt,mark){
   const vid=uid();
-  const num=(Math.max(0,...byE('voucher').map(v=>+String(v.d.num).replace(/\D/g,'')||0))+1);
-  const d={title,num:String(num),vdate:dt||{s:today()},vtype:'عادی',scope:'شرکت',status:'ثبت‌شده (دائم)'};
+  const num=serNew('voucher','num');
+  const d={title,num:String(num),seq:num,vdate:dt||{s:today()},vtype:'عادی',scope:'شرکت',status:'ثبت‌شده (دائم)'};
   if(mark)Object.assign(d,mark);
   put({id:vid,e:'voucher',d,u:Date.now()});
   return vid;
@@ -8023,7 +8124,7 @@ function postInvoice(id,silent){
     const cash=acctByCode('101'),recv=acctByCode('102'),rev=acctByCode('401'),vat=acctByCode('204'),cogsA=acctByCode('501'),invA=acctByCode('103');
     if(rev&&(cash||recv)&&c.total>0){
       vid=uid();
-      const num=(Math.max(0,...byE('voucher').map(v=>+String(v.d.num).replace(/\D/g,'')||0))+1);
+      const num=serNew('voucher','num');
       put({id:vid,e:'voucher',d:{title:'فروش — '+(inv.d.title||''),num:String(num),vdate:dt,vtype:'عادی',scope:'کسب‌وکار',status:'ثبت‌شده (دائم)',_inv:id},u:Date.now()});
       const L=(acct,d,cr,desc)=>{if(!acct||(!d&&!cr))return;put({id:uid(),e:'vline',d:{title:desc||'',voucher:[vid],acct:[acct],debit:d||0,credit:cr||0},u:Date.now()});};
       if(c.paid>0&&cash)L(cash,c.paid,0,'دریافت نقد');
@@ -8097,12 +8198,12 @@ function pinvSave(status){
   const valid=pinvDraft.lines.filter(l=>l.product&&(+l.qty||0)>0);
   if(!valid.length){alert('حداقل یک ردیف با کالا و تعداد لازم است');return;}
   const pid=uid();
-  const num=(Math.max(0,...byE('purchinv').map(v=>+String(v.d.title).replace(/\D/g,'')||0))+1);
+  const num=serNew('purchinv','title');
   const _ptot=pinvTotalsDraft().total;
   let _ppaid=pinvDraft.paymode==='نقدی'?_ptot:pinvDraft.paymode==='بخشی'?Math.min(_ptot,+faNum(String(pinvDraft.paidAmt||0)).replace(/[,،٬\s]/g,'')||0):0;
   if(pinvDraft.kind==='پیش‌فاکتور خرید')_ppaid=0;
   const _isPf=pinvDraft.kind==='پیش‌فاکتور خرید';
-  put({id:pid,e:'purchinv',d:{title:pinvDraft.desc||((_isPf?'پیش‌فاکتور خرید ':'خرید ')+num),kind:pinvDraft.kind||'فاکتور خرید',biz:pinvDraft.biz?[pinvDraft.biz]:[],
+  put({id:pid,e:'purchinv',d:{title:pinvDraft.desc||((_isPf?'پیش‌فاکتور خرید ':'خرید ')+num),seq:num,kind:pinvDraft.kind||'فاکتور خرید',biz:pinvDraft.biz?[pinvDraft.biz]:[],
     supplier:pinvDraft.supplier?[pinvDraft.supplier]:[],status:status||'ثبت شده',
     cur:pinvDraft.cur||'ریال',fx:+pinvDraft.fx||null,origin:pinvDraft.origin||'داخلی',
     date:{s:pinvDraft.vdate},due:pinvDraft.due?{s:pinvDraft.due}:null,
@@ -8141,7 +8242,7 @@ function postPurch(id,silent){
     const cash=acctByCode('101'),pay=acctByCode('201'),invA=acctByCode('103'),vatPre=acctByCode('104');
     if(invA&&(cash||pay)&&c.total>0){
       vid=uid();
-      const num=(Math.max(0,...byE('voucher').map(v=>+String(v.d.num).replace(/\D/g,'')||0))+1);
+      const num=serNew('voucher','num');
       put({id:vid,e:'voucher',d:{title:'خرید — '+(p.d.title||''),num:String(num),vdate:dt,vtype:'عادی',scope:'کسب‌وکار',status:'ثبت‌شده (دائم)',_pinv:id},u:Date.now()});
       const L=(acct,d,cr,desc)=>{if(!acct||(!d&&!cr))return;put({id:uid(),e:'vline',d:{title:desc||'',voucher:[vid],acct:[acct],debit:d||0,credit:cr||0},u:Date.now()});};
       L(invA,c.base+c.ship,0,'افزایش موجودی کالا');
@@ -8800,7 +8901,7 @@ function settlePost(id,silent){
   if(cfg.gl){
     const cash=acctByCode('101'),recv=acctByCode('102'),payA=acctByCode('201');
     if(cash){
-      vid=uid();const num=(Math.max(0,...byE('voucher').map(v=>+String(v.d.num).replace(/\D/g,'')||0))+1);
+      vid=uid();const num=serNew('voucher','num');
       put({id:vid,e:'voucher',d:{title:(pay?'پرداخت — ':'دریافت — ')+(s.d.title||''),num:String(num),vdate:s.d.date||{s:today()},vtype:'عادی',scope:'کسب‌وکار',status:'ثبت‌شده (دائم)',_settle:id},u:Date.now()});
       const L=(acct,d,cr,desc)=>{if(!acct||(!d&&!cr))return;put({id:uid(),e:'vline',d:{title:desc||'',voucher:[vid],acct:[acct],debit:d||0,credit:cr||0},u:Date.now()});};
       if(pay){L(payA,amt,0,'کاهش بدهی به تامین‌کننده');L(cash,0,amt,'پرداخت نقد');}
@@ -9943,11 +10044,11 @@ function invSave(status){
     }
   }
   const iid=uid();
-  const num=(Math.max(0,...byE('invoice').map(v=>+String(v.d.title).replace(/\D/g,'')||0))+1);
+  const num=serNew('invoice','title');
   const _tot=invTotalsDraft().total;
   const paid=invDraft.paymode==='نقدی'?_tot:invDraft.paymode==='بخشی'?Math.min(_tot,+faNum(String(invDraft.paidAmt||0)).replace(/[,،٬\s]/g,'')||0):0;
   if(invDraft.customer&&recs[invDraft.customer]&&String(invDraft.natid||'').trim()&&String(recs[invDraft.customer].d.natid||'')!==String(invDraft.natid).trim()){const _c=recs[invDraft.customer];_c.d.natid=String(invDraft.natid).trim();_c.u=Date.now();put(_c);}
-  put({id:iid,e:'invoice',d:{title:invDraft.desc||('فاکتور '+num),natid:String(invDraft.natid||'').trim()||undefined,biz:invDraft.biz?[invDraft.biz]:[],
+  put({id:iid,e:'invoice',d:{title:invDraft.desc||('فاکتور '+num),seq:num,natid:String(invDraft.natid||'').trim()||undefined,biz:invDraft.biz?[invDraft.biz]:[],
     customer:invDraft.customer?[invDraft.customer]:[],referrer:invDraft.referrer?[invDraft.referrer]:[],seller:invDraft.seller?[invDraft.seller]:[],orgu:invDraft.orgu?[invDraft.orgu]:(invDraft.seller&&recs[invDraft.seller]?relIds(recs[invDraft.seller],'orgu'):[]),kind:invDraft.kind,status:status||'صادر شده',
     date:{s:dNorm(invDraft.vdate)||invDraft.vdate},due:invDraft.due?{s:dNorm(invDraft.due)||invDraft.due}:null,
     disc:+invDraft.disc||0,discpct:+invDraft.discpct||0,official:invDraft.official||'غیررسمی',warranty:invDraft.warranty||undefined,taxpct:+invDraft.taxpct||0,ship:+invDraft.ship||0,paid,note:invDraft.note,
@@ -11449,7 +11550,7 @@ function glCloseBooks(){
   if(!re){alert('حساب «۳۰۲ سود انباشته» در کدینگ یافت نشد');return;}
   if(!confirm('سند بستن حساب‌های موقت صادر شود؟ همه حساب‌های سود و زیانی صفر و سود دوره به «سود انباشته» منتقل می‌شود.'))return;
   const vid=uid();
-  const num=(Math.max(0,...byE('voucher').map(v=>+String(v.d.num).replace(/\D/g,'')||0))+1);
+  const num=serNew('voucher','num');
   put({id:vid,e:'voucher',d:{title:'بستن حساب‌های موقت',num:String(num),vdate:{s:today()},vtype:'بستن حساب‌های موقت',scope:'هلدینگ',status:'ثبت‌شده (دائم)'},u:Date.now()});
   let net=0;
   pls.forEach(({a,net:n})=>{
@@ -11533,7 +11634,7 @@ function glSave(status){
   const valid=glDraft.lines.filter(l=>relIds({d:{acct:l.acct?[l.acct]:[]}},'acct').length&&((+l.debit||0)||(+l.credit||0)));
   if(valid.length<2){alert('حداقل دو ردیف معتبر (حساب + مبلغ) لازم است');return;}
   const vid=uid();
-  const num=(Math.max(0,...byE('voucher').map(v=>+String(v.d.num).replace(/\D/g,'')||0))+1);
+  const num=serNew('voucher','num');
   put({id:vid,e:'voucher',d:{title:glDraft.desc||'سند '+num,num:String(num),vdate:{s:glDraft.vdate},vtype:'عادی',scope:glDraft.scope,
     company:glDraft.company?[glDraft.company]:[],status:status||'ثبت‌شده (دائم)'},u:Date.now()});
   glDraft.lines.forEach(l=>{if(!l.acct||!((+l.debit||0)||(+l.credit||0)))return;
@@ -12339,13 +12440,14 @@ function nav(){
     <div class="nav-i ${view.type==='ucenter'?'on':''}" onclick="go('ucenter')">🎛️ مرکز فرمان کاربران</div>
     <div class="nav-i ${view.type==='acl'?'on':''}" onclick="go('acl')">🛡️ سطوح دسترسی</div>
     <div class="nav-i ${view.type==='schema'?'on':''}" onclick="go('schema')">🧩 فیلدها و بخش‌ها</div>
-    <div class="nav-i ${view.type==='backupdash'?'on':''}" onclick="go('backupdash')">💾 پشتیبان‌گیری و بازیابی</div>`;
+    <div class="nav-i ${view.type==='backupdash'?'on':''}" onclick="go('backupdash')">💾 پشتیبان‌گیری و بازیابی</div>
+    <div class="nav-i ${view.type==='docno'?'on':''}" onclick="go('docno')">🔢 بررسی شمارهٔ اسناد</div>`;
     else if(!isPending())sys+=`<div class="nav-i ${view.type==='backupdash'?'on':''}" onclick="go('backupdash')">🚨 حالت بحران (تغییرات من)</div>`;
     if(!isPending()&&canView('basedash'))sys+=`<div class="nav-i ${view.type==='basedash'?'on':''}" onclick="go('basedash')">🧰 اطلاعات پایه</div>`;
     if(!isPending()&&canView('impcenter'))sys+=`<div class="nav-i ${view.type==='impcenter'?'on':''}" onclick="go('impcenter')">📥 مرکز ورود اکسل</div>`;
     if(sys){
       let open=false;try{open=localStorage.getItem('xr_sysgrp')==='1';}catch(e){}
-      const onSys=['users','ucenter','acl','schema','backupdash','basedash','impcenter'].includes(view.type);
+      const onSys=['users','ucenter','acl','schema','backupdash','docno','basedash','impcenter'].includes(view.type);
       if(onSys)open=true;
       h+=`<div class="nav-h navg" style="cursor:pointer" onclick="try{localStorage.setItem('xr_sysgrp',${open?"'0'":"'1'"});}catch(e){}nav()">
         <span class="gic" style="background:#5a6b80">⚙️</span><span style="flex:1">مدیریت سیستم</span><span class="pm">${open?'⌄':'‹'}</span></div>`;
@@ -12469,6 +12571,7 @@ function render(){
     view.type==='pfdash'?'🔄 تسویه درگاه‌ها و پلتفرم‌ها':
     view.type==='perfdash'?'🎖️ داشبورد عملکرد':
     view.type==='aligndash'?'🧭 همسویی عملکرد و استراتژی':
+    view.type==='docno'?'🔢 بررسی و اصلاح شمارهٔ اسناد':
     view.type==='backupdash'?'💾 پشتیبان‌گیری و بازیابی':
     view.type==='salesdash'?'🧾 داشبورد فروش':
     view.type==='invnew'?'🧾 صدور فاکتور':
@@ -12583,6 +12686,7 @@ function render(){
     else if(view.type==='pfdash')c.innerHTML=pfdashHTML();
     else if(view.type==='perfdash')c.innerHTML=perfdashHTML();
     else if(view.type==='aligndash')c.innerHTML=aligndashHTML();
+    else if(view.type==='docno')c.innerHTML=isAdmin()?docnoHTML():'<div class="empty">این بخش فقط برای ادمین است</div>';
     else if(view.type==='backupdash')c.innerHTML=backupdashHTML();
     else if(view.type==='salesdash')c.innerHTML=salesdashHTML();
     else if(view.type==='invnew')c.innerHTML=invnewHTML();
