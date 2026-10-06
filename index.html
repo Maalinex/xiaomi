@@ -451,11 +451,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.38</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.39</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.38</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.39</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -6295,10 +6295,126 @@ window.wasteBrief=wasteBrief;
 /* ===== 🧾 موتور فاکتور فروش (M07) ===== */
 let _invLineIdx=null;
 function invLinesOf(invId){
-  if(!_invLineIdx){_invLineIdx={};byE('invline').forEach(l=>{const p=relIds(l,'invoice')[0];if(p)(_invLineIdx[p]||(_invLineIdx[p]=[])).push(l);});}
+  // 🛡 v3.39 — ردیف، فرزندِ فاکتور است: اگر خودِ فاکتور دیده می‌شود، ردیف‌هایش هم باید دیده شوند.
+  // قبلاً از byE خوانده می‌شد و «کسب‌وکار فعال» یا «محدودهٔ داده» ردیف‌ها را حذف می‌کرد ⇒ فاکتور بدون کالا و بدون مبلغ.
+  if(!_invLineIdx){_invLineIdx={};
+    for(const id in recs){const l=recs[id];
+      if(!l||l.del||l.e!=='invline'||!l.d)continue;
+      const p=(l.d.invoice&&l.d.invoice[0])||'';
+      if(p)(_invLineIdx[p]||(_invLineIdx[p]=[])).push(l);}}
   return _invLineIdx[invId]||[];
 }
 function invLineAmt(l){return Math.max(0,(l.d.qty||0)*(l.d.price||0)-(l.d.ldisc||0));}
+/* ═══ 🩺 v3.39 — سلامت فاکتورها: یافتن و اصلاح فاکتورهای ناقص ═══ */
+function invChk(){
+  const out=[];
+  const linesByInv={},plinesByInv={};
+  for(const id in recs){const r=recs[id];if(!r||r.del||!r.d)continue;
+    if(r.e==='invline'){const p=(r.d.invoice&&r.d.invoice[0])||'';if(p)(linesByInv[p]||(linesByInv[p]=[])).push(r);}
+    if(r.e==='purchline'){const p=(r.d.purchinv&&r.d.purchinv[0])||'';if(p)(plinesByInv[p]||(plinesByInv[p]=[])).push(r);}}
+  const scan=(ent,lineEnt,idx,relK)=>{
+    for(const id in recs){const v=recs[id];
+      if(!v||v.del||v.e!==ent||!v.d)continue;
+      if(v.d.status==='باطل')continue;
+      const ls=idx[id]||[];
+      const bz=(v.d.biz&&v.d.biz[0])||'';
+      const probs=[];
+      if(!ls.length)probs.push({k:'nolines',t:'هیچ ردیف کالایی ندارد'});
+      ls.forEach(l=>{
+        const pid=(l.d.product&&l.d.product[0])||'';
+        if(!pid)probs.push({k:'noprod',t:'ردیفی بدون کالا (مبلغ '+money(Math.max(0,(+l.d.qty||0)*(+l.d.price||0)-(+l.d.ldisc||0)))+')',line:l.id});
+        else if(!recs[pid]||recs[pid].del)probs.push({k:'delprod',t:'کالای این ردیف حذف شده',line:l.id});
+        const lb=(l.d.biz&&l.d.biz[0])||'';
+        if(bz&&lb&&lb!==bz)probs.push({k:'bizmix',t:'کسب‌وکار ردیف با فاکتور فرق دارد — ردیف در نمای فیلترشده دیده نمی‌شد',line:l.id});
+        if(!(+l.d.qty>0))probs.push({k:'noqty',t:'ردیفی با تعداد صفر',line:l.id});
+      });
+      if(probs.length)out.push({inv:v,ent,lineEnt,relK,lines:ls,probs,bz});
+    }
+  };
+  scan('invoice','invline',linesByInv,'invoice');
+  scan('purchinv','purchline',plinesByInv,'purchinv');
+  return out.sort((a,b)=>(b.inv.u||0)-(a.inv.u||0));
+}
+window.invChkFixBiz=function(invId){
+  const v=recs[invId];if(!v)return;
+  const bz=(v.d.biz&&v.d.biz[0])||'';
+  const le=v.e==='invoice'?'invline':'purchline',rk=v.e==='invoice'?'invoice':'purchinv';
+  let n=0;
+  for(const id in recs){const l=recs[id];
+    if(!l||l.del||l.e!==le||!l.d)continue;
+    if(((l.d[rk]&&l.d[rk][0])||'')!==invId)continue;
+    const lb=(l.d.biz&&l.d.biz[0])||'';
+    if(lb===bz)continue;
+    l.d.biz=bz?[bz]:[];l.u=Date.now();put(l);n++;}
+  invalidateByE();
+  alert(n?'✅ کسب‌وکار '+n.toLocaleString('fa-IR')+' ردیف با فاکتور هم‌تراز شد':'تفاوتی نبود');
+  render();
+};
+window.invChkFixAllBiz=function(){
+  const rows=invChk().filter(x=>x.probs.some(p=>p.k==='bizmix'));
+  if(!rows.length){alert('موردی نیست ✅');return;}
+  if(!confirm('🧢 در '+rows.length.toLocaleString('fa-IR')+' سند، کسب‌وکار ردیف‌ها با خودِ سند فرق دارد و همین باعث می‌شود ردیف و مبلغ دیده نشود.\n\nهمه هم‌تراز شوند؟'))return;
+  let n=0;
+  rows.forEach(x=>{const bz=x.bz;const le=x.lineEnt,rk=x.relK;
+    for(const id in recs){const l=recs[id];
+      if(!l||l.del||l.e!==le||!l.d)continue;
+      if(((l.d[rk]&&l.d[rk][0])||'')!==x.inv.id)continue;
+      const lb=(l.d.biz&&l.d.biz[0])||'';
+      if(lb===bz)continue;
+      l.d.biz=bz?[bz]:[];l.u=Date.now();put(l);n++;}});
+  invalidateByE();alert('✅ '+n.toLocaleString('fa-IR')+' ردیف اصلاح شد');render();
+};
+window.invChkSetProd=function(lineId,name){
+  const l=recs[lineId];if(!l)return;
+  const nm=String(name||'').trim();
+  if(!nm){alert('نام کالا را بنویس');return;}
+  const p=Object.values(recs).find(x=>x&&x.e==='product'&&!x.del&&String(x.d.title||'').trim()===nm);
+  if(!p){alert('کالای «'+nm+'» پیدا نشد — اول در «📦 کالا و خدمات» بسازش یا نام دقیق را بنویس');return;}
+  l.d.product=[p.id];l.d.title=p.d.title||l.d.title;l.u=Date.now();put(l);
+  invalidateByE();render();
+};
+window.invChkDelLine=function(lineId){
+  const l=recs[lineId];if(!l)return;
+  if(!confirm('این ردیف حذف شود؟'))return;
+  l.del=true;l.u=Date.now();put(l);invalidateByE();render();
+};
+function invhealthHTML(){
+  const rows=invChk();
+  const bizmix=rows.filter(x=>x.probs.some(p=>p.k==='bizmix')).length;
+  let h=`<div class="tools"><b style="font-size:13px">🩺 سلامت فاکتورها</b><span style="flex:1"></span>
+    ${bizmix?`<button class="btn sm" onclick="invChkFixAllBiz()">🧢 هم‌ترازکردن کسب‌وکار ${bizmix.toLocaleString('fa-IR')} سند</button>`:''}</div>`;
+  h+=`<div class="sec" style="border-inline-start:3px solid var(--ac)">${uiTip('invhlp',
+    'فاکتورهایی که ردیف کالا ندارند یا ردیفشان ناقص است این‌جا فهرست می‌شوند.',
+    'سه ایراد رایج: ۱) ردیفی که کالایش پیدا نشده (معمولاً از «ورود گروهی دستیار هوشمند» وقتی نام کالا با فهرست کالاها یکی نبوده) — مبلغ دارد ولی کالا ندارد. ۲) ردیفی که «کسب‌وکار»ش با خود فاکتور فرق دارد؛ تا نسخهٔ ۳.۳۸ چنین ردیفی در نمای فیلترشده اصلاً دیده نمی‌شد و فاکتور بدون کالا و بدون مبلغ ظاهر می‌شد (از این نسخه ردیف‌ها دیگر فیلتر نمی‌شوند، ولی هم‌ترازکردن داده هم بهتر است). ۳) فاکتوری که اصلاً ردیفی ندارد.')}</div>`;
+  if(!rows.length)return h+`<div class="sec"><div class="empty">✅ همهٔ فاکتورها سالم‌اند — هیچ فاکتور بدون کالا یا با ردیف ناقص پیدا نشد</div></div>`;
+  h+=`<div class="sec"><h3>موارد یافت‌شده <span class="c">${rows.length.toLocaleString('fa-IR')}</span></h3>
+  <div class="tblwrap" style="max-height:520px;overflow:auto"><table><thead><tr>
+    <th style="text-align:right">سند</th><th>تاریخ</th><th>مبلغ</th><th style="text-align:right">ایراد</th><th>اقدام</th></tr></thead><tbody>`;
+  rows.slice(0,150).forEach(x=>{
+    let amt='—';try{amt=x.ent==='invoice'?money(invCalc(x.inv).total):money(pinvCalc(x.inv).total);}catch(e){}
+    const dt=ds(x.inv.d.date)||'';
+    h+=`<tr><td style="text-align:right"><span style="cursor:pointer;color:var(--ac)" onclick="openRec('${x.ent}','${x.inv.id}')">${esc(x.inv.d.title||'—')}</span>
+        <div style="font-size:10px;color:var(--tx2)">${x.ent==='invoice'?'فاکتور فروش':'فاکتور خرید'}${x.bz&&recs[x.bz]?' · '+esc(recs[x.bz].d.title):''}</div></td>
+      <td style="font-size:11px">${dt?esc(iso2jstr(dt)):'—'}</td>
+      <td style="white-space:nowrap">${amt}</td>
+      <td style="text-align:right;white-space:normal;font-size:11.5px">
+        ${x.probs.map(p=>`<div style="color:${p.k==='nolines'?'var(--bad)':'var(--warn)'}">⚠️ ${esc(p.t)}</div>`).join('')}</td>
+      <td style="white-space:nowrap">
+        ${x.probs.some(p=>p.k==='bizmix')?`<button class="btn sm" onclick="invChkFixBiz('${x.inv.id}')">🧢 هم‌تراز</button> `:''}
+        ${x.probs.filter(p=>p.k==='noprod'||p.k==='delprod').map(p=>`
+          <div style="display:flex;gap:4px;margin-top:4px">
+            <input list="dl_hprod" id="hp_${p.line}" placeholder="🔍 کالای درست…" style="width:150px;font-size:11.5px">
+            <button class="btn gh sm" onclick="invChkSetProd('${p.line}',document.getElementById('hp_${p.line}').value)">ثبت</button>
+            <button class="btn bad sm" onclick="invChkDelLine('${p.line}')">✕</button></div>`).join('')}
+      </td></tr>`;
+  });
+  h+=`</tbody></table></div>
+  <datalist id="dl_hprod">${byE('product').map(p=>`<option value="${esc(p.d.title||'')}">`).join('')}</datalist>
+  ${rows.length>150?`<div style="font-size:11px;color:var(--tx2);margin-top:6px">۱۵۰ مورد اول نمایش داده شد</div>`:''}</div>`;
+  return h;
+}
+window.invhealthHTML=invhealthHTML;
+
 /* ═══ 🔢 v3.32 — شماره‌گذاری یکتای اسناد (فاکتور فروش، فاکتور خرید، سند حسابداری) ═══
    باگ قدیمی: شمارهٔ بعدی از byE(...) گرفته می‌شد؛ byE محدودهٔ داده، زمینهٔ فعال (کسب‌وکار/شرکت)
    و رکوردهای حذف‌شده را فیلتر می‌کند ⇒ هر کاربر/کسب‌وکار شمارندهٔ جداگانه می‌گرفت و شماره‌ها تکراری می‌شد.
@@ -7631,6 +7747,7 @@ function aiRunApply(a){
   const NOW=Date.now();const tmp={};let made=0,upd=0,errs=[];
   // پاس اول: id موقت
   list.forEach(x=>{if(x.id&&String(x.id).startsWith('tmp'))tmp[x.id]=uid();});
+  const miss=[]; // 🔎 نام‌هایی که به رکوردی وصل نشدند
   const resolve=(e,k,v)=>{ // نام یا tmp → آرایه id
     const f=E[e].f.find(ff=>ff.k===k);if(!f||f.t!==REL)return v;
     const arr=Array.isArray(v)?v:[v];
@@ -7638,11 +7755,15 @@ function aiRunApply(a){
       x=String(x||'').trim();if(!x)return null;
       if(tmp[x])return tmp[x];
       if(recs[x]&&!recs[x].del)return x;
-      const t=byE(f.r).find(rr=>_pnorm(rr.d.title)===_pnorm(x));
+      let t=byE(f.r).find(rr=>_pnorm(rr.d.title)===_pnorm(x));
+      if(!t)t=Object.values(recs).find(rr=>rr&&rr.e===f.r&&!rr.del&&_pnorm(rr.d.title)===_pnorm(x));
+      if(!t)miss.push({e,k,n:x,ref:E[f.r].n});
       return t?t.id:null;
     }).filter(Boolean);
     return ids;
   };
+  // ردیف‌های سند بدون پیوندِ ضروری ساخته نمی‌شوند (وگرنه «ردیف بدون کالا» می‌ماند)
+  const REQ={invline:['invoice','product'],purchline:['purchinv','product'],vline:['voucher','acct']};
   list.forEach(x=>{
     try{
       const e=x.e;if(!E[e]){errs.push(e+'؟');return;}
@@ -7656,14 +7777,22 @@ function aiRunApply(a){
         else d[k]=v;
       });
       if(!d.biz&&E[e].f.some(f=>f.k==='biz')&&gBiz())d.biz=[gBiz()];
+      const req=REQ[e];
+      if(req&&req.some(k=>!(Array.isArray(d[k])?d[k].length:d[k]))){
+        errs.push('ردیف «'+(x.d&&x.d.title||'')+'» ثبت نشد — '+req.filter(k=>!(Array.isArray(d[k])?d[k].length:d[k])).map(k=>(E[e].f.find(f=>f.k===k)||{n:k}).n).join(' و ')+' پیدا نشد');
+        return;}
       if(target){target.d={...target.d,...d};target.u=NOW;queue.push(target.id);upd++;}
       else{const id=tmp[x.id]||uid();recs[id]={id,e,d:{_by:myEmail(),...d},u:NOW};queue.push(id);made++;}
     }catch(err){errs.push(String(err).slice(0,60));}
   });
   queue=[...new Set(queue)];
-  try{_byRaw=null;}catch(e){}try{_invLineIdx=null;}catch(e){}try{_whQtyCache=null;}catch(e){}try{_fifoCache=null;}catch(e){}
+  try{invalidateByE();}catch(e){}
   saveLocal();saveQ();flush();
-  return {created:made,updated:upd,errors:errs.slice(0,5)};
+  if(miss.length){
+    const uniq=[...new Set(miss.map(m=>m.ref+': «'+m.n+'»'))];
+    errs.push('پیدا نشد → '+uniq.slice(0,8).join('، ')+(uniq.length>8?' و…':''));
+  }
+  return {created:made,updated:upd,errors:errs.slice(0,8),missing:miss};
 }
 async function aiReadFile(f){ // CSV/TSV/متن + xlsx (بدون کتابخانه، با DecompressionStream)
   const name=(f.name||'').toLowerCase();
@@ -8474,7 +8603,12 @@ window.postInvoice=postInvoice;window.saveAutopost=saveAutopost;
 /* ===== 🧾 موتور فاکتور خرید (قرینه‌ی فروش) ===== */
 let _pinvLineIdx=null;
 function pinvLinesOf(pid){
-  if(!_pinvLineIdx){_pinvLineIdx={};byE('purchline').forEach(l=>{const p=relIds(l,'purchinv')[0];if(p)(_pinvLineIdx[p]||(_pinvLineIdx[p]=[])).push(l);});}
+  // 🛡 v3.39 — همانند ردیف‌های فروش: ردیف خرید هرگز با زمینه/محدوده فیلتر نمی‌شود
+  if(!_pinvLineIdx){_pinvLineIdx={};
+    for(const id in recs){const l=recs[id];
+      if(!l||l.del||l.e!=='purchline'||!l.d)continue;
+      const p=(l.d.purchinv&&l.d.purchinv[0])||'';
+      if(p)(_pinvLineIdx[p]||(_pinvLineIdx[p]=[])).push(l);}}
   return _pinvLineIdx[pid]||[];
 }
 /* ═══ 🚚 v3.33 — هزینه‌های جانبی خرید: تفکیک نوع، طرف‌حسابِ هر هزینه، و سرشکن اختیاری روی بهای کالا ═══ */
@@ -12965,13 +13099,14 @@ function nav(){
     <div class="nav-i ${view.type==='acl'?'on':''}" onclick="go('acl')">🛡️ سطوح دسترسی</div>
     <div class="nav-i ${view.type==='schema'?'on':''}" onclick="go('schema')">🧩 فیلدها و بخش‌ها</div>
     <div class="nav-i ${view.type==='backupdash'?'on':''}" onclick="go('backupdash')">💾 پشتیبان‌گیری و بازیابی</div>
-    <div class="nav-i ${view.type==='docno'?'on':''}" onclick="go('docno')">🔢 بررسی شمارهٔ اسناد</div>`;
+    <div class="nav-i ${view.type==='docno'?'on':''}" onclick="go('docno')">🔢 بررسی شمارهٔ اسناد</div>
+    <div class="nav-i ${view.type==='invhealth'?'on':''}" onclick="go('invhealth')">🩺 سلامت فاکتورها</div>`;
     else if(!isPending())sys+=`<div class="nav-i ${view.type==='backupdash'?'on':''}" onclick="go('backupdash')">🚨 حالت بحران (تغییرات من)</div>`;
     if(!isPending()&&canView('basedash'))sys+=`<div class="nav-i ${view.type==='basedash'?'on':''}" onclick="go('basedash')">🧰 اطلاعات پایه</div>`;
     if(!isPending()&&canView('impcenter'))sys+=`<div class="nav-i ${view.type==='impcenter'?'on':''}" onclick="go('impcenter')">📥 مرکز ورود اکسل</div>`;
     if(sys){
       let open=false;try{open=localStorage.getItem('xr_sysgrp')==='1';}catch(e){}
-      const onSys=['users','ucenter','acl','schema','backupdash','docno','basedash','impcenter'].includes(view.type);
+      const onSys=['users','ucenter','acl','schema','backupdash','docno','invhealth','basedash','impcenter'].includes(view.type);
       if(onSys)open=true;
       h+=`<div class="nav-h navg" style="cursor:pointer" onclick="try{localStorage.setItem('xr_sysgrp',${open?"'0'":"'1'"});}catch(e){}nav()">
         <span class="gic" style="background:#5a6b80">⚙️</span><span style="flex:1">مدیریت سیستم</span><span class="pm">${open?'⌄':'‹'}</span></div>`;
@@ -13096,6 +13231,7 @@ function render(){
     view.type==='pfdash'?'🔄 تسویه درگاه‌ها و پلتفرم‌ها':
     view.type==='perfdash'?'🎖️ داشبورد عملکرد':
     view.type==='aligndash'?'🧭 همسویی عملکرد و استراتژی':
+    view.type==='invhealth'?'🩺 سلامت فاکتورها':
     view.type==='docno'?'🔢 بررسی و اصلاح شمارهٔ اسناد':
     view.type==='backupdash'?'💾 پشتیبان‌گیری و بازیابی':
     view.type==='salesdash'?'🧾 داشبورد فروش':
@@ -13212,6 +13348,7 @@ function render(){
     else if(view.type==='perfdash')c.innerHTML=perfdashHTML();
     else if(view.type==='aligndash')c.innerHTML=aligndashHTML();
     else if(view.type==='docno')c.innerHTML=isAdmin()?docnoHTML():'<div class="empty">این بخش فقط برای ادمین است</div>';
+    else if(view.type==='invhealth')c.innerHTML=isAdmin()?invhealthHTML():'<div class="empty">این بخش فقط برای ادمین است</div>';
     else if(view.type==='backupdash')c.innerHTML=backupdashHTML();
     else if(view.type==='salesdash')c.innerHTML=salesdashHTML();
     else if(view.type==='invnew')c.innerHTML=invnewHTML();
