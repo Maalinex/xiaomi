@@ -448,11 +448,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.33</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.34</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.33</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.34</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -8197,18 +8197,30 @@ function pcapShare(inv,l){
   return m.cap*(la/m.tot);
 }
 /* ───────── ویرایشگر ردیف‌های هزینه ───────── */
-function pcostPayeeOpts(sel){
-  const list=byE('crm').slice().sort((a,b)=>String(a.d.title||'').localeCompare(String(b.d.title||'')));
-  return `<option value="">— همان فروشندهٔ کالا —</option>${list.map(x=>`<option value="${x.id}" ${x.id===sel?'selected':''}>${esc(x.d.title||'—')}</option>`).join('')}<option value="__free" ${sel==='__free'?'selected':''}>✍️ نام آزاد…</option>`;
+function pcostCrmList(){return byE('crm').slice().sort((a,b)=>String(a.d.title||'').localeCompare(String(b.d.title||'')));}
+function pcostDataList(){return `<datalist id="dl_pcostpayee">${pcostCrmList().map(x=>`<option value="${esc(x.d.title||'')}">`).join('')}</datalist>`;}
+/* 🔎 نامِ تایپ‌شده → طرف‌حساب: اگر در CRM بود انتخاب، اگر نبود همان‌جا ساخته می‌شود */
+function pcostResolvePayee(name){
+  name=String(name||'').trim();
+  if(!name)return {payee:'',pname:''};
+  const hit=pcostCrmList().find(x=>String(x.d.title||'').trim()===name)
+    ||Object.values(recs).find(x=>x&&x.e==='crm'&&!x.del&&String(x.d.title||'').trim()===name);
+  if(hit)return {payee:hit.id,pname:''};
+  if(can('c','crm')&&confirm('طرف‌حساب «'+name+'» در CRM نیست.\n\nهمین حالا ساخته شود تا بدهی و سوابق پرداختش ثبت شود؟\n(اگر «لغو» بزنی، فقط نامش روی این هزینه می‌نشیند)')){
+    const id=uid();
+    put({id,e:'crm',d:{title:name,kind:'حقوقی',rel:'تامین‌کننده',imp:'معمولی',note:'ساخته‌شده از هزینه‌های جانبی خرید'},u:Date.now()});
+    _byRaw=null;
+    return {payee:id,pname:''};
+  }
+  return {payee:'',pname:name};
 }
+window.pcostResolvePayee=pcostResolvePayee;
 function pcostRowUI(r,i,SP,DP,supName){
-  const freeMode=r.payee==='__free'||(!r.payee&&r.pname);
   return `<tr>
   <td><select onchange="${SP}${i},'k',this.value)" style="min-width:122px;font-size:12px">${PCOST_KINDS.map(k=>`<option ${k===r.k?'selected':''}>${k}</option>`).join('')}${PCOST_KINDS.includes(r.k)?'':`<option selected>${esc(r.k)}</option>`}</select></td>
   <td><input inputmode="numeric" dir="ltr" value="${r.amt||''}" onchange="${SP}${i},'amt',this.value)" style="max-width:118px;text-align:left" placeholder="۰"></td>
-  <td><select onchange="${SP}${i},'payee',this.value)" style="min-width:140px;font-size:12px">${pcostPayeeOpts(freeMode?'__free':r.payee)}</select>
-    ${freeMode?`<input value="${esc(r.pname||'')}" onchange="${SP}${i},'pname',this.value)" placeholder="نام باربری / ترخیص‌کار" style="margin-top:4px;font-size:12px">`:
-      `<div style="font-size:10px;color:var(--tx2);margin-top:3px">${r.payee?'':'← '+esc(supName||'فروشندهٔ کالا')}</div>`}</td>
+  <td><input list="dl_pcostpayee" value="${esc(r.payee&&recs[r.payee]?(recs[r.payee].d.title||''):(r.pname||''))}" placeholder="🔍 بنویس تا جستجو شود…" onchange="${SP}${i},'payeeName',this.value)" style="min-width:168px;font-size:12px">
+    <div style="font-size:10px;color:${r.payee?'var(--ok)':(r.pname?'#B58500':'var(--tx2)')};margin-top:3px">${r.payee?'✔ در CRM ثبت است':(r.pname?'⚠️ فقط نام — در CRM نیست':'← '+esc(supName||'فروشندهٔ کالا'))}</div></td>
   <td><input value="${esc(r.due||'')}" onchange="${SP}${i},'due',this.value)" placeholder="۱۴۰۵/۰۷/۲۰" style="max-width:110px;font-size:12px"></td>
   <td style="text-align:center"><input type="checkbox" ${r.pd?'checked':''} onchange="${SP}${i},'pd',this.checked?1:0)"></td>
   <td style="text-align:center"><input type="checkbox" ${r.cap?'checked':''} onchange="${SP}${i},'cap',this.checked?1:0)"></td>
@@ -8216,7 +8228,7 @@ function pcostRowUI(r,i,SP,DP,supName){
   <td><button class="btn bad sm" onclick="${DP}${i})">✕</button></td></tr>`;
 }
 function pcostTableUI(rows,SP,DP,supName,addFn){
-  return `<div class="tblwrap"><table><thead><tr>
+  return `${pcostDataList()}<div class="tblwrap"><table><thead><tr>
     <th>نوع هزینه</th><th>مبلغ (ریال)</th><th>به چه کسی باید پرداخت شود؟</th><th>سررسید</th><th>پرداخت شد؟</th><th title="به نسبت مبلغ هر قلم کالا به بهای تمام‌شده اضافه می‌شود">سرشکن روی کالا</th><th>توضیح</th><th></th>
     </tr></thead><tbody>
     ${rows.length?rows.map((r,i)=>pcostRowUI(r,i,SP,DP,supName)).join(''):'<tr><td colspan="8" style="color:var(--tx2);font-size:12px">هزینهٔ جانبی‌ای ثبت نشده</td></tr>'}
@@ -8227,7 +8239,8 @@ function pcostTableUI(rows,SP,DP,supName,addFn){
       <span style="font-size:11.5px;color:var(--tx2)">جمع هزینه‌ها: <b style="color:var(--tx)">${money(rows.reduce((a,x)=>a+(+x.amt||0),0))}</b>
       │ سرشکن روی کالا: <b style="color:var(--ac)">${money(rows.reduce((a,x)=>a+(x.cap?+x.amt||0:0),0))}</b></span>
     </div>
-    <p style="font-size:10.5px;color:var(--tx2);margin-top:6px">💡 «سرشکن روی کالا» یعنی این هزینه به نسبت مبلغ هر قلم، به بهای تمام‌شدهٔ همان کالا اضافه شود (سود ناخالص واقعی‌تر). هزینهٔ پرداخت‌نشده‌ای که طرف‌حسابش با فروشندهٔ کالا فرق دارد، به‌عنوان بدهی جداگانه در «مطالبات و بدهی» می‌نشیند.</p>`;
+    <p style="font-size:10.5px;color:var(--tx2);margin-top:6px">💡 «سرشکن روی کالا» یعنی این هزینه به نسبت مبلغ هر قلم، به بهای تمام‌شدهٔ همان کالا اضافه شود (سود ناخالص واقعی‌تر). هزینهٔ پرداخت‌نشده‌ای که طرف‌حسابش با فروشندهٔ کالا فرق دارد، به‌عنوان بدهی جداگانه در «مطالبات و بدهی» می‌نشیند.<br>
+    🔎 در ستون طرف‌حساب بنویس تا جستجو شود؛ اگر نامِ تازه‌ای بزنی، می‌پرسد و همان‌جا در CRM می‌سازدش.</p>`;
 }
 /* ── فرم ثبت فاکتور خرید ── */
 function pcostDraftRows(){if(!Array.isArray(pinvDraft.costs))pinvDraft.costs=[];return pinvDraft.costs;}
@@ -8239,8 +8252,8 @@ window.pcostSet=function(i,k,v){
   else if(k==='pd'||k==='cap')rows[i][k]=v?1:0;
   else if(k==='due')rows[i].due=dNorm(v)||v||'';
   else if(k==='k'){rows[i].k=v;if(PCOST_CAPDEF[v]!=null)rows[i].cap=PCOST_CAPDEF[v];}
+  else if(k==='payeeName'){const p=pcostResolvePayee(v);rows[i].payee=p.payee;rows[i].pname=p.pname;}
   else rows[i][k]=v;
-  if(k==='payee'&&v!=='__free')rows[i].pname='';
   render();
 };
 function pcostDraftUI(){
@@ -8262,8 +8275,8 @@ window.pcostRecSet=function(id,i,k,v){
   else if(k==='pd'||k==='cap')rows[i][k]=v?1:0;
   else if(k==='due')rows[i].due=dNorm(v)||v||'';
   else if(k==='k'){rows[i].k=v;if(PCOST_CAPDEF[v]!=null)rows[i].cap=PCOST_CAPDEF[v];}
+  else if(k==='payeeName'){const p=pcostResolvePayee(v);rows[i].payee=p.payee;rows[i].pname=p.pname;}
   else rows[i][k]=v;
-  if(k==='payee'&&v!=='__free')rows[i].pname='';
   pcostRecWrite(id,rows);
 };
 function pcostRecUI(p){
