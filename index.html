@@ -448,11 +448,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.34</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.36</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.34</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.36</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -5111,6 +5111,14 @@ function impcenterHTML(){
     ${log.length?`<div class="tblwrap" style="max-height:180px;overflow:auto;margin-top:6px"><table><tbody>${log.map(l=>`<tr><td style="text-align:right;font-size:11px">${esc(l)}</td></tr>`).join('')}</tbody></table></div>`:''}
     </div>`;
   }
+  // 🧾 اسناد دوسطحی (سربرگ + ردیف) — در فهرست عمومی پایین نمی‌آیند
+  if(can('c','invoice'))h+=`<div class="sec" style="border-inline-start:3px solid var(--ok)"><h3>🧾 ورود فاکتور فروش (سربرگ + ردیف‌های کالا)
+    <span style="flex:1"></span>
+    <button class="btn gh sm" onclick="invImpTemplate()">⬇️ قالب</button>
+    <button class="btn sm" onclick="invImpOpen()">📂 بارگذاری</button></h3>
+    <p style="font-size:12px;color:var(--tx2);line-height:2">فاکتور سند دوسطحی است (سربرگ + ردیف کالا) و در فهرست پایین نمی‌آید. در این قالب <b>هر سطر = یک ردیف کالا</b>ست و سطرهای هم‌شماره یک فاکتور می‌شوند؛ مشتری و کالای ناشناخته در صورت تمایل خودکار ساخته می‌شوند و شمارهٔ فاکتور با قاعدهٔ یکتای نسخهٔ ۳.۳۲ صادر می‌شود.<br>
+    <b>🧢 قالب هر کسب‌وکار جداست</b> — ستون‌های اکسل بر اساس «قالب فاکتورِ» همان کسب‌وکار ساخته می‌شوند (فروش متری، نوع تخفیف، رسمی/غیررسمی، ارزش افزوده). در پنجرهٔ بارگذاری، کسب‌وکار را انتخاب کن تا قالب خودش را بگیری.</p>
+    <p style="font-size:11px;color:var(--tx2)">برای فروش تک‌کالایی و ساده، «🛒 فروش سریع» در فهرست پایین هم هست.</p></div>`;
   h+=srchBox('impc','جستجوی بخش برای گرفتن قالب یا بارگذاری…','— گروه‌های بی‌نتیجه موقتاً پنهان می‌شوند');
   allGroups().forEach(g=>{
     const ents=Object.entries(E).filter(([k,v])=>v.grp===g&&!v.sub&&can('c',k)&&impFields(k).length&&k!=='plmonth');
@@ -5126,6 +5134,323 @@ function impcenterHTML(){
   });
   return h;
 }
+/* ═══ 📥 v3.36 — ورود اکسل «فاکتور فروش» با قالبِ مخصوص هر کسب‌وکار ═══
+   فاکتور سند دوسطحی است (سربرگ + ردیف کالا)، پس در فهرست عمومیِ مرکز ورود اکسل نمی‌آید.
+   ضمناً هر کسب‌وکار قالب فاکتور خودش را دارد (فروش متری، نوع تخفیف، رسمی/غیررسمی، ارزش افزوده)
+   — قالب اکسل و اعتبارسنجی هم دقیقاً بر همان اساس ساخته می‌شود. */
+const INVIMP_DEF={
+  no:['شماره فاکتور'],date:['تاریخ'],kind:['نوع سند'],cust:['مشتری'],biz:['کسب‌وکار'],
+  seller:['فروشنده'],prod:['کالا / خدمت','کالا/خدمت','کالا'],qty:['تعداد','تعداد (شاخه/بسته)'],
+  mlen:['متر هر واحد'],price:['قیمت واحد (ریال)'],ldisc:['تخفیف این ردیف (ریال)'],
+  disc:['تخفیف کل فاکتور (ریال)'],discpct:['تخفیف کل ٪','تخفیف کل درصد'],
+  taxpct:['مالیات بر ارزش افزوده ٪'],ship:['هزینه ارسال (ریال)'],paid:['مبلغ پرداخت‌شده (ریال)'],
+  natid:['شناسه ملی / کد اقتصادی'],official:['رسمی / غیررسمی'],status:['وضعیت'],note:['توضیحات']
+};
+function invImpKeyOf(head){
+  const h=String(head||'').trim();if(!h)return null;
+  if(INVIMP_DEF[h])return h;
+  for(const k in INVIMP_DEF)if(INVIMP_DEF[k].some(x=>x===h))return k;
+  return null;
+}
+function invImpCfg(bizId){return bizInvCfg(bizId||gBiz()||'');}
+/* 🧩 ستون‌های قالب — بر اساس «قالب فاکتورِ» همان کسب‌وکار */
+function invImpCols(bizId){
+  const c=invImpCfg(bizId),L=[];
+  const add=(k,n,hint)=>L.push([k,n,hint]);
+  add('no','شماره فاکتور','سطرهای هم‌شماره یک فاکتور می‌شوند │ خالی = شمارهٔ خودکار');
+  add('date','تاریخ','۱۴۰۵/۰۷/۱۲ یا 2026-10-04');
+  add('kind','نوع سند','فاکتور فروش یا پیش‌فاکتور │ خالی = فاکتور فروش');
+  add('cust','مشتری','نام دقیق مشتری — اگر نبود ساخته می‌شود');
+  add('biz','کسب‌وکار','خالی = کسب‌وکار انتخاب‌شده در بالای همین پنجره');
+  add('seller','فروشنده','نام فرد در منابع انسانی (اختیاری)');
+  add('prod','کالا / خدمت','نام دقیق کالا — اگر نبود ساخته می‌شود');
+  add('qty',c.metric?'تعداد (شاخه/بسته)':'تعداد','عدد');
+  if(c.metric)add('mlen','متر هر واحد','عدد — این کسب‌وکار فروش متری دارد');
+  add('price','قیمت واحد (ریال)','عدد');
+  add('ldisc','تخفیف این ردیف (ریال)','عدد (اختیاری)');
+  if(c.disc!=='درصدی')add('disc','تخفیف کل فاکتور (ریال)','فقط در سطر اول هر فاکتور (اختیاری)');
+  if(c.disc!=='مبلغی (ریال)')add('discpct','تخفیف کل ٪','فقط در سطر اول هر فاکتور (اختیاری)');
+  add('taxpct','مالیات بر ارزش افزوده ٪',c.novat?'این کسب‌وکار ارزش افزودهٔ خودکار ندارد — معمولاً خالی بماند':'فقط در سطر اول هر فاکتور (اختیاری)');
+  add('ship','هزینه ارسال (ریال)','فقط در سطر اول هر فاکتور (اختیاری)');
+  add('paid','مبلغ پرداخت‌شده (ریال)','فقط در سطر اول هر فاکتور (اختیاری)');
+  add('natid','شناسه ملی / کد اقتصادی','اختیاری');
+  if(c.official)add('official','رسمی / غیررسمی','رسمی یا غیررسمی │ خالی = غیررسمی');
+  add('status','وضعیت','صادر شده / پیش‌نویس │ خالی = صادر شده');
+  add('note','توضیحات','اختیاری');
+  return L;
+}
+function invImpCfgLine(bizId){
+  const c=invImpCfg(bizId),t=[];
+  t.push(c.metric?'📏 فروش متری (ستون متراژ دارد)':'بدون فروش متری');
+  t.push('تخفیف: '+c.disc);
+  t.push(c.official?'رسمی/غیررسمی انتخابی':'همیشه غیررسمی');
+  t.push(c.novat?'بدون ارزش افزودهٔ خودکار':'ارزش افزودهٔ '+vatPct(today()).toLocaleString('fa-IR')+'٪');
+  return t.join(' │ ');
+}
+let invImpState=null,invImpBiz=null;
+function invImpNum(v){const n=+faNum(String(v??'')).replace(/[,٬\s]/g,'');return isNaN(n)?null:n;}
+function invImpFind(e,name){
+  const nm=String(name||'').trim();if(!nm)return null;
+  const hit=byE(e).find(x=>String(x.d.title||'').trim()===nm);
+  if(hit)return hit;
+  return Object.values(recs).find(x=>x&&x.e===e&&!x.del&&String(x.d.title||'').trim()===nm)||null;
+}
+/* 🧱 گروه‌بندی سطرها به فاکتور + اعتبارسنجی مطابق قالبِ کسب‌وکار هر فاکتور */
+function invImpBuild(arr,defBiz){
+  arr=(arr||[]).filter(r=>Array.isArray(r)&&r.some(c=>String(c??'').trim()!==''));
+  if(arr.length<2)return {err:'فایل خالی است یا فقط سربرگ دارد'};
+  const heads=arr[0].map(h=>String(h??'').trim());
+  const map=heads.map(invImpKeyOf);
+  if(!map.includes('prod'))return {err:'ستون «کالا / خدمت» پیدا نشد — از قالب دانلودی استفاده کنید'};
+  if(!map.includes('cust'))return {err:'ستون «مشتری» پیدا نشد — از قالب دانلودی استفاده کنید'};
+  const unknown=heads.filter((h,i)=>h&&!map[i]);
+  const groups=[],byNo={};let auto=0;
+  arr.slice(1).forEach((row,ri)=>{
+    const first=String(row.find(c=>String(c??'').trim()!=='')??'').trim();
+    if(first.startsWith('راهنما'))return;
+    const v={};map.forEach((k,ci)=>{if(k)v[k]=String(row[ci]??'').trim();});
+    let key=faNum(String(v.no||'')).trim();
+    if(!key){auto++;key='__auto'+auto;}
+    let g=byNo[key];
+    if(!g){
+      g=byNo[key]={no:faNum(String(v.no||'')).trim(),rows:[],errs:[],warns:[],head:{},fileRow:ri+2};
+      const dv=v.date?impDate(v.date):null;
+      if(v.date&&dv===undefined)g.errs.push('تاریخ نامعتبر «'+v.date+'»');
+      g.head.date=dv||{s:today()};
+      g.head.kind=(v.kind||'').trim()||INV_KIND_SALE;
+      if(![INV_KIND_SALE,INV_KIND_PROF].includes(g.head.kind))g.errs.push('نوع سند باید «'+INV_KIND_SALE+'» یا «'+INV_KIND_PROF+'» باشد');
+      g.head.status=(v.status||'').trim()||'صادر شده';
+      ['disc','discpct','taxpct','ship','paid'].forEach(k=>{if(v[k]){const n=invImpNum(v[k]);
+        if(n==null)g.errs.push(({disc:'تخفیف کل',discpct:'تخفیف کل ٪',taxpct:'مالیات ٪',ship:'هزینه ارسال',paid:'پرداخت‌شده'})[k]+': عدد نامعتبر');else g.head[k]=n;}});
+      g.head.natid=v.natid||'';g.head.note=v.note||'';g.head.official=(v.official||'').trim();
+      g.custName=v.cust||'';g.bizName=v.biz||'';g.sellerName=v.seller||'';
+      if(!g.custName)g.errs.push('نام مشتری خالی است');
+      groups.push(g);
+    }
+    const q=invImpNum(v.qty),p=invImpNum(v.price),ld=v.ldisc?invImpNum(v.ldisc):0,ml=v.mlen?invImpNum(v.mlen):0;
+    const errs=[];
+    if(!String(v.prod||'').trim())errs.push('نام کالا خالی است');
+    if(q==null||q<=0)errs.push('تعداد نامعتبر «'+(v.qty||'')+'»');
+    if(p==null||p<0)errs.push('قیمت واحد نامعتبر «'+(v.price||'')+'»');
+    if(ld==null)errs.push('تخفیف ردیف نامعتبر');
+    if(ml==null)errs.push('متراژ نامعتبر «'+(v.mlen||'')+'»');
+    g.rows.push({fileRow:ri+2,prod:String(v.prod||'').trim(),qty:q||0,price:p||0,ldisc:ld||0,mlen:ml||0,errs});
+  });
+  groups.forEach(g=>{
+    g.lineErrs=g.rows.filter(r=>r.errs.length).length;
+    // 🧢 کسب‌وکار این فاکتور ⇒ قالب فاکتورِ همان کسب‌وکار
+    const bRec=g.bizName?invImpFind('business',g.bizName):null;
+    if(g.bizName&&!bRec)g.errs.push('کسب‌وکار «'+g.bizName+'» تعریف نشده');
+    g.bizId=bRec?bRec.id:(defBiz||gBiz()||'');
+    const c=invImpCfg(g.bizId);g.cfg=c;
+    g.bizLabel=g.bizId&&recs[g.bizId]?(recs[g.bizId].d.title||''):'—';
+    // ⚖️ تطبیق با قالبِ همان کسب‌وکار
+    if(!c.metric&&g.rows.some(r=>r.mlen>0))g.warns.push('این کسب‌وکار فروش متری ندارد — ستون متراژ نادیده گرفته می‌شود');
+    if(c.metric&&g.rows.every(r=>!r.mlen))g.warns.push('قالب این کسب‌وکار متری است ولی ستون متراژ پر نشده');
+    if(c.disc==='درصدی'&&g.head.disc>0){g.warns.push('قالب تخفیف این کسب‌وکار «درصدی» است — تخفیف ریالی نادیده گرفته می‌شود');delete g.head.disc;}
+    if(c.disc==='مبلغی (ریال)'&&g.head.discpct>0){g.warns.push('قالب تخفیف این کسب‌وکار «مبلغی» است — تخفیف درصدی نادیده گرفته می‌شود');delete g.head.discpct;}
+    if(c.novat&&g.head.taxpct>0)g.warns.push('این کسب‌وکار ارزش افزودهٔ خودکار ندارد — مالیات '+g.head.taxpct.toLocaleString('fa-IR')+'٪ همان‌طور که در فایل آمده ثبت می‌شود');
+    if(!c.official&&g.head.official)g.warns.push('قالب این کسب‌وکار «رسمی/غیررسمی» ندارد — غیررسمی ثبت می‌شود');
+    g.head.official=(c.official&&g.head.official==='رسمی')?'رسمی':'غیررسمی';
+    if(g.no){
+      const n=+faNum(g.no).replace(/\D/g,'');
+      const ex=serRaw('invoice').find(x=>!x.del&&serOf(x,'title')===n);
+      if(ex)g.dup=ex;
+    }
+    g.newCust=g.custName&&!invImpFind('customer',g.custName);
+    g.newProds=[...new Set(g.rows.map(r=>r.prod).filter(Boolean))].filter(n=>!invImpFind('product',n));
+    if(g.sellerName&&!invImpFind('hr',g.sellerName))g.errs.push('فروشنده «'+g.sellerName+'» در منابع انسانی نیست');
+    if(!g.rows.length)g.errs.push('هیچ ردیف کالایی ندارد');
+    g.ok=!g.errs.length&&!g.lineErrs&&!g.dup;
+    let sub=0;g.rows.forEach(r=>{sub+=Math.max(0,r.qty*r.price-r.ldisc);});
+    const dAmt=(g.head.disc||0)+Math.round(sub*((g.head.discpct||0)/100));
+    const base=Math.max(0,sub-dAmt);
+    g.total=base+Math.round(base*((g.head.taxpct||0)/100))+(g.head.ship||0);
+  });
+  return {groups,unknown,ok:groups.filter(g=>g.ok)};
+}
+/* 📄 قالب اکسل — مخصوص کسب‌وکار انتخاب‌شده */
+window.invImpTemplate=function(bizId){
+  bizId=bizId!==undefined?bizId:(invImpBiz!=null?invImpBiz:(gBiz()||''));
+  const COLS=invImpCols(bizId),c=invImpCfg(bizId);
+  const bName=bizId&&recs[bizId]?(recs[bizId].d.title||''):'همه';
+  const ex1={},ex2={};
+  COLS.forEach(([k])=>{ex1[k]='';ex2[k]='';});
+  Object.assign(ex1,{no:'1001',date:iso2jstr(today()),kind:INV_KIND_SALE,cust:'فروشگاه نمونه',biz:bName==='همه'?'':bName,prod:'کالای نمونه ۱',qty:'2',price:'1600000',ldisc:'0',status:'صادر شده'});
+  Object.assign(ex2,{no:'1001',prod:'کالای نمونه ۲',qty:'1',price:'900000',ldisc:'0'});
+  if(c.metric){ex1.mlen='5.8';ex2.mlen='5.8';}
+  if(c.official)ex1.official='غیررسمی';
+  const rows=[COLS.map(x=>x[1]),COLS.map((x,i)=>(i===0?'راهنما: ':'')+x[2]),
+    COLS.map(x=>ex1[x[0]]),COLS.map(x=>ex2[x[0]])];
+  const fname='قالب-ورود-فاکتور-فروش-'+String(bName).replace(/[\\/:*?"<>|]/g,'-');
+  loadXLSX().then(()=>{
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=COLS.map(()=>({wch:22}));
+    const wb=XLSX.utils.book_new();wb.Workbook={Views:[{RTL:true}]};
+    XLSX.utils.book_append_sheet(wb,ws,'فاکتور فروش');
+    XLSX.writeFile(wb,fname+'.xlsx');
+  }).catch(()=>{
+    const csv='﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\r\n')+'\r\n';
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+    a.download=fname+'.csv';a.click();
+  });
+};
+window.invImpSetBiz=function(v){invImpBiz=v||'';const el=document.getElementById('invimp_cfg');if(el)el.innerHTML=invImpCfgNote();
+  if(invImpState&&invImpState.raw)invImpPrev(invImpState.raw);};
+function invImpCfgNote(){
+  const bz=invImpBiz!=null?invImpBiz:(gBiz()||'');
+  const nm=bz&&recs[bz]?(recs[bz].d.title||''):'';
+  const COLS=invImpCols(bz);
+  return `<div style="font-size:11.5px;color:var(--tx2);background:var(--bg3);border-radius:8px;padding:7px 10px">
+    🧾 قالب فاکتور${nm?' «'+esc(nm)+'»':''}: <b style="color:var(--tx)">${esc(invImpCfgLine(bz))}</b>
+    <br>ستون‌های قالب (${COLS.length.toLocaleString('fa-IR')} ستون): ${COLS.map(x=>esc(x[1])).join(' · ')}
+    <br><span style="color:var(--ac)">هر فاکتورِ فایل با ستون «کسب‌وکار» خودش سنجیده می‌شود — اگر فایل چند کسب‌وکار داشته باشد، هرکدام با قالب خودش کنترل می‌شود.</span></div>`;
+}
+/* 🪟 پنجره */
+window.invImpOpen=function(){
+  if(!can('c','invoice')){alert('اجازهٔ ثبت فاکتور را ندارید');return;}
+  invImpState=null;invImpBiz=gBiz()||'';
+  const bz=bizAll();
+  const el=document.getElementById('imp');
+  el.innerHTML=`
+  <div style="display:flex;align-items:center;gap:8px"><b style="font-size:14px">📥 ورود اکسل — 🧾 فاکتور فروش</b>
+    <span style="flex:1"></span><span onclick="invImpClose()" style="cursor:pointer;color:var(--tx2)">✕</span></div>
+  <div class="tools" style="margin:10px 0 8px"><label style="margin:0">قالب برای کسب‌وکار:</label>
+    <select onchange="invImpSetBiz(this.value)" style="max-width:200px">
+      <option value="">— بدون کسب‌وکار مشخص —</option>
+      ${bz.map(x=>`<option value="${x.id}" ${x.id===invImpBiz?'selected':''}>${esc(x.d.title||'')}</option>`).join('')}
+    </select>
+    <button class="btn gh sm" onclick="invImpTemplate()">⬇️ دانلود قالب این کسب‌وکار</button>
+    <label class="btn sm" style="cursor:pointer">📂 انتخاب فایل (Excel یا CSV)
+      <input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="invImpFile(this)"></label>
+  </div>
+  <div id="invimp_cfg">${invImpCfgNote()}</div>
+  <ol style="font-size:12px;color:var(--tx2);line-height:2.1;margin:10px 18px">
+    <li><b>هر سطر = یک ردیف کالا.</b> سطرهایی با «شماره فاکتور» یکسان، یک فاکتور می‌شوند؛ تخفیف کل، مالیات، ارسال و پرداختی را فقط در سطر اول هر فاکتور بنویس.</li>
+    <li>شمارهٔ فاکتور را خالی بگذاری، هر سطر یک فاکتور جدا با شمارهٔ خودکار می‌شود.</li>
+    <li>قبل از ثبت، پیش‌نمایش فاکتوربه‌فاکتور با کسب‌وکار، مبلغ، خطاها و هشدارهای ناسازگاری با قالب را نشان می‌دهم.</li>
+  </ol>
+  <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--tx2);margin:0 0 10px">
+    <input type="checkbox" id="invimp_mk" checked style="width:auto"> مشتری و کالای ناشناخته ساخته شود</label>
+  <div id="invimp_prev"></div>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button class="btn" id="invimp_go" onclick="invImpCommit()" disabled>ثبت نهایی</button>
+    <button class="btn gh" onclick="invImpClose()">بستن</button>
+  </div>`;
+  el.classList.add('show');
+};
+window.invImpClose=function(){document.getElementById('imp').classList.remove('show');invImpState=null;};
+window.invImpFile=function(inp){
+  const file=inp.files&&inp.files[0];if(!file)return;
+  const prev=document.getElementById('invimp_prev');
+  prev.innerHTML='<div class="empty">در حال خواندن فایل…</div>';
+  const fail=e=>{prev.innerHTML=`<div class="empty" style="color:var(--bad)">⚠️ ${esc(e.message||'خطا در خواندن فایل')}</div>`;};
+  if(/\.csv$/i.test(file.name)){
+    const r=new FileReader();r.onload=()=>invImpPrev(csvParse(r.result));r.onerror=()=>fail(new Error('فایل خوانده نشد'));r.readAsText(file,'utf-8');
+  }else{
+    loadXLSX().then(()=>{const r=new FileReader();
+      r.onload=()=>{try{const wb=XLSX.read(new Uint8Array(r.result),{type:'array'});
+        invImpPrev(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:''}));
+      }catch(err){fail(err);}};
+      r.onerror=()=>fail(new Error('فایل خوانده نشد'));r.readAsArrayBuffer(file);}).catch(fail);
+  }
+};
+function invImpPrev(arr){
+  const prev=document.getElementById('invimp_prev');
+  const res=invImpBuild(arr,invImpBiz!=null?invImpBiz:(gBiz()||''));
+  if(res.err){prev.innerHTML='<div class="empty" style="color:var(--bad)">⚠️ '+esc(res.err)+'</div>';return;}
+  invImpState={groups:res.groups,ok:res.ok,raw:arr};
+  const bad=res.groups.length-res.ok.length;
+  const newC=[...new Set(res.ok.filter(g=>g.newCust).map(g=>g.custName))];
+  const newP=[...new Set([].concat(...res.ok.map(g=>g.newProds)))];
+  const dupN=res.groups.filter(g=>g.dup).length;
+  const warnN=res.groups.filter(g=>g.warns.length).length;
+  const bizSet=[...new Set(res.groups.map(g=>g.bizLabel))];
+  let h=`<div style="display:flex;gap:10px;font-size:12px;margin-bottom:8px;flex-wrap:wrap">
+    <span class="imp-ok">✅ ${res.ok.length.toLocaleString('fa-IR')} فاکتور سالم (${res.ok.reduce((a,g)=>a+g.rows.length,0).toLocaleString('fa-IR')} ردیف)</span>
+    ${bad?`<span class="imp-bad">⚠️ ${bad.toLocaleString('fa-IR')} فاکتور دارای ایراد (ثبت نمی‌شوند)</span>`:''}
+    ${dupN?`<span style="color:var(--warn)">⏭ ${dupN.toLocaleString('fa-IR')} شمارهٔ تکراری</span>`:''}
+    ${warnN?`<span style="color:var(--warn)">🧾 ${warnN.toLocaleString('fa-IR')} فاکتور با تذکر قالب</span>`:''}
+    ${bizSet.length>1?`<span style="color:var(--ac)">🧢 ${bizSet.length.toLocaleString('fa-IR')} کسب‌وکار: ${bizSet.map(esc).join('، ')}</span>`:''}
+    ${res.unknown.length?`<span style="color:var(--warn)">ستون ناشناخته: ${res.unknown.map(esc).join('، ')}</span>`:''}
+  </div>
+  ${(newC.length||newP.length)?`<div style="font-size:11.5px;color:var(--ac);background:var(--bg3);border-radius:8px;padding:7px 10px;margin-bottom:8px">
+    ➕ ساخته می‌شوند: ${newC.length?`<b>${newC.length.toLocaleString('fa-IR')} مشتری</b> (${newC.slice(0,4).map(esc).join('، ')}${newC.length>4?' و…':''})`:''}
+    ${newC.length&&newP.length?' │ ':''}${newP.length?`<b>${newP.length.toLocaleString('fa-IR')} کالا</b> (${newP.slice(0,4).map(esc).join('، ')}${newP.length>4?' و…':''})`:''}
+    <br><span style="color:var(--tx2)">اگر نمی‌خواهی، تیک «مشتری و کالای ناشناخته ساخته شود» را بردار — آن فاکتورها ثبت نمی‌شوند.</span></div>`:''}
+  <div class="tblwrap" style="max-height:320px;overflow:auto"><table><thead><tr><th>شماره</th><th>تاریخ</th><th style="text-align:right">مشتری</th><th>کسب‌وکار</th><th>ردیف</th><th>مبلغ</th><th>وضعیت</th></tr></thead><tbody>`;
+  res.groups.slice(0,200).forEach(g=>{
+    const st=g.dup?`<span style="color:var(--warn)">⏭ شمارهٔ ${esc(g.no||'')} قبلاً ثبت شده — وارد نمی‌شود</span>`
+      :g.errs.length?'<span class="imp-bad">⚠️ '+g.errs.map(esc).join(' │ ')+'</span>'
+      :g.lineErrs?'<span class="imp-bad">⚠️ '+g.rows.filter(r=>r.errs.length).map(r=>'سطر '+r.fileRow+': '+r.errs.join('، ')).map(esc).join(' │ ')+'</span>'
+      :'<span class="imp-ok">✅ آماده</span>';
+    h+=`<tr><td>${esc(g.no||'خودکار')}</td><td style="font-size:11px">${esc(iso2jstr(ds(g.head.date))||'—')}</td>
+      <td style="text-align:right">${esc(g.custName||'—')}${g.newCust?' <span class="tag y" style="font-size:9.5px">جدید</span>':''}</td>
+      <td style="font-size:11px">${esc(g.bizLabel||'—')}</td>
+      <td>${g.rows.length.toLocaleString('fa-IR')}</td><td style="white-space:nowrap">${money(g.total)}</td>
+      <td style="white-space:normal">${st}${g.warns.length?`<div style="font-size:10.5px;color:var(--warn);margin-top:3px">🧾 ${g.warns.map(esc).join(' │ ')}</div>`:''}</td></tr>`;
+  });
+  h+=`</tbody></table></div>${res.groups.length>200?`<div style="font-size:11px;color:var(--tx2);margin-top:4px">… و ${(res.groups.length-200).toLocaleString('fa-IR')} فاکتور دیگر</div>`:''}`;
+  prev.innerHTML=h;
+  const btn=document.getElementById('invimp_go');
+  btn.disabled=!res.ok.length;
+  btn.textContent='ثبت نهایی '+res.ok.length.toLocaleString('fa-IR')+' فاکتور';
+}
+window.invImpCommit=function(){
+  if(!invImpState||!invImpState.ok.length)return;
+  const mk=document.getElementById('invimp_mk').checked;
+  let nInv=0,nLine=0,nCust=0,nProd=0,skipped=0;
+  const ensure=(e,name,extra)=>{
+    let r=invImpFind(e,name);
+    if(r)return r.id;
+    if(!mk)return null;
+    const id=uid();
+    put({id,e,d:Object.assign({title:name},extra||{}),u:Date.now()});
+    if(e==='customer')nCust++;else if(e==='product')nProd++;
+    return id;
+  };
+  invImpState.ok.forEach(g=>{
+    const bizId=g.bizId||'';
+    const custId=ensure('customer',g.custName,{biz:bizId?[bizId]:[]});
+    if(!custId){skipped++;return;}
+    const lines=[];let missing=false;
+    g.rows.forEach(r=>{
+      const pid=ensure('product',r.prod,{biz:bizId?[bizId]:[],buy:0,sell:r.price,mlen:(g.cfg&&g.cfg.metric&&r.mlen)?r.mlen:undefined});
+      if(!pid){missing=true;return;}
+      lines.push({pid,...r});
+    });
+    if(missing||!lines.length){skipped++;return;}
+    const seq=g.no?(+faNum(g.no).replace(/\D/g,'')||serNew('invoice','title')):serNew('invoice','title');
+    const sellerId=g.sellerName?(invImpFind('hr',g.sellerName)||{}).id:null;
+    const iid=uid();
+    put({id:iid,e:'invoice',d:{
+      title:(g.head.kind===INV_KIND_PROF?'پیش‌فاکتور ':'فاکتور ')+seq,seq,
+      kind:g.head.kind,status:g.head.status,official:g.head.official||'غیررسمی',
+      biz:bizId?[bizId]:[],customer:[custId],seller:sellerId?[sellerId]:[],
+      orgu:sellerId&&recs[sellerId]?relIds(recs[sellerId],'orgu'):[],
+      date:g.head.date,disc:g.head.disc||0,discpct:g.head.discpct||0,
+      taxpct:g.head.taxpct||0,ship:g.head.ship||0,paid:g.head.paid||0,
+      natid:String(g.head.natid||'').trim()||undefined,
+      note:(g.head.note||'')+(g.head.note?' │ ':'')+'ورود اکسل',_by:myEmail()},u:Date.now()});
+    nInv++;
+    lines.forEach(l=>{
+      put({id:uid(),e:'invline',d:{title:(recs[l.pid]&&recs[l.pid].d.title)||l.prod,invoice:[iid],product:[l.pid],
+        biz:bizId?[bizId]:[],qty:l.qty,price:l.price,ldisc:l.ldisc||0,
+        mlen:(g.cfg&&g.cfg.metric)?(l.mlen||0):0},u:Date.now()});
+      nLine++;});
+  });
+  invalidateByE();
+  try{saveQ();saveLocal();flush();}catch(e){}
+  invImpClose();
+  alert('✅ ثبت شد\n\n🧾 فاکتور: '+nInv.toLocaleString('fa-IR')
+    +'\n➖ ردیف کالا: '+nLine.toLocaleString('fa-IR')
+    +(nCust?'\n👤 مشتری تازه: '+nCust.toLocaleString('fa-IR'):'')
+    +(nProd?'\n📦 کالای تازه: '+nProd.toLocaleString('fa-IR'):'')
+    +(skipped?'\n⏭ رد شد (مشتری/کالای ناشناخته و تیک ساخت خاموش): '+skipped.toLocaleString('fa-IR'):''));
+  go('list','invoice');
+};
+
 function impOpen(e){
   if(!can('c',e)){alert('اجازه ایجاد در این بخش را ندارید');return;}
   impState={e,valid:[],upsert:true};
@@ -13699,6 +14024,7 @@ function smdashHTML(){
   const kcard=(key,t,v,bad,sub)=>{const on=view.smCard===key;return `<div class="sec" style="text-align:center;padding:13px 10px;cursor:pointer;${on?'border:1px solid var(--ac)':''}" onclick="view.smCard=${on?'null':`'${key}'`};view.smQ='';render()"><div style="font-size:11px;color:var(--tx2)">${t} ▾</div><div style="font-size:18px;font-weight:800;margin-top:4px;color:${bad?'var(--bad)':'var(--tx)'}">${v}</div>${sub?`<div style="font-size:10px;color:var(--tx2);margin-top:3px">${sub}</div>`:''}</div>`;};
   const PER=[['d7','۷ روز'],['d30','۳۰ روز'],['m','ماه جاری'],['q','فصل جاری'],['y','امسال']];
   const _qa=`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px">
+    ${canSee('invoice')&&can('c','invoice')?`<button class="btn gh sm" onclick="invImpOpen()">📥 ورود اکسل فاکتور</button>`:''}
     ${canSee('invoice')?`<button class="btn gh sm" onclick="invGo('${INV_KIND_SALE}')">🧾 فاکتورهای فروش <b>${invKindCount(INV_KIND_SALE).toLocaleString('fa-IR')}</b></button>
     <button class="btn gh sm" onclick="invGo('${INV_KIND_PROF}')">📝 پیش‌فاکتورها <b>${invKindCount(INV_KIND_PROF).toLocaleString('fa-IR')}</b></button>`:''}
     ${canSee('pricelist')?`<button class="btn gh sm" onclick="go('list','pricelist')">🏷️ لیست قیمت فروش <b>${menuCount('pricelist').toLocaleString('fa-IR')}</b></button>`:''}
@@ -13709,7 +14035,8 @@ function smdashHTML(){
     <select onchange="setGBiz(this.value)" style="max-width:160px"><option value="">همه کسب‌وکارها</option>${bizzes.map(x=>`<option value="${x.id}" ${x.id===b?'selected':''}>${esc(x.d.title)}</option>`).join('')}</select>
     <button class="btn gh sm" onclick="invDraft=null;go('invnew')">🧾 فاکتور جدید</button>
     <button class="btn gh sm" onclick="openRec('sale')">🛒 فروش سریع</button>
-    <button class="btn gh sm" onclick="impOpen('sale')">📥 ورود اکسل فروش</button></div>`;
+    <button class="btn gh sm" onclick="impOpen('sale')">📥 ورود اکسل فروش سریع</button>
+    <button class="btn gh sm" onclick="invImpOpen()">📥 ورود اکسل فاکتور</button></div>`;
   if(!H.length)return h+`<div class="empty">هنوز فروشی ثبت نشده — «🧾 فاکتور جدید» یا «🛒 فروش سریع» بزن، یا با «📥 ورود اکسل فروش» داده را گروهی وارد کن.<br><span style="font-size:11px">ورود اکسل ساده‌تر با «فروش سریع» است (هر ردیف = یک فروش: کالا، تعداد، قیمت، مشتری، فروشنده، تاریخ).</span></div>`;
   // انتخاب دوره
   const _yrs=[...new Set(H.map(x=>{try{return x.d?g2j(...x.d.split('-').map(Number))[0]:null;}catch(e){return null;}}).filter(Boolean))].sort();
