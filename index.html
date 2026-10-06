@@ -23,6 +23,9 @@
   --sh16:0 8px 16px rgba(0,0,0,.12),0 0 2px rgba(0,0,0,.08);
 }
 @keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.mrow.simon > .simx{display:none!important}
+.simbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 2px}
+.mhero-s{padding:8px 12px!important;margin-bottom:8px!important;min-height:0!important;display:flex;align-items:center;gap:9px}
 .vin #content .sec,.vin #content .card{animation:up .3s var(--ease) both}
 .vin #content .sec:nth-child(2){animation-delay:35ms}.vin #content .sec:nth-child(3){animation-delay:70ms}.vin #content .sec:nth-child(4){animation-delay:105ms}.vin #content .sec:nth-child(n+5){animation-delay:140ms}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -448,11 +451,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.36</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.37</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.36</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.37</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -467,6 +470,7 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
       <button class="btn gh sm topmv" id="pomobtn" onclick="togglePomo()">🍅 پومودورو</button>
       </span>
       <button class="btn gh sm" id="authbtn" onclick="authAction()">ورود</button>
+      <span id="simbtn_wrap"></span>
       <button class="btn gh sm" onclick="openSettings()" aria-label="تنظیمات">⚙️</button>
     </div>
     <div id="mtabs"></div>
@@ -10781,15 +10785,14 @@ function invnewHTML(){
   let h='';
   if(!byE('customer').length||!byE('product').length){
     h+=`<div class="sec" style="border-inline-start:3px solid var(--warn)"><b style="font-size:13px">⚠️ فهرست ${!byE('customer').length?'مشتریان':''}${!byE('customer').length&&!byE('product').length?' و ':''}${!byE('product').length?'کالاها':''} روی این دستگاه خالی است</b>
-      <div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:2">اگر مطمئنی در سیستم ثبت شده‌اند، یکی از این دو دلیل است:<br>
-      ۱) همگام‌سازی این دستگاه هنوز کامل نشده — دکمهٔ <b>🔄</b> بالای صفحه را بزن و چند لحظه صبر کن.<br>
-      ۲) حساب شما هنوز توسط ادمین تایید نشده یا نقش/دسترسی‌ات تازه عوض شده — از ادمین بخواه در «👤 کاربران و دسترسی» نقش‌ات را چک کند، بعد یک‌بار خروج و ورود کن.</div>
+      ${uiTip('invsync','دکمهٔ زیر را بزن تا اطلاعات از سرور بیاید.',
+        'اگر مطمئنی در سیستم ثبت شده‌اند، یکی از این دو دلیل است:<br>۱) همگام‌سازی این دستگاه هنوز کامل نشده — دکمهٔ <b>🔄</b> بالای صفحه را بزن و چند لحظه صبر کن.<br>۲) حساب شما هنوز توسط ادمین تایید نشده یا نقش/دسترسی‌ات تازه عوض شده — از ادمین بخواه در «👤 کاربران و دسترسی» نقش‌ات را چک کند، بعد یک‌بار خروج و ورود کن.')}
       <button class="btn sm" style="margin-top:8px" onclick="pullAll(true)">🔄 دریافت کامل اطلاعات از سرور</button></div>`;
   }
   h+=`<div class="sec"><h3>${invDraft._editId?'✏️ ویرایش '+esc(recs[invDraft._editId]&&recs[invDraft._editId].d.title||'فاکتور')+' <span style="font-size:11px;color:var(--warn);font-weight:400">— تغییرات روی همین فاکتور ذخیره می‌شود؛ وصولی‌ها و اقساط ثبت‌شده حفظ می‌شوند</span>':invDraft.kind==='پیش‌فاکتور'?'📝 صدور پیش‌فاکتور — ارسال به گردش فروش':'🧾 صدور فاکتور'}</h3>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px">
+  <div id="invhead" class="mrow${uiSimple()?' simon':''}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px">
     <div><label ${lbl}>نوع سند</label><div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">${invDraft.kind==='پیش‌فاکتور'?'📝 پیش‌فاکتور':'🧾 فاکتور فروش'}</div></div>
-    <div><label ${lbl}>🏛 نوع فاکتور</label><select onchange="invSetOfficial(this.value)">
+    <div class="simx"><label ${lbl}>🏛 نوع فاکتور</label><select onchange="invSetOfficial(this.value)">
       ${['غیررسمی','رسمی','آفلاین','آنلاین','همکار'].map(o2=>`<option ${(invDraft.official||'غیررسمی')===o2?'selected':''}>${o2}</option>`).join('')}</select>
       ${invDraft.official==='رسمی'?(bizInvCfg(invDraft.biz).novat?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">این کسب‌وکار: رسمی بدون ارزش افزودهٔ خودکار</div>`:`<div style="font-size:10px;color:var(--ac);margin-top:2px">ارزش افزوده ${fmtN(+invDraft.taxpct||0)}٪ خودکار اعمال شد</div>`):''}</div>
     <div><label ${lbl}>کسب‌وکار <span style="opacity:.7">(از باکس بالای منو)</span></label>
@@ -10801,17 +10804,19 @@ function invnewHTML(){
       ${view.qc?`<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap"><input id="qc_nm" placeholder="نام مشتری جدید" style="max-width:150px;font-size:12px"><input id="qc_ph" placeholder="تلفن (اختیاری)" style="max-width:120px;font-size:12px" dir="ltr"><input id="qc_ad" placeholder="🏠 آدرس (اختیاری)" style="min-width:220px;flex:1;font-size:12px"><button type="button" class="btn sm" onclick="invQuickCust()">ثبت</button></div>`:''}
       ${(()=>{if(!invDraft.customer||!recs[invDraft.customer])return'';const cr=+recs[invDraft.customer].d.credit||0;if(!cr)return'';const du=custReceivable(invDraft.customer);const ok=du<cr;
         return `<div style="font-size:10.5px;margin-top:4px;color:${ok?'var(--tx2)':'var(--bad)'}">💳 اعتبار: بدهی ${money(du)} از سقف ${money(cr)}${ok?'':' — سقف پر است!'}</div>`;})()}</div>
-    <div><label ${lbl}>🆔 شناسه ملی مشتری <span style="opacity:.7">(برای فاکتور رسمی)</span></label><input dir="ltr" inputmode="numeric" data-nogroup="1" value="${esc(invDraft.natid!=null?invDraft.natid:(invDraft.customer&&recs[invDraft.customer]?String(recs[invDraft.customer].d.natid||''):''))}" oninput="invDraft.natid=this.value;invDraft._natidAuto=0" placeholder="مثلاً ۱۰۱۰۱۲۳۴۵۶۷"></div>
-    <div><label ${lbl}>🤝 معرف <span style="opacity:.7">(کدام مشتری معرفی کرده؟ اختیاری)</span></label><input list="dl_invcust" value="${esc(invDraft.referrer&&recs[invDraft.referrer]?recs[invDraft.referrer].d.title||'':'')}" placeholder="نام مشتری معرفی‌کننده…" onchange="invPickRef(this.value)"></div>
-    <div><label ${lbl}>👤 فروشنده / فرد <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('seller',this.value)"><option value="">—</option>${sellers.map(x=>{const u=orguOf(x);return `<option value="${x.id}" ${x.id===invDraft.seller?'selected':''}>${esc(x.d.title)}${u?' · '+esc(u):''}</option>`;}).join('')}</select>
+    <div class="simx"><label ${lbl}>🆔 شناسه ملی مشتری <span style="opacity:.7">(برای فاکتور رسمی)</span></label><input dir="ltr" inputmode="numeric" data-nogroup="1" value="${esc(invDraft.natid!=null?invDraft.natid:(invDraft.customer&&recs[invDraft.customer]?String(recs[invDraft.customer].d.natid||''):''))}" oninput="invDraft.natid=this.value;invDraft._natidAuto=0" placeholder="مثلاً ۱۰۱۰۱۲۳۴۵۶۷"></div>
+    <div class="simx"><label ${lbl}>🤝 معرف <span style="opacity:.7">(کدام مشتری معرفی کرده؟ اختیاری)</span></label><input list="dl_invcust" value="${esc(invDraft.referrer&&recs[invDraft.referrer]?recs[invDraft.referrer].d.title||'':'')}" placeholder="نام مشتری معرفی‌کننده…" onchange="invPickRef(this.value)"></div>
+    <div class="simx"><label ${lbl}>👤 فروشنده / فرد <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('seller',this.value)"><option value="">—</option>${sellers.map(x=>{const u=orguOf(x);return `<option value="${x.id}" ${x.id===invDraft.seller?'selected':''}>${esc(x.d.title)}${u?' · '+esc(u):''}</option>`;}).join('')}</select>
       ${invDraft.seller&&recs[invDraft.seller]?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">واحد/تیم فرد: ${esc(orguOf(recs[invDraft.seller])||'—')}</div>`:''}</div>
-    <div><label ${lbl}>🧩 واحد / تیم <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('orgu',this.value)"><option value="">— (خودکار از فرد)</option>${byE('orgunit').map(u=>`<option value="${u.id}" ${u.id===invDraft.orgu?'selected':''}>${esc(unitPath(u.id))}</option>`).join('')}</select></div>
-    <div><label ${lbl}>شماره/شرح</label><input value="${esc(invDraft.desc)}" oninput="invDraft.desc=this.value" placeholder="خودکار"></div>
+    <div class="simx"><label ${lbl}>🧩 واحد / تیم <span style="opacity:.7">(تارگت و عملکرد)</span></label><select onchange="invSetHead('orgu',this.value)"><option value="">— (خودکار از فرد)</option>${byE('orgunit').map(u=>`<option value="${u.id}" ${u.id===invDraft.orgu?'selected':''}>${esc(unitPath(u.id))}</option>`).join('')}</select></div>
+    <div class="simx"><label ${lbl}>شماره/شرح</label><input value="${esc(invDraft.desc)}" oninput="invDraft.desc=this.value" placeholder="خودکار"></div>
     <div><label ${lbl}>تاریخ صدور</label><div style="display:flex;gap:4px"><input id="inv_vdate" value="${esc(invDraft.vdate&&/^\d{4}-/.test(invDraft.vdate)?iso2jstr(invDraft.vdate):invDraft.vdate||'')}" oninput="invDraft.vdate=this.value" placeholder="۱۴۰۴/۰۴/۲۵" style="flex:1"><button type="button" class="btn gh sm" style="padding:4px 8px" onclick="openJcal('inv_vdate')">📅</button></div></div>
     ${invDraft.kind==='پیش‌فاکتور'||invDraft._editId?'':`<div><label ${lbl}>💳 وضعیت دریافت</label><select onchange="invDraft.paymode=this.value;render()"><option ${invDraft.paymode==='نقدی'?'selected':''}>نقدی</option><option ${invDraft.paymode==='اعتباری'?'selected':''}>اعتباری (نسیه)</option><option ${invDraft.paymode==='بخشی'?'selected':''}>دریافت بخشی</option></select></div>
     ${invDraft.paymode==='بخشی'?`<div><label ${lbl}>مبلغ دریافتی (ریال)</label><input inputmode="numeric" dir="ltr" value="${esc(invDraft.paidAmt||'')}" oninput="invDraft.paidAmt=this.value" placeholder="۰"></div>`:''}
-    <div><label ${lbl}>سررسید ${invDraft.paymode!=='نقدی'?'(اعتبار)':''}</label><input value="${esc(invDraft.due||'')}" oninput="invDraft.due=this.value" placeholder="اختیاری"></div>`}
+    <div class="simx"><label ${lbl}>سررسید ${invDraft.paymode!=='نقدی'?'(اعتبار)':''}</label><input value="${esc(invDraft.due||'')}" oninput="invDraft.due=this.value" placeholder="اختیاری"></div>`}
   </div>
+  ${uiSimple()?`<div class="simbar"><button class="btn gh sm" id="invmore" onclick="(function(){const r=document.getElementById('invhead');const on=r.classList.toggle('simon');
+    document.getElementById('invmore').textContent=on?'⚙️ فیلدهای بیشتر (معرف، فروشنده، شناسه ملی، سررسید…) ▾':'🪶 جمع‌کردن فیلدهای کم‌کاربرد ▴';})()">⚙️ فیلدهای بیشتر (معرف، فروشنده، شناسه ملی، سررسید…) ▾</button></div>`:''}
   ${invDraft.kind==='پیش‌فاکتور'?`
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:10px;padding:12px;border:1px dashed var(--ac);border-radius:12px;background:var(--bg3)">
     <div><label ${lbl}>💳 شرایط پرداخت</label><select onchange="invDraft.payterm=this.value;render()">${['نقد','چک','چند مرحله‌ای'].map(k=>`<option ${k===(invDraft.payterm||'نقد')?'selected':''}>${k}</option>`).join('')}</select></div>
@@ -12903,6 +12908,12 @@ function mtabsHTML(){ // 🧷 هدر ماژول + نوار زیرمنوها با
   const _am=items.match(/class="nav-i on"[^>]*>([^<]*)/);
   const cur=_am?_am[1].trim():'';
   const gl=grpLabel(g)||g;
+  // 🪶 حالت ساده: یک نوار باریک به‌جای هدر بزرگ + breadcrumbِ تکراری
+  if(uiSimple())return `<div class="mhero mhero-s" style="--mtc:${c}">
+    <span class="mico" style="background:${c};width:28px;height:28px;font-size:15px">${ic}</span>
+    <div class="mttl" style="font-size:14px">${esc(gl)}</div>
+  </div>
+  <div class="mtabs" style="--mtc:${c}">${items}</div>`;
   return `<div class="mcrumb">شیائومی / <b style="color:${c}">${esc(gl)}</b>${cur?` / ${esc(cur)}`:''}</div>
   <div class="mhero" style="--mtc:${c}">
     <span class="mico" style="background:${c}">${ic}</span>
@@ -13007,6 +13018,7 @@ function _qaEnts(list){ // 🔗 دکمه‌های دسترسی سریع به ب�
   return btns?`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px">${btns}</div>`:'';
 }
 function render(){
+  try{const _sb=document.getElementById('simbtn_wrap');if(_sb)_sb.innerHTML=uiSimpleBadge();}catch(e){}
   if(view&&view.type==='myhub'){view.type='me';view.meTab='hub';} // 🗂 تلفیق‌شده در میز کار
   if(view&&['findash','finform','invdash','cfaacad','gdash','epcfdash','cdash','portdash','tokendash','agiledash','module'].includes(view.type)&&(view.type!=='module'||!view.flt))view={type:'me'}; // 🛡 صفحات حذف‌شده/ناقص
   if(view&&(view.type==='list'||view.type==='rec')&&view.e&&!E[view.e])view={type:'me'}; // 🛡 بخش حذف‌شده
@@ -17746,8 +17758,11 @@ function meHTML(){
     }
   }catch(_e){}
   // پروفایل
-  h+=`<div class="sec"><h3>👤 پروفایل من <span style="flex:1"></span>
-    ${hr?`<button class="btn sm" onclick="openRec('hr','${hr.id}')">✏️ ویرایش اطلاعات فردی</button>`:`<button class="btn sm" onclick="mkProfile()">＋ ساخت پروفایل من</button>`}</h3>`;
+  const _simProf=uiSimple()&&!!hr;
+  h+=`<div class="sec" ${_simProf?'style="padding:9px 13px"':''}><h3 ${_simProf?'style="font-size:12.5px;margin:0"':''}>👤 ${_simProf?esc(hr.d.title)+' <span style="font-weight:400;color:var(--tx2);font-size:11px">— '+myRole()+'</span>':'پروفایل من'} <span style="flex:1"></span>
+    ${_simProf?`<button class="btn gh sm" onclick="uiFoldToggle('meprof')">جزئیات ▾</button>`:''}
+    ${hr?`<button class="btn ${_simProf?'gh ':''}sm" onclick="openRec('hr','${hr.id}')">✏️ ویرایش${_simProf?'':' اطلاعات فردی'}</button>`:`<button class="btn sm" onclick="mkProfile()">＋ ساخت پروفایل من</button>`}</h3>`;
+  if(_simProf)h+=`<div id="fold_meprof" style="display:none">`;
   if(hr){
     h+=`<div class="comp">
       <div class="chip">نام: <b>${esc(hr.d.title)}</b></div>
@@ -17757,6 +17772,7 @@ function meHTML(){
       <div class="chip">تلفن: <b dir="ltr">${esc(hr.d.phone||'—')}</b></div>
       <div class="chip">نقش در سیستم: <b>${myRole()}</b></div>
     </div>`;
+    if(_simProf)h+=`</div>`;
   } else {
     h+=`<div class="empty">پروفایل شما هنوز به پرونده منابع انسانی وصل نیست — با «ساخت پروفایل من» بسازید تا تسک‌ها و پروژه‌هایی که به شما سپرده می‌شود اینجا دیده شود.<br>
     <span style="font-size:11px">(اگر قبلاً در HR ثبت شده‌اید، کافی است فیلد «ایمیل» همان رکورد برابر <b dir="ltr">${esc(myEmail())}</b> باشد.)</span></div>`;
@@ -17772,7 +17788,8 @@ function meHTML(){
   const myMs=[...new Map([...mine('measure','owner'),...myBsc.flatMap(b=>bscMeasures(b))].map(m=>[m.id,m])).values()];
   const msOd=myMs.filter(m=>{const d=measureDue(m);return d&&d<today();});
   const jmp=id=>`const s=document.getElementById('${id}');if(s){s.scrollIntoView({behavior:'smooth',block:'start'});s.style.boxShadow='0 0 0 2px rgba(212,175,55,.55)';setTimeout(()=>s.style.boxShadow='',1600);}`;
-  h+=`<div class="cards">
+  _cardHide=true;
+  const _myCards=`
     ${card('📘 تسک باز من',tasks.length,null,jmp('sec_my_task'))}
     ${card('⏰ عقب‌افتاده',od.length,od.length?'var(--bad)':null,jmp('sec_my_task'))}
     ${card('🏗️ پروژه‌های من',mine('project','pm').length,null,jmp('sec_my_project'))}
@@ -17781,8 +17798,10 @@ function meHTML(){
     ${card('🍅 پومودورو امروز',pomoCount(),null,"togglePomo()")}
     ${(()=>{const rt=rtMyToday();const dn=rt.filter(t=>t.d.status==='Done').length;
       return card('🔁 تکرارشوندهٔ امروز',rt.length?dn.toLocaleString('fa-IR')+' از '+rt.length.toLocaleString('fa-IR'):0,
-        rt.length&&dn<rt.length?'var(--warn)':(rt.length?'#16c784':null),jmp('sec_my_rt'));})()}
-  </div>`;
+        rt.length&&dn<rt.length?'var(--warn)':(rt.length?'#16c784':null),jmp('sec_my_rt'));})()}`;
+  _cardHide=false;
+  h+=_myCards.trim()?`<div class="cards">${_myCards}</div>`
+    :`<div class="sec" style="text-align:center;padding:16px;color:var(--tx2);font-size:12.5px">✅ کار باز یا عقب‌افتاده‌ای به شما سپرده نشده</div>`;
   // 🔁 وظایف تکرارشوندهٔ امروزِ من
   h+=(()=>{const rt=rtMyToday().sort((a,b)=>String(a.d.title||'').localeCompare(String(b.d.title||''),'fa'));
     const t0=today(),hi=[...myHRids()][0]||null;
@@ -17802,7 +17821,7 @@ function meHTML(){
     }
     return x+`</div>`;})();
   {const rps=rptAll();if(rps.length)h+=`<div class="sec"><h3>📌 گزارش‌های ذخیره‌شده</h3><div style="display:flex;gap:6px;flex-wrap:wrap">${rps.map(r2=>`<button class="btn gh sm" onclick="rptOpen('${r2.id}')">💾 ${esc(r2.name)} <span style="opacity:.6;font-size:10px">${E[r2.e]?E[r2.e].n:''}</span></button>`).join('')}</div></div>`;}
-  h+=`<div style="font-size:11px;color:var(--tx2);background:var(--bg2);border:1px dashed var(--line);border-radius:9px;padding:8px 11px;margin-bottom:10px">🗂️ این میز کار فقط کارهای <b>سپرده‌شده به شخص شما</b> را نشان می‌دهد${canView('dash')?' — کارهای کلی سازمان و همهٔ تسک‌های سیستم در «🎛️ اتاق کنترل سازمان» پایین همین صفحه است.':'.'}</div>`;
+  if(!uiSimple())h+=`<div style="font-size:11px;color:var(--tx2);background:var(--bg2);border:1px dashed var(--line);border-radius:9px;padding:8px 11px;margin-bottom:10px">🗂️ این میز کار فقط کارهای <b>سپرده‌شده به شخص شما</b> را نشان می‌دهد${canView('dash')?' — کارهای کلی سازمان و همهٔ تسک‌های سیستم در «🎛️ اتاق کنترل سازمان» پایین همین صفحه است.':'.'}</div>`;
   // ⚖️ اهداف BSC تحت مسئولیت من — با زنجیره کامل پاسخ‌گویی
   if(myBsc.length){
     h+=`<div class="sec relsec" id="sec_my_bsc"><h3>⚖️ اهداف BSC تحت مسئولیت من <span class="c">${myBsc.length.toLocaleString('fa-IR')}</span></h3>
@@ -17876,8 +17895,11 @@ function meHTML(){
   });
   // 🎛️ اتاق کنترل سازمان — ادغام‌شده در میز کار (با کنترل دسترسی خودش و تک‌تک المان‌هایش)
   if(canView('dash')){
+    _cardHide=uiSimple();
     const dh=dashHTML();
-    if(dh)h+=`<div style="display:flex;align-items:center;gap:10px;margin:22px 0 12px">
+    _cardHide=false;
+    if(dh&&uiSimple())h+=uiFold('meorg','🎛️ اتاق کنترل سازمان',dh);
+    else if(dh)h+=`<div style="display:flex;align-items:center;gap:10px;margin:22px 0 12px">
       <div style="height:1px;flex:1;background:linear-gradient(90deg,transparent,rgba(212,175,55,.4))"></div>
       <b style="font-size:14px;color:#ecd98f">🎛️ اتاق کنترل سازمان</b>
       <div style="height:1px;flex:1;background:linear-gradient(90deg,rgba(212,175,55,.4),transparent)"></div>
@@ -21469,7 +21491,10 @@ function donutSVG(parts,centerV,centerL){ // parts: [{v,c,l}] — نمودار �
     <text x="60" y="58" text-anchor="middle" font-size="20" font-weight="800" fill="var(--tx)">${centerV}</text>
     <text x="60" y="76" text-anchor="middle" font-size="9.5" fill="var(--tx2)">${centerL}</text></svg>`;
 }
-function card(l,v,col,click){return `<div class="card" ${click?`style="cursor:pointer" onclick="${click}"`:''}><div class="l">${l}</div><div class="v" style="${col?'color:'+col:''}">${typeof v==='number'?v.toLocaleString('fa-IR'):v}</div></div>`;}
+function card(l,v,col,click){
+  if(uiSimple()&&_cardHide&&(v===0||v==='0'||v==='۰'||v==='—'||v==null||v===''))return '';
+  return `<div class="card" ${click?`style="cursor:pointer" onclick="${click}"`:''}><div class="l">${l}</div><div class="v" style="${col?'color:'+col:''}">${typeof v==='number'?v.toLocaleString('fa-IR'):v}</div></div>`;}
+let _cardHide=false;
 function stratNode(b,depth){
   depth=depth||0; if(depth>6)return '';
   const ic=b.d.kind==='استراتژی کلان'?'🔗':'🎯';
@@ -21588,6 +21613,82 @@ document.addEventListener('mousedown',e=>{
 /* 🧲 فیلدهای قابل‌نمایش در فرم (با حذف فیلدهای مخفی‌شده‌ی ادمین جز در حالت چیدمان) */
 let formArrange=false;
 function formHidden(e){return (schemaCfg().hidden||{})[e]||[];}
+/* ═══ 🪶 v3.37 — حالت ساده: پیش‌فرض فقط ضروری‌ها، بقیه پشت دکمهٔ «بیشتر» ═══
+   هیچ امکانی حذف نمی‌شود؛ فقط آنچه ۹۰٪ مواقع لازم نیست، جمع می‌شود. */
+function uiSimple(){try{const v=localStorage.getItem('xr_simple');return v===null?true:v==='1';}catch(e){return true;}}
+window.uiSimpleToggle=function(){try{localStorage.setItem('xr_simple',uiSimple()?'0':'1');}catch(e){}
+  try{if(document.getElementById('ovl')&&document.getElementById('ovl').classList.contains('show'))drawModal();}catch(e){}
+  render();};
+function uiSimpleBadge(){
+  const on=uiSimple();
+  return `<button class="btn ${on?'':'gh'} sm" onclick="uiSimpleToggle()" title="${on?'الان فقط فیلدها و بخش‌های ضروری نشان داده می‌شوند':'الان همه‌چیز نشان داده می‌شود'}">${on?'🪶 حالت ساده':'🔧 حالت کامل'}</button>`;
+}
+/* 🎯 فیلدهای ضروریِ هر بخش — بقیه پشت «فیلدهای بیشتر» می‌روند */
+const SIMPLE_KEEP={
+  customer:['title','biz','mobile','phone','kind','natid','city'],
+  crm:['title','kind','rel','phone','email'],
+  product:['title','biz','grp','unit','buy','sell','stock0','minstock'],
+  invoice:['title','biz','customer','kind','date','status','disc','taxpct','paid'],
+  purchinv:['title','biz','supplier','kind','date','status','disc','taxpct','paid'],
+  sale:['title','biz','product','qty','price','date','kind','customer'],
+  purchase:['title','biz','product','qty','price','date','supplier'],
+  lead:['title','date','kind','phone','source','pcat','product','lstatus','seller'],
+  expense:['title','biz','cat','amount','date'],
+  hr:['title','email','mobile','unit','post','manager','quota'],
+  task:['title','owner','due','status','pri','project'],
+  project:['title','biz','owner','start','end','status'],
+  claim:['title','kind','customer','product','qty','date','status'],
+  leave:['title','kind','range','days','person','approver'],
+  whouse:['title','biz','kind','addr'],
+  cheque:['title','kind','amount','due','status','party'],
+  acctx:['title','account','kind','amount','date'],
+  voucher:['title','num','vdate','vtype','status'],
+  business:['title','co'],
+  company:['title','natid','phone','addr'],
+};
+/* ستون‌های «همیشه مهم» برای بخش‌هایی که فهرست دستی ندارند */
+const SIMPLE_ALWAYS=['title','biz','date','amount','qty','price','status','kind','customer','supplier','product','person','owner','due','start','end'];
+function simpleKeep(e){
+  const list=SIMPLE_KEEP[e];
+  if(list)return new Set(list);
+  const fs=(E[e]&&E[e].f)||[];
+  const keep=new Set();
+  fs.forEach(f=>{if(SIMPLE_ALWAYS.includes(f.k))keep.add(f.k);});
+  // اگر فهرست خیلی کوتاه شد، ۶ فیلد اول را هم نگه دار تا فرم بی‌معنی نشود
+  if(keep.size<4)fs.slice(0,6).forEach(f=>keep.add(f.k));
+  keep.add('title');
+  return keep;
+}
+/* فیلدی که مقدار دارد هرگز پنهان نمی‌شود — کاربر نباید دادهٔ پرشده را گم کند */
+function simpleIsExtra(e,f,d){
+  if(!uiSimple()||formArrange)return false;
+  if(simpleKeep(e).has(f.k))return false;
+  const v=d?d[f.k]:null;
+  if(v!=null&&v!==''&&!(Array.isArray(v)&&!v.length)&&!(typeof v==='object'&&!Array.isArray(v)&&!v.s))return false;
+  return true;
+}
+/* 🗜 جمع‌کنندهٔ عمومی — برای بلوک‌های طولانی راهنما و بخش‌های کم‌کاربرد */
+let _uiOpen={};
+window.uiFoldToggle=function(k){_uiOpen[k]=!_uiOpen[k];
+  const body=document.getElementById('fold_'+k),btn=document.getElementById('foldb_'+k);
+  if(body)body.style.display=_uiOpen[k]?'':'none';
+  if(btn)btn.textContent=btn.dataset.lab+(_uiOpen[k]?' ▴':' ▾');};
+function uiFold(k,label,inner,opts){
+  opts=opts||{};
+  const on=!!_uiOpen[k]||!uiSimple()&&opts.openFull;
+  return `<div style="margin:${opts.tight?'6px 0':'10px 0'}">
+    <button class="btn gh sm" id="foldb_${k}" data-lab="${esc(label)}" onclick="uiFoldToggle('${k}')">${esc(label)}${on?' ▴':' ▾'}</button>
+    <div id="fold_${k}" style="display:${on?'':'none'};margin-top:8px">${inner}</div></div>`;
+}
+/* 💡 راهنمای کوتاه‌شده: در حالت ساده فقط یک خط + «توضیح بیشتر» */
+function uiTip(k,short,full){
+  if(!uiSimple())return `<p style="font-size:11.5px;color:var(--tx2);line-height:2">${full}</p>`;
+  return `<p style="font-size:11.5px;color:var(--tx2);line-height:1.9">${short}
+    <a onclick="uiFoldToggle('${k}')" style="color:var(--ac);cursor:pointer">توضیح بیشتر</a></p>
+    <div id="fold_${k}" style="display:none;font-size:11.5px;color:var(--tx2);line-height:2;margin-bottom:6px">${full}</div>`;
+}
+window.uiTip=uiTip;window.uiFold=uiFold;window.uiSimple=uiSimple;window.uiSimpleBadge=uiSimpleBadge;
+
 function formFields(e){
   const hid=formHidden(e);
   return visFields(e).filter(f=>f.k==='title'||formArrange||!hid.includes(f.k));
@@ -21628,17 +21729,19 @@ function drawModal(){
     if(chips.length)h+=`<div class="comp">${chips.map(c=>`<div class="chip">${c[0]}: <b>${c[1]}</b></div>`).join('')}</div>`;
   }
   const drag=canLayout()&&!formArrange;
-  if(canLayout()){
+  if(canLayout()&&(!uiSimple()||formArrange)){
     h+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:7px 10px;border-radius:9px;background:${formArrange?'rgba(212,175,55,.12)':'var(--bg)'};border:1px solid ${formArrange?'var(--ac)':'var(--line)'}">
       <button class="btn ${formArrange?'':'gh'} sm" onclick="if(!formArrange){try{harvest();}catch(e){}}formArrange=!formArrange;drawModal()">🧲 چیدمان فیلدها</button>
       <span style="font-size:11px;color:var(--tx2)">${formArrange?'با ▲▼ جابجا کن، با 👁 مخفی/نمایش بده — روی همه کاربران اعمال می‌شود. دوباره بزن تا تمام شود.':'ترتیب و نمایش فیلدهای این فرم را تغییر بده'}</span></div>`;
   }
   const hid=formHidden(e);
   const _ff=formFields(e), _ffkeys=_ff.map(x=>x.k);
-  if(_ff.length>=14&&!formArrange)h+=srchBox('mfld','جستجوی فیلد در این فرم…','— فیلدهای پرشده و بقیه دست‌نخورده می‌مانند','#mrow_dnd > div[data-fk]');
-  h+=`<div class="mrow" id="mrow_dnd">`;
+  if(_ff.length>=14&&!formArrange&&!uiSimple())h+=srchBox('mfld','جستجوی فیلد در این فرم…','— فیلدهای پرشده و بقیه دست‌نخورده می‌مانند','#mrow_dnd > div[data-fk]');
+  let _simx=0;
+  h+=`<div class="mrow${uiSimple()&&!formArrange?' simon':''}" id="mrow_dnd">`;
   _ff.forEach((f,_fi)=>{
     const v=cur.d[f.k];
+    const _isX=simpleIsExtra(e,f,cur.d);if(_isX)_simx++;
     const ro=fldMode(e,f.k)==='read';
     const full=(f.t===LNG||f.t===REL||f.t===DAT||(formArrange))?'full':'';
     const plus=(f.t===SEL||f.t===MUL||f.t===STA)?` <a onclick="addOpt('${f.k}')" style="color:var(--ac);cursor:pointer;font-size:11px">＋ گزینه جدید</a>`:'';
@@ -21647,7 +21750,7 @@ function drawModal(){
         <button class="btn gh sm" style="padding:1px 7px" onclick="fmArrange('${e}','${f.k}',-1)" title="بالا">▲</button>
         <button class="btn gh sm" style="padding:1px 7px" onclick="fmArrange('${e}','${f.k}',1)" title="پایین">▼</button>
         <button class="btn ${isHidden?'':'gh'} sm" style="padding:1px 7px" onclick="fmHide('${e}','${f.k}')" title="${isHidden?'نمایش این فیلد':'مخفی‌کردن این فیلد'}">${isHidden?'🙈':'👁'}</button></span>`:'';
-    h+=`<div class="${full}" data-fk="${f.k}" ${drag?'draggable="true"':''} ${drag?'style="cursor:grab"':''} ${formArrange&&isHidden?'style="opacity:.5"':''}><label>${drag?'<span class="dndh" title="بکشید و جابجا کنید" style="cursor:grab;color:var(--tx2)">⋮⋮</span> ':''}${f.n}${plus}${arrCtl}</label>`;
+    h+=`<div class="${full}${_isX?' simx':''}" data-fk="${f.k}" ${drag?'draggable="true"':''} ${drag?'style="cursor:grab"':''} ${formArrange&&isHidden?'style="opacity:.5"':''}><label>${drag?'<span class="dndh" title="بکشید و جابجا کنید" style="cursor:grab;color:var(--tx2)">⋮⋮</span> ':''}${f.n}${plus}${arrCtl}</label>`;
     if(formArrange){h+=`<div style="font-size:10.5px;color:var(--tx2);padding:6px 8px;background:var(--bg);border:1px dashed var(--line);border-radius:8px">${isHidden?'🙈 مخفی از فرم':'نوع: '+((CF_TYPES.find(t=>t[0]===f.t)||[,f.t])[1])}</div></div>`;return;}
     if(f.t==='calc'){
       const cv=calcVal(e,f,cur.d);
@@ -21684,6 +21787,10 @@ function drawModal(){
     h+=`</div>`;
   });
   h+=`</div>`;
+  if(_simx>0)h+=`<div class="simbar">
+    <button class="btn gh sm" id="simmore" onclick="(function(){const r=document.getElementById('mrow_dnd');const on=r.classList.toggle('simon');
+      document.getElementById('simmore').textContent=on?'⚙️ ${_simx.toLocaleString('fa-IR')} فیلد بیشتر ▾':'🪶 جمع‌کردن فیلدهای کم‌کاربرد ▴';})()">⚙️ ${_simx.toLocaleString('fa-IR')} فیلد بیشتر ▾</button>
+    <span style="font-size:10.5px;color:var(--tx2)">فیلدهای پرشده همیشه دیده می‌شوند</span></div>`;
   // 🧹 «ارجاعات معکوس» حذف شد — صدها چیپ تکراری فرم را غیرقابل استفاده می‌کرد؛ اسناد مرتبط در صفحهٔ خود رکورد دیده می‌شوند
   // ⚙️ مدیریت عادت‌ها داخل فرم عادت روزانه
   if(e==='habit'){
