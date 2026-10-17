@@ -451,11 +451,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.40</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.41</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.40</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.41</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -13101,6 +13101,16 @@ window.tbQuickAdd=function(col){
   invalidateByE();render();
   setTimeout(()=>{const i2=document.getElementById(inp?inp.id:'');if(i2)i2.focus();},60);
 };
+window.tbQuickFull=function(col){
+  if(!can('c','task')){alert('اجازهٔ ساخت تسک را ندارید');return;}
+  const inp=document.getElementById('tbq_'+btoa(unescape(encodeURIComponent(col))).replace(/=/g,''));
+  const title=inp?String(inp.value||'').trim():'';
+  const own=view.tbWho&&!['all','me','none'].includes(view.tbWho)?[view.tbWho]:(_meHr()?[_meHr()]:[]);
+  const list=tbByCol(tbTasks())[col]||[];
+  openRecWith('task',{title,status:col,prio:'Medium',owner:own,
+    project:view.tbPrj?[view.tbPrj]:[],created:{s:today()},ord:(list.length+1)*10,_by:myEmail()});
+  if(inp)inp.value='';
+};
 window.tbAddCol=function(){
   const f=(E.task.f||[]).find(x=>x.k==='status');if(!f)return;
   const n=prompt('نام ستون جدید (مثلاً: در انتظار تأیید)');
@@ -13193,12 +13203,13 @@ function taskboardHTML(){
     if(can('c','task'))h+=`<div style="display:flex;gap:5px;margin-top:4px">
       <input class="tbadd" id="tbq_${btoa(unescape(encodeURIComponent(col))).replace(/=/g,'')}" placeholder="＋ تسک تازه…"
         onkeydown="if(event.key==='Enter'){event.preventDefault();tbQuickAdd('${esc(col).replace(/'/g,"\\'")}')}">
-      <button class="btn gh sm" style="padding:4px 9px" onclick="tbQuickAdd('${esc(col).replace(/'/g,"\\'")}')">＋</button></div>`;
+      <button class="btn gh sm" style="padding:4px 9px" title="افزودن سریع (فقط عنوان)" onclick="tbQuickAdd('${esc(col).replace(/'/g,"\\'")}')">＋</button>
+      <button class="btn gh sm" style="padding:4px 9px" title="افزودن با جزئیات کامل (مسئول، تاریخ، اولویت، شرح…)" onclick="tbQuickFull('${esc(col).replace(/'/g,"\\'")}')">📝</button></div>`;
     h+=`</div>`;
   });
   h+=`</div>`;
   if(!rows.length)h+=`<div class="sec"><div class="empty">کارتی برای نمایش نیست — با «＋ تسک تازه…» زیر هر ستون شروع کن</div></div>`;
-  h+=`<p style="font-size:11px;color:var(--tx2);margin-top:4px">💡 کارت را با ماوس یا انگشت بگیر و روی ستون دلخواه رها کن. روی عنوان کارت بزنی، جزئیات کامل باز می‌شود.</p>`;
+  h+=`<p style="font-size:11px;color:var(--tx2);margin-top:4px">💡 کارت را با ماوس یا انگشت بگیر و روی ستون دلخواه رها کن. روی عنوان کارت بزنی، فرم کامل تسک باز می‌شود. برای ساخت تسک با جزئیات، دکمهٔ 📝 کنار هر ستون.</p>`;
   return h;
 }
 window.taskboardHTML=taskboardHTML;
@@ -22125,6 +22136,7 @@ function drawModal(){
   let _simx=0;
   h+=`<div class="mrow${uiSimple()&&!formArrange?' simon':''}" id="mrow_dnd">`;
   _ff.forEach((f,_fi)=>{
+    if(f.t===REL&&!E[f.r])return; // فیلدِ ارجاع به موجودیتِ تعریف‌نشده — رد می‌شود
     const v=cur.d[f.k];
     const _isX=simpleIsExtra(e,f,cur.d);if(_isX)_simx++;
     const ro=fldMode(e,f.k)==='read';
@@ -22238,6 +22250,7 @@ function relSource(rel){
 }
 window.relSource=relSource;
 function relPicker(f){
+  if(!E[f.r])return `<div style="font-size:11px;color:var(--tx2);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px">این فیلد به موجودیتی اشاره دارد که در این نسخه تعریف نشده است.</div>`;
   const sel=relIds(cur,f.k);
   let opts=relSource(f.r).filter(o=>o.id!==cur.id) // جلوگیری از ارجاع به خود
     .sort((a,b)=>(a.d.title||'').localeCompare(b.d.title||'','fa'));
