@@ -451,11 +451,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.39</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.40</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.39</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.40</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -734,6 +734,7 @@ pupdate:{ic:'🗞️',n:'گزارش‌های کار و جلسه',grp:'سازما
 task:{ic:'📘',n:'تسک‌ها',grp:'عملکرد و تارگت',f:[
  {k:'title',n:'عنوان تسک',t:TXT},
  {k:'status',n:'وضعیت',t:STA,o:STATUS},
+ {k:'ord',n:'ترتیب روی تخته',t:NUM},
  {k:'prio',n:'اولویت',t:SEL,o:PRIO},
  {k:'created',n:'تاریخ و ساعت ایجاد تسک',t:DAT},
  {k:'due',n:'تاریخ و ساعت ددلاین',t:DAT},{k:'est',n:'تخمین زمان (ساعت)',t:NUM},
@@ -2901,6 +2902,7 @@ const VIEWS_ACL=[
  ['quotenew','⚖️ ثبت استعلام'],
  ['purchwf','🛒 کارتابل گردش خرید'],
  ['claimdash','↩️ مرجوعی و گارانتی'],
+ ['taskboard','🗂 تختهٔ تسک‌ها'],
  ['perfdash','🎖️ داشبورد عملکرد'],
  ['targetdash','🎯 پایش تارگت فروش'],
  ['aligndash','🧭 همسویی عملکرد'],
@@ -13013,11 +13015,254 @@ function wsMenu(g){
   if(g==='پرسنل و سازمان')return (
     it('orgchart','🏛 چارت سازمانی',"go('orgchart')",canView('orgchart'))+
     (canView('wfcenter')?(()=>{const _n=wfcMineCnt();return `<div class="nav-i ${view.type==='wfcenter'?'on':''}" onclick="go('wfcenter')">🗂 مرکز گردش کارها${_n?` <span class="c" style="background:var(--ac);color:#fff">${_n.toLocaleString('fa-IR')}</span>`:''}</div>`;})():'')+
+    it('taskboard','🗂 تختهٔ تسک‌ها',"go('taskboard')",canSee('task'))+
     it('bpm','🧩 فرآیندهای کاری',"go('bpm')",canView('bpm')));
   return '';
 }
 const GRP_IC={'داشبوردها':'📊','فروش':'🧾','CRM و مشتریان':'🤝','کالا و انبار':'📦','عملکرد و تارگت':'🎯','مالی':'💰','پرسنل و سازمان':'👥','بخش‌های سفارشی':'📁'};
 const GRP_COLOR={'داشبوردها':'#5B2C93','فروش':'#0078D4','CRM و مشتریان':'#038387','کالا و انبار':'#CA5010','عملکرد و تارگت':'#744DA9','مالی':'#107C10','پرسنل و سازمان':'#E3008C','بخش‌های سفارشی':'#8764B8'};
+/* ═══ 🗂 v3.40 — تختهٔ تسک (تریلو‌مانند): ستون‌ها، کارت‌ها و جابجایی با ماوس/لمس ═══ */
+const TB_PRIO_C={'Urgent':'#D13438','High':'#CA5010','Medium':'#B58500','Low':'#5C5C5C'};
+function tbPrioFa(p){return ({'Urgent':'فوری','High':'بالا','Medium':'متوسط','Low':'پایین'})[p]||p||'';}
+function tbColFa(s){return STATFA[s]||s;}
+/* ستون‌ها = گزینه‌های وضعیت تسک (قابل افزودن توسط ادمین) */
+function tbCols(){
+  const f=(E.task.f||[]).find(x=>x.k==='status');
+  const o=f?optsFor('task',f):STATUS.slice();
+  return o.length?o:STATUS.slice();
+}
+function tbDoneCol(){const c=tbCols();return c.includes('Done')?'Done':c[c.length-1];}
+/* تسک‌های قابل‌مشاهده با فیلترهای تخته */
+function tbTasks(){
+  const me=[...myHRids()];
+  let rows=byE('task').filter(t=>!t.del);
+  const who=view.tbWho||'all';
+  if(who==='me')rows=rows.filter(t=>relIds(t,'owner').some(x=>me.includes(x))||relIds(t,'helpers').some(x=>me.includes(x)));
+  else if(who&&who!=='all'&&who!=='none')rows=rows.filter(t=>relIds(t,'owner').includes(who)||relIds(t,'helpers').includes(who));
+  else if(who==='none')rows=rows.filter(t=>!relIds(t,'owner').length);
+  if(view.tbPrj)rows=rows.filter(t=>relIds(t,'project').includes(view.tbPrj));
+  const q=String(view.tbQ||'').trim();
+  if(q){const nq=faNum(q).toLowerCase();
+    rows=rows.filter(t=>{
+      const nm=relIds(t,'owner').map(i=>recs[i]&&recs[i].d.title||'').join(' ');
+      return (String(t.d.title||'')+' '+nm+' '+String(t.d.note||'')).toLowerCase().includes(nq);});}
+  if(!view.tbDone)rows=rows.filter(t=>t.d.status!==tbDoneCol()||tbIsFresh(t));
+  return rows;
+}
+function tbIsFresh(t){ // تسک انجام‌شدهٔ ۷ روز اخیر همچنان روی تخته بماند
+  const u=+t.u||0;return u&&(Date.now()-u)<7*86400000;
+}
+function tbOrd(t){const n=+t.d.ord;return isNaN(n)?1e9+(+t.u||0)/1e6:n;}
+function tbByCol(rows){
+  const m={};tbCols().forEach(c=>m[c]=[]);
+  rows.forEach(t=>{const s=t.d.status||tbCols()[0];(m[s]||(m[s]=[])).push(t);});
+  Object.keys(m).forEach(k=>m[k].sort((a,b)=>tbOrd(a)-tbOrd(b)||String(a.d.title||'').localeCompare(String(b.d.title||''),'fa')));
+  return m;
+}
+function tbOverdue(t){const d=ds(t.d.due);return d&&d<today()&&t.d.status!==tbDoneCol();}
+function tbPeople(){
+  const seen={};const out=[];
+  byE('task').forEach(t=>relIds(t,'owner').forEach(i=>{if(!seen[i]&&recs[i]){seen[i]=1;out.push(recs[i]);}}));
+  byE('hr').forEach(h=>{if(!seen[h.id]){seen[h.id]=1;out.push(h);}});
+  return out.sort((a,b)=>String(a.d.title||'').localeCompare(String(b.d.title||''),'fa'));
+}
+/* ───────── اقدام‌ها ───────── */
+window.tbMove=function(tid,col,beforeId){
+  const t=recs[tid];if(!t||t.del)return;
+  if(!can('e','task',t)){alert('اجازهٔ جابجایی این تسک را ندارید');render();return;}
+  const was=t.d.status||'';
+  const list=tbByCol(tbTasks())[col]||[];
+  const others=list.filter(x=>x.id!==tid);
+  const idx=beforeId?Math.max(0,others.findIndex(x=>x.id===beforeId)):others.length;
+  const at=idx<0?others.length:idx;
+  const seq=[...others.slice(0,at),t,...others.slice(at)];
+  t.d.status=col;
+  seq.forEach((x,i)=>{const nv=(i+1)*10;if(+x.d.ord!==nv){x.d.ord=nv;if(x.id!==tid){x.u=Date.now();put(x);}}});
+  if(was!==col){
+    t.d.wflog=(t.d.wflog||[]).concat([{t:Date.now(),by:myEmail(),act:'انتقال از «'+tbColFa(was)+'» به «'+tbColFa(col)+'»'}]);
+    if(col===tbDoneCol()&&!t.d.donedate)t.d.donedate={s:today()};
+    if(col!==tbDoneCol())delete t.d.donedate;
+  }
+  t.u=Date.now();put(t);
+  invalidateByE();render();
+};
+window.tbQuickAdd=function(col){
+  const inp=document.getElementById('tbq_'+btoa(unescape(encodeURIComponent(col))).replace(/=/g,''));
+  const title=inp?String(inp.value||'').trim():'';
+  if(!title){if(inp)inp.focus();return;}
+  if(!can('c','task')){alert('اجازهٔ ساخت تسک را ندارید');return;}
+  const own=view.tbWho&&!['all','me','none'].includes(view.tbWho)?[view.tbWho]:(_meHr()?[_meHr()]:[]);
+  const list=tbByCol(tbTasks())[col]||[];
+  const id=uid();
+  put({id,e:'task',d:{title,status:col,prio:'Medium',owner:own,
+    project:view.tbPrj?[view.tbPrj]:[],created:{s:today()},
+    ord:(list.length+1)*10,_by:myEmail()},u:Date.now()});
+  if(inp)inp.value='';
+  invalidateByE();render();
+  setTimeout(()=>{const i2=document.getElementById(inp?inp.id:'');if(i2)i2.focus();},60);
+};
+window.tbAddCol=function(){
+  const f=(E.task.f||[]).find(x=>x.k==='status');if(!f)return;
+  const n=prompt('نام ستون جدید (مثلاً: در انتظار تأیید)');
+  if(!n||!n.trim())return;
+  const v=n.trim();
+  if(tbCols().includes(v)){alert('این ستون هست');return;}
+  const m=recs[MO];
+  if(!m||m.del){alert('برای افزودن ستون باید ادمین باشی');return;}
+  const k='task.status';
+  m.d[k]=[...(m.d[k]||[]),v];m.u=Date.now();put(m);
+  invalidateByE();render();
+};
+window.tbSet=function(k,v){view[k]=v===''?null:v;render();};
+window.tbCard=function(id){openRec('task',id);};
+/* ───────── رندر ───────── */
+function taskboardHTML(){
+  if(!can('c','task')&&!canSee('task'))return '<div class="empty">دسترسی به تسک‌ها ندارید</div>';
+  const cols=tbCols(), rows=tbTasks(), byc=tbByCol(rows);
+  const people=tbPeople();
+  const prjs=byE('project');
+  const me=[...myHRids()];
+  const mine=rows.filter(t=>relIds(t,'owner').some(x=>me.includes(x))).length;
+  const od=rows.filter(tbOverdue).length;
+  let h=`<style id="tbcss">
+  .tbwrap{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 14px;align-items:flex-start}
+  .tbbody{min-height:90px}
+.tbcol{flex:0 0 272px;background:var(--bg3);border-radius:14px;padding:10px;border:1px solid var(--line);min-height:120px}
+  .tbcol.tbover{outline:2px dashed var(--ac);outline-offset:2px;background:rgba(0,120,212,.06)}
+  .tbch{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;margin-bottom:9px;padding:0 2px}
+  .tbch .c{background:var(--bg2);border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;color:var(--tx2)}
+  .tbcard{background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:9px 11px;margin-bottom:8px;
+    box-shadow:var(--sh2);cursor:grab;touch-action:none;user-select:none}
+  .tbcard:active{cursor:grabbing}
+  .tbcard .t{font-size:12.5px;font-weight:700;line-height:1.7;word-break:break-word}
+  .tbcard .m{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:7px;font-size:10.5px;color:var(--tx2)}
+  .tbcard .av{width:19px;height:19px;border-radius:50%;background:var(--ac);color:#fff;font-size:9.5px;
+    display:inline-flex;align-items:center;justify-content:center;font-weight:800}
+  .tbdot{width:7px;height:7px;border-radius:50%;display:inline-block}
+  .tbph{height:54px;border:2px dashed var(--ac);border-radius:11px;margin-bottom:8px;background:rgba(0,120,212,.07)}
+  .tbdrag{position:fixed;z-index:9999;pointer-events:none;width:252px;opacity:.95;transform:rotate(2deg);box-shadow:var(--sh16)}
+  .tbadd{width:100%;font-size:12px;margin-top:2px}
+  </style>`;
+  h+=`<div class="tools"><b style="font-size:13px">🗂 تختهٔ تسک‌ها</b>
+    <span class="chip" style="background:var(--bg3);font-size:11px">${rows.length.toLocaleString('fa-IR')} کارت</span>
+    ${mine?`<span class="chip" style="background:rgba(0,120,212,.12);color:var(--ac);font-size:11px">${mine.toLocaleString('fa-IR')} مال من</span>`:''}
+    ${od?`<span class="chip" style="background:rgba(209,52,56,.12);color:var(--bad);font-size:11px">${od.toLocaleString('fa-IR')} عقب‌افتاده</span>`:''}
+    <span style="flex:1"></span>
+    ${isAdmin()?`<button class="btn gh sm" onclick="tbAddCol()">➕ ستون</button>`:''}
+    <button class="btn gh sm" onclick="go('list','task')">📋 نمای فهرستی</button></div>`;
+  h+=`<div class="tools" style="margin-bottom:8px">
+    <label style="margin:0">نمایش:</label>
+    <select onchange="tbSet('tbWho',this.value)" style="max-width:190px">
+      <option value="all" ${(view.tbWho||'all')==='all'?'selected':''}>👥 همه</option>
+      <option value="me" ${view.tbWho==='me'?'selected':''}>🙋 تسک‌های من</option>
+      <option value="none" ${view.tbWho==='none'?'selected':''}>❔ بدون مسئول</option>
+      ${people.map(p=>`<option value="${p.id}" ${view.tbWho===p.id?'selected':''}>${esc(p.d.title||'—')}</option>`).join('')}
+    </select>
+    ${prjs.length?`<select onchange="tbSet('tbPrj',this.value)" style="max-width:190px">
+      <option value="">🏗️ همهٔ پروژه‌ها</option>
+      ${prjs.map(p=>`<option value="${p.id}" ${view.tbPrj===p.id?'selected':''}>${esc(p.d.title||'—')}</option>`).join('')}</select>`:''}
+    <input id="tb_q" value="${esc(view.tbQ||'')}" placeholder="🔍 جستجو در عنوان یا مسئول…" oninput="view.tbQ=this.value;clearTimeout(window._tbT);window._tbT=setTimeout(render,250)" style="max-width:230px">
+    <label style="display:flex;align-items:center;gap:5px;margin:0;font-size:11.5px;color:var(--tx2)">
+      <input type="checkbox" ${view.tbDone?'checked':''} onchange="view.tbDone=this.checked;render()" style="width:auto"> نمایش همهٔ انجام‌شده‌ها</label>
+  </div>`;
+  h+=`<div class="tbwrap" id="tbwrap">`;
+  cols.forEach(col=>{
+    const list=byc[col]||[];
+    const isDone=col===tbDoneCol();
+    h+=`<div class="tbcol" data-col="${esc(col)}">
+      <div class="tbch"><span class="tbdot" style="background:${isDone?'#17B26A':col===cols[0]?'#98A2B3':'#2E6FE0'}"></span>
+        ${esc(tbColFa(col))}<span class="c">${list.length.toLocaleString('fa-IR')}</span></div>
+      <div class="tbbody" data-col="${esc(col)}">`;
+    list.forEach(t=>{
+      const own=relIds(t,'owner').map(i=>recs[i]).filter(Boolean);
+      const dd=ds(t.d.due);
+      const ov=tbOverdue(t);
+      const editable=can('e','task',t);
+      h+=`<div class="tbcard" data-tid="${t.id}" ${editable?'':'style="cursor:default;opacity:.85"'}>
+        <div class="t" onclick="tbCard('${t.id}')" style="cursor:pointer">${esc(t.d.title||'—')}</div>
+        <div class="m">
+          ${t.d.prio?`<span class="tbdot" style="background:${TB_PRIO_C[t.d.prio]||'#98A2B3'}" title="${esc(tbPrioFa(t.d.prio))}"></span>`:''}
+          ${dd?`<span style="color:${ov?'var(--bad)':'var(--tx2)'};font-weight:${ov?'800':'400'}">${ov?'⏰ ':'📅 '}${esc(iso2jstr(dd))}</span>`:''}
+          ${relIds(t,'project')[0]&&recs[relIds(t,'project')[0]]?`<span>🏗️ ${esc(String(recs[relIds(t,'project')[0]].d.title||'').slice(0,14))}</span>`:''}
+          <span style="flex:1"></span>
+          ${own.map(o=>`<span class="av" title="${esc(o.d.title||'')}">${esc(String(o.d.title||'?').trim().slice(0,2))}</span>`).join('')}
+          ${own.length?'':'<span style="color:var(--warn)">بدون مسئول</span>'}
+        </div></div>`;
+    });
+    h+=`</div>`;
+    if(can('c','task'))h+=`<div style="display:flex;gap:5px;margin-top:4px">
+      <input class="tbadd" id="tbq_${btoa(unescape(encodeURIComponent(col))).replace(/=/g,'')}" placeholder="＋ تسک تازه…"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();tbQuickAdd('${esc(col).replace(/'/g,"\\'")}')}">
+      <button class="btn gh sm" style="padding:4px 9px" onclick="tbQuickAdd('${esc(col).replace(/'/g,"\\'")}')">＋</button></div>`;
+    h+=`</div>`;
+  });
+  h+=`</div>`;
+  if(!rows.length)h+=`<div class="sec"><div class="empty">کارتی برای نمایش نیست — با «＋ تسک تازه…» زیر هر ستون شروع کن</div></div>`;
+  h+=`<p style="font-size:11px;color:var(--tx2);margin-top:4px">💡 کارت را با ماوس یا انگشت بگیر و روی ستون دلخواه رها کن. روی عنوان کارت بزنی، جزئیات کامل باز می‌شود.</p>`;
+  return h;
+}
+window.taskboardHTML=taskboardHTML;
+/* ───────── کشیدن و رها کردن (ماوس + لمس) ───────── */
+let _tbDrag=null;
+function tbInit(){
+  const wrap=document.getElementById('tbwrap');if(!wrap||wrap._tb)return;
+  wrap._tb=1;
+  wrap.addEventListener('pointerdown',ev=>{
+    const card=ev.target.closest&&ev.target.closest('.tbcard');
+    if(!card||!wrap.contains(card))return;
+    if(ev.target.closest('button,a,input,select,textarea'))return;
+    const t=recs[card.dataset.tid];
+    if(!t||!can('e','task',t))return;
+    const sx=ev.clientX,sy=ev.clientY;
+    let started=false,ghost=null,ph=null;
+    const onMove=e2=>{
+      if(!started){
+        if(Math.abs(e2.clientX-sx)<6&&Math.abs(e2.clientY-sy)<6)return;
+        started=true;
+        try{card.setPointerCapture(ev.pointerId);}catch(e){}
+        ghost=card.cloneNode(true);ghost.className='tbcard tbdrag';document.body.appendChild(ghost);
+        ph=document.createElement('div');ph.className='tbph';
+        card.parentNode.insertBefore(ph,card);
+        card.style.display='none';
+      }
+      if(ghost){ghost.style.left=(e2.clientX-120)+'px';ghost.style.top=(e2.clientY-22)+'px';}
+      ghost.style.display='none';
+      const under=document.elementFromPoint(e2.clientX,e2.clientY);
+      ghost.style.display='';
+      let body=under&&under.closest?under.closest('.tbbody'):null;
+      if(!body){const colEl=under&&under.closest?under.closest('.tbcol'):null;if(colEl)body=colEl.querySelector('.tbbody');}
+      if(!body){const all=[...document.querySelectorAll('.tbcol')];for(const cEl of all){const r=cEl.getBoundingClientRect();if(e2.clientX>=r.left&&e2.clientX<=r.right&&e2.clientY>=r.top&&e2.clientY<=r.bottom){body=cEl.querySelector('.tbbody');break;}}}
+      document.querySelectorAll('.tbcol.tbover').forEach(c=>c.classList.remove('tbover'));
+      if(!body)return;
+      body.closest('.tbcol').classList.add('tbover');
+      const cards=[...body.querySelectorAll('.tbcard')].filter(c=>c!==card&&c.style.display!=='none');
+      let before=null;
+      for(const c of cards){const r=c.getBoundingClientRect();if(e2.clientY<r.top+r.height/2){before=c;break;}}
+      if(before)body.insertBefore(ph,before);else body.appendChild(ph);
+    };
+    const onUp=e2=>{
+      window.removeEventListener('pointermove',onMove);
+      window.removeEventListener('pointerup',onUp);
+      window.removeEventListener('pointercancel',onUp);
+      document.querySelectorAll('.tbcol.tbover').forEach(c=>c.classList.remove('tbover'));
+      if(!started){return;}
+      if(ghost&&ghost.parentNode)ghost.parentNode.removeChild(ghost);
+      const body=ph&&ph.parentNode?ph.parentNode:null;
+      const col=body?body.dataset.col:null;
+      let beforeId=null;
+      if(ph){let n=ph.nextElementSibling;while(n&&!n.classList.contains('tbcard'))n=n.nextElementSibling;
+        if(n&&n!==card)beforeId=n.dataset.tid;}
+      if(ph&&ph.parentNode)ph.parentNode.removeChild(ph);
+      card.style.display='';
+      if(col)tbMove(card.dataset.tid,col,beforeId);
+    };
+    window.addEventListener('pointermove',onMove);
+    window.addEventListener('pointerup',onUp);
+    window.addEventListener('pointercancel',onUp);
+  });
+}
+window.tbInit=tbInit;
+
 function mtItems(g){ // 🧩 همهٔ زیرمنوهای یک گروه به‌صورت چیپ
   if(g==='داشبوردها')return dashChips(); // 📊 داشبوردها یک‌جا
   const ents=groupEnts(g);
@@ -13231,6 +13476,7 @@ function render(){
     view.type==='pfdash'?'🔄 تسویه درگاه‌ها و پلتفرم‌ها':
     view.type==='perfdash'?'🎖️ داشبورد عملکرد':
     view.type==='aligndash'?'🧭 همسویی عملکرد و استراتژی':
+    view.type==='taskboard'?'🗂 تختهٔ تسک‌ها':
     view.type==='invhealth'?'🩺 سلامت فاکتورها':
     view.type==='docno'?'🔢 بررسی و اصلاح شمارهٔ اسناد':
     view.type==='backupdash'?'💾 پشتیبان‌گیری و بازیابی':
@@ -13349,6 +13595,7 @@ function render(){
     else if(view.type==='aligndash')c.innerHTML=aligndashHTML();
     else if(view.type==='docno')c.innerHTML=isAdmin()?docnoHTML():'<div class="empty">این بخش فقط برای ادمین است</div>';
     else if(view.type==='invhealth')c.innerHTML=isAdmin()?invhealthHTML():'<div class="empty">این بخش فقط برای ادمین است</div>';
+    else if(view.type==='taskboard'){c.innerHTML=taskboardHTML();try{setTimeout(tbInit,0);}catch(_e){}}
     else if(view.type==='backupdash')c.innerHTML=backupdashHTML();
     else if(view.type==='salesdash')c.innerHTML=salesdashHTML();
     else if(view.type==='invnew')c.innerHTML=invnewHTML();
@@ -18017,6 +18264,7 @@ function meHTML(){
     });
     h+=`</div>`;
   }
+  if(canSee('task'))h+=`<div style="margin:12px 0 4px"><button class="btn sm" onclick="go('taskboard')">🗂 تختهٔ تسک‌ها — کارت‌ها را با ماوس یا انگشت جابجا کن</button></div>`;
   const secs=[
     ['📘 تسک‌های من','task',tasks],
     ['🏗️ پروژه‌های تحت مدیریت من','project',mine('project','pm')],
