@@ -451,11 +451,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.41</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.42</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.41</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.42</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -735,6 +735,8 @@ task:{ic:'📘',n:'تسک‌ها',grp:'عملکرد و تارگت',f:[
  {k:'title',n:'عنوان تسک',t:TXT},
  {k:'status',n:'وضعیت',t:STA,o:STATUS},
  {k:'ord',n:'ترتیب روی تخته',t:NUM},
+ {k:'arch',n:'✅ انجام شد (بایگانی)',t:CHK},
+ {k:'archdate',n:'تاریخ بایگانی',t:DAT,one:1},
  {k:'prio',n:'اولویت',t:SEL,o:PRIO},
  {k:'created',n:'تاریخ و ساعت ایجاد تسک',t:DAT},
  {k:'due',n:'تاریخ و ساعت ددلاین',t:DAT},{k:'est',n:'تخمین زمان (ساعت)',t:NUM},
@@ -2903,6 +2905,7 @@ const VIEWS_ACL=[
  ['purchwf','🛒 کارتابل گردش خرید'],
  ['claimdash','↩️ مرجوعی و گارانتی'],
  ['taskboard','🗂 تختهٔ تسک‌ها'],
+ ['taskarch','🗄 بایگانی تسک‌ها'],
  ['perfdash','🎖️ داشبورد عملکرد'],
  ['targetdash','🎯 پایش تارگت فروش'],
  ['aligndash','🧭 همسویی عملکرد'],
@@ -13016,6 +13019,7 @@ function wsMenu(g){
     it('orgchart','🏛 چارت سازمانی',"go('orgchart')",canView('orgchart'))+
     (canView('wfcenter')?(()=>{const _n=wfcMineCnt();return `<div class="nav-i ${view.type==='wfcenter'?'on':''}" onclick="go('wfcenter')">🗂 مرکز گردش کارها${_n?` <span class="c" style="background:var(--ac);color:#fff">${_n.toLocaleString('fa-IR')}</span>`:''}</div>`;})():'')+
     it('taskboard','🗂 تختهٔ تسک‌ها',"go('taskboard')",canSee('task'))+
+    it('taskarch','🗄 بایگانی تسک‌ها',"go('taskarch')",canSee('task'))+
     it('bpm','🧩 فرآیندهای کاری',"go('bpm')",canView('bpm')));
   return '';
 }
@@ -13025,13 +13029,21 @@ const GRP_COLOR={'داشبوردها':'#5B2C93','فروش':'#0078D4','CRM و م�
 const TB_PRIO_C={'Urgent':'#D13438','High':'#CA5010','Medium':'#B58500','Low':'#5C5C5C'};
 function tbPrioFa(p){return ({'Urgent':'فوری','High':'بالا','Medium':'متوسط','Low':'پایین'})[p]||p||'';}
 function tbColFa(s){return STATFA[s]||s;}
-/* ستون‌ها = گزینه‌های وضعیت تسک (قابل افزودن توسط ادمین) */
-function tbCols(){
-  const f=(E.task.f||[]).find(x=>x.k==='status');
-  const o=f?optsFor('task',f):STATUS.slice();
-  return o.length?o:STATUS.slice();
+/* ستون‌های پیش‌فرض تخته — قابل حذف و افزودن */
+const TB_DEF=['فروش','مالی','مدیریت سوشیال','سایت','SEO'];
+function tbColsRaw(){
+  const m=recs[MO];
+  const c=m&&!m.del&&Array.isArray(m.d['task.board'])?m.d['task.board'].map(x=>String(x||'').trim()).filter(Boolean):null;
+  return c&&c.length?c:TB_DEF.slice();
 }
-function tbDoneCol(){const c=tbCols();return c.includes('Done')?'Done':c[c.length-1];}
+function tbCols(){return tbColsRaw();}
+function tbColsWrite(arr){
+  const m=recs[MO];
+  if(!m||m.del){alert('برای تغییر ستون‌ها باید ادمین باشی');return false;}
+  m.d['task.board']=arr.slice();m.u=Date.now();put(m);return true;
+}
+function tbDoneCol(){return null;} // ستون «انجام شد» نداریم — پایان کار با تیکِ بایگانی
+function tbArch(t){return !!(t&&t.d&&t.d.arch);}
 /* تسک‌های قابل‌مشاهده با فیلترهای تخته */
 function tbTasks(){
   const me=[...myHRids()];
@@ -13046,7 +13058,7 @@ function tbTasks(){
     rows=rows.filter(t=>{
       const nm=relIds(t,'owner').map(i=>recs[i]&&recs[i].d.title||'').join(' ');
       return (String(t.d.title||'')+' '+nm+' '+String(t.d.note||'')).toLowerCase().includes(nq);});}
-  if(!view.tbDone)rows=rows.filter(t=>t.d.status!==tbDoneCol()||tbIsFresh(t));
+  rows=rows.filter(t=>!tbArch(t));
   return rows;
 }
 function tbIsFresh(t){ // تسک انجام‌شدهٔ ۷ روز اخیر همچنان روی تخته بماند
@@ -13054,12 +13066,13 @@ function tbIsFresh(t){ // تسک انجام‌شدهٔ ۷ روز اخیر همچ
 }
 function tbOrd(t){const n=+t.d.ord;return isNaN(n)?1e9+(+t.u||0)/1e6:n;}
 function tbByCol(rows){
-  const m={};tbCols().forEach(c=>m[c]=[]);
-  rows.forEach(t=>{const s=t.d.status||tbCols()[0];(m[s]||(m[s]=[])).push(t);});
+  const cols=tbCols();
+  const m={};cols.forEach(c=>m[c]=[]);
+  rows.forEach(t=>{let s=t.d.status;if(!s||!cols.includes(s))s=cols[0];(m[s]||(m[s]=[])).push(t);});
   Object.keys(m).forEach(k=>m[k].sort((a,b)=>tbOrd(a)-tbOrd(b)||String(a.d.title||'').localeCompare(String(b.d.title||''),'fa')));
   return m;
 }
-function tbOverdue(t){const d=ds(t.d.due);return d&&d<today()&&t.d.status!==tbDoneCol();}
+function tbOverdue(t){const d=ds(t.d.due);return d&&d<today()&&!tbArch(t);}
 function tbPeople(){
   const seen={};const out=[];
   byE('task').forEach(t=>relIds(t,'owner').forEach(i=>{if(!seen[i]&&recs[i]){seen[i]=1;out.push(recs[i]);}}));
@@ -13080,8 +13093,6 @@ window.tbMove=function(tid,col,beforeId){
   seq.forEach((x,i)=>{const nv=(i+1)*10;if(+x.d.ord!==nv){x.d.ord=nv;if(x.id!==tid){x.u=Date.now();put(x);}}});
   if(was!==col){
     t.d.wflog=(t.d.wflog||[]).concat([{t:Date.now(),by:myEmail(),act:'انتقال از «'+tbColFa(was)+'» به «'+tbColFa(col)+'»'}]);
-    if(col===tbDoneCol()&&!t.d.donedate)t.d.donedate={s:today()};
-    if(col!==tbDoneCol())delete t.d.donedate;
   }
   t.u=Date.now();put(t);
   invalidateByE();render();
@@ -13112,16 +13123,58 @@ window.tbQuickFull=function(col){
   if(inp)inp.value='';
 };
 window.tbAddCol=function(){
-  const f=(E.task.f||[]).find(x=>x.k==='status');if(!f)return;
-  const n=prompt('نام ستون جدید (مثلاً: در انتظار تأیید)');
+  const n=prompt('نام ستون جدید (مثلاً: پشتیبانی)');
   if(!n||!n.trim())return;
   const v=n.trim();
-  if(tbCols().includes(v)){alert('این ستون هست');return;}
-  const m=recs[MO];
-  if(!m||m.del){alert('برای افزودن ستون باید ادمین باشی');return;}
-  const k='task.status';
-  m.d[k]=[...(m.d[k]||[]),v];m.u=Date.now();put(m);
+  if(tbCols().includes(v)){alert('این ستون از قبل هست');return;}
+  if(!tbColsWrite([...tbCols(),v]))return;
   invalidateByE();render();
+};
+window.tbDelCol=function(col){
+  const cols=tbCols();
+  if(cols.length<=1){alert('دست‌کم یک ستون باید بماند');return;}
+  const rest=cols.filter(c=>c!==col);
+  const list=tbByCol(tbTasks())[col]||[];
+  if(!confirm(list.length
+    ?'ستون «'+tbColFa(col)+'» حذف شود؟ '+list.length.toLocaleString('fa-IR')+' کارتِ داخل آن به ستون «'+tbColFa(rest[0])+'» منتقل می‌شود.'
+    :'ستون «'+tbColFa(col)+'» حذف شود؟'))return;
+  if(!tbColsWrite(rest))return;
+  list.forEach((t,i)=>{
+    if(!can('e','task',t))return;
+    t.d.status=rest[0];t.d.ord=((tbByCol(tbTasks())[rest[0]]||[]).length+i+1)*10;
+    t.d.wflog=(t.d.wflog||[]).concat([{t:Date.now(),by:myEmail(),act:'ستون «'+tbColFa(col)+'» حذف شد — انتقال به «'+tbColFa(rest[0])+'»'}]);
+    t.u=Date.now();put(t);
+  });
+  invalidateByE();render();
+};
+window.tbRenCol=function(col){
+  const n=prompt('نام تازهٔ ستون:',tbColFa(col));
+  if(!n||!n.trim()||n.trim()===col)return;
+  const v=n.trim();
+  if(tbCols().includes(v)){alert('این نام از قبل هست');return;}
+  if(!tbColsWrite(tbCols().map(c=>c===col?v:c)))return;
+  byE('task').forEach(t=>{if(t.d.status===col&&can('e','task',t)){t.d.status=v;t.u=Date.now();put(t);}});
+  invalidateByE();render();
+};
+/* ✅ تیکِ پایان کار → بایگانی */
+window.tbDone=function(tid,on){
+  const t=recs[tid];if(!t||t.del)return;
+  if(!can('e','task',t)){alert('اجازهٔ تغییر این تسک را ندارید');render();return;}
+  if(on){
+    t.d.arch=true;t.d.archdate={s:today()};
+    if(!t.d.donedate)t.d.donedate={s:today()};
+    t.d.wflog=(t.d.wflog||[]).concat([{t:Date.now(),by:myEmail(),act:'✅ انجام شد — به بایگانی رفت'}]);
+  }else{
+    delete t.d.arch;delete t.d.archdate;delete t.d.donedate;
+    t.d.wflog=(t.d.wflog||[]).concat([{t:Date.now(),by:myEmail(),act:'↩️ از بایگانی برگشت'}]);
+  }
+  t.u=Date.now();put(t);invalidateByE();render();
+};
+window.tbDel=function(tid){
+  const t=recs[tid];if(!t||t.del)return;
+  if(!can('d','task',t)){alert('اجازهٔ حذف این تسک را ندارید');return;}
+  if(!confirm('تسک «'+String(t.d.title||'')+'» حذف شود؟ این کار برگشت‌پذیر نیست.'))return;
+  t.del=true;t.u=Date.now();put(t);invalidateByE();render();
 };
 window.tbSet=function(k,v){view[k]=v===''?null:v;render();};
 window.tbCard=function(id){openRec('task',id);};
@@ -13152,6 +13205,8 @@ function taskboardHTML(){
   .tbph{height:54px;border:2px dashed var(--ac);border-radius:11px;margin-bottom:8px;background:rgba(0,120,212,.07)}
   .tbdrag{position:fixed;z-index:9999;pointer-events:none;width:252px;opacity:.95;transform:rotate(2deg);box-shadow:var(--sh16)}
   .tbadd{width:100%;font-size:12px;margin-top:2px}
+  .tbcx{padding:1px 6px!important;font-size:11px!important;line-height:1.6}
+  .tbck{width:auto!important;margin:3px 0 0;flex:0 0 auto;cursor:pointer}
   </style>`;
   h+=`<div class="tools"><b style="font-size:13px">🗂 تختهٔ تسک‌ها</b>
     <span class="chip" style="background:var(--bg3);font-size:11px">${rows.length.toLocaleString('fa-IR')} کارت</span>
@@ -13159,6 +13214,7 @@ function taskboardHTML(){
     ${od?`<span class="chip" style="background:rgba(209,52,56,.12);color:var(--bad);font-size:11px">${od.toLocaleString('fa-IR')} عقب‌افتاده</span>`:''}
     <span style="flex:1"></span>
     ${isAdmin()?`<button class="btn gh sm" onclick="tbAddCol()">➕ ستون</button>`:''}
+    <button class="btn gh sm" onclick="go('taskarch')">🗄 بایگانی${(()=>{const n=byE('task').filter(t=>!t.del&&tbArch(t)).length;return n?' ('+n.toLocaleString('fa-IR')+')':'';})()}</button>
     <button class="btn gh sm" onclick="go('list','task')">📋 نمای فهرستی</button></div>`;
   h+=`<div class="tools" style="margin-bottom:8px">
     <label style="margin:0">نمایش:</label>
@@ -13172,16 +13228,18 @@ function taskboardHTML(){
       <option value="">🏗️ همهٔ پروژه‌ها</option>
       ${prjs.map(p=>`<option value="${p.id}" ${view.tbPrj===p.id?'selected':''}>${esc(p.d.title||'—')}</option>`).join('')}</select>`:''}
     <input id="tb_q" value="${esc(view.tbQ||'')}" placeholder="🔍 جستجو در عنوان یا مسئول…" oninput="view.tbQ=this.value;clearTimeout(window._tbT);window._tbT=setTimeout(render,250)" style="max-width:230px">
-    <label style="display:flex;align-items:center;gap:5px;margin:0;font-size:11.5px;color:var(--tx2)">
-      <input type="checkbox" ${view.tbDone?'checked':''} onchange="view.tbDone=this.checked;render()" style="width:auto"> نمایش همهٔ انجام‌شده‌ها</label>
   </div>`;
   h+=`<div class="tbwrap" id="tbwrap">`;
   cols.forEach(col=>{
     const list=byc[col]||[];
-    const isDone=col===tbDoneCol();
+    const ci=cols.indexOf(col);
+    const cc=['#2E6FE0','#107C10','#C239B3','#CA5010','#744DA9','#0F6CBD','#B58500'][ci%7];
     h+=`<div class="tbcol" data-col="${esc(col)}">
-      <div class="tbch"><span class="tbdot" style="background:${isDone?'#17B26A':col===cols[0]?'#98A2B3':'#2E6FE0'}"></span>
-        ${esc(tbColFa(col))}<span class="c">${list.length.toLocaleString('fa-IR')}</span></div>
+      <div class="tbch"><span class="tbdot" style="background:${cc}"></span>
+        ${esc(tbColFa(col))}<span class="c">${list.length.toLocaleString('fa-IR')}</span>
+        <span style="flex:1"></span>
+        ${isAdmin()?`<button class="btn gh sm tbcx" title="تغییر نام ستون" onclick="tbRenCol('${esc(col).replace(/'/g,"\\'")}')">✏️</button>
+        <button class="btn gh sm tbcx" title="حذف ستون" onclick="tbDelCol('${esc(col).replace(/'/g,"\\'")}')">🗑</button>`:''}</div>
       <div class="tbbody" data-col="${esc(col)}">`;
     list.forEach(t=>{
       const own=relIds(t,'owner').map(i=>recs[i]).filter(Boolean);
@@ -13189,7 +13247,12 @@ function taskboardHTML(){
       const ov=tbOverdue(t);
       const editable=can('e','task',t);
       h+=`<div class="tbcard" data-tid="${t.id}" ${editable?'':'style="cursor:default;opacity:.85"'}>
-        <div class="t" onclick="tbCard('${t.id}')" style="cursor:pointer">${esc(t.d.title||'—')}</div>
+        <div style="display:flex;align-items:flex-start;gap:7px">
+          <input type="checkbox" class="tbck" title="انجام شد — برو به بایگانی" ${editable?'':'disabled'}
+            onclick="event.stopPropagation()" onchange="tbDone('${t.id}',this.checked)">
+          <div class="t" onclick="tbCard('${t.id}')" style="cursor:pointer;flex:1">${esc(t.d.title||'—')}</div>
+          ${can('d','task',t)?`<button class="btn gh sm tbcx" title="حذف تسک" onclick="event.stopPropagation();tbDel('${t.id}')">🗑</button>`:''}
+        </div>
         <div class="m">
           ${t.d.prio?`<span class="tbdot" style="background:${TB_PRIO_C[t.d.prio]||'#98A2B3'}" title="${esc(tbPrioFa(t.d.prio))}"></span>`:''}
           ${dd?`<span style="color:${ov?'var(--bad)':'var(--tx2)'};font-weight:${ov?'800':'400'}">${ov?'⏰ ':'📅 '}${esc(iso2jstr(dd))}</span>`:''}
@@ -13209,10 +13272,131 @@ function taskboardHTML(){
   });
   h+=`</div>`;
   if(!rows.length)h+=`<div class="sec"><div class="empty">کارتی برای نمایش نیست — با «＋ تسک تازه…» زیر هر ستون شروع کن</div></div>`;
-  h+=`<p style="font-size:11px;color:var(--tx2);margin-top:4px">💡 کارت را با ماوس یا انگشت بگیر و روی ستون دلخواه رها کن. روی عنوان کارت بزنی، فرم کامل تسک باز می‌شود. برای ساخت تسک با جزئیات، دکمهٔ 📝 کنار هر ستون.</p>`;
+  h+=`<p style="font-size:11px;color:var(--tx2);margin-top:4px">💡 کارت را با ماوس یا انگشت بگیر و روی ستون دلخواه رها کن. تیکِ کنار هر کارت یعنی «انجام شد» و کارت به 🗄 بایگانی می‌رود. 🗑 تسک را حذف می‌کند. روی عنوان کارت بزنی، فرم کامل باز می‌شود.</p>`;
   return h;
 }
 window.taskboardHTML=taskboardHTML;
+
+/* ═══ 🗄 v3.42 — بایگانی تسک‌های انجام‌شده ═══ */
+function taArchRows(){
+  let rows=byE('task').filter(t=>!t.del&&tbArch(t));
+  const who=view.taWho||'all';
+  const me=[...myHRids()];
+  if(who==='me')rows=rows.filter(t=>relIds(t,'owner').some(x=>me.includes(x))||relIds(t,'helpers').some(x=>me.includes(x)));
+  else if(who&&who!=='all')rows=rows.filter(t=>relIds(t,'owner').includes(who)||relIds(t,'helpers').includes(who));
+  if(view.taCol)rows=rows.filter(t=>(t.d.status||'')===view.taCol);
+  if(view.taPrj)rows=rows.filter(t=>relIds(t,'project').includes(view.taPrj));
+  if(view.taPrio)rows=rows.filter(t=>(t.d.prio||'')===view.taPrio);
+  const f=dNorm(view.taFrom||''), to=dNorm(view.taTo||'');
+  if(f)rows=rows.filter(t=>(taArchDay(t)||'')>=f);
+  if(to)rows=rows.filter(t=>(taArchDay(t)||'')<=to);
+  const q=String(view.taQ||'').trim();
+  if(q){const nq=faNum(q).toLowerCase();
+    rows=rows.filter(t=>{
+      const nm=relIds(t,'owner').concat(relIds(t,'helpers')).map(i=>recs[i]&&recs[i].d.title||'').join(' ');
+      const pj=relIds(t,'project').map(i=>recs[i]&&recs[i].d.title||'').join(' ');
+      return (String(t.d.title||'')+' '+nm+' '+pj+' '+String(t.d.note||'')+' '+String(t.d.status||'')).toLowerCase().includes(nq);});}
+  return rows.sort((a,b)=>String(taArchDay(b)||'').localeCompare(String(taArchDay(a)||''))||(+b.u||0)-(+a.u||0));
+}
+function taArchDay(t){return ds(t.d.archdate)||ds(t.d.donedate)||(t.u?new Date(+t.u).toISOString().slice(0,10):'');}
+window.taSet=function(k,v){view[k]=v===''?null:v;render();};
+window.taClear=function(){['taWho','taCol','taPrj','taPrio','taFrom','taTo','taQ','taGrp'].forEach(k=>view[k]=null);render();};
+window.taXlsx=function(){
+  const rows=taArchRows();
+  if(!rows.length){alert('چیزی برای خروجی نیست');return;}
+  const data=rows.map(t=>({
+    'عنوان تسک':t.d.title||'',
+    'دسته (ستون)':tbColFa(t.d.status||''),
+    'مسئول':relIds(t,'owner').map(i=>recs[i]&&recs[i].d.title||'').join('، '),
+    'پروژه':relIds(t,'project').map(i=>recs[i]&&recs[i].d.title||'').join('، '),
+    'اولویت':tbPrioFa(t.d.prio||''),
+    'ددلاین':iso2jstr(ds(t.d.due)||''),
+    'تاریخ انجام':iso2jstr(taArchDay(t))
+  }));
+  const cols=Object.keys(data[0]);
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const csv='\uFEFF'+[cols.map(q).join(','),...data.map(r=>cols.map(c=>q(r[c])).join(','))].join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='بایگانی-تسک‌ها-'+iso2jstr(today()).replace(/\//g,'-')+'.csv';
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);
+};
+function taskarchHTML(){
+  if(!canSee('task'))return '<div class="empty">دسترسی به تسک‌ها ندارید</div>';
+  const rows=taArchRows();
+  const all=byE('task').filter(t=>!t.del&&tbArch(t));
+  const people=tbPeople(), prjs=byE('project'), cols=[...new Set(tbCols().concat(all.map(t=>t.d.status||'').filter(Boolean)))];
+  const grp=view.taGrp||'month';
+  let h=`<div class="tools"><b style="font-size:13px">🗄 بایگانی تسک‌های انجام‌شده</b>
+    <span class="chip" style="background:var(--bg3);font-size:11px">${rows.length.toLocaleString('fa-IR')} از ${all.length.toLocaleString('fa-IR')}</span>
+    <span style="flex:1"></span>
+    <button class="btn gh sm" onclick="taXlsx()">⬇️ خروجی</button>
+    <button class="btn gh sm" onclick="go('taskboard')">🗂 بازگشت به تخته</button></div>`;
+  h+=`<div class="tools" style="flex-wrap:wrap;margin-bottom:6px">
+    <select onchange="taSet('taWho',this.value)" style="max-width:180px">
+      <option value="all">👥 همهٔ افراد</option>
+      <option value="me" ${view.taWho==='me'?'selected':''}>🙋 مالِ من</option>
+      ${people.map(p=>`<option value="${p.id}" ${view.taWho===p.id?'selected':''}>${esc(p.d.title||'—')}</option>`).join('')}
+    </select>
+    <select onchange="taSet('taCol',this.value)" style="max-width:170px">
+      <option value="">🗂 همهٔ دسته‌ها</option>
+      ${cols.map(c=>`<option value="${esc(c)}" ${view.taCol===c?'selected':''}>${esc(tbColFa(c))}</option>`).join('')}
+    </select>
+    ${prjs.length?`<select onchange="taSet('taPrj',this.value)" style="max-width:170px">
+      <option value="">🏗️ همهٔ پروژه‌ها</option>
+      ${prjs.map(p=>`<option value="${p.id}" ${view.taPrj===p.id?'selected':''}>${esc(p.d.title||'—')}</option>`).join('')}</select>`:''}
+    <select onchange="taSet('taPrio',this.value)" style="max-width:140px">
+      <option value="">⚑ همهٔ اولویت‌ها</option>
+      ${['Urgent','High','Medium','Low'].map(p=>`<option value="${p}" ${view.taPrio===p?'selected':''}>${esc(tbPrioFa(p))}</option>`).join('')}
+    </select>
+  </div>
+  <div class="tools" style="flex-wrap:wrap;margin-bottom:8px">
+    <label style="margin:0;font-size:11.5px">از تاریخ:</label>
+    <div style="display:flex;gap:4px"><input id="ta_from" dir="ltr" placeholder="۱۴۰۵/۰۱/۰۱" value="${esc(iso2jstr(dNorm(view.taFrom||''))||'')}" onchange="taSet('taFrom',this.value)" style="max-width:120px">
+      <button class="btn gh sm" style="padding:4px 8px" onclick="openJcal('ta_from')">📅</button></div>
+    <label style="margin:0;font-size:11.5px">تا:</label>
+    <div style="display:flex;gap:4px"><input id="ta_to" dir="ltr" placeholder="۱۴۰۵/۱۲/۲۹" value="${esc(iso2jstr(dNorm(view.taTo||''))||'')}" onchange="taSet('taTo',this.value)" style="max-width:120px">
+      <button class="btn gh sm" style="padding:4px 8px" onclick="openJcal('ta_to')">📅</button></div>
+    <input value="${esc(view.taQ||'')}" placeholder="🔍 جستجو در عنوان، مسئول، پروژه…" oninput="view.taQ=this.value;clearTimeout(window._taT);window._taT=setTimeout(render,250)" style="max-width:240px">
+    <select onchange="taSet('taGrp',this.value)" style="max-width:150px">
+      <option value="month" ${grp==='month'?'selected':''}>📅 گروه‌بندی: ماه</option>
+      <option value="col" ${grp==='col'?'selected':''}>🗂 گروه‌بندی: دسته</option>
+      <option value="who" ${grp==='who'?'selected':''}>👤 گروه‌بندی: مسئول</option>
+      <option value="none" ${grp==='none'?'selected':''}>— بدون گروه‌بندی</option>
+    </select>
+    <button class="btn gh sm" onclick="taClear()">پاک‌کردن فیلترها</button></div>`;
+  if(!rows.length)return h+`<div class="sec"><div class="empty">تسکی در بایگانی با این فیلترها نیست — روی تخته، تیکِ کنار کارت را بزن تا اینجا بیاید</div></div>`;
+  const G={};
+  rows.forEach(t=>{
+    let k='—';
+    if(grp==='month'){const d=taArchDay(t);k=d?iso2jstr(d).slice(0,7):'بدون تاریخ';}
+    else if(grp==='col')k=tbColFa(t.d.status||'—');
+    else if(grp==='who'){const o=relIds(t,'owner').map(i=>recs[i]&&recs[i].d.title||'').filter(Boolean);k=o.join('، ')||'بدون مسئول';}
+    else k='همه';
+    (G[k]||(G[k]=[])).push(t);
+  });
+  Object.keys(G).forEach(k=>{
+    h+=`<div class="sec"><div class="sech"><b>${esc(k)}</b><span class="chip" style="background:var(--bg3);font-size:11px;margin-right:8px">${G[k].length.toLocaleString('fa-IR')} تسک</span></div>
+      <div class="tw"><table><thead><tr><th>عنوان</th><th>دسته</th><th>مسئول</th><th>پروژه</th><th>اولویت</th><th>تاریخ انجام</th><th></th></tr></thead><tbody>`;
+    G[k].forEach(t=>{
+      const own=relIds(t,'owner').map(i=>recs[i]&&recs[i].d.title||'').join('، ');
+      const pj=relIds(t,'project').map(i=>recs[i]&&recs[i].d.title||'').join('، ');
+      h+=`<tr>
+        <td><a onclick="tbCard('${t.id}')" style="color:var(--ac);cursor:pointer">${esc(t.d.title||'—')}</a></td>
+        <td>${esc(tbColFa(t.d.status||'—'))}</td>
+        <td>${esc(own||'—')}</td>
+        <td>${esc(pj||'—')}</td>
+        <td>${t.d.prio?`<span class="tbdot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${TB_PRIO_C[t.d.prio]||'#98A2B3'}"></span> ${esc(tbPrioFa(t.d.prio))}`:'—'}</td>
+        <td dir="ltr">${esc(iso2jstr(taArchDay(t))||'—')}</td>
+        <td style="white-space:nowrap">
+          ${can('e','task',t)?`<button class="btn gh sm" title="برگرداندن به تخته" onclick="tbDone('${t.id}',false)">↩️</button>`:''}
+          ${can('d','task',t)?`<button class="btn gh sm" title="حذف" onclick="tbDel('${t.id}')">🗑</button>`:''}</td></tr>`;
+    });
+    h+=`</tbody></table></div></div>`;
+  });
+  return h;
+}
+window.taskarchHTML=taskarchHTML;
 /* ───────── کشیدن و رها کردن (ماوس + لمس) ───────── */
 let _tbDrag=null;
 function tbInit(){
@@ -13488,6 +13672,7 @@ function render(){
     view.type==='perfdash'?'🎖️ داشبورد عملکرد':
     view.type==='aligndash'?'🧭 همسویی عملکرد و استراتژی':
     view.type==='taskboard'?'🗂 تختهٔ تسک‌ها':
+    view.type==='taskarch'?'🗄 بایگانی تسک‌ها':
     view.type==='invhealth'?'🩺 سلامت فاکتورها':
     view.type==='docno'?'🔢 بررسی و اصلاح شمارهٔ اسناد':
     view.type==='backupdash'?'💾 پشتیبان‌گیری و بازیابی':
@@ -13607,6 +13792,7 @@ function render(){
     else if(view.type==='docno')c.innerHTML=isAdmin()?docnoHTML():'<div class="empty">این بخش فقط برای ادمین است</div>';
     else if(view.type==='invhealth')c.innerHTML=isAdmin()?invhealthHTML():'<div class="empty">این بخش فقط برای ادمین است</div>';
     else if(view.type==='taskboard'){c.innerHTML=taskboardHTML();try{setTimeout(tbInit,0);}catch(_e){}}
+    else if(view.type==='taskarch')c.innerHTML=taskarchHTML();
     else if(view.type==='backupdash')c.innerHTML=backupdashHTML();
     else if(view.type==='salesdash')c.innerHTML=salesdashHTML();
     else if(view.type==='invnew')c.innerHTML=invnewHTML();
