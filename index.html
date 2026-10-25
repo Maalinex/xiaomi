@@ -451,11 +451,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.42</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.43</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.42</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.43</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2844,7 +2844,18 @@ function iAmIn(r){
 function myScope(){ // تنظیم محدوده داده کاربر جاری (null = بدون محدودیت)
   if(!session||isAdmin()||isPending())return null;
   const s=aclFor().scope;
-  return (s&&s.on)?s:null;
+  if(!s||!s.on)return null;
+  // 🛟 «محدود به انتخاب‌ها» روشن ولی هیچ شرکت/کسب‌وکار/واحدی انتخاب نشده:
+  // این یعنی تنظیمِ ناتمام، نه «فقط رکوردهای خودت». بدون این محافظ، کاربر
+  // فقط رکوردهای ساختهٔ خودش را می‌دید و گزارش‌ها خالی می‌شدند.
+  const none=!((s.c||[]).length||(s.b||[]).length||(s.u||[]).length);
+  if(none&&!s.strict)return null;
+  return s;
+}
+function scopeIncomplete(){ // برای هشدار در «سطوح دسترسی»
+  const s=aclFor().scope;
+  if(!s||!s.on)return false;
+  return !((s.c||[]).length||(s.b||[]).length||(s.u||[]).length);
 }
 function inMyScope(r){
   const s=myScope();if(!s)return true;
@@ -6710,10 +6721,31 @@ function invTotalsPanel(r){
 /* 🗓 فاکتورهای صادرشدهٔ یک روز مشخص */
 window.dayinvSet=function(v){const iso=parseJDate(v,'');if(iso)view.dayD=String(iso).slice(0,10);render();};
 window.dayinvShift=function(n){view.dayD=_isoAdd(view.dayD||today().slice(0,10),n);render();};
+/* 🩺 چرا یک فاکتورِ ثبت‌شده در گزارش روز دیده نمی‌شود؟
+   دو دروازه بین «ثبت» و «نمایش» هست: کسب‌وکار فعالِ نوار بالا، و محدودهٔ دادهٔ کاربر.
+   این تابع تعداد فاکتورهای پنهان‌شدهٔ همان روز را برمی‌گرداند تا کاربر گیج نشود. */
+function dayinvHidden(D){
+  const all=[];
+  for(const id in recs){const v=recs[id];
+    if(!v||v.del||v.e!=='invoice'||!v.d)continue;
+    const d=ds(v.d.date);
+    if(d&&String(d).slice(0,10)===D&&v.d.status!=='باطل')all.push(v);}
+  let byBiz=0,byScope=0;
+  const sc=myScope();
+  all.forEach(v=>{
+    let ctxOK=true;
+    try{ctxOK=ctxFilter('invoice',[v]).length>0;}catch(_e){}
+    if(!ctxOK){byBiz++;return;}
+    if(sc){let ok=true;try{_scoping=true;ok=inMyScope(v);}finally{_scoping=false;}
+      if(!ok)byScope++;}
+  });
+  return {total:all.length,byBiz,byScope};
+}
 function dayinvHTML(){
   const D=view.dayD||today().slice(0,10);view.dayD=D;
   const rows=byE('invoice').filter(v=>{const d=ds(v.d.date);return d&&String(d).slice(0,10)===D&&v.d.status!=='باطل';})
     .sort((a,b)=>(b.u||0)-(a.u||0));
+  const hid=dayinvHidden(D);
   const sale=rows.filter(v=>v.d.kind!=='پیش‌فاکتور'), prof=rows.filter(v=>v.d.kind==='پیش‌فاکتور');
   let tot=0;sale.forEach(v=>{try{tot+=invCalc(v).total;}catch(e){}});
   const row=v=>{const c2=invCalc(v);const cu=relIds(v,'customer')[0];const se=relIds(v,'seller')[0];
@@ -6733,6 +6765,12 @@ function dayinvHTML(){
     <span style="flex:1"></span>
     ${can('c','invoice')?`<button class="btn sm" onclick="invDraft=null;go('invnew')">🧾 فاکتور جدید</button>`:''}
   </div>
+  ${(hid.byBiz||hid.byScope)?`<div style="background:rgba(202,80,16,.1);border:1px solid rgba(202,80,16,.35);border-radius:10px;padding:10px 12px;font-size:12px;line-height:2;margin-bottom:10px">
+    🩺 در این روز <b>${hid.total.toLocaleString('fa-IR')}</b> فاکتور ثبت شده ولی <b>${(hid.byBiz+hid.byScope).toLocaleString('fa-IR')}</b> تای آن اینجا نمایش داده نشده:
+    ${hid.byBiz?`<div>• <b>${hid.byBiz.toLocaleString('fa-IR')}</b> فاکتور متعلق به کسب‌وکار دیگری است — از نوار بالا کسب‌وکار فعال را عوض کن یا روی «همه» بگذار.
+      <button class="btn gh sm" style="margin-right:6px" onclick="setGBiz('');render()">نمایش همهٔ کسب‌وکارها</button></div>`:''}
+    ${hid.byScope?`<div>• <b>${hid.byScope.toLocaleString('fa-IR')}</b> فاکتور بیرون از «محدودهٔ دادهٔ» کاربر شماست — ادمین باید در «مدیریت سیستم ← 🛡️ سطوح دسترسی ← 🔭 محدوده داده» شرکت/کسب‌وکار مجاز شما را تیک بزند (یا محدوده را روی «همه داده‌ها» بگذارد).</div>`:''}
+  </div>`:''}
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px">
     <div class="sec" style="text-align:center;padding:12px"><div style="font-size:11px;color:var(--tx2)">🧾 فاکتور فروش</div><b style="font-size:18px">${sale.length.toLocaleString('fa-IR')}</b></div>
     <div class="sec" style="text-align:center;padding:12px"><div style="font-size:11px;color:var(--tx2)">📝 پیش‌فاکتور</div><b style="font-size:18px">${prof.length.toLocaleString('fa-IR')}</b></div>
@@ -19492,6 +19530,10 @@ function aclBodyHTML(){
     h+=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:9px 0">
       ${seg([['','همه داده‌ها'],['1','🔒 محدود به انتخاب‌ها']],sc.on?'1':'',`setAclScopeOn('%V'==='1');render()`)}
       ${sc.on?`<label style="display:flex;gap:6px;align-items:center;font-size:12px;cursor:pointer"><input type="checkbox" ${sc.strict?'checked':''} onchange="setAclScopeStrict(this.checked);render()">رکوردهای بدون وابستگی سازمانی هم مخفی شوند</label>`:''}</div>
+    ${(sc.on&&!((sc.c||[]).length||(sc.b||[]).length||(sc.u||[]).length))?`<div style="background:rgba(202,80,16,.1);border:1px solid rgba(202,80,16,.35);border-radius:9px;padding:9px 11px;font-size:11.5px;line-height:1.9;margin-bottom:8px">
+      ⚠️ «محدود به انتخاب‌ها» روشن است ولی هیچ شرکت/کسب‌وکار/واحدی تیک نخورده.
+      ${sc.strict?'با این تنظیم، این افراد <b>فقط رکوردهای ساختهٔ خودشان</b> را می‌بینند و گزارش‌هایی مثل «فاکتورهای روز» تقریباً خالی می‌شود. دست‌کم یک مورد را از فهرست زیر تیک بزن.':'فعلاً بی‌اثر در نظر گرفته می‌شود (هیچ محدودیتی اعمال نمی‌شود). برای اعمال واقعی، دست‌کم یک مورد را از فهرست زیر تیک بزن.'}
+    </div>`:''}
     ${sc.on?`<h3 style="font-size:12.5px;margin-top:8px">🏢 شرکت‌های مجاز</h3>${pick('company','c','🏢')}
       <h3 style="font-size:12.5px;margin-top:10px">🧢 کسب‌وکارهای مجاز</h3>${pick('business','b','🧢')}
       <h3 style="font-size:12.5px;margin-top:10px">🧩 واحدهای مجاز</h3>${pick('orgunit','u','🧩')}`:''}`;
