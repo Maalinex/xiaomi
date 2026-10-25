@@ -451,11 +451,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.43</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.44</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.43</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.44</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -5449,7 +5449,7 @@ window.invImpCommit=function(){
       kind:g.head.kind,status:g.head.status,official:g.head.official||'غیررسمی',
       biz:bizId?[bizId]:[],customer:[custId],seller:sellerId?[sellerId]:[],
       orgu:sellerId&&recs[sellerId]?relIds(recs[sellerId],'orgu'):[],
-      date:g.head.date,disc:g.head.disc||0,discpct:g.head.discpct||0,
+      date:(g.head.date&&(g.head.date.s||typeof g.head.date==='string'))?g.head.date:{s:today()},disc:g.head.disc||0,discpct:g.head.discpct||0,
       taxpct:g.head.taxpct||0,ship:g.head.ship||0,paid:g.head.paid||0,
       natid:String(g.head.natid||'').trim()||undefined,
       note:(g.head.note||'')+(g.head.note?' │ ':'')+'ورود اکسل',_by:myEmail()},u:Date.now()});
@@ -6724,6 +6724,28 @@ window.dayinvShift=function(n){view.dayD=_isoAdd(view.dayD||today().slice(0,10),
 /* 🩺 چرا یک فاکتورِ ثبت‌شده در گزارش روز دیده نمی‌شود؟
    دو دروازه بین «ثبت» و «نمایش» هست: کسب‌وکار فعالِ نوار بالا، و محدودهٔ دادهٔ کاربر.
    این تابع تعداد فاکتورهای پنهان‌شدهٔ همان روز را برمی‌گرداند تا کاربر گیج نشود. */
+function invNoDate(){ // فاکتورهایی که «تاریخ صدور» ندارند و در هیچ روزی دیده نمی‌شوند
+  const out=[];
+  byE('invoice').forEach(v=>{if(!v.del&&v.d&&v.d.status!=='باطل'&&!ds(v.d.date))out.push(v);});
+  return out.sort((a,b)=>(b.u||0)-(a.u||0));
+}
+function invRegDay(v){ // روزِ ثبت رکورد (برای پیشنهاد تاریخ)
+  const t=+v.u||0;if(!t)return today();
+  try{return new Date(t).toISOString().slice(0,10);}catch(e){return today();}
+}
+window.invFixDate=function(id,iso){
+  const v=recs[id];if(!v||!can('e','invoice',v))return;
+  v.d.date={s:iso||invRegDay(v)};v.u=Date.now();put(v);
+  invalidateByE();_byRaw=null;render();
+};
+window.invFixDateAll=function(){
+  const list=invNoDate().filter(v=>can('e','invoice',v));
+  if(!list.length)return;
+  if(!confirm(list.length.toLocaleString('fa-IR')+' فاکتور بدون تاریخ صدور پیدا شد.\n\nبرای هرکدام «تاریخ ثبت در سیستم» به‌عنوان تاریخ صدور گذاشته شود؟\n\nپیش از این کار یک پشتیبان بگیر.'))return;
+  list.forEach(v=>{v.d.date={s:invRegDay(v)};v.u=Date.now();put(v);});
+  invalidateByE();_byRaw=null;render();
+  alert(list.length.toLocaleString('fa-IR')+' فاکتور اصلاح شد و حالا در گزارش روزِ خودش دیده می‌شود.');
+};
 function dayinvHidden(D){
   const all=[];
   for(const id in recs){const v=recs[id];
@@ -6746,6 +6768,7 @@ function dayinvHTML(){
   const rows=byE('invoice').filter(v=>{const d=ds(v.d.date);return d&&String(d).slice(0,10)===D&&v.d.status!=='باطل';})
     .sort((a,b)=>(b.u||0)-(a.u||0));
   const hid=dayinvHidden(D);
+  const nod=invNoDate();
   const sale=rows.filter(v=>v.d.kind!=='پیش‌فاکتور'), prof=rows.filter(v=>v.d.kind==='پیش‌فاکتور');
   let tot=0;sale.forEach(v=>{try{tot+=invCalc(v).total;}catch(e){}});
   const row=v=>{const c2=invCalc(v);const cu=relIds(v,'customer')[0];const se=relIds(v,'seller')[0];
@@ -6765,6 +6788,20 @@ function dayinvHTML(){
     <span style="flex:1"></span>
     ${can('c','invoice')?`<button class="btn sm" onclick="invDraft=null;go('invnew')">🧾 فاکتور جدید</button>`:''}
   </div>
+  ${nod.length?`<div style="background:rgba(209,52,56,.1);border:1px solid rgba(209,52,56,.35);border-radius:10px;padding:10px 12px;font-size:12px;line-height:2;margin-bottom:10px">
+    ⚠️ <b>${nod.length.toLocaleString('fa-IR')}</b> فاکتور «تاریخ صدور» ندارد، به همین دلیل در گزارش <b>هیچ روزی</b> دیده نمی‌شود (در فهرست فاکتورها هست).
+    ${can('e','invoice')?`<button class="btn sm" style="margin-right:6px" onclick="invFixDateAll()">📅 تاریخِ ثبت هرکدام را به‌عنوان تاریخ صدور بگذار</button>`:''}
+    <div class="tblwrap" style="margin-top:7px"><table><thead><tr><th>شماره/شرح</th><th>مشتری</th><th>فروشنده</th><th>ثبت در سیستم</th><th></th></tr></thead><tbody>
+    ${nod.slice(0,30).map(v=>{const cu=relIds(v,'customer')[0],se=relIds(v,'seller')[0];
+      return `<tr><td><a onclick="go('rec','invoice','${v.id}')" style="color:var(--ac);cursor:pointer">${esc(v.d.title||'—')}</a></td>
+        <td>${esc((cu&&recs[cu]&&recs[cu].d.title)||'—')}</td>
+        <td>${esc((se&&recs[se]&&recs[se].d.title)||'—')}</td>
+        <td dir="ltr">${esc(iso2jstr(invRegDay(v)))}</td>
+        <td style="white-space:nowrap">${can('e','invoice',v)?`<button class="btn gh sm" title="همین روزِ انتخاب‌شده را بگذار" onclick="invFixDate('${v.id}','${D}')">📅 ${esc(iso2jstr(D))}</button>
+          <button class="btn gh sm" title="تاریخ ثبت در سیستم را بگذار" onclick="invFixDate('${v.id}','')">↩️ ثبت</button>`:''}</td></tr>`;}).join('')}
+    </tbody></table></div>
+    ${nod.length>30?`<div style="font-size:11px;color:var(--tx2)">… و ${(nod.length-30).toLocaleString('fa-IR')} مورد دیگر</div>`:''}
+  </div>`:''}
   ${(hid.byBiz||hid.byScope)?`<div style="background:rgba(202,80,16,.1);border:1px solid rgba(202,80,16,.35);border-radius:10px;padding:10px 12px;font-size:12px;line-height:2;margin-bottom:10px">
     🩺 در این روز <b>${hid.total.toLocaleString('fa-IR')}</b> فاکتور ثبت شده ولی <b>${(hid.byBiz+hid.byScope).toLocaleString('fa-IR')}</b> تای آن اینجا نمایش داده نشده:
     ${hid.byBiz?`<div>• <b>${hid.byBiz.toLocaleString('fa-IR')}</b> فاکتور متعلق به کسب‌وکار دیگری است — از نوار بالا کسب‌وکار فعال را عوض کن یا روی «همه» بگذار.
@@ -10681,7 +10718,7 @@ function invSave(status){
     r.d={...r.d,natid:String(invDraft.natid||'').trim()||undefined,title:invDraft.desc||r.d.title,biz:invDraft.biz?[invDraft.biz]:[],
       customer:invDraft.customer?[invDraft.customer]:[],referrer:invDraft.referrer?[invDraft.referrer]:[],seller:invDraft.seller?[invDraft.seller]:[],
       orgu:invDraft.orgu?[invDraft.orgu]:r.d.orgu||[],
-      official:invDraft.official||'غیررسمی',warranty:invDraft.warranty||undefined,date:{s:dNorm(invDraft.vdate)||invDraft.vdate},
+      official:invDraft.official||'غیررسمی',warranty:invDraft.warranty||undefined,date:{s:dNorm(invDraft.vdate)||invDraft.vdate||today()},
       due:invDraft.due?{s:dNorm(invDraft.due)||invDraft.due}:null,
       disc:+invDraft.disc||0,discpct:+invDraft.discpct||0,taxpct:+invDraft.taxpct||0,ship:+invDraft.ship||0,
       note:invDraft.note,payterm:invDraft.payterm||'',payterms:invDraft.payterms||'',delivterms:invDraft.delivterms||''};
@@ -10744,7 +10781,7 @@ function invSave(status){
   if(invDraft.customer&&recs[invDraft.customer]&&String(invDraft.natid||'').trim()&&String(recs[invDraft.customer].d.natid||'')!==String(invDraft.natid).trim()){const _c=recs[invDraft.customer];_c.d.natid=String(invDraft.natid).trim();_c.u=Date.now();put(_c);}
   put({id:iid,e:'invoice',d:{title:invDraft.desc||('فاکتور '+num),seq:num,natid:String(invDraft.natid||'').trim()||undefined,biz:invDraft.biz?[invDraft.biz]:[],
     customer:invDraft.customer?[invDraft.customer]:[],referrer:invDraft.referrer?[invDraft.referrer]:[],seller:invDraft.seller?[invDraft.seller]:[],orgu:invDraft.orgu?[invDraft.orgu]:(invDraft.seller&&recs[invDraft.seller]?relIds(recs[invDraft.seller],'orgu'):[]),kind:invDraft.kind,status:status||'صادر شده',
-    date:{s:dNorm(invDraft.vdate)||invDraft.vdate},due:invDraft.due?{s:dNorm(invDraft.due)||invDraft.due}:null,
+    date:{s:dNorm(invDraft.vdate)||invDraft.vdate||today()},due:invDraft.due?{s:dNorm(invDraft.due)||invDraft.due}:null,
     disc:+invDraft.disc||0,discpct:+invDraft.discpct||0,official:invDraft.official||'غیررسمی',warranty:invDraft.warranty||undefined,taxpct:+invDraft.taxpct||0,ship:+invDraft.ship||0,paid,note:invDraft.note,
     payterm:invDraft.payterm||'',payterms:invDraft.payterms||'',delivterms:invDraft.delivterms||'',validto:invDraft.validto?{s:invDraft.validto}:null,
     _blc:_blcFlag||undefined,blcap:_blcAp},u:Date.now()});
@@ -22668,6 +22705,8 @@ function saveRec(){
   const err=harvest();
   if(err){alert(err);return;}
   if(!cur.d.title){alert('عنوان الزامی است');return;}
+  // 📅 فاکتور/پیش‌فاکتور بدون «تاریخ صدور» در هیچ گزارش روزی دیده نمی‌شود — امروز را می‌گذاریم
+  if((cur.e==='invoice'||cur.e==='purchinv')&&!ds(cur.d.date))cur.d.date={s:today()};
   // 🏢 مشتری حقوقی: پیشوند «شرکت» به ابتدای نام (برای نمایش تمیزتر)
   if(cur.e==='customer'&&cur.d.kind==='حقوقی')cur.d.title=corpName(cur.d.title);
   // 📵 مشتری تکراری بر اساس شماره موبایل
