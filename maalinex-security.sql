@@ -671,3 +671,43 @@ begin
 end $$;
 
 select '🏢 برچسب‌های سازمانی v3.26 اعمال شد ✅' as status;
+
+-- ═══════════════════════════════════════════════════════════
+-- 🔁 v3.45 — سندِ ساخته‌شده توسط کاربر باید به سرور برسد (این بخش را یک‌بار اجرا کنید)
+-- مشکل گزارش‌شده: کاربر فاکتور می‌زد و فقط خودش می‌دید؛ بقیه (حتی ادمین) نمی‌دیدند.
+-- علت: سیاست درج (insert) هم از app_in_scope می‌گذشت. اگر «محدودهٔ داده» برای نقش روشن
+-- بود ولی هیچ شرکت/کسب‌وکاری تیک نخورده بود، رکوردِ وصل به یک کسب‌وکار رد می‌شد و فقط
+-- در حافظهٔ همان دستگاه می‌ماند. اپ از نسخهٔ ۳.۴۳ این حالت را «بدون محدودیت» می‌گیرد؛
+-- سرور هم باید همین را بگیرد. ضمناً اپ از ۳.۴۵ روی هر رکورد تازه مُهر سازنده (_by) می‌گذارد.
+-- ═══════════════════════════════════════════════════════════
+create or replace function public.app_scope_empty() returns boolean
+language sql stable security definer set search_path=public as
+$$ select coalesce(jsonb_array_length(coalesce(app_scope()->'c','[]'::jsonb)),0)=0
+      and coalesce(jsonb_array_length(coalesce(app_scope()->'b','[]'::jsonb)),0)=0
+      and coalesce(jsonb_array_length(coalesce(app_scope()->'u','[]'::jsonb)),0)=0 $$;
+
+create or replace function public.app_in_scope(rid uuid, ent text, d jsonb) returns boolean
+language plpgsql stable security definer set search_path=public as $$
+declare sc jsonb; strict_m boolean; txt text;
+begin
+  if app_is_admin() then return true; end if;
+  if ent in ('chatmsg','letter') then return true; end if;         -- 💬📨 ارتباط داخلی برای همه
+  if ent in ('company','business','orgunit') then return true; end if; -- 🏢 برچسب‌های ساختاری
+  sc:=app_scope();
+  if sc is null or coalesce((sc->>'on')::int,0)=0 then return true; end if;
+  strict_m:=coalesce((sc->>'strict')::int,0)=1;
+  -- 🛟 محدوده روشن ولی هیچ شرکت/کسب‌وکار/واحدی انتخاب نشده و سخت‌گیرانه هم نیست = تنظیم ناتمام → بدون محدودیت
+  if not strict_m and app_scope_empty() then return true; end if;
+  if app_is_meta(rid) then return true; end if;
+  txt:=d::text;
+  if lower(coalesce(d->>'_by',''))=app_email() then return true; end if;
+  if ent='hr' and lower(coalesce(d->>'email',''))=app_email() then return true; end if;
+  if app_row_mine(d) then return true; end if;
+  if exists(select 1 from app_scope_ids() a where txt like '%'||a::text||'%') then return true; end if;
+  if strict_m then return false; end if;
+  return not exists(select 1 from records o
+     where o.entity in ('company','business','orgunit') and not o.deleted
+       and txt like '%'||o.id::text||'%');
+end $$;
+
+select '🔁 سینک اسناد کاربران v3.45 اعمال شد ✅' as status;

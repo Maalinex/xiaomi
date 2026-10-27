@@ -446,16 +446,19 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <details id="l_conn"><summary>⚙️ تنظیمات اتصال (Supabase)</summary>
       <label>Supabase URL</label><input id="l_url" dir="ltr" placeholder="https://xxxx.supabase.co">
       <label>Anon Key</label><input id="l_key" dir="ltr" placeholder="eyJ...">
+      <label style="margin-top:8px">🌉 آدرس واسطه (Cloudflare) — برای کار بدون VPN؛ خالی = اتصال مستقیم</label>
+      <input id="l_bridge" dir="ltr" placeholder="https://xiaomi-bridge.xxxx.workers.dev" onchange="bridgeSet(this.value)">
+      <div style="display:flex;gap:6px;margin-top:4px"><button type="button" class="btn gh sm" onclick="bridgeTest()">🔎 آزمایش واسطه</button></div>
     </details>
     <div class="err" id="l_err"></div>
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.44</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.47</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.44</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.47</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1263,7 +1266,7 @@ product:{ic:'📦',n:'کالا و خدمات',grp:'کالا و انبار',f:[
  {k:'source',n:'📣 منبع لید (از کجا آمده؟)',t:SEL,o:['سایت','تلفن','معرفی دوستان','اینستاگرام','لینکدین']},
  {k:'pcat',n:'دسته‌بندی محصول موردنظر',t:SEL,o:['عمومی','دیجیتال','پوشاک','خوراکی','خدمات','مواد اولیه']},
  {k:'product',n:'کالای موردنظر',t:REL,r:'product',s:1},
- {k:'lstatus',n:'وضعیت',t:SEL,o:['جدید','در حال پیگیری','تبدیل به مشتری','از دست رفته']},
+ {k:'lstatus',n:'وضعیت',t:SEL,o:['جدید','داغ','در حال پیگیری','تبدیل به مشتری','از دست رفته']},
  {k:'seller',n:'کارشناس فروش',t:REL,r:'hr',s:1},
  {k:'biz',n:'کسب‌وکار',t:REL,r:'business',s:1},
  {k:'customer',n:'مشتری (پس از خرید، خودکار پر می‌شود)',t:REL,r:'customer',s:1},
@@ -2183,6 +2186,24 @@ let recs={};            // id -> {id,e,d,u,del}
 let sb=null, session=null, rt=null;
 const cfg=JSON.parse(localStorage.getItem('xr_cfg')||'{}');
 if(PRESET.url&&PRESET.key){cfg.url=PRESET.url;cfg.key=PRESET.key;}
+/* 🌉 واسطهٔ Cloudflare (برای دسترسی بدون VPN): اگر تنظیم شده، جای آدرس مستقیم Supabase می‌نشیند */
+const BRIDGE_URL='';
+(function(){try{const b=(localStorage.getItem('xr_bridge')||BRIDGE_URL||'').trim().replace(/\/+$/,'');if(b)cfg.url=b;}catch(e){}})();
+function bridgeSet(v){v=String(v||'').trim().replace(/\/+$/,'');
+  if(v&&!/^https?:\/\//.test(v)){alert('آدرس واسطه باید با https:// شروع شود');return;}
+  try{if(v)localStorage.setItem('xr_bridge',v);else localStorage.removeItem('xr_bridge');}catch(e){}
+  cfg.url=v||PRESET.url;localStorage.setItem('xr_cfg',JSON.stringify(cfg));
+  alert(v?'آدرس واسطه ذخیره شد — برای اتصال، صفحه را یک‌بار تازه کن':'واسطه حذف شد — اتصال مستقیم به Supabase');
+}
+async function bridgeTest(){
+  const v=String((document.getElementById('l_bridge')||{}).value||'').trim().replace(/\/+$/,'');
+  const el=document.getElementById('l_err');if(!v){if(el)el.textContent='آدرس واسطه خالی است';return;}
+  if(el)el.textContent='در حال آزمایش واسطه…';
+  try{const ctl=new AbortController();setTimeout(()=>ctl.abort(),8000);
+    const r=await fetch(v+'/__health',{signal:ctl.signal});const t=await r.text();
+    if(el)el.textContent=r.ok&&/ok/.test(t)?'✅ واسطه در دسترس است: '+t.slice(0,80):'⚠️ پاسخ غیرمنتظره: '+t.slice(0,80);
+  }catch(e){if(el)el.textContent='❌ واسطه در دسترس نیست: '+String(e&&e.message||e).slice(0,80);}
+}
 const MU='00000000-0000-4000-8000-00000000aaaa', MO='00000000-0000-4000-8000-00000000bbbb', MA='00000000-0000-4000-8000-00000000cccc';
 let _slT=null,_slBusy=false;
 /* 🗜️ فشرده‌سازی بومی مرورگر (deflate) — ظرفیت کش محلی را چند برابر می‌کند */
@@ -2239,9 +2260,30 @@ async function loadLocal(){
 let queue=JSON.parse(localStorage.getItem('xr_q')||'[]');
 function saveQ(){localStorage.setItem('xr_q',JSON.stringify(queue));}
 function uid(){return crypto.randomUUID();}
-function setSync(cls,txt){document.getElementById('syncdot').className=cls;document.getElementById('synctxt').textContent=txt;}
+function setSync(cls,txt){document.getElementById('syncdot').className=cls;document.getElementById('synctxt').textContent=txt;try{rejBadge();}catch(e){}}
 
-function put(rec,push=true){const _old=recs[rec.id];recs[rec.id]=rec;_patchCaches(_old,rec);saveLocal();if(push){queue.push(rec.id);saveQ();flush();}render();}
+function put(rec,push=true){const _old=recs[rec.id];
+  // ✍️ مُهر سازنده روی رکورد تازه: سرور (RLS) رکوردِ ساختهٔ خودِ فرد را همیشه می‌پذیرد و نشان می‌دهد
+  try{if(!_old&&rec&&rec.d&&typeof rec.d==='object'&&!rec.d._by&&rec.id!==MU&&rec.id!==MO&&rec.id!==MA&&typeof myEmail==='function'&&myEmail())rec.d._by=myEmail();}catch(_e){}
+  recs[rec.id]=rec;_patchCaches(_old,rec);saveLocal();if(push){queue.push(rec.id);saveQ();flush();}render();}
+/* ⛔ رکوردهایی که سرور (سیاست امنیتی) رد کرده: دیگر بی‌صدا دور ریخته نمی‌شوند */
+let rejected={};try{rejected=JSON.parse(localStorage.getItem('xr_rej')||'{}')||{};}catch(e){rejected={};}
+function saveRej(){try{localStorage.setItem('xr_rej',JSON.stringify(rejected));}catch(e){}}
+function rejAdd(id,msg){rejected[id]={t:Date.now(),m:String(msg||'').slice(0,160)};saveRej();rejBadge();}
+function rejClear(id){if(rejected[id]){delete rejected[id];saveRej();rejBadge();}}
+function rejCount(){return Object.keys(rejected).filter(id=>recs[id]&&!recs[id].del).length;}
+function rejBadge(){
+  let el=document.getElementById('rejbadge');
+  const n=rejCount();
+  if(!n){if(el)el.remove();return;}
+  if(!el){el=document.createElement('button');el.id='rejbadge';el.className='btn sm';
+    el.style.cssText='border:1.5px solid var(--bad);color:var(--bad);background:rgba(209,52,56,.08);font-weight:800';
+    el.onclick=()=>go('syncfix');
+    const dot=document.getElementById('syncdot');if(dot&&dot.parentNode)dot.parentNode.insertBefore(el,dot.nextSibling);else document.body.appendChild(el);}
+  el.textContent='⛔ '+n.toLocaleString('fa-IR')+' سند به سرور نرفته';
+  el.title='این رکوردها فقط روی همین دستگاه هستند و بقیه نمی‌بینند — بزن تا ببینی چرا';
+}
+window.rejRetry=function(){const ids=Object.keys(rejected).filter(id=>recs[id]);ids.forEach(id=>{if(!queue.includes(id))queue.push(id);});saveQ();flush();render();};
 /* 🐎 وصله‌ی افزایشی کش‌ها برای یک رکورد — به‌جای بازسازی کامل روی داده‌ی حجیم */
 function _patchCaches(old,rec){
   try{_bizInferCache={};}catch(e){}
@@ -2350,6 +2392,7 @@ function visE(e){const rows=byE(e);if(!GROWTH.includes(e))return rows;
   return rows.filter(r=>!r.d._by||r.d._by===myEmail()||isAdmin());}
 function menuCount(e){ // عدد کنار منو: با کسب‌وکار/شرکت فعال فیلتر می‌شود (مطابق لیست)
   let rows=visE(e);const def=E[e];if(!def)return rows.length;
+  if(e==='lead')rows=rows.filter(r=>!leadIsConv(r)); // 🎯 تبدیل‌شده‌ها دیگر لید نیستند
   if(gCo()&&e!=='company'&&e!=='business'){const cf=(def.f||[]).find(f=>f.t===REL&&f.r==='company');
     if(cf)rows=rows.filter(r=>{const ids=relIds(r,cf.k);return !ids.length||ids.includes(gCo());});}
   if(gBiz()&&e!=='business'){const bf=(def.f||[]).find(f=>f.t===REL&&f.r==='business');
@@ -2601,16 +2644,16 @@ async function flush(){
       if(!rows.length){queue=queue.slice(ids.length);saveQ();continue;}
       if(queue.length>ids.length)setSync('','در حال همگام‌سازی… '+queue.length.toLocaleString('fa-IR')+' مورد مانده');
       const {error}=await sb.from('records').upsert(rows);
-      if(!error){queue=queue.slice(ids.length);saveQ();retries=0;continue;}
+      if(!error){ids.forEach(rejClear);queue=queue.slice(ids.length);saveQ();retries=0;continue;}
       if(isRLS(error)){
         // یکی از ردیف‌های دسته توسط سیاست امنیتی رد شده — تک‌تک بفرست تا فقط همان حذف شود
         for(const id of ids){
           const row=rowOf(id);
           if(!row){queue=queue.filter(x=>x!==id);continue;}
           const one=await sb.from('records').upsert(row);
-          if(one.error&&isRLS(one.error)){rlsDropped++;queue=queue.filter(x=>x!==id);saveQ();}
+          if(one.error&&isRLS(one.error)){rlsDropped++;queue=queue.filter(x=>x!==id);saveQ();rejAdd(id,one.error.message||one.error.code||'RLS');}
           else if(one.error){setSync('err','خطا در ارسال: '+String(one.error.message||'').slice(0,70)+' — بعداً تلاش می‌شود');return;}
-          else{queue=queue.filter(x=>x!==id);saveQ();}
+          else{rejClear(id);queue=queue.filter(x=>x!==id);saveQ();}
         }
         continue;
       }
@@ -2619,9 +2662,10 @@ async function flush(){
       setSync('err','خطا در ارسال: '+String(error.message||'').slice(0,70)+' — بعداً تلاش می‌شود');return;
     }
     if(rlsDropped){
-      setSync('err','⛔ '+rlsDropped.toLocaleString('fa-IR')+' تغییر توسط سرور رد شد (مجوز امنیتی)');
+      setSync('err','⛔ '+rlsDropped.toLocaleString('fa-IR')+' سند توسط سرور رد شد — فقط روی این دستگاه مانده');
+      try{rejBadge();}catch(e){}
       try{await pullAll();}catch(e){}
-    }else setSync('ok','سینک شد');
+    }else{setSync('ok','سینک شد');try{rejBadge();}catch(e){}}
   } finally{_flushing=false;}
 }
 let _rtTimer=null;
@@ -5808,8 +5852,75 @@ function deltaApply(){
   render();
 }
 window.deltaApply=deltaApply;
+
+/* ═══ 🔁 v3.45 — صفحهٔ «اسنادی که به سرور نرفته» + بازارسال رکوردهای محلی ═══ */
+async function localOnlyScan(){ // رکوردهای این دستگاه که روی سرور نیستند
+  if(!sb||!session)return {err:'به سرور وصل نیستی'};
+  const server=new Set();let from=0;
+  while(true){
+    const {data,error}=await sb.from('records').select('id').range(from,from+999);
+    if(error)return {err:error.message||'خطا در خواندن سرور'};
+    (data||[]).forEach(r=>server.add(r.id));
+    if(!data||data.length<1000)break;from+=1000;
+  }
+  const miss=[];
+  for(const id in recs){const r=recs[id];
+    if(!r||r.del||!r.e||id===MU||id===MO||id===MA)continue;
+    if(!/^[0-9a-fA-F-]{36}$/.test(String(id)))continue;
+    if(!server.has(id))miss.push(r);}
+  return {serverCount:server.size,miss:miss.sort((a,b)=>(b.u||0)-(a.u||0))};
+}
+window.localOnlyRun=async function(){
+  const btn=document.getElementById('lobtn');if(btn){btn.disabled=true;btn.textContent='در حال مقایسه با سرور…';}
+  const r=await localOnlyScan();
+  window._lo=r;render();
+};
+window.localOnlyPush=function(){
+  const r=window._lo;if(!r||!r.miss||!r.miss.length)return;
+  r.miss.forEach(x=>{if(!queue.includes(x.id))queue.push(x.id);});saveQ();
+  window._lo=null;flush();render();
+};
+function syncfixHTML(){
+  const rej=Object.keys(rejected).map(id=>({id,r:recs[id],m:rejected[id]})).filter(x=>x.r&&!x.r.del).sort((a,b)=>(b.m.t||0)-(a.m.t||0));
+  const nm=id=>{const r=recs[id];if(!r)return '—';return (E[r.e]&&E[r.e].n||r.e)+' — '+String(r.d&&r.d.title||'بدون عنوان');};
+  let h=`<div class="sec" style="border-inline-start:3px solid var(--bad)"><h3>⛔ اسنادی که به سرور نرفته‌اند</h3>
+    <p style="font-size:12.5px;color:var(--tx2);line-height:2.1">این رکوردها روی همین دستگاه ساخته شده‌اند ولی سرور آن‌ها را نپذیرفته (سیاست امنیتی/محدودهٔ داده). تا وقتی اینجا هستند، <b>فقط شما</b> آن‌ها را می‌بینید و بقیه (حتی ادمین) نمی‌بینند.
+    معمولاً علت یکی از این‌هاست: (۱) فایل <code>maalinex-security.sql</code> جدید هنوز در Supabase اجرا نشده؛ (۲) در «سطوح دسترسی»، محدودهٔ دادهٔ نقش شما روشن است ولی کسب‌وکار/شرکت شما تیک نخورده؛ (۳) سطح دسترسی شما به این بخش «فقط مشاهده» است.
+    بعد از رفع علت، «ارسال دوباره» را بزن.</p>`;
+  if(!rej.length)h+=`<div class="empty">همه‌چیز سینک است — رکوردِ ردشده‌ای روی این دستگاه نیست</div>`;
+  else h+=`<div class="tools"><button class="btn" onclick="rejRetry()">🔁 ارسال دوبارهٔ همه (${rej.length.toLocaleString('fa-IR')})</button></div>
+    <div class="tblwrap"><table><thead><tr><th>سند</th><th>زمان رد شدن</th><th>پاسخ سرور</th><th></th></tr></thead><tbody>
+    ${rej.map(x=>`<tr><td><a onclick="openRec('${x.r.e}','${x.id}')" style="color:var(--ac);cursor:pointer">${esc(nm(x.id))}</a></td>
+      <td dir="ltr" style="font-size:11px">${esc(fmtOne(new Date(x.m.t||0).toISOString()))}</td>
+      <td style="font-size:11px;color:var(--tx2)" dir="ltr">${esc(x.m.m||'')}</td>
+      <td><button class="btn gh sm" onclick="queue.push('${x.id}');saveQ();flush();render()">🔁</button></td></tr>`).join('')}
+    </tbody></table></div>`;
+  h+=`</div>`;
+  // بازیابی رکوردهای محلیِ قدیمی که پیش از این نسخه بی‌صدا دور ریخته شده‌اند
+  h+=`<div class="sec"><h3>🔍 رکوردهای محلی که روی سرور نیستند</h3>
+    <p style="font-size:12.5px;color:var(--tx2);line-height:2.1">نسخه‌های قبل، رکوردِ ردشده را بی‌صدا از صف حذف می‌کردند؛ یعنی ممکن است اسنادی روی این دستگاه باشد که هیچ‌وقت به سرور نرسیده و در فهرست بالا هم نیست. این ابزار شناسهٔ همهٔ رکوردهای سرور را می‌گیرد و با این دستگاه مقایسه می‌کند.</p>
+    <div class="tools"><button class="btn gh" id="lobtn" onclick="localOnlyRun()">🔍 مقایسه با سرور</button></div>`;
+  const lo=window._lo;
+  if(lo){
+    if(lo.err)h+=`<div class="empty" style="color:var(--bad)">${esc(lo.err)}</div>`;
+    else if(!lo.miss.length)h+=`<div class="empty">✅ همهٔ ${Object.keys(recs).length.toLocaleString('fa-IR')} رکورد این دستگاه روی سرور هست (${lo.serverCount.toLocaleString('fa-IR')} رکورد سرور)</div>`;
+    else{
+      const byE2={};lo.miss.forEach(r=>{const k=(E[r.e]&&E[r.e].n)||r.e;byE2[k]=(byE2[k]||0)+1;});
+      h+=`<div style="background:rgba(209,52,56,.08);border:1px solid rgba(209,52,56,.3);border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:2;margin-top:6px">
+        ⚠️ <b>${lo.miss.length.toLocaleString('fa-IR')}</b> رکورد فقط روی این دستگاه است: ${Object.keys(byE2).map(k=>esc(k)+' ('+byE2[k].toLocaleString('fa-IR')+')').join('، ')}
+        <div class="tools" style="margin-top:6px"><button class="btn" onclick="localOnlyPush()">📤 ارسال همه به سرور</button></div>
+        <div class="tblwrap" style="margin-top:6px"><table><thead><tr><th>سند</th><th>آخرین تغییر</th></tr></thead><tbody>
+        ${lo.miss.slice(0,60).map(r=>`<tr><td><a onclick="openRec('${r.e}','${r.id}')" style="color:var(--ac);cursor:pointer">${esc(nm(r.id))}</a></td><td dir="ltr" style="font-size:11px">${esc(fmtOne(new Date(+r.u||0).toISOString()))}</td></tr>`).join('')}
+        </tbody></table></div>${lo.miss.length>60?`<div style="font-size:11px;color:var(--tx2)">… و ${(lo.miss.length-60).toLocaleString('fa-IR')} مورد دیگر</div>`:''}</div>`;
+    }
+  }
+  h+=`</div>`;
+  return h;
+}
+window.syncfixHTML=syncfixHTML;
 function crisisHTML(){
-  let h=`<div class="sec" style="border-inline-start:3px solid #e5b567"><h3>🚨 حالت بحران — قطعی طولانی اینترنت</h3>
+  let h=`<div class="tools" style="margin-bottom:8px"><button class="btn gh sm" onclick="go('syncfix')">⛔ اسناد ارسال‌نشده به سرور${rejCount()?' ('+rejCount().toLocaleString('fa-IR')+')':''}</button></div>`;
+  h+=`<div class="sec" style="border-inline-start:3px solid #e5b567"><h3>🚨 حالت بحران — قطعی طولانی اینترنت</h3>
     <p style="font-size:12.5px;color:var(--tx2);line-height:2.2">اپ بدون اینترنت کامل کار می‌کند و همه تغییرات روی همین دستگاه ذخیره و صف می‌شوند؛ به محض وصل شدن، خودکار با سرور یکی می‌شود. اگر قطعی طولانی شد و می‌خواهید کنترل مرکزی از دست نرود: هر کاربر آخر وقت «فایل تغییرات» خودش را می‌گیرد و با فلش/بلوتوث/پیام‌رسان به ادمین می‌رساند؛ ادمین همه را در سیستم خودش ادغام می‌کند. قاعده ادغام: هر رکورد فقط اگر <b>جدیدتر</b> از نسخه موجود باشد اعمال می‌شود (تداخل‌ها هوشمند حل می‌شود).</p>
     <div class="tools" style="margin-top:6px">
       <b style="font-size:12px">📤 خروجی تغییرات من:</b>
@@ -6822,7 +6933,7 @@ window.dayinvHTML=dayinvHTML;
 /* ═══════════ 🎯 لیدها (سرنخ‌های فروش) ═══════════
    ثبت تماس‌ها و مراجعات سایت ← پیگیری ← تبدیل خودکار به مشتری هنگام خرید ← گزارش و نرخ تبدیل */
 const LEAD_SRC=['سایت','تلفن','معرفی دوستان','اینستاگرام','لینکدین'];
-const LEAD_ST=['جدید','در حال پیگیری','تبدیل به مشتری','از دست رفته'];
+const LEAD_ST=['جدید','داغ','در حال پیگیری','تبدیل به مشتری','از دست رفته'];
 const LEAD_CONV='تبدیل به مشتری', LEAD_LOST='از دست رفته';
 function leadKey(p){const m=faNum(String(p||'')).replace(/\D/g,'');return m.length>=10?m.slice(-10):'';}
 function leadDate(l){let d=null;try{d=ds(l.d.date);}catch(e){}return String(d||new Date(l.u||Date.now()).toISOString()).slice(0,10);}
@@ -6898,6 +7009,37 @@ window.leadLost=function(id){
   const l=recs[id];if(!l||l.del)return;
   const why=prompt('علت از دست رفتن لید (اختیاری):','');if(why===null)return;
   l.d={...l.d,lstatus:LEAD_LOST,lostwhy:String(why||'').trim()};l.u=Date.now();put(l);setSync('ok','ثبت شد');
+};
+/* ⚡ تغییر وضعیت لید همان‌جا در فهرست (بدون باز کردن فرم) */
+function leadStCol(st,conv){return conv?'var(--ok)':st===LEAD_LOST?'var(--bad)':st==='داغ'?'#D13438':st==='در حال پیگیری'?'var(--warn)':'var(--ac)';}
+function leadStatusSel(l){
+  const st=l.d.lstatus||'جدید', conv=leadIsConv(l);
+  const opts=[...new Set(LEAD_ST.concat(st?[st]:[]))];
+  if(!can('e','lead',l))return `<span class="tag" style="color:${leadStCol(st,conv)};font-weight:700">${esc(st==='داغ'?'🔥 داغ':st)}</span>`;
+  return `<select class="leadst" data-id="${l.id}" onclick="event.stopPropagation()" onchange="event.stopPropagation();leadSetStatus('${l.id}',this.value)"
+    style="font-size:12px;font-weight:700;padding:3px 8px;border-radius:8px;max-width:160px;color:${leadStCol(st,conv)};border:1px solid ${leadStCol(st,conv)};background:var(--bg2)">
+    ${opts.map(o=>`<option value="${esc(o)}" ${o===st?'selected':''}>${o==='داغ'?'🔥 ':''}${esc(o)}</option>`).join('')}</select>`;
+}
+window.leadSetStatus=function(id,st){
+  const l=recs[id];if(!l||l.del)return;
+  if(!can('e','lead',l)){alert('اجازهٔ تغییر این لید را ندارید');render();return;}
+  const was=l.d.lstatus||'جدید';
+  if(st===was){return;}
+  if(st===LEAD_CONV){
+    // تبدیل به مشتری: مشتری ساخته/متصل می‌شود و لید از فهرست می‌رود (در گزارش‌ها می‌ماند)
+    const cid=leadMakeCust(id);if(!cid){render();return;}
+    const r=recs[id];r.d={...r.d,lstatus:LEAD_CONV,customer:[cid],convdate:r.d.convdate||today()};
+    r.u=Date.now();put(r);
+    setSync('ok','🎯 لید به مشتری تبدیل شد و به «مشتریان» رفت');
+    return;
+  }
+  if(st===LEAD_LOST){
+    const why=prompt('علت از دست رفتن لید (اختیاری):',l.d.lostwhy||'');if(why===null){render();return;}
+    l.d={...l.d,lstatus:LEAD_LOST,lostwhy:String(why||'').trim()};l.u=Date.now();put(l);return;
+  }
+  const nd={...l.d,lstatus:st};
+  if(was===LEAD_CONV){delete nd.convdate;} // بازگشت از تبدیل‌شده (اصلاح اشتباه)
+  l.d=nd;l.u=Date.now();put(l);
 };
 window.leadReopen=function(id){const l=recs[id];if(!l||l.del)return;l.d={...l.d,lstatus:'در حال پیگیری'};l.u=Date.now();put(l);};
 function leadPanel(r){ // پنل وضعیت روی صفحهٔ هر لید
@@ -7034,7 +7176,7 @@ function leadDashUI(){
   const det=D.list.map(l=>{const c=leadIsConv(l);const st=l.d.lstatus||'جدید';const col=c?'var(--ok)':st===LEAD_LOST?'var(--bad)':st==='در حال پیگیری'?'var(--warn)':'var(--ac)';
     return `<tr data-sr="ldq" style="cursor:pointer" onclick="go('rec','lead','${l.id}')"><td>${esc(iso2jstr(leadDate(l)))}</td><td style="text-align:right;font-weight:700">${esc(l.d.title||'—')}</td><td>${esc(l.d.kind||'—')}</td>
       <td>${esc(l.d.source||'—')}</td><td>${esc(l.d.pcat||'—')}</td><td>${esc(leadGval(l,'product').label)}</td><td dir="ltr">${esc(faNumStr(l.d.phone||''))}</td>
-      <td style="color:${col};font-weight:700">${esc(st)}</td><td>${esc(leadGval(l,'seller').label)}</td></tr>`;}).join('');
+      <td>${leadStatusSel(l)}</td><td>${esc(leadGval(l,'seller').label)}</td></tr>`;}).join('');
   return `<div class="sec"><h3>📊 گزارش لیدها و نرخ تبدیل
     <span style="flex:1"></span>
     ${can('c','lead')?`<button class="btn sm" onclick="openRec('lead')">＋ ثبت لید جدید</button>`:''}
@@ -13748,6 +13890,7 @@ function render(){
     view.type==='aligndash'?'🧭 همسویی عملکرد و استراتژی':
     view.type==='taskboard'?'🗂 تختهٔ تسک‌ها':
     view.type==='taskarch'?'🗄 بایگانی تسک‌ها':
+    view.type==='syncfix'?'⛔ اسناد ارسال‌نشده به سرور':
     view.type==='invhealth'?'🩺 سلامت فاکتورها':
     view.type==='docno'?'🔢 بررسی و اصلاح شمارهٔ اسناد':
     view.type==='backupdash'?'💾 پشتیبان‌گیری و بازیابی':
@@ -13868,6 +14011,7 @@ function render(){
     else if(view.type==='invhealth')c.innerHTML=isAdmin()?invhealthHTML():'<div class="empty">این بخش فقط برای ادمین است</div>';
     else if(view.type==='taskboard'){c.innerHTML=taskboardHTML();try{setTimeout(tbInit,0);}catch(_e){}}
     else if(view.type==='taskarch')c.innerHTML=taskarchHTML();
+    else if(view.type==='syncfix')c.innerHTML=syncfixHTML();
     else if(view.type==='backupdash')c.innerHTML=backupdashHTML();
     else if(view.type==='salesdash')c.innerHTML=salesdashHTML();
     else if(view.type==='invnew')c.innerHTML=invnewHTML();
@@ -13979,6 +14123,7 @@ function tagCls(v){
 }
 function cellHTML(r,f){
   const v=r.d[f.k];
+  if(r.e==='lead'&&f.k==='lstatus')return leadStatusSel(r);
   if(f.t===REL)return relIds(r,f.k).map(id=>`<span class="tag">${esc(nameOf(id))}</span>`).join('')||'—';
   if(f.t===SEL||f.t===STA)return v?`<span class="tag ${tagCls(v)}">${esc(STATFA[v]||v)}</span>`:'—';
   if(f.t===MUL)return (v||[]).map(x=>`<span class="tag">${esc(x)}</span>`).join('')||'—';
@@ -17579,6 +17724,20 @@ function listHTML(e){
       </tbody></table></div>`;
     }
   }
+  // 🎯 لیدِ تبدیل‌شده دیگر لید نیست — در «مشتریان» است؛ اینجا فقط با دکمهٔ «نمایش» دیده می‌شود (گزارش‌ها آن را می‌شمارند)
+  let _leadBar='';
+  if(e==='lead'){
+    try{leadSync();}catch(_e){}
+    const convN=rows.filter(leadIsConv).length;
+    if(!view.ldShowConv)rows=rows.filter(r=>!leadIsConv(r));
+    const hotN=rows.filter(r=>r.d.lstatus==='داغ').length;
+    _leadBar=`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;font-size:11.5px;color:var(--tx2)">
+      ${hotN?`<span class="chip" style="background:rgba(209,52,56,.1);color:#D13438;font-weight:700">🔥 ${hotN.toLocaleString('fa-IR')} لید داغ</span>`:''}
+      <span>وضعیت هر لید را همین‌جا از ستون «وضعیت» عوض کن.</span>
+      <span style="flex:1"></span>
+      ${convN?`<button class="btn ${view.ldShowConv?'':'gh'} sm" onclick="view.ldShowConv=!view.ldShowConv;view.page=0;render()">👤 ${view.ldShowConv?'پنهان‌کردن':'نمایش'} تبدیل‌شده‌ها (${convN.toLocaleString('fa-IR')})</button>`:''}
+      <button class="btn gh sm" onclick="go('leaddash')">📊 گزارش لیدها</button></div>`;
+  }
   if(view.flt&&FILTERS[view.flt])rows=rows.filter(FILTERS[view.flt].f);
   if(q){ // 🔍 جستجو: علاوه بر فیلدهای خود رکورد، نامِ رکوردهای مرتبط (مشتری، معرف، کالا و…) و ارقام فارسی/لاتین
     const ql=faNum(q).toLowerCase();
@@ -17655,7 +17814,7 @@ function listHTML(e){
       ${sortFs.filter(f=>[SEL,STA,REL,CHK,MUL,TXT].includes(f.t)).map(f=>`<option value="${f.k}" ${view.grp===f.k?'selected':''}>${esc(f.n)}</option>`).join('')}</select>
     <button class="btn gh sm" onclick="view.filterOpen=!view.filterOpen;render()">🔎 فیلتر ستونی${Object.values(colFlt).filter(Boolean).length?' ('+Object.values(colFlt).filter(Boolean).length.toLocaleString('fa-IR')+')':''}</button>
     ${(view.sort||view.grp||Object.values(colFlt).some(Boolean)||view.flt)?`<button class="btn bad sm" onclick="view.sort=null;view.grp=null;view.cf={};view.flt=null;view.page=0;render()">پاک‌سازی ابزارها ✕</button>`:''}
-  </div>${view.selMode?selBarHTML(e,rows):''}${_bizHint}${_invBar}${lvlBar}`;
+  </div>${view.selMode?selBarHTML(e,rows):''}${_bizHint}${_invBar}${_leadBar}${lvlBar}`;
   // پنل فیلتر ستونی
   if(view.filterOpen){
     h+=`<div class="sec" style="margin-bottom:10px"><h3 style="font-size:13px">🔎 فیلتر بر اساس فیلد</h3>
@@ -23115,6 +23274,7 @@ async function handleRecovery(){
   return true;
 }
 function fillLoginForm(){
+  try{const b=localStorage.getItem('xr_bridge')||BRIDGE_URL||'';const be=document.getElementById('l_bridge');if(be)be.value=b;}catch(e){}
   if(cfg.url)document.getElementById('l_url').value=cfg.url;
   if(cfg.key)document.getElementById('l_key').value=cfg.key;
   if(!cfg.url||!cfg.key)document.getElementById('l_conn').open=true;
