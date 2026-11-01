@@ -454,11 +454,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.52</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.53</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.52</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.53</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2523,6 +2523,36 @@ async function _pgRetry(mk,tries=3){
   }
   return last;
 }
+/* 🤝 v3.53 — ادغام هوشمند هنگام دریافت رکورد از سرور
+   مشکل: دو نفر روی یک فاکتور نشانه می‌گذارند (یکی «ثبت در سپیدار»، دیگری «دیدم»/«ارسال شد»).
+   هر ذخیره، کلِ رکورد را می‌فرستد؛ نسخهٔ قدیمی فقط «جدیدتر برنده» بود و نشانهٔ نفر دیگر پاک می‌شد.
+   حالا نشانه‌های مشترک (سپیدار، ارسال، دیدم‌ها) از دو طرف با هم ادغام می‌شوند و اگر چیزی به رکورد
+   سرور اضافه شد، همان را دوباره می‌فرستیم تا همه هم‌گرا شوند. */
+const MERGE_MARKS=['_sepidar','_ship'];
+function mergeIn(row){
+  const remoteU=new Date(row.updated_at||Date.now()).getTime();
+  const loc=recs[row.id];
+  const rd=(row.data&&typeof row.data==='object')?row.data:{};
+  if(!loc){recs[row.id]={id:row.id,e:row.entity,d:rd,u:remoteU,del:row.deleted};return true;}
+  const ld=(loc.d&&typeof loc.d==='object')?loc.d:{};
+  const union=(a,b)=>{const o=[];[...(a||[]),...(b||[])].forEach(x=>{x=String(x||'').toLowerCase();if(x&&!o.includes(x))o.push(x);});return o;};
+  let changed=false,needPush=false;
+  if(loc.u<remoteU){
+    const nd=Object.assign({},rd);
+    if(!row.deleted&&!loc.del){
+      MERGE_MARKS.forEach(k=>{if(ld[k]&&!nd[k]&&(+ld[k].t||0)>remoteU){nd[k]=ld[k];needPush=true;}});
+      const ack=union(ld._finack,rd._finack);
+      if(ack.length>(rd._finack||[]).length){nd._finack=ack;needPush=true;}
+    }
+    recs[row.id]={id:row.id,e:row.entity,d:nd,u:remoteU,del:row.deleted};changed=true;
+  }else if(!row.deleted&&!loc.del){
+    MERGE_MARKS.forEach(k=>{if(rd[k]&&!ld[k]){ld[k]=rd[k];changed=true;needPush=true;}});
+    const ack=union(ld._finack,rd._finack);
+    if(ack.length>(ld._finack||[]).length){ld._finack=ack;changed=true;needPush=true;}
+  }
+  if(needPush){recs[row.id].u=Date.now();if(!queue.includes(row.id))queue.push(row.id);saveQ();clearTimeout(window._mergeFT);window._mergeFT=setTimeout(()=>{try{flush();}catch(e){}},1200);}
+  return changed;
+}
 async function pullAll(full){
   if(!sb||!session)return;
   const wasPending=isPending();
@@ -2554,8 +2584,7 @@ async function pullAll(full){
       const {data,error}=await _pgRetry(()=>sb.from('records').select('*').gt('updated_at',curLag).order('updated_at',{ascending:true}).range(from,from+page-1));
       if(error){setSync('err','خطای سینک: '+String(error.message||'').slice(0,80));const _dv=document.getElementById('fsync');if(_dv)_dv.remove();return;}
       (data||[]).forEach(row=>{
-        const loc=recs[row.id], remoteU=new Date(row.updated_at).getTime();
-        if(!loc||loc.u<remoteU){recs[row.id]={id:row.id,e:row.entity,d:row.data||{},u:remoteU,del:row.deleted};window._pullChg=(window._pullChg||0)+1;}
+        if(mergeIn(row))window._pullChg=(window._pullChg||0)+1;
         if(row.updated_at>maxU)maxU=row.updated_at;
       });
       if(!data||data.length<page)break; from+=page;
@@ -2679,10 +2708,8 @@ function subscribeRT(){
   try{if(rt)sb.removeChannel(rt);}catch(e){}
   rt=sb.channel('recs').on('postgres_changes',{event:'*',schema:'public',table:'records'},p=>{
     const row=p.new&&p.new.id?p.new:p.old; if(!row||!row.id)return;
-    const remoteU=new Date(row.updated_at||Date.now()).getTime();
-    const loc=recs[row.id];
-    if(!loc||loc.u<remoteU){
-      recs[row.id]={id:row.id,e:row.entity,d:row.data||{},u:remoteU,del:row.deleted};invalidateByE();
+    if(mergeIn(row)){
+      invalidateByE();
       // 🐎 دسته‌بندی: هنگام دریافت انبوه (مثلاً بعد از ورود اکسل روی دستگاه دیگر) هر تغییر جدا رندر نشود
       clearTimeout(_rtTimer);
       _rtTimer=setTimeout(()=>{saveLocal();try{serReconcile();}catch(e){}renderSafe();},400);
