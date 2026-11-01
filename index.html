@@ -454,11 +454,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.51</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.52</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.51</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.52</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -8174,11 +8174,15 @@ function finnotifUnseen(){ // شمارندهٔ اعلان: فاکتورهایی 
 }
 window.finAck=function(id){const r=recs[id];if(!r)return;const me=myEmail();
   const a=(r.d._finack||[]);if(!a.includes(me)){r.d={...r.d,_finack:[...a,me]};r.u=Date.now();put(r);}};
-window.finSepidar=function(id){const r=recs[id];if(!r)return;
+function finCanMark(r){ // تیک‌های مالی (سپیدار/ارسال/دیدم) تغییرِ خودِ رکورد است؛ سرور بدون سطح «ویرایش» آن را رد می‌کند
+  if(can('e','invoice',r))return true;
+  alert('سطح دسترسی شما به «فاکتور و پیش‌فاکتور» فقط مشاهده است؛ این تیک روی سرور ذخیره نمی‌شود و بقیه نمی‌بینند.\n\nادمین باید در «سطوح دسترسی» برای نقش شما، فاکتور را روی «ایجاد و ویرایش» بگذارد.');
+  return false;}
+window.finSepidar=function(id){const r=recs[id];if(!r)return;if(!finCanMark(r)){render();return;}
   if(r.d._sepidar){if(!confirm('تیک «در سپیدار ثبت شد» برداشته شود؟'))return;r.d={...r.d,_sepidar:null,_log:[...(r.d._log||[]),{t:Date.now(),by:myEmail(),act:'↩️ تیک ثبت در سپیدار برداشته شد'}]};}
   else{r.d={...r.d,_sepidar:{by:myEmail(),t:Date.now()},_log:[...(r.d._log||[]),{t:Date.now(),by:myEmail(),act:'🧮 در سپیدار ثبت شد (واحد مالی)'}]};const me=myEmail();const a=(r.d._finack||[]);if(!a.includes(me))r.d._finack=[...a,me];}
   r.u=Date.now();put(r);};
-window.finShip=function(id){const r=recs[id];if(!r)return;
+window.finShip=function(id){const r=recs[id];if(!r)return;if(!finCanMark(r)){render();return;}
   if(r.d._ship){if(!confirm('این فاکتور قبلاً «ارسال شد» خورده. برداشته شود؟'))return;r.d={...r.d,_ship:null};}
   else{r.d={...r.d,_ship:{by:myEmail(),t:Date.now()},_log:[...(r.d._log||[]),{t:Date.now(),by:myEmail(),act:'📦 کالا ارسال شد (واحد مالی)'}]};const me=myEmail();const a=(r.d._finack||[]);if(!a.includes(me))r.d._finack=[...a,me];}
   r.u=Date.now();put(r);};
