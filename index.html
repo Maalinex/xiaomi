@@ -454,11 +454,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.49</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.50</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.49</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.50</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2613,6 +2613,7 @@ async function pullAll(full){
   invalidateByE();
   await pullMeta(); // همیشه کاربران/نقش‌ها به‌روز
   syncCursor=maxU||new Date().toISOString();localStorage.setItem('xr_synccur',syncCursor);
+  try{setTimeout(()=>{try{if(serReconcile())renderSafe();}catch(e){}},300);}catch(e){}
   // اگر کاربر تازه از «در انتظار تایید» به نقش واقعی ارتقا یافت، یک سینک کامل بزن تا داده‌های تازه‌مجاز بیایند
   if(!full&&wasPending&&!isPending()){return pullAll(true);}
   // 🔑 اگر نقش یا سطح دسترسی کاربر از آخرین سینک عوض شده (مثلاً ادمین دسترسی وسیع‌تری داده)،
@@ -2684,7 +2685,7 @@ function subscribeRT(){
       recs[row.id]={id:row.id,e:row.entity,d:row.data||{},u:remoteU,del:row.deleted};invalidateByE();
       // 🐎 دسته‌بندی: هنگام دریافت انبوه (مثلاً بعد از ورود اکسل روی دستگاه دیگر) هر تغییر جدا رندر نشود
       clearTimeout(_rtTimer);
-      _rtTimer=setTimeout(()=>{saveLocal();renderSafe();},400);
+      _rtTimer=setTimeout(()=>{saveLocal();try{serReconcile();}catch(e){}renderSafe();},400);
       if(row.id===MU||row.id===MA||row.id===MO){ // 🔑 نقش/دسترسی عوض شد → دریافت فوری داده‌های تازه‌مجاز
         clearTimeout(window._rtMetaT);
         window._rtMetaT=setTimeout(()=>{try{pullAll().then(()=>flush()).catch(()=>{});}catch(e){}},800);
@@ -6608,6 +6609,30 @@ window.serFixRec=function(e,key,id){
   if(!confirm('شمارهٔ این سند به '+no.toLocaleString('fa-IR')+' تغییر کند؟'))return;
   serFixOne(r,key,no);_byRaw=null;render();
 };
+/* 🤝 v3.50 — آشتی خودکار شماره‌ها بعد از سینک:
+   وقتی دو دستگاه بی‌خبر از هم (آفلاین/بدون VPN) سند می‌سازند، هر دو «آخرین شماره + ۱» را می‌دهند و بعد از سینک تکراری می‌شود.
+   قاعده: سندِ قدیمی‌تر شماره‌اش را نگه می‌دارد؛ سندِ جدیدتر فقط اگر ساختهٔ همین کاربر باشد همین‌جا شمارهٔ تازه می‌گیرد
+   (تا دو دستگاه هم‌زمان تصمیم متفاوت نگیرند). بقیه را ادمین با ابزار «بررسی شمارهٔ اسناد» درست می‌کند. */
+function serReconcile(){
+  let n=0;const me=(typeof myEmail==='function'?myEmail():'')||'';
+  if(!me)return 0;
+  const seqOfSave=r=>{try{return +(r.d._seqt||r.u||0);}catch(e){return 0;}};
+  [{e:'invoice',key:'title'},{e:'purchinv',key:'title'},{e:'voucher',key:'num'}].forEach(({e,key})=>{
+    serDups(e,key).forEach(gr=>{
+      const sorted=gr.recs.slice().sort((a,b)=>seqOfSave(a)-seqOfSave(b));
+      sorted.slice(1).forEach(r=>{
+        if(String(r.d._by||'').toLowerCase()!==me.toLowerCase())return; // فقط سندِ خودم
+        if(r.d._serfix&&Date.now()-r.d._serfix<60000)return;          // تازه اصلاح شده
+        const no=serNew(e,key);
+        r.d._serfix=Date.now();
+        serFixOne(r,key,no);n++;
+      });
+    });
+  });
+  if(n){_byRaw=null;try{setSync('ok','🔢 '+n.toLocaleString('fa-IR')+' شمارهٔ تکراری خودکار اصلاح شد');}catch(e){}}
+  return n;
+}
+window.serReconcile=serReconcile;
 const SER_DOCS=[
   {e:'invoice',key:'title',n:'🧾 فاکتور و پیش‌فاکتور فروش'},
   {e:'purchinv',key:'title',n:'🧾 فاکتور خرید'},
@@ -10929,10 +10954,11 @@ function invSave(status){
   }
   const iid=uid();
   const num=serNew('invoice','title');
+  const _seqt=Date.now();
   const _tot=invTotalsDraft().total;
   const paid=invDraft.paymode==='نقدی'?_tot:invDraft.paymode==='بخشی'?Math.min(_tot,+faNum(String(invDraft.paidAmt||0)).replace(/[,،٬\s]/g,'')||0):0;
   if(invDraft.customer&&recs[invDraft.customer]&&String(invDraft.natid||'').trim()&&String(recs[invDraft.customer].d.natid||'')!==String(invDraft.natid).trim()){const _c=recs[invDraft.customer];_c.d.natid=String(invDraft.natid).trim();_c.u=Date.now();put(_c);}
-  put({id:iid,e:'invoice',d:{title:invDraft.desc||('فاکتور '+num),seq:num,natid:String(invDraft.natid||'').trim()||undefined,biz:invDraft.biz?[invDraft.biz]:[],
+  put({id:iid,e:'invoice',d:{title:invDraft.desc||('فاکتور '+num),seq:num,_seqt,natid:String(invDraft.natid||'').trim()||undefined,biz:invDraft.biz?[invDraft.biz]:[],
     customer:invDraft.customer?[invDraft.customer]:[],referrer:invDraft.referrer?[invDraft.referrer]:[],seller:invDraft.seller?[invDraft.seller]:[],orgu:invDraft.orgu?[invDraft.orgu]:(invDraft.seller&&recs[invDraft.seller]?relIds(recs[invDraft.seller],'orgu'):[]),kind:invDraft.kind,status:status||'صادر شده',
     date:{s:dNorm(invDraft.vdate)||invDraft.vdate||today()},due:invDraft.due?{s:dNorm(invDraft.due)||invDraft.due}:null,
     disc:+invDraft.disc||0,discpct:+invDraft.discpct||0,official:invDraft.official||'غیررسمی',warranty:invDraft.warranty||undefined,taxpct:+invDraft.taxpct||0,ship:+invDraft.ship||0,paid,note:invDraft.note,
@@ -17726,7 +17752,12 @@ function listHTML(e){
     const chip=(v,lb)=>`<button class="btn ${ik===v?'':'gh'} sm" onclick="view.ikind='${v}';view.page=0;render()">${lb}</button>`;
     const _edCnt=rows.filter(r=>(r.d._log||[]).some(x=>String(x.act||'').includes('ویرایش'))).length;
     if(view.iked)rows=rows.filter(r=>(r.d._log||[]).some(x=>String(x.act||'').includes('ویرایش')));
-    _invBar=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+    const _dups=serDups('invoice','title');
+    if(_dups.length)_invBar+=`<div style="background:rgba(202,80,16,.1);border:1px solid rgba(202,80,16,.35);border-radius:10px;padding:8px 12px;font-size:12px;line-height:2;margin-bottom:8px">
+      🔢 <b>${_dups.length.toLocaleString('fa-IR')}</b> شمارهٔ فاکتور تکراری: ${_dups.slice(0,8).map(g=>'«'+g.no.toLocaleString('fa-IR')+'»').join('، ')}${_dups.length>8?' …':''}
+      — معمولاً وقتی دو نفر بدون اتصال به سرور هم‌زمان فاکتور می‌زنند. سندِ خودِ هر کاربر بعد از سینک خودکار اصلاح می‌شود؛ بقیه را ادمین اینجا درست می‌کند:
+      ${isAdmin()?`<button class="btn sm" style="margin-right:6px" onclick="go('docno')">🔢 بررسی و اصلاح شماره‌ها</button>`:''}</div>`;
+    _invBar+=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
       ${chip(INV_KIND_SALE,'🧾 فاکتورهای فروش')}${chip(INV_KIND_PROF,'📝 پیش‌فاکتورها')}
       <button class="btn ${ik?'gh':''} sm" onclick="view.ikind='';view.page=0;render()">همه اسناد</button>
       <button class="btn ${view.iked?'':'gh'} sm" onclick="view.iked=!view.iked;view.page=0;render()">✏️ ویرایش‌شده‌ها${_edCnt?` <span class="c">${_edCnt.toLocaleString('fa-IR')}</span>`:''}</button></div>`;
