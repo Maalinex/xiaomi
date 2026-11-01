@@ -454,11 +454,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.50</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.51</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.50</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.51</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -8191,21 +8191,20 @@ function finnotifHTML(){
   const P=[['d','امروز'],['w','۷ روز'],['m','۳۰ روز'],['all','همه']];
   let h=`<div class="sec"><h3>🔔 فاکتورهای فروش — کارتابل مالی <span style="flex:1"></span>
     ${P.map(([k,n])=>`<button class="btn ${per===k?'':'gh '}sm" onclick="view.fnPer='${k}';render()">${n}</button>`).join('')}</h3>
-  <p style="font-size:12px;color:var(--tx2);line-height:2">هر فاکتوری سمت فروش صادر شود این‌جا می‌نشیند و روی آیکن منو شمارنده می‌خورد. «✔ دیدم» یعنی بررسی کردم؛ «📦 ارسال شد» یعنی کالا تحویل/ارسال شد؛ تیک «🧮 سپیدار» یعنی فاکتور در نرم‌افزار سپیدار هم ثبت شده — همه در تاریخچهٔ فاکتور ثبت می‌شوند.</p>
+  <p style="font-size:12px;color:var(--tx2);line-height:2">هر فاکتوری سمت فروش صادر شود این‌جا می‌نشیند و روی آیکن منو شمارنده می‌خورد. باز کردن هر فاکتور یعنی «دیدم»؛ «📦 ارسال شد» یعنی کالا تحویل/ارسال شد؛ تیک «🧮 ثبت در سپیدار» را از بالای صفحهٔ خودِ فاکتور بزن — وضعیتش اینجا هم دیده می‌شود و در تاریخچهٔ فاکتور ثبت می‌شود.</p>
   <div class="comp" style="margin-bottom:8px"><div class="chip">در بازه: <b>${rows.length.toLocaleString('fa-IR')}</b></div><div class="chip">🆕 دیده‌نشده: <b style="color:${unseen.length?'var(--bad)':'var(--ok)'}">${unseen.length.toLocaleString('fa-IR')}</b></div>
   ${unseen.length?`<button class="btn gh sm" onclick="${unseen.slice(0,200).map(v=>`finAck('${v.id}')`).join(';')}">✔ همه را دیدم</button>`:''}</div>
-  ${rows.length?`<div class="tblwrap" style="max-height:520px;overflow:auto"><table><thead><tr><th style="text-align:right">فاکتور</th><th>مشتری</th><th>تاریخ</th><th>مبلغ (دقیق)</th><th>وضعیت</th><th>ارسال کالا</th><th title="ثبت در نرم‌افزار سپیدار">🧮 سپیدار</th><th></th></tr></thead><tbody>
+  ${rows.length?`<div class="tblwrap" style="max-height:520px;overflow:auto"><table><thead><tr><th style="text-align:right">فاکتور</th><th>مشتری</th><th>تاریخ</th><th>🏷 دسته</th><th>مبلغ (دقیق)</th><th>وضعیت</th><th>ارسال کالا</th><th title="ثبت در نرم‌افزار سپیدار — از صفحهٔ خود فاکتور تیک می‌خورد">🧮 سپیدار</th></tr></thead><tbody>
   ${rows.slice(0,300).map(v=>{const c=invCalc(v);const seen=(v.d._finack||[]).map(x=>String(x).toLowerCase()).includes(me);const sh=v.d._ship;const sp=v.d._sepidar;
     return `<tr style="${seen?'':'background:var(--bg3);font-weight:600'}">
-    <td style="text-align:right;cursor:pointer;color:var(--ac)" onclick="go('rec','invoice','${v.id}')">${seen?'':'🆕 '}${esc(v.d.title||'—')}</td>
+    <td style="text-align:right;cursor:pointer;color:var(--ac)" onclick="${seen?'':`finAck('${v.id}',1);`}go('rec','invoice','${v.id}')">${seen?'':'🆕 '}${esc(v.d.title||'—')}</td>
     <td>${smNameOf(relIds(v,'customer')[0])}</td>
     <td>${ds(v.d.date)?esc(iso2jstr(ds(v.d.date))):'—'}</td>
+    <td><span class="tag ${v.d.official==='رسمی'?'b':v.d.official==='تعمیرات'?'y':''}" style="font-size:11px">${esc(invCatFa(v.d.official))}</span></td>
     <td>${moneyX(c.total)}</td>
     <td style="font-size:11px">${esc(v.d.status||'')}${c.due>0?` │ <span style="color:var(--bad)">مانده ${moneyX(c.due)}</span>`:' │ <span style="color:var(--ok)">تسویه</span>'}</td>
     <td>${sh?`<span style="color:var(--ok);font-size:11px" title="${esc(sh.by||'')}">📦 ارسال شد<br><span style="color:var(--tx2)">${new Date(sh.t).toLocaleDateString('fa-IR')} · ${esc((sh.by||'').split('@')[0])}</span></span>`:`<button class="btn sm" onclick="finShip('${v.id}')">📦 ارسال شد</button>`}</td>
-    <td style="text-align:center"><label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;margin:0;white-space:nowrap" title="${sp?esc((sp.by||'')+' · '+new Date(sp.t).toLocaleDateString('fa-IR')):'هنوز در سپیدار ثبت نشده'}">
-      <input type="checkbox" ${sp?'checked':''} onchange="finSepidar('${v.id}')" style="width:16px;height:16px;accent-color:var(--ok);margin:0"> ${sp?`<span style="color:var(--ok)">ثبت شد</span>`:'<span style="color:var(--tx2)">ثبت در سپیدار</span>'}</label></td>
-    <td>${seen?'':`<button class="btn gh sm" onclick="finAck('${v.id}')">✔ دیدم</button>`}</td></tr>`;}).join('')}
+    <td style="text-align:center;font-size:11px" title="${sp?esc((sp.by||'')+' · '+new Date(sp.t).toLocaleDateString('fa-IR')):'هنوز در سپیدار ثبت نشده — از صفحهٔ فاکتور تیک بزن'}">${sp?`<span style="color:var(--ok);font-weight:700">✅ ثبت شد</span><br><span style="color:var(--tx2)">${esc((sp.by||'').split('@')[0])}</span>`:'<span style="color:var(--tx2)">—</span>'}</td></tr>`;}).join('')}
   </tbody></table></div>`:'<div class="empty" style="padding:16px">در این بازه فاکتور فروشی صادر نشده ✔</div>'}</div>`;
   return h;
 }
@@ -18304,6 +18303,8 @@ function recHTML(e,id){
     ${e==='booknote'&&!relIds(r,'idea').length&&can('c','idea')?`<button class="btn gh sm" onclick="noteToIdea('${id}')">💡 تبدیل به ایده</button>`:''}
     ${e==='invoice'?`<button class="btn gh sm" onclick="invPrint('${id}')">🖨️ چاپ / PDF</button>`:''}
     ${e==='invoice'&&canSee('delivery')&&can('c','delivery')?`<button class="btn gh sm" onclick="invToDelivery('${id}')">🛵 ارسال برای توزیع</button>`:''}
+    ${e==='invoice'&&r.d.kind!==INV_KIND_PROF&&finnotifCan()?`<label class="btn gh sm" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;margin:0;${r.d._sepidar?'border-color:var(--ok);color:var(--ok)':''}" title="${r.d._sepidar?esc('ثبت شده توسط '+(r.d._sepidar.by||'')+' · '+new Date(r.d._sepidar.t).toLocaleDateString('fa-IR')):'وقتی فاکتور در نرم‌افزار سپیدار ثبت شد، تیک بزن'}">
+      <input type="checkbox" ${r.d._sepidar?'checked':''} onchange="finSepidar('${id}')" style="width:15px;height:15px;accent-color:var(--ok);margin:0"> 🧮 ${r.d._sepidar?'ثبت شد در سپیدار':'ثبت در سپیدار'}</label>`:''}
     ${(e==='customer'||e==='crm'||e==='hr')&&(r.d.mobile||r.d.phone)?`<a class="btn gh sm" style="text-decoration:none" href="${telHref(r.d.mobile||r.d.phone)||'#'}">📞 تماس</a>`:''}
     ${e==='customer'&&canSee('settle')?`<button class="btn gh sm" onclick="openStmt('cust','${id}')">📄 کارت حساب</button>`:''}
     ${e==='crm'&&canSee('settle')?`<button class="btn gh sm" onclick="openStmt('supp','${id}')">📄 کارت حساب</button>`:''}
