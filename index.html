@@ -454,11 +454,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.48</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.49</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.48</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.49</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1362,7 +1362,7 @@ invoice:{ic:'🧾',n:'فاکتور و پیش‌فاکتور',grp:'فروش',sub:
  {k:'seller',n:'👤 فروشنده / فرد (تارگت و عملکرد)',t:REL,r:'hr',s:1},
  {k:'orgu',n:'🧩 واحد / تیم (تارگت و عملکرد)',t:REL,r:'orgunit',s:1},
  {k:'wh',n:'🏬 انبارِ خروج کالا',t:REL,r:'whouse',s:1},
- {k:'kind',n:'نوع فاکتور',t:SEL,o:['فاکتور فروش','تعمیرات','پیش‌فاکتور']},
+ {k:'kind',n:'نوع سند',t:SEL,o:['فاکتور فروش','پیش‌فاکتور']},
  {k:'wfst',n:'وضعیت گردش فروش',t:SEL,o:['—','نزد مدیر فروش','نزد مالی','تأیید مالی — نزد مدیر فروش','تأییدشده — نزد فروشنده','اسناد پرداخت — نزد مالی','فاکتور صادر شد','برگشت برای اصلاح','باطل/بایگانی']},
  {k:'status',n:'وضعیت',t:SEL,o:['پیش‌نویس','صادر شده','تسویه شده','باطل']},
  {k:'date',n:'تاریخ صدور',t:DAT},
@@ -1373,14 +1373,14 @@ invoice:{ic:'🧾',n:'فاکتور و پیش‌فاکتور',grp:'فروش',sub:
  {k:'validto',n:'⏳ اعتبار پیش‌فاکتور تا',t:DAT},
  {k:'disc',n:'تخفیف کل فاکتور (ریال)',t:NUM},
  {k:'discpct',n:'تخفیف ٪ کل فاکتور',t:NUM},
- {k:'official',n:'نوع فاکتور',t:SEL,o:['غیررسمی','رسمی','آفلاین','آنلاین','همکار']},
+ {k:'official',n:'🏷 دستهٔ فاکتور',t:SEL,o:['غیررسمی','رسمی','آفلاین','آنلاین','همکار','تعمیرات']},
  {k:'taxpct',n:'مالیات بر ارزش افزوده ٪',t:NUM},
  {k:'ship',n:'هزینه ارسال/بسته‌بندی (ریال)',t:NUM},
  {k:'paid',n:'مبلغ پرداخت‌شده (ریال)',t:NUM},
  {k:'gateway',n:'درگاه/مارکت‌پلیس فروش',t:REL,r:'gateway',s:1},
  {k:'acode',n:'کد حسابداری درآمد (اختیاری)',t:REL,r:'acct',s:1},
  {k:'note',n:'توضیحات',t:LNG}],
- cols:['title','customer','kind','status','date'],comp:'invBrief'},
+ cols:['title','customer','official','status','date'],comp:'invBrief'},
 invline:{sub:1,ic:'➖',n:'ردیف فاکتور',grp:'فروش',sub:1,f:[
  {k:'title',n:'شرح ردیف',t:TXT},
  {k:'invoice',n:'فاکتور',t:REL,r:'invoice',s:1},
@@ -2399,8 +2399,11 @@ function menuCount(e){ // عدد کنار منو: با کسب‌وکار/شرک�
     if(bf)rows=rows.filter(r=>{const ids=relIds(r,bf.k);return !ids.length||ids.includes(gBiz());});}
   return rows.length;}
 /* 🧾 گزارش فاکتور فروش و 📝 پیش‌فاکتور، دو ردیف جدا در منوی فروش */
-const INV_KIND_SALE='فاکتور فروش',INV_KIND_PROF='پیش‌فاکتور',INV_KIND_REP='تعمیرات';
-function invKindFa(v){return v===INV_KIND_PROF?'📝 پیش‌فاکتور':v===INV_KIND_REP?'🔧 تعمیرات':'🧾 فاکتور فروش';}
+const INV_KIND_SALE='فاکتور فروش',INV_KIND_PROF='پیش‌فاکتور';
+function invKindFa(v){return v===INV_KIND_PROF?'📝 پیش‌فاکتور':'🧾 فاکتور فروش';}
+/* 🏷 دستهٔ فاکتور (فیلد official): رسمی/غیررسمی/آفلاین/آنلاین/همکار/تعمیرات */
+const INV_CATS=['غیررسمی','رسمی','آفلاین','آنلاین','همکار','تعمیرات'];
+function invCatFa(v){v=v||'غیررسمی';return ({'رسمی':'🏛 رسمی','غیررسمی':'📄 غیررسمی','آفلاین':'🏬 آفلاین','آنلاین':'🌐 آنلاین','همکار':'🤝 همکار','تعمیرات':'🔧 تعمیرات'})[v]||v;}
 function invKindRows(kind){ // شمارش هم‌راستا با فیلتر کسب‌وکار/شرکت فعال
   let rows=visE('invoice');const def=E['invoice'];
   if(gCo()){const cf=(def.f||[]).find(f=>f.t===REL&&f.r==='company');
@@ -5317,7 +5320,7 @@ function invImpBuild(arr,defBiz){
     if(c.disc==='مبلغی (ریال)'&&g.head.discpct>0){g.warns.push('قالب تخفیف این کسب‌وکار «مبلغی» است — تخفیف درصدی نادیده گرفته می‌شود');delete g.head.discpct;}
     if(c.novat&&g.head.taxpct>0)g.warns.push('این کسب‌وکار ارزش افزودهٔ خودکار ندارد — مالیات '+g.head.taxpct.toLocaleString('fa-IR')+'٪ همان‌طور که در فایل آمده ثبت می‌شود');
     if(!c.official&&g.head.official)g.warns.push('قالب این کسب‌وکار «رسمی/غیررسمی» ندارد — غیررسمی ثبت می‌شود');
-    g.head.official=(c.official&&g.head.official==='رسمی')?'رسمی':'غیررسمی';
+    g.head.official=(g.head.official==='رسمی')?(c.official?'رسمی':'غیررسمی'):(INV_CATS.includes(g.head.official)?g.head.official:'غیررسمی');
     if(g.no){
       const n=+faNum(g.no).replace(/\D/g,'');
       const ex=serRaw('invoice').find(x=>!x.del&&serOf(x,'title')===n);
@@ -11155,10 +11158,9 @@ function invnewHTML(){
   }
   h+=`<div class="sec"><h3>${invDraft._editId?'✏️ ویرایش '+esc(recs[invDraft._editId]&&recs[invDraft._editId].d.title||'فاکتور')+' <span style="font-size:11px;color:var(--warn);font-weight:400">— تغییرات روی همین فاکتور ذخیره می‌شود؛ وصولی‌ها و اقساط ثبت‌شده حفظ می‌شوند</span>':invDraft.kind==='پیش‌فاکتور'?'📝 صدور پیش‌فاکتور — ارسال به گردش فروش':'🧾 صدور فاکتور'}</h3>
   <div id="invhead" class="mrow${uiSimple()?' simon':''}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px">
-    <div><label ${lbl}>نوع فاکتور</label>${invDraft.kind==='پیش‌فاکتور'?`<div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">📝 پیش‌فاکتور</div>`
-      :`<select onchange="invDraft.kind=this.value;render()" style="font-weight:700"><option value="${INV_KIND_SALE}" ${(invDraft.kind||INV_KIND_SALE)!==INV_KIND_REP?'selected':''}>🧾 فاکتور فروش</option><option value="${INV_KIND_REP}" ${invDraft.kind===INV_KIND_REP?'selected':''}>🔧 تعمیرات</option></select>`}</div>
-    <div class="simx"><label ${lbl}>🏛 نوع فاکتور</label><select onchange="invSetOfficial(this.value)">
-      ${['غیررسمی','رسمی','آفلاین','آنلاین','همکار'].map(o2=>`<option ${(invDraft.official||'غیررسمی')===o2?'selected':''}>${o2}</option>`).join('')}</select>
+    <div><label ${lbl}>نوع سند</label><div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">${invDraft.kind==='پیش‌فاکتور'?'📝 پیش‌فاکتور':'🧾 فاکتور فروش'}</div></div>
+    <div><label ${lbl}>🏷 دستهٔ فاکتور</label><select onchange="invSetOfficial(this.value)">
+      ${INV_CATS.map(o2=>`<option ${(invDraft.official||'غیررسمی')===o2?'selected':''}>${o2}</option>`).join('')}</select>
       ${invDraft.official==='رسمی'?(bizInvCfg(invDraft.biz).novat?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">این کسب‌وکار: رسمی بدون ارزش افزودهٔ خودکار</div>`:`<div style="font-size:10px;color:var(--ac);margin-top:2px">ارزش افزوده ${fmtN(+invDraft.taxpct||0)}٪ خودکار اعمال شد</div>`):''}</div>
     <div><label ${lbl}>کسب‌وکار <span style="opacity:.7">(از باکس بالای منو)</span></label>
       ${gBiz()&&recs[gBiz()]?`<div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">🧢 ${esc(recs[gBiz()].d.title)}</div>`
@@ -14133,7 +14135,8 @@ function tagCls(v){
 function cellHTML(r,f){
   const v=r.d[f.k];
   if(r.e==='lead'&&f.k==='lstatus')return leadStatusSel(r);
-  if(r.e==='invoice'&&f.k==='kind')return `<span class="tag ${v===INV_KIND_PROF?'y':v===INV_KIND_REP?'b':'g'}">${esc(invKindFa(v))}</span>`;
+  if(r.e==='invoice'&&f.k==='kind')return `<span class="tag ${v===INV_KIND_PROF?'y':'g'}">${esc(invKindFa(v))}</span>`;
+  if(r.e==='invoice'&&f.k==='official')return `<span class="tag ${v==='رسمی'?'b':v==='تعمیرات'?'y':''}">${esc(invCatFa(v))}</span>`;
   if(f.t===REL)return relIds(r,f.k).map(id=>`<span class="tag">${esc(nameOf(id))}</span>`).join('')||'—';
   if(f.t===SEL||f.t===STA)return v?`<span class="tag ${tagCls(v)}">${esc(STATFA[v]||v)}</span>`:'—';
   if(f.t===MUL)return (v||[]).map(x=>`<span class="tag">${esc(x)}</span>`).join('')||'—';
