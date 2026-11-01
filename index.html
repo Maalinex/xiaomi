@@ -454,11 +454,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.47</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.48</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.47</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.48</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -1362,7 +1362,7 @@ invoice:{ic:'🧾',n:'فاکتور و پیش‌فاکتور',grp:'فروش',sub:
  {k:'seller',n:'👤 فروشنده / فرد (تارگت و عملکرد)',t:REL,r:'hr',s:1},
  {k:'orgu',n:'🧩 واحد / تیم (تارگت و عملکرد)',t:REL,r:'orgunit',s:1},
  {k:'wh',n:'🏬 انبارِ خروج کالا',t:REL,r:'whouse',s:1},
- {k:'kind',n:'نوع سند',t:SEL,o:['فاکتور فروش','پیش‌فاکتور']},
+ {k:'kind',n:'نوع فاکتور',t:SEL,o:['فاکتور فروش','تعمیرات','پیش‌فاکتور']},
  {k:'wfst',n:'وضعیت گردش فروش',t:SEL,o:['—','نزد مدیر فروش','نزد مالی','تأیید مالی — نزد مدیر فروش','تأییدشده — نزد فروشنده','اسناد پرداخت — نزد مالی','فاکتور صادر شد','برگشت برای اصلاح','باطل/بایگانی']},
  {k:'status',n:'وضعیت',t:SEL,o:['پیش‌نویس','صادر شده','تسویه شده','باطل']},
  {k:'date',n:'تاریخ صدور',t:DAT},
@@ -2399,7 +2399,8 @@ function menuCount(e){ // عدد کنار منو: با کسب‌وکار/شرک�
     if(bf)rows=rows.filter(r=>{const ids=relIds(r,bf.k);return !ids.length||ids.includes(gBiz());});}
   return rows.length;}
 /* 🧾 گزارش فاکتور فروش و 📝 پیش‌فاکتور، دو ردیف جدا در منوی فروش */
-const INV_KIND_SALE='فاکتور فروش',INV_KIND_PROF='پیش‌فاکتور';
+const INV_KIND_SALE='فاکتور فروش',INV_KIND_PROF='پیش‌فاکتور',INV_KIND_REP='تعمیرات';
+function invKindFa(v){return v===INV_KIND_PROF?'📝 پیش‌فاکتور':v===INV_KIND_REP?'🔧 تعمیرات':'🧾 فاکتور فروش';}
 function invKindRows(kind){ // شمارش هم‌راستا با فیلتر کسب‌وکار/شرکت فعال
   let rows=visE('invoice');const def=E['invoice'];
   if(gCo()){const cf=(def.f||[]).find(f=>f.t===REL&&f.r==='company');
@@ -4016,15 +4017,16 @@ function wfCard(v,actions){
   const lg=(v.d.wflog||[]);
   return `<div style="border:1px solid var(--line);border-inline-start:3px solid ${stCol};border-radius:14px;padding:12px 16px;margin:10px 0;background:var(--bg2);box-shadow:0 3px 12px rgba(30,60,110,.05)">
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <b style="cursor:pointer" onclick="go('rec','invoice','${v.id}')">📝 ${esc(v.d.title||'—')}</b>
+      <b style="cursor:pointer;font-size:14px" onclick="go('rec','invoice','${v.id}')">👤 ${cu&&recs[cu]?esc(recs[cu].d.title):'— بدون مشتری —'}</b>
+      <span class="tag" style="cursor:pointer" onclick="go('rec','invoice','${v.id}')">📝 ${esc(v.d.title||'—')}</span>
       <span class="tag" style="color:${stCol};font-weight:700">${esc(v.d.wfst||'')}</span>
-      <span style="font-size:11px;color:var(--tx2)">مشتری: ${cu&&recs[cu]?esc(recs[cu].d.title):'—'} │ فروشنده: ${se&&recs[se]?esc(recs[se].d.title):'—'} │ مبلغ: <b>${money(c.total)}</b></span>
+      <span style="font-size:11px;color:var(--tx2)">فروشنده: ${se&&recs[se]?esc(recs[se].d.title):'—'} │ مبلغ: <b>${money(c.total)}</b></span>
       <span style="flex:1"></span>
       ${v.d.sepfile?`<button class="btn gh sm" onclick="wfDownload('${v.id}','sepfile')">📎 پیش‌فاکتور سپیدار</button>`:''}
       ${v.d.payfile?`<button class="btn gh sm" onclick="wfDownload('${v.id}','payfile')">📎 اسناد پرداخت</button>`:''}
       ${(isAdmin()||myWrole()==='مدیر ارشد')?`<button class="btn gh sm" style="color:var(--bad)" title="حذف کامل سند و ردیف‌هایش — فقط ادمین/مدیر ارشد" onclick="wfDelete('${v.id}')">🗑 حذف</button>`:''}
     </div>
-    ${(v.d.payterm||v.d.delivterms||v.d.validto)?`<div style="font-size:11px;color:var(--tx2);margin-top:5px">${v.d.payterm?'💳 پرداخت: '+esc(v.d.payterm)+(v.d.payterms?' («'+esc(v.d.payterms)+'»)':''):''}${v.d.delivterms?' │ 🚚 تحویل: '+esc(v.d.delivterms):''}${ds(v.d.validto)?' │ ⏳ اعتبار تا '+iso2jstr(ds(v.d.validto)):''}${relIds(v,'wh')[0]&&recs[relIds(v,'wh')[0]]?' │ 🏬 '+esc(recs[relIds(v,'wh')[0]].d.title):''}</div>`:''}
+    ${(v.d.payterm||v.d.delivterms||v.d.validto||ds(v.d.date))?`<div style="font-size:11px;color:var(--tx2);margin-top:5px">${ds(v.d.date)?'📅 صدور: <b>'+iso2jstr(ds(v.d.date))+'</b>':''}${v.d.payterm?(ds(v.d.date)?' │ ':'')+'💳 پرداخت: '+esc(v.d.payterm)+(v.d.payterms?' («'+esc(v.d.payterms)+'»)':''):''}${v.d.delivterms?' │ 🚚 تحویل: '+esc(v.d.delivterms):''}${ds(v.d.validto)?' │ ⏳ اعتبار تا '+iso2jstr(ds(v.d.validto)):''}${relIds(v,'wh')[0]&&recs[relIds(v,'wh')[0]]?' │ 🏬 '+esc(recs[relIds(v,'wh')[0]].d.title):''}</div>`:''}
     ${lg.length?`<div style="font-size:10.5px;color:var(--tx2);margin-top:6px">${lg.slice(-4).map(x=>`${esc(x.act)} — ${esc(x.by||'')}${x.note?' («'+esc(x.note)+'»)':''}`).join(' ⟵ ')}</div>`:''}
     ${actions?`<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
       <input id="wfn_${v.id}" placeholder="یادداشت (اختیاری)" style="max-width:240px;font-size:12px">
@@ -6943,7 +6945,7 @@ function leadSaleInv(v){ // فاکتور فروشِ واقعی (نه پیش‌ف
   const k=v.d.kind||'';
   if(k===INV_KIND_PROF||v.d.status==='باطل')return false;
   try{if(v.d.wfst===WF_ST.VOID)return false;}catch(e){}
-  return !k||k===INV_KIND_SALE;
+  return k!==INV_KIND_PROF; // فروش و تعمیرات هر دو «خرید» محسوب می‌شوند
 }
 function leadInvDate(v){let d=null;try{d=ds(v.d.date)||ds(v.d.vdate);}catch(e){}return String(d||new Date(v.u||Date.now()).toISOString()).slice(0,10);} // تاریخ صدور فاکتور در d.date ذخیره می‌شود
 let _leadSyncT=0;
@@ -8144,6 +8146,10 @@ function finnotifUnseen(){ // شمارندهٔ اعلان: فاکتورهایی 
 }
 window.finAck=function(id){const r=recs[id];if(!r)return;const me=myEmail();
   const a=(r.d._finack||[]);if(!a.includes(me)){r.d={...r.d,_finack:[...a,me]};r.u=Date.now();put(r);}};
+window.finSepidar=function(id){const r=recs[id];if(!r)return;
+  if(r.d._sepidar){if(!confirm('تیک «در سپیدار ثبت شد» برداشته شود؟'))return;r.d={...r.d,_sepidar:null,_log:[...(r.d._log||[]),{t:Date.now(),by:myEmail(),act:'↩️ تیک ثبت در سپیدار برداشته شد'}]};}
+  else{r.d={...r.d,_sepidar:{by:myEmail(),t:Date.now()},_log:[...(r.d._log||[]),{t:Date.now(),by:myEmail(),act:'🧮 در سپیدار ثبت شد (واحد مالی)'}]};const me=myEmail();const a=(r.d._finack||[]);if(!a.includes(me))r.d._finack=[...a,me];}
+  r.u=Date.now();put(r);};
 window.finShip=function(id){const r=recs[id];if(!r)return;
   if(r.d._ship){if(!confirm('این فاکتور قبلاً «ارسال شد» خورده. برداشته شود؟'))return;r.d={...r.d,_ship:null};}
   else{r.d={...r.d,_ship:{by:myEmail(),t:Date.now()},_log:[...(r.d._log||[]),{t:Date.now(),by:myEmail(),act:'📦 کالا ارسال شد (واحد مالی)'}]};const me=myEmail();const a=(r.d._finack||[]);if(!a.includes(me))r.d._finack=[...a,me];}
@@ -8157,11 +8163,11 @@ function finnotifHTML(){
   const P=[['d','امروز'],['w','۷ روز'],['m','۳۰ روز'],['all','همه']];
   let h=`<div class="sec"><h3>🔔 فاکتورهای فروش — کارتابل مالی <span style="flex:1"></span>
     ${P.map(([k,n])=>`<button class="btn ${per===k?'':'gh '}sm" onclick="view.fnPer='${k}';render()">${n}</button>`).join('')}</h3>
-  <p style="font-size:12px;color:var(--tx2);line-height:2">هر فاکتوری سمت فروش صادر شود این‌جا می‌نشیند و روی آیکن منو شمارنده می‌خورد. «✔ دیدم» یعنی بررسی کردم؛ «📦 ارسال شد» یعنی کالا تحویل/ارسال شد و در تاریخچهٔ فاکتور هم ثبت می‌شود.</p>
+  <p style="font-size:12px;color:var(--tx2);line-height:2">هر فاکتوری سمت فروش صادر شود این‌جا می‌نشیند و روی آیکن منو شمارنده می‌خورد. «✔ دیدم» یعنی بررسی کردم؛ «📦 ارسال شد» یعنی کالا تحویل/ارسال شد؛ تیک «🧮 سپیدار» یعنی فاکتور در نرم‌افزار سپیدار هم ثبت شده — همه در تاریخچهٔ فاکتور ثبت می‌شوند.</p>
   <div class="comp" style="margin-bottom:8px"><div class="chip">در بازه: <b>${rows.length.toLocaleString('fa-IR')}</b></div><div class="chip">🆕 دیده‌نشده: <b style="color:${unseen.length?'var(--bad)':'var(--ok)'}">${unseen.length.toLocaleString('fa-IR')}</b></div>
   ${unseen.length?`<button class="btn gh sm" onclick="${unseen.slice(0,200).map(v=>`finAck('${v.id}')`).join(';')}">✔ همه را دیدم</button>`:''}</div>
-  ${rows.length?`<div class="tblwrap" style="max-height:520px;overflow:auto"><table><thead><tr><th style="text-align:right">فاکتور</th><th>مشتری</th><th>تاریخ</th><th>مبلغ (دقیق)</th><th>وضعیت</th><th>ارسال کالا</th><th></th></tr></thead><tbody>
-  ${rows.slice(0,300).map(v=>{const c=invCalc(v);const seen=(v.d._finack||[]).map(x=>String(x).toLowerCase()).includes(me);const sh=v.d._ship;
+  ${rows.length?`<div class="tblwrap" style="max-height:520px;overflow:auto"><table><thead><tr><th style="text-align:right">فاکتور</th><th>مشتری</th><th>تاریخ</th><th>مبلغ (دقیق)</th><th>وضعیت</th><th>ارسال کالا</th><th title="ثبت در نرم‌افزار سپیدار">🧮 سپیدار</th><th></th></tr></thead><tbody>
+  ${rows.slice(0,300).map(v=>{const c=invCalc(v);const seen=(v.d._finack||[]).map(x=>String(x).toLowerCase()).includes(me);const sh=v.d._ship;const sp=v.d._sepidar;
     return `<tr style="${seen?'':'background:var(--bg3);font-weight:600'}">
     <td style="text-align:right;cursor:pointer;color:var(--ac)" onclick="go('rec','invoice','${v.id}')">${seen?'':'🆕 '}${esc(v.d.title||'—')}</td>
     <td>${smNameOf(relIds(v,'customer')[0])}</td>
@@ -8169,6 +8175,8 @@ function finnotifHTML(){
     <td>${moneyX(c.total)}</td>
     <td style="font-size:11px">${esc(v.d.status||'')}${c.due>0?` │ <span style="color:var(--bad)">مانده ${moneyX(c.due)}</span>`:' │ <span style="color:var(--ok)">تسویه</span>'}</td>
     <td>${sh?`<span style="color:var(--ok);font-size:11px" title="${esc(sh.by||'')}">📦 ارسال شد<br><span style="color:var(--tx2)">${new Date(sh.t).toLocaleDateString('fa-IR')} · ${esc((sh.by||'').split('@')[0])}</span></span>`:`<button class="btn sm" onclick="finShip('${v.id}')">📦 ارسال شد</button>`}</td>
+    <td style="text-align:center"><label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;margin:0;white-space:nowrap" title="${sp?esc((sp.by||'')+' · '+new Date(sp.t).toLocaleDateString('fa-IR')):'هنوز در سپیدار ثبت نشده'}">
+      <input type="checkbox" ${sp?'checked':''} onchange="finSepidar('${v.id}')" style="width:16px;height:16px;accent-color:var(--ok);margin:0"> ${sp?`<span style="color:var(--ok)">ثبت شد</span>`:'<span style="color:var(--tx2)">ثبت در سپیدار</span>'}</label></td>
     <td>${seen?'':`<button class="btn gh sm" onclick="finAck('${v.id}')">✔ دیدم</button>`}</td></tr>`;}).join('')}
   </tbody></table></div>`:'<div class="empty" style="padding:16px">در این بازه فاکتور فروشی صادر نشده ✔</div>'}</div>`;
   return h;
@@ -11147,7 +11155,8 @@ function invnewHTML(){
   }
   h+=`<div class="sec"><h3>${invDraft._editId?'✏️ ویرایش '+esc(recs[invDraft._editId]&&recs[invDraft._editId].d.title||'فاکتور')+' <span style="font-size:11px;color:var(--warn);font-weight:400">— تغییرات روی همین فاکتور ذخیره می‌شود؛ وصولی‌ها و اقساط ثبت‌شده حفظ می‌شوند</span>':invDraft.kind==='پیش‌فاکتور'?'📝 صدور پیش‌فاکتور — ارسال به گردش فروش':'🧾 صدور فاکتور'}</h3>
   <div id="invhead" class="mrow${uiSimple()?' simon':''}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:8px">
-    <div><label ${lbl}>نوع سند</label><div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">${invDraft.kind==='پیش‌فاکتور'?'📝 پیش‌فاکتور':'🧾 فاکتور فروش'}</div></div>
+    <div><label ${lbl}>نوع فاکتور</label>${invDraft.kind==='پیش‌فاکتور'?`<div style="padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg3,rgba(0,0,0,.04));font-weight:700;font-size:13px">📝 پیش‌فاکتور</div>`
+      :`<select onchange="invDraft.kind=this.value;render()" style="font-weight:700"><option value="${INV_KIND_SALE}" ${(invDraft.kind||INV_KIND_SALE)!==INV_KIND_REP?'selected':''}>🧾 فاکتور فروش</option><option value="${INV_KIND_REP}" ${invDraft.kind===INV_KIND_REP?'selected':''}>🔧 تعمیرات</option></select>`}</div>
     <div class="simx"><label ${lbl}>🏛 نوع فاکتور</label><select onchange="invSetOfficial(this.value)">
       ${['غیررسمی','رسمی','آفلاین','آنلاین','همکار'].map(o2=>`<option ${(invDraft.official||'غیررسمی')===o2?'selected':''}>${o2}</option>`).join('')}</select>
       ${invDraft.official==='رسمی'?(bizInvCfg(invDraft.biz).novat?`<div style="font-size:10px;color:var(--tx2);margin-top:2px">این کسب‌وکار: رسمی بدون ارزش افزودهٔ خودکار</div>`:`<div style="font-size:10px;color:var(--ac);margin-top:2px">ارزش افزوده ${fmtN(+invDraft.taxpct||0)}٪ خودکار اعمال شد</div>`):''}</div>
@@ -14124,6 +14133,7 @@ function tagCls(v){
 function cellHTML(r,f){
   const v=r.d[f.k];
   if(r.e==='lead'&&f.k==='lstatus')return leadStatusSel(r);
+  if(r.e==='invoice'&&f.k==='kind')return `<span class="tag ${v===INV_KIND_PROF?'y':v===INV_KIND_REP?'b':'g'}">${esc(invKindFa(v))}</span>`;
   if(f.t===REL)return relIds(r,f.k).map(id=>`<span class="tag">${esc(nameOf(id))}</span>`).join('')||'—';
   if(f.t===SEL||f.t===STA)return v?`<span class="tag ${tagCls(v)}">${esc(STATFA[v]||v)}</span>`:'—';
   if(f.t===MUL)return (v||[]).map(x=>`<span class="tag">${esc(x)}</span>`).join('')||'—';
@@ -18955,7 +18965,7 @@ function geoCityLL(name){
 function geoAllProvs(){return GEO_PROVS.concat(GEO_IRQ,GEO_AFG);}
 function geoSales(){ // جمع فروش هر مشتری
   const m={};
-  byE('invoice').forEach(v=>{if(v.d.kind!==INV_KIND_SALE&&v.d.kind!=='فاکتور فروش')return;
+  byE('invoice').forEach(v=>{if(v.d.kind===INV_KIND_PROF||v.d.status==='باطل')return;
     const c=relIds(v,'customer')[0];if(!c)return;m[c]=(m[c]||0)+(+v.d.total||0);});
   return m;
 }
