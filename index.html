@@ -454,11 +454,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.54</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.55</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.54</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.55</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -2447,6 +2447,19 @@ window.bizPath=bizPath;
 function relIds(r,k){const v=r.d[k];return Array.isArray(v)?v.filter(id=>recs[id]&&!recs[id].del):[];}
 function backRefs(id,ent,key){return byE(ent).filter(r=>Array.isArray(r.d[key])&&r.d[key].includes(id));}
 
+/* ⏱ v3.55 — مهلت برای هر درخواست شبکه.
+   در شبکه‌های فیلترشده، درخواست معمولاً «خطا» نمی‌دهد بلکه بی‌پایان معلق می‌ماند. بدون مهلت،
+   یک درخواستِ معلق قفلِ ارسال (_flushing) را برای کل نشست نگه می‌داشت: هیچ سندی تا بستن اپ
+   فرستاده نمی‌شد و وضعیت روی «در حال سینک…» می‌ماند — حتی بعد از برگشت اینترنت. */
+function sbFetch(input,init){
+  const u=String((input&&input.url)||input||'');
+  const ms=/\/storage\//.test(u)?180000:/\/auth\//.test(u)?25000:30000;
+  const ctl=new AbortController();
+  const outer=init&&init.signal;
+  if(outer){if(outer.aborted)ctl.abort();else outer.addEventListener('abort',()=>ctl.abort(),{once:true});}
+  const t=setTimeout(()=>ctl.abort(),ms);
+  return fetch(input,Object.assign({},init||{},{signal:ctl.signal})).finally(()=>clearTimeout(t));
+}
 async function initSupabase(){
   if(!cfg.url||!cfg.key)return false;
   if(!window.supabase){
@@ -2455,7 +2468,7 @@ async function initSupabase(){
       s.onload=res;s.onerror=rej;document.head.appendChild(s);}).catch(()=>null);
   }
   if(!window.supabase)return false;
-  sb=window.supabase.createClient(cfg.url,cfg.key);
+  sb=window.supabase.createClient(cfg.url,cfg.key,{global:{fetch:sbFetch}});
   try{sb.auth.onAuthStateChange((ev,ss)=>{ // 🔑 تازه‌سازی توکن/خروج → متغیر نشست همیشه درست بماند
     if(ev==='TOKEN_REFRESHED'&&ss)session=ss;
     else if(ev==='SIGNED_OUT'){session=null;try{setSync('err','نشست منقضی شد — دوباره وارد شو');}catch(e){}}
@@ -2522,7 +2535,7 @@ async function pullMeta(){ // 🔑 رکوردهای متا (کاربران/گز�
 async function _pgRetry(mk,tries=3){
   let last=null;
   for(let i=0;i<tries;i++){
-    try{const r=await mk();if(!r.error)return r;last=r;}
+    try{const r=await _tmo(Promise.resolve(mk()),35000);if(!r.error)return r;last=r;}
     catch(e){last={data:null,error:e};}
     if(i<tries-1)await new Promise(rs=>setTimeout(rs,1500*(i+1)));
   }
@@ -2559,8 +2572,17 @@ function mergeIn(row){
   if(needPush){recs[row.id].u=Date.now();if(!queue.includes(row.id))queue.push(row.id);saveQ();clearTimeout(window._mergeFT);window._mergeFT=setTimeout(()=>{try{flush();}catch(e){}},1200);}
   return changed;
 }
+let _pulling=false,_pullAt=0;
 async function pullAll(full){
   if(!sb||!session)return;
+  if(_pulling&&Date.now()-_pullAt<120000)return; // یک دریافت در هر لحظه
+  _pulling=true;_pullAt=Date.now();
+  try{return await _pullAllInner(full);}
+  catch(e){try{setSync('err','خطای سینک: '+String(e&&e.message||e).slice(0,70));}catch(_e){}
+    const _dv=document.getElementById('fsync');if(_dv)_dv.remove();}
+  finally{_pulling=false;}
+}
+async function _pullAllInner(full){
   const wasPending=isPending();
   // ⚡ سینک تدریجی: فقط رکوردهای تغییرکرده از آخرین سینک را بگیر (سریع، حتی با ده‌ها هزار رکورد).
   // سینک کامل فقط بار اول یا هنگام ورود (full=true) — برای پاک‌سازی رکوردهای دیگر مجازنشده.
@@ -2651,7 +2673,7 @@ async function pullAll(full){
   syncCursor=maxU||new Date().toISOString();localStorage.setItem('xr_synccur',syncCursor);
   try{setTimeout(()=>{try{if(serReconcile())renderSafe();}catch(e){}},300);}catch(e){}
   // اگر کاربر تازه از «در انتظار تایید» به نقش واقعی ارتقا یافت، یک سینک کامل بزن تا داده‌های تازه‌مجاز بیایند
-  if(!full&&wasPending&&!isPending()){return pullAll(true);}
+  if(!full&&wasPending&&!isPending()){return _pullAllInner(true);}
   // 🔑 اگر نقش یا سطح دسترسی کاربر از آخرین سینک عوض شده (مثلاً ادمین دسترسی وسیع‌تری داده)،
   // سینک کامل بزن تا رکوردهای قدیمیِ تازه‌مجاز هم بیایند — و گرنه «اطلاعات گذشته» هرگز نمی‌آمد.
   try{
@@ -2659,7 +2681,7 @@ async function pullAll(full){
     sig=String(sig.length)+':'+sig.slice(0,400);
     const prev=localStorage.getItem('xr_rolesig');
     localStorage.setItem('xr_rolesig',sig);
-    if(!full&&prev&&prev!==sig&&!isPending()){return pullAll(true);}
+    if(!full&&prev&&prev!==sig&&!isPending()){return _pullAllInner(true);}
   }catch(e){}
   window._fsTried=0; // سینک موفق: دفعه بعدِ نیاز، دوباره صفحه پیشرفت مجاز است
   try{const dv=document.getElementById('fsync');if(dv){dv.remove();invalidateByE();nav();render();}}catch(e){}
@@ -2674,10 +2696,11 @@ function authExpired(){ // نشست دیگر معتبر نیست — کاربر 
   if(window._authExpT&&Date.now()-window._authExpT<60000)return;window._authExpT=Date.now();
   try{const l=document.getElementById('login');if(l){fillLoginForm();l.classList.add('show');const er=document.getElementById('l_err');if(er)er.textContent='نشست شما منقضی شده؛ رمز را وارد کن تا سینک ادامه پیدا کند. داده‌های محلی سر جایش است.';}}catch(e){}
 }
+let _flushAt=0;
 async function flush(){
   if(!sb||!session){if(cfg.url)setSync('off','آفلاین — ذخیره محلی');return;}
-  if(_flushing)return; // جلوگیری از اجرای موازی هنگام ورود انبوه
-  _flushing=true;
+  if(_flushing&&Date.now()-_flushAt<90000)return; // جلوگیری از اجرای موازی هنگام ورود انبوه
+  _flushing=true;_flushAt=Date.now(); // 🛟 قفلِ گیرکرده (بیش از ۹۰ ثانیه) خودکار آزاد می‌شود
   try{
     let rlsDropped=0, retries=0;
     while(queue.length){
@@ -2690,14 +2713,18 @@ async function flush(){
       const rows=ids.map(rowOf).filter(Boolean).filter(r=>/^[0-9a-fA-F-]{36}$/.test(String(r.id)));
       if(!rows.length){queue=queue.slice(ids.length);saveQ();continue;}
       if(queue.length>ids.length)setSync('','در حال همگام‌سازی… '+queue.length.toLocaleString('fa-IR')+' مورد مانده');
-      const {error}=await sb.from('records').upsert(rows);
+      let error=null;
+      try{({error}=await _tmo(Promise.resolve(sb.from('records').upsert(rows)),40000));}
+      catch(e){error={message:'سرور جواب نداد ('+String(e&&e.message||e).slice(0,40)+')',timeout:true};}
+      _flushAt=Date.now();
       if(!error){ids.forEach(rejClear);queue=queue.slice(ids.length);saveQ();retries=0;continue;}
       if(isRLS(error)){
         // یکی از ردیف‌های دسته توسط سیاست امنیتی رد شده — تک‌تک بفرست تا فقط همان حذف شود
         for(const id of ids){
           const row=rowOf(id);
           if(!row){queue=queue.filter(x=>x!==id);continue;}
-          const one=await sb.from('records').upsert(row);
+          let one;try{one=await _tmo(Promise.resolve(sb.from('records').upsert(row)),30000);}catch(e){one={error:{message:'سرور جواب نداد',timeout:true}};}
+          _flushAt=Date.now();
           if(one.error&&isRLS(one.error)){rlsDropped++;queue=queue.filter(x=>x!==id);saveQ();rejAdd(id,one.error.message||one.error.code||'RLS');}
           else if(one.error){setSync('err','خطا در ارسال: '+String(one.error.message||'').slice(0,70)+' — بعداً تلاش می‌شود');return;}
           else{rejClear(id);queue=queue.filter(x=>x!==id);saveQ();}
@@ -2707,7 +2734,8 @@ async function flush(){
       // خطای گذرا (شبکه/محدودیت نرخ): کمی صبر و تلاش دوباره — حداکثر ۳ بار در این نوبت
       if(isAuthErr(error)){authExpired();return;}
       if(retries<3){retries++;setSync('','اختلال موقت — تلاش دوباره ('+retries+')…');await new Promise(r=>setTimeout(r,1500*retries));continue;}
-      setSync('err','خطا در ارسال: '+String(error.message||'').slice(0,70)+' — بعداً تلاش می‌شود');return;
+      setSync('err',(error.timeout?'⛔ سرور در دسترس نیست — '+queue.length.toLocaleString('fa-IR')+' سند روی این دستگاه منتظر ارسال است (VPN/واسطه را بررسی کن)':'خطا در ارسال: '+String(error.message||'').slice(0,70))+' — خودکار دوباره تلاش می‌شود');
+      clearTimeout(window._flushRetryT);window._flushRetryT=setTimeout(()=>{try{flush();}catch(e){}},30000);return;
     }
     if(rlsDropped){
       setSync('err','⛔ '+rlsDropped.toLocaleString('fa-IR')+' سند توسط سرور رد شد — فقط روی این دستگاه مانده');
@@ -23753,7 +23781,7 @@ function pomoReset(){clearInterval(pomo.iv);pomo.run=false;pomo.mode='focus';pom
   await loadLocal();aiRestoreDir();render();fillLoginForm();checkDraft();
   if(cfg.url&&cfg.key){
     const ok=await initSupabase().catch(()=>false);
-    if(ok){try{await handleRecovery();}catch(e){} await pullAll();bootstrapAdmin();subscribeRT();flush();whoami();render();}
+    if(ok){try{await handleRecovery();}catch(e){} try{flush();}catch(e){} await pullAll();bootstrapAdmin();subscribeRT();flush();whoami();render();}
     else if(cfg.local!==1){
       if(localStorage.getItem('xr_authok')==='1'){ // 🔌 آفلاین/خطای گذرا و قبلاً واردشده → با کش محلی ادامه بده
         setSync('off','آفلاین — نسخهٔ محلی؛ با وصل شدن اینترنت خودکار سینک می‌شود');render();whoami();
@@ -23778,8 +23806,9 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&sb&&sessi
 // 🔁 سینک دوره‌ای: حتی وقتی کاربر پنجره را باز نگه داشته، هر ۴۵ ثانیه تغییرات بقیه گرفته شود
 // (اگر رئال‌تایم سرور فعال باشد این فقط پشتیبان است؛ اگر نباشد، همین مسیر اصلی هم‌دیدی کاربران است)
 setInterval(()=>{
-  if(sb&&session&&!document.hidden&&navigator.onLine!==false&&!_flushing&&Date.now()-lastPull>30000){
+  if(sb&&session&&!document.hidden&&navigator.onLine!==false&&Date.now()-lastPull>30000){
     lastPull=Date.now();
+    if(queue.length)flush();
     pullAll().then(()=>flush()).catch(()=>{});
   }
 },45000);
