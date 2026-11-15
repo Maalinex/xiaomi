@@ -454,11 +454,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.57</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.58</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.57</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.58</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -6736,6 +6736,17 @@ function fifoCalc(p){
   if(_fifoCache[p.id])return _fifoCache[p.id];
   return _fifoCache[p.id]=_fifoCalcRaw(p);
 }
+/* 🧮 v3.58 — ردیف‌های خرید/فروشِ هر کالا، مستقیم از رکوردها (نه byE):
+   byE با «کسب‌وکار فعال» و «محدودهٔ داده» فیلتر می‌شود و لایه‌های خرید را از موتور بها پنهان می‌کرد. */
+function _fifoLines(ent){
+  if(!_fifoCache)_fifoCache={};
+  const k='__'+ent;
+  if(_fifoCache[k])return _fifoCache[k];
+  const m={};
+  for(const id in recs){const l=recs[id];if(!l||l.del||l.e!==ent||!l.d)continue;
+    const pid=(l.d.product&&l.d.product[0])||'';if(pid)(m[pid]||(m[pid]=[])).push(l);}
+  return _fifoCache[k]=m;
+}
 function _fifoCalcRaw(p){
   const dkey=x=>(ds(x.d.date)||'9999-12-31')+'#'+String(x.u).padStart(15,'0');
   // لایه‌های ورودی: موجودی اول دوره (به قیمت خرید واحد کالا) + خریدها به ترتیب تاریخ
@@ -6743,8 +6754,7 @@ function _fifoCalcRaw(p){
   // تاریخ لایه اول دوره: اولین خرید یا تاریخ ثبت کالا (برای محاسبه سن ماندگاری)
   const buys=[];
   purchasesOf(p.id).forEach(x=>{if(x.d._pinv)return;/* 🛡 آینهٔ فاکتور خرید — ردیف سند جداگانه شمرده می‌شود */const q=+x.d.qty||0;if(q>0)buys.push({q,c:puUnitToman(x)+((+x.d.extra||0)/q),d:ds(x.d.date)||'',u:x.u||0});});
-  byE('purchline').forEach(l=>{                                  // 🧾 ردیف‌های فاکتور خرید هم لایهٔ بهای تمام‌شده‌اند
-    if(relIds(l,'product')[0]!==p.id)return;
+  (_fifoLines('purchline')[p.id]||[]).forEach(l=>{               // 🧾 ردیف‌های فاکتور خرید هم لایهٔ بهای تمام‌شده‌اند
     const inv=recs[relIds(l,'purchinv')[0]];if(!inv||inv.del)return;
     const stt=inv.d.status||'';if(stt==='پیش‌نویس'||stt==='باطل')return;
     if(inv.d.kind==='پیش‌فاکتور خرید')return; // 📝 پیش‌فاکتور خرید لایه ندارد
@@ -6760,13 +6770,12 @@ function _fifoCalcRaw(p){
   buys.forEach(b2=>layers.push({q:b2.q,c:b2.c,d:b2.d}));
   let lastCost=layers.length?layers[layers.length-1].c:(p.d.buy||0);
   // مصرف لایه‌ها با فروش‌ها به ترتیب تاریخ
-  let profit=0,cogs=0,shortage=0;const bySale={};
+  let profit=0,cogs=0,shortage=0;const bySale={},costBySale={},shortBySale={};
   const sells=[];
   salesOf(p.id).forEach(s2=>{if(s2.d._inv)return;/* 🛡 آینهٔ فاکتور فروش */sells.push({id:s2.id,q:+s2.d.qty||0,price:+s2.d.price||0,extra:+s2.d.extra||0,d:ds(s2.d.date)||'',u:s2.u||0});});
-  byE('invline').forEach(l=>{                                    // 🧾 ردیف‌های فاکتور فروش هم مصرف‌کنندهٔ لایه‌ها هستند
-    if(relIds(l,'product')[0]!==p.id)return;
+  (_fifoLines('invline')[p.id]||[]).forEach(l=>{                 // 🧾 ردیف‌های فاکتور فروش هم مصرف‌کنندهٔ لایه‌ها هستند
     const inv=recs[relIds(l,'invoice')[0]];if(!inv||inv.del)return;
-    if((inv.d.kind||'')!=='فاکتور فروش')return;
+    if((inv.d.kind||'')==='پیش‌فاکتور')return; // فاکتورِ بدون نوع (قدیمی) هم فروش است
     const stt=inv.d.status||'';if(stt==='پیش‌نویس'||stt==='باطل')return;
     const q=+l.d.qty||0;if(q<=0)return;
     sells.push({id:l.id,q,price:+l.d.price||0,extra:+l.d.ldisc||0,d:ds(inv.d.date)||'',u:inv.u||0});
@@ -6779,10 +6788,10 @@ function _fifoCalcRaw(p){
         cost+=take*L.c; L.q-=take; need-=take;
         if(L.q<=0)layers.shift(); else lastCost=L.c;
       }
-      if(need>0){cost+=need*lastCost;shortage+=need;} // فروش بیش از موجودی: با آخرین بهای شناخته‌شده
+      if(need>0){cost+=need*lastCost;shortage+=need;shortBySale[s.id]=need;} // فروش بیش از موجودی: با آخرین بهای شناخته‌شده
       cogs+=cost;
       const pr=s.q*s.price-s.extra-cost;
-      bySale[s.id]=pr; profit+=pr;
+      bySale[s.id]=pr; costBySale[s.id]=cost; profit+=pr;
     });
   // 🗑 مصرف لایه‌ها بابت ضایعات (خروج از انبار) — پس از فروش‌ها
   let wasteCost=0,wasteQ=0;
@@ -6794,7 +6803,7 @@ function _fifoCalcRaw(p){
   const value=layers.reduce((a,L)=>a+L.q*L.c,0);
   const qty=layers.reduce((a,L)=>a+L.q,0)-0;
   const oldestDate=layers.length?layers[0].d:''; // تاریخ قدیمی‌ترین جنسِ باقی‌مانده در انبار
-  return {value,profit,cogs,shortage,layerQty:qty,avg:qty>0?value/qty:lastCost,bySale,layers:layers.map(L=>({q:L.q,c:L.c,d:L.d})),oldestDate,wasteCost,wasteQ};
+  return {value,profit,cogs,shortage,layerQty:qty,avg:qty>0?value/qty:lastCost,bySale,costBySale,shortBySale,hasCost:(buys.length>0||(+p.d.buy||0)>0),layers:layers.map(L=>({q:L.q,c:L.c,d:L.d})),oldestDate,wasteCost,wasteQ};
 }
 function productProfit(p){return fifoCalc(p).profit;} // سود تحقق‌یافته FIFO
 function stockValue(p){return fifoCalc(p).value;}     // ارزش انبار FIFO
@@ -7075,8 +7084,10 @@ function invCalc(inv){
 function invBrief(inv){
   const c=invCalc(inv);const proforma=inv.d.kind==='پیش‌فاکتور';const voided=inv.d.status==='باطل';
   const open=c.due>0&&!proforma&&!voided;
-  return {label:'مبلغ کل'+(open?' │ مانده':'')+(proforma?' │ پیش‌فاکتور':'')+(voided?' │ باطل':''),
-    v:moneyX(c.total)+(open?' │ '+moneyX(c.due):''),bad:open||voided};
+  let pf='';
+  if(!proforma&&!voided&&canSeeCost()){try{const k=invCogs(inv);if(k.lines.length)pf=' │ <span title="بهای تمام‌شده: '+money(k.cogs)+'" style="color:'+(k.gp<0?'var(--bad)':'var(--ok)')+'">سود '+moneyX(k.gp)+(k.unknown?' ⚠️':'')+'</span>';}catch(e){}}
+  return {label:'مبلغ کل'+(open?' │ مانده':'')+(proforma?' │ پیش‌فاکتور':'')+(voided?' │ باطل':'')+(pf?' │ سود':''),
+    v:moneyX(c.total)+(open?' │ '+moneyX(c.due):'')+pf,bad:open||voided};
 }
 function invLineBrief(l){return {label:'مبلغ ردیف',v:moneyX(invLineAmt(l))};}
 window.invBrief=invBrief;window.invLineBrief=invLineBrief;
@@ -11249,6 +11260,44 @@ function invTotalsDraft(){
   const meters=invDraft.lines.reduce((a,l)=>a+(+l.qty||0)*(+l.mlen||0),0);
   return {sub,disc,base,tax,ship,meters,total:base+tax+ship};
 }
+/* 💹 v3.58 — بهای تمام‌شده و سود هر فاکتور فروش، از لایه‌های واقعی خرید (FIFO) به‌همراه سهم کرایه/هزینه‌های سرشکن‌شده */
+function canSeeCost(){try{return isAdmin()||canView('plreport');}catch(e){return false;}}
+function invLineCost(l){ // {cost, known, short}
+  const pid=relIds(l,'product')[0];const p=pid&&recs[pid]&&!recs[pid].del?recs[pid]:null;
+  const q=+l.d.qty||0;
+  if(!p)return {cost:0,known:false,short:0};
+  let f=null;try{f=fifoCalc(p);}catch(e){}
+  if(f&&f.costBySale&&f.costBySale[l.id]!=null)return {cost:f.costBySale[l.id],known:!!f.hasCost,short:f.hasCost?((f.shortBySale&&f.shortBySale[l.id])||0):0};
+  const u=(f&&f.avg>0)?f.avg:(+p.d.buy||0);
+  return {cost:q*u,known:u>0,short:0};
+}
+function invCogs(inv){
+  let cogs=0,unknown=0,short=0;const lines=[];
+  invLinesOf(inv.id).forEach(l=>{const c=invLineCost(l);cogs+=c.cost;if(!c.known)unknown++;short+=c.short;
+    lines.push({l,cost:c.cost,known:c.known,short:c.short,amt:invLineAmt(l)});});
+  let base=0;try{base=invCalc(inv).base;}catch(e){}
+  const gp=base-cogs;
+  return {cogs,base,gp,margin:base>0?gp/base*100:0,unknown,short,lines};
+}
+function invCostPanel(r){
+  if(!canSeeCost()||r.d.kind==='پیش‌فاکتور'||r.d.status==='باطل')return '';
+  const c=invCogs(r);if(!c.lines.length)return '';
+  const F=n=>fmtN(Math.round(n));
+  const col=c.gp<0?'var(--bad)':'var(--ok)';
+  return `<div class="sec" style="border-inline-start:3px solid ${col}"><h3>💹 بهای تمام‌شده و سود این فاکتور</h3>
+    <div class="comp" style="margin-bottom:8px">
+      <div class="chip">فروش خالص (بدون مالیات): <b>${money(c.base)}</b></div>
+      <div class="chip">📦 بهای تمام‌شده: <b>${money(c.cogs)}</b></div>
+      <div class="chip">📈 سود ناخالص: <b style="color:${col}">${money(c.gp)}</b></div>
+      <div class="chip">٪ حاشیه: <b style="color:${col}">${c.margin.toLocaleString('fa-IR',{maximumFractionDigits:1})}٪</b></div></div>
+    <div class="tblwrap"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالا</th><th>تعداد</th><th>فروش ردیف</th><th>بهای واحد</th><th>بهای تمام‌شدهٔ ردیف</th><th>سود ردیف</th></tr></thead><tbody>
+    ${c.lines.map(x=>{const pid=relIds(x.l,'product')[0];const q=+x.l.d.qty||0;const g=x.amt-x.cost;
+      return `<tr><td style="text-align:right">${esc((pid&&recs[pid]&&recs[pid].d.title)||x.l.d.title||'—')}${!x.known?' <span class="tag r" style="font-size:10px">بدون بهای خرید</span>':x.short?` <span class="tag y" style="font-size:10px" title="برای این تعداد، خریدِ ثبت‌شدهٔ کافی نبود؛ با آخرین بهای خرید حساب شد">${x.short.toLocaleString('fa-IR')} عدد بیش از خرید</span>`:''}</td>
+        <td>${q.toLocaleString('fa-IR')}</td><td>${F(x.amt)}</td><td>${q?F(x.cost/q):'—'}</td><td>${F(x.cost)}</td>
+        <td style="font-weight:700;color:${g<0?'var(--bad)':'var(--ok)'}">${F(g)}</td></tr>`;}).join('')}
+    </tbody></table></div>
+    <p style="font-size:10.5px;color:var(--tx2);margin-top:6px">بها از فاکتورهای خرید/رسیدهای انبار به روش FIFO (اولین خرید، اولین فروش) و با سهم کرایه حمل و هزینه‌های سرشکن‌شده حساب می‌شود.${c.unknown?' ⚠️ برای ردیف‌های «بدون بهای خرید»، هیچ خرید یا قیمت خریدی ثبت نشده و بها صفر فرض شده — سود واقعی کمتر است.':''}</p></div>`;
+}
 function invCostOf(pid){const p=recs[pid];if(!p)return 0;try{const f=fifoCalc(p);if(f.avg>0)return f.avg;}catch(e){}return +p.d.buy||0;}
 /* 🏛 درصد ارزش افزوده فاکتور رسمی به تفکیک سال شمسی — در «اطلاعات پایه» تنظیم می‌شود */
 function vatCfg(){const m=recs[MO];return (m&&!m.del&&m.d._vat)||{};}
@@ -12731,18 +12780,27 @@ function plCalc(biz,from,to){
     if(v.d.kind==='پیش‌فاکتور'||v.d.status==='باطل')return false;
     if(biz&&!relIds(v,'biz').includes(biz))return false;
     const d=dnorm(v.d.date);if(f&&(!d||d<f))return false;if(t&&(!d||d>t))return false;return true;});
-  let rev=0,cogs=0,disc=0,tax=0,ship=0;const byProd={};
+  let rev=0,cogs=0,disc=0,tax=0,ship=0,unknown=0,short=0;const byProd={},byInv=[];
   invs.forEach(v=>{const c=invCalc(v);rev+=c.base;disc+=c.disc;tax+=c.tax;ship+=c.ship;
-    invLinesOf(v.id).forEach(l=>{const pid=relIds(l,'product')[0];const p=pid&&recs[pid]?recs[pid]:null;
-      const amt=invLineAmt(l);const cost=(l.d.qty||0)*((p&&p.d.buy)||0);cogs+=cost;
-      const pn=p?p.d.title:'—';byProd[pn]=byProd[pn]||{rev:0,cogs:0,qty:0};byProd[pn].rev+=amt;byProd[pn].cogs+=cost;byProd[pn].qty+=(l.d.qty||0);});});
+    const ic=invCogs(v);cogs+=ic.cogs;unknown+=ic.unknown;short+=ic.short;
+    byInv.push({id:v.id,t:v.d.title||'—',d:String(ds(v.d.date)||'').slice(0,10),cu:relIds(v,'customer')[0]||'',rev:c.base,cogs:ic.cogs,gp:c.base-ic.cogs,unknown:ic.unknown,short:ic.short});
+    ic.lines.forEach(x=>{const l=x.l;const pid=relIds(l,'product')[0];const p=pid&&recs[pid]?recs[pid]:null;
+      const pn=p?p.d.title:'—';byProd[pn]=byProd[pn]||{rev:0,cogs:0,qty:0,unknown:0};byProd[pn].rev+=x.amt;byProd[pn].cogs+=x.cost;byProd[pn].qty+=(+l.d.qty||0);if(!x.known)byProd[pn].unknown++;});});
   // فروش‌های قدیمی/سریع (sale) در همان بازه
   const legacy=bizSaleLegacy(biz).filter(s=>{const d=dnorm(s.d.date);if(f&&(!d||d<f))return false;if(t&&(!d||d>t))return false;return true;});
-  legacy.forEach(s=>{const amt=saleAmt(s);const pid=relIds(s,'product')[0];const p=pid&&recs[pid]?recs[pid]:null;const cost=(s.d.qty||0)*((p&&p.d.buy)||0);
+  legacy.forEach(s=>{const amt=saleAmt(s);const pid=relIds(s,'product')[0];const p=pid&&recs[pid]?recs[pid]:null;
+    let cost=(s.d.qty||0)*((p&&p.d.buy)||0);try{if(p){const f=fifoCalc(p);if(f.costBySale&&f.costBySale[s.id]!=null)cost=f.costBySale[s.id];}}catch(e){}
     rev+=amt;cogs+=cost;const pn=p?p.d.title:'—';byProd[pn]=byProd[pn]||{rev:0,cogs:0,qty:0};byProd[pn].rev+=amt;byProd[pn].cogs+=cost;byProd[pn].qty+=(s.d.qty||0);});
   const gp=rev-cogs;
-  return {count:invs.length+legacy.length,rev,cogs,gp,margin:rev>0?gp/rev*100:0,disc,tax,ship,byProd};
+  return {count:invs.length+legacy.length,rev,cogs,gp,margin:rev>0?gp/rev*100:0,disc,tax,ship,byProd,byInv,unknown,short};
 }
+window.plInvCsv=function(){
+  const r=plCalc(gBiz(),view.plFrom,view.plTo);if(!r.byInv.length){alert('چیزی برای خروجی نیست');return;}
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const rows=[['فاکتور','مشتری','تاریخ','فروش خالص','بهای تمام‌شده','سود','درصد حاشیه']].concat(r.byInv.map(x=>[x.t,(x.cu&&recs[x.cu]&&recs[x.cu].d.title)||'',x.d?faNum(iso2jstr(String(x.d).slice(0,10))):'',Math.round(x.rev),Math.round(x.cogs),Math.round(x.gp),x.rev>0?(x.gp/x.rev*100).toFixed(1):'']));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+rows.map(z=>z.map(q).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));
+  a.download='سود-فاکتورها.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);
+};
 function plreportHTML(){
   const bizzes=bizAll();
   
@@ -12761,12 +12819,20 @@ function plreportHTML(){
     ${card('٪ حاشیه سود',r.margin.toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪',r.margin<0)}
     ${card('🧾 تعداد فاکتور',r.count.toLocaleString('fa-IR'))}
   </div>
+  ${(r.unknown||r.short)?`<div style="background:rgba(202,80,16,.1);border:1px solid rgba(202,80,16,.35);border-radius:10px;padding:9px 12px;font-size:12px;line-height:2;margin:8px 0">
+    ${r.unknown?`⚠️ <b>${r.unknown.toLocaleString('fa-IR')}</b> ردیف فروش کالایی دارد که هیچ خرید/رسید انبار یا «قیمت خرید»ی برایش ثبت نشده — بهای آن صفر حساب شده و سود بیشتر از واقع نشان داده می‌شود.<br>`:''}
+    ${r.short?`⚠️ <b>${r.short.toLocaleString('fa-IR')}</b> عدد بیش از خریدهای ثبت‌شده فروخته شده — برای این مقدار، آخرین بهای خرید ملاک قرار گرفت. (رسیدهای خرید قدیمی‌تر یا موجودی اول دوره را وارد کن تا دقیق شود.)`:''}</div>`:''}
+  <div class="sec"><h3>🧾 بهای تمام‌شده و سود به تفکیک فاکتور <span style="flex:1"></span><button class="btn gh sm" onclick="plInvCsv()">⬇️ خروجی</button></h3>
+  ${r.byInv.length?`<div class="tblwrap" style="max-height:420px;overflow:auto"><table><thead><tr><th style="text-align:right">فاکتور</th><th>مشتری</th><th>تاریخ</th><th>فروش خالص</th><th>بهای تمام‌شده</th><th>سود</th><th>٪ حاشیه</th></tr></thead><tbody>
+    ${r.byInv.slice().sort((a,b)=>String(b.d).localeCompare(String(a.d))).slice(0,500).map(x=>`<tr style="cursor:pointer" onclick="go('rec','invoice','${x.id}')"><td style="text-align:right;color:var(--ac)">${esc(x.t)}${x.unknown?' <span title="ردیفِ بدون بهای خرید دارد">⚠️</span>':''}</td><td>${esc((x.cu&&recs[x.cu]&&recs[x.cu].d.title)||'—')}</td><td dir="ltr">${x.d?esc(iso2jstr(String(x.d).slice(0,10))):'—'}</td><td>${fmtN(Math.round(x.rev))}</td><td>${fmtN(Math.round(x.cogs))}</td>
+      <td style="font-weight:700;color:${x.gp<0?'var(--bad)':'var(--ok)'}">${fmtN(Math.round(x.gp))}</td><td>${x.rev>0?(x.gp/x.rev*100).toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪':'—'}</td></tr>`).join('')}
+    </tbody></table></div>`:'<div class="empty">فاکتوری در این بازه نیست</div>'}</div>
   <div class="sec"><h3>📦 سود به تفکیک کالا</h3>
   ${prods.length?`<div class="tblwrap"><table><thead><tr><th>کالا</th><th>تعداد</th><th>درآمد</th><th>بهای تمام‌شده</th><th>سود</th><th>٪ حاشیه</th></tr></thead><tbody>
     ${prods.map(p=>`<tr><td style="text-align:right">${esc(p.n)}</td><td>${(p.qty||0).toLocaleString('fa-IR')}</td><td>${fmtN(p.rev)}</td><td>${fmtN(p.cogs)}</td>
       <td style="font-weight:700;color:${p.gp<0?'var(--bad)':'var(--ok)'}">${fmtN(p.gp)}</td><td>${p.rev>0?(p.gp/p.rev*100).toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪':'—'}</td></tr>`).join('')}
     </tbody></table></div>`:'<div class="empty">فاکتوری در این بازه نیست</div>'}
-  <p style="font-size:10.5px;color:var(--tx2);margin-top:8px">💡 درآمد = مبلغ خالصِ فاکتورها (بعد از تخفیف، بدون مالیات). بهای تمام‌شده = تعداد × «قیمت خرید» کالا. تاریخ‌ها را خالی بگذاری یعنی کل بازه.</p></div>`;
+  <p style="font-size:10.5px;color:var(--tx2);margin-top:8px">💡 درآمد = مبلغ خالصِ فاکتورها (بعد از تخفیف، بدون مالیات). بهای تمام‌شده از فاکتورهای خرید و رسیدهای انبار به روش FIFO حساب می‌شود و سهم کرایه حمل/هزینه‌های سرشکن‌شده را هم دارد؛ اگر برای کالایی خریدی ثبت نشده باشد، «قیمت خرید» خودِ کالا ملاک است. تاریخ‌ها را خالی بگذاری یعنی کل بازه.</p></div>`;
 }
 /* ===== 🗒️ ثبت وقایع و پیگیری‌ها (فراگیر روی همه رکوردها) ===== */
 const EVT_IC={'یادداشت':'📝','تماس':'📞','جلسه':'🤝','پیشرفت':'✅','مشکل / مانع':'⛔','تصمیم':'⚖️','تغییر وضعیت':'🔀','پیگیری':'🔔','ارجاع':'↗️','دریافت / پرداخت':'💸'};
@@ -18739,7 +18805,7 @@ function recHTML(e,id){
   if(chips.length)h+=`<div class="comp" style="margin-bottom:12px">${chips.map(c=>`<div class="chip">${c[0]}: ${c[1]}</div>`).join('')}</div>`;
   if(e==='saletarget'){try{h+=tgtAwardHTML(r);}catch(_e){}}
   if(e==='hr'){try{h+=hrIdCardHTML(r);}catch(_e){}try{h+=hrWorkHTML(r);}catch(_e){}}
-  if(e==='invoice'){try{h+=invTotalsPanel(r);}catch(_e){}}
+  if(e==='invoice'){try{h+=invTotalsPanel(r);}catch(_e){}try{h+=invCostPanel(r);}catch(_e){}}
   if(e==='purchinv'){try{h+=pinvLifePanel(r);}catch(_e){}try{h+=pcostRecUI(r);}catch(_e){}}
   if(e==='lead'){try{h+=leadPanel(r);}catch(_e){}}
   if(e==='invoice'&&r.d.status!=='باطل'){try{
