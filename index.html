@@ -329,7 +329,7 @@ tr[data-sel="1"]{background:rgba(239,68,68,.14)!important}
   background:#fff;border:1px solid var(--line);box-shadow:0 18px 50px rgba(30,60,110,.16)}
 #mycal.show{display:block}
 #imp{position:fixed;top:4%;left:50%;transform:translateX(-50%);z-index:75;width:min(880px,95vw);max-height:90vh;overflow:auto;padding:16px;border-radius:16px;display:none;
-  background:rgba(18,22,19,.97);backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);
+  background:var(--bg2,#fff);color:var(--tx);
   border:1px solid rgba(61,123,255,.3);box-shadow:0 18px 60px rgba(30,60,110,.10)}
 #imp.show{display:block}
 #imp table{font-size:11px}
@@ -454,11 +454,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.56</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.57</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.56</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.57</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -5013,6 +5013,239 @@ function sepfinHTML(){
 
 /* ═══════════ 📦 ورود گردش انبار (رسید انبار سپیدار — CSV آماده‌شده) ═══════════ */
 let whImpState=null;
+/* ═══ 🧾 v3.57 — ورود مستقیم «رسید انبار» از اکسل خام سپیدار (بدون آماده‌سازی دستی) ═══
+   ستون‌ها با «عنوان ستون» شناخته می‌شوند نه با جایگاه — جابه‌جایی ستون‌ها در خروجی سپیدار مشکلی نمی‌سازد.
+   هر رسید = یک سند؛ کلید یکتا = نوع رسید + شماره + سال مالی → بارگذاری دوباره هرگز تکراری نمی‌سازد.
+   کرایه حمل به‌صورت «هزینهٔ جانبیِ سرشکن‌شونده» با طرف‌حسابِ حمل‌کننده ثبت می‌شود (قیمت کالا دست‌نخورده می‌ماند). */
+const SPI_RT={'1':'خرید','2':'تولید','3':'سایر','4':'موجودی اول دوره','5':'انتقال بین انبار'};
+const SPI_COLS={
+  origin:h=>h.includes('نوع خرید'),
+  rtype:h=>h.includes('نوع رسید'),
+  num:h=>h.includes('شماره'),
+  date:h=>h.includes('تاریخ'),
+  wh:h=>h.includes('کد انبار'),
+  sup:h=>h.includes('تحویل دهنده'),
+  carrier:h=>h.includes('حمل کننده'),
+  prod:h=>/^قلم/.test(h)&&/کد( کالا)?$/.test(h)&&!h.includes('انبار کد انبار'),
+  qty:h=>h.includes('واحد اصلی')||/(تعداد|مقدار)$/.test(h),
+  fee:h=>/ فی$/.test(h)||h==='فی',
+  total:h=>/ کل$/.test(h)||h==='کل',
+  ship:h=>h.includes('کرایه')
+};
+const SPI_REQ=['rtype','num','date','prod','qty','fee'];
+let spiState=null;
+function spiN(v){if(typeof v==='number')return v;const x=parseFloat(faNum(String(v==null?'':v)).replace(/[,٬،\s]/g,''));return isNaN(x)?0:x;}
+function spiCode(v){if(typeof v==='number')return String(Math.round(v));return faNum(String(v==null?'':v)).trim();}
+function spiHeader(arr){ // ردیف سربرگ را پیدا و ستون‌ها را نگاشت کن
+  for(let r=0;r<Math.min(arr.length,15);r++){
+    const hs=(arr[r]||[]).map(x=>sepNorm(x));
+    const map={};
+    Object.keys(SPI_COLS).forEach(k=>{const i=hs.findIndex(h=>h&&SPI_COLS[k](h));if(i>=0)map[k]=i;});
+    if(SPI_REQ.every(k=>map[k]!=null))return {row:r,map,labels:hs};
+  }
+  return null;
+}
+function spiIdx(){ // نمایه‌های تطبیق کد
+  const codeKeys=[...((E.product.f||[]).filter(f=>f.k!=='sku'&&String(f.n||'').replace(/\s+/g,' ').includes('کد کالا')).map(f=>f.k)),'sku'];
+  const prod={};Object.values(recs).forEach(p=>{if(!p||p.del||p.e!=='product'||!p.d)return;codeKeys.forEach(kk=>{const k=faNum(String(p.d[kk]||'')).trim().toUpperCase();if(k)prod[k]=prod[k]||p.id;});});
+  const crm={};Object.values(recs).forEach(c=>{if(!c||c.del||c.e!=='crm'||!c.d)return;const k=faNum(String(c.d.code||'')).trim();if(k)crm[k]=crm[k]||c.id;});
+  const wh={};Object.values(recs).forEach(w=>{if(!w||w.del||w.e!=='whouse'||!w.d)return;const k=faNum(String(w.d.code||'')).trim();if(k)wh[k]=wh[k]||w.id;});
+  const bykey={},bytitle={};
+  Object.values(recs).forEach(v=>{if(!v||v.del||!v.d)return;
+    if(v.e==='purchinv'||v.e==='whmove'){if(v.d.sepkey)bykey[v.d.sepkey]=v;if(v.d.title)bytitle[v.d.title]=v;}});
+  return {prod,crm,wh,bykey,bytitle,codeKeys};
+}
+function spiSig(g){return g.lines.map(l=>l.prod+':'+l.qty+':'+Math.round(l.fee)).sort().join('|')+'#'+Math.round(g.ship)+'#'+(g.sup||'')+'#'+(g.wh||'')+'#'+g.iso;}
+function spiBuild(arr){
+  const H=spiHeader(arr||[]);
+  if(!H)return {err:'سربرگ ستون‌های رسید انبار سپیدار پیدا نشد. ستون‌های لازم: نوع رسید، شماره، تاریخ، کد کالا (قلم … کد)، واحد اصلی (تعداد)، فی.'};
+  const m=H.map, X=spiIdx();
+  const skipped=[];const G={};const order=[];
+  for(let r=H.row+1;r<arr.length;r++){
+    const row=arr[r]||[];
+    if(!row.some(c=>String(c==null?'':c).trim()!==''))continue;
+    const num=spiCode(row[m.num]).replace(/\D/g,'');
+    const prod=spiCode(row[m.prod]).toUpperCase();
+    const qty=spiN(row[m.qty]);
+    const iso=(sepDate(row[m.date])||'').slice(0,10);
+    const rtype=spiCode(row[m.rtype]).replace(/\D/g,'');
+    if(!num||!prod||!(qty>0)||!iso||!SPI_RT[rtype]){ // ردیف توضیح/راهنما یا ناقص
+      const why=!num?'شماره رسید ندارد':!SPI_RT[rtype]?'نوع رسید نامعتبر':!prod?'کد کالا ندارد':!(qty>0)?'تعداد صفر/نامعتبر':'تاریخ نامعتبر';
+      const isNote=!num&&!(qty>0); // ردیف توضیح ستون‌ها
+      if(!isNote)skipped.push({n:r+1,why});
+      continue;
+    }
+    const jy=iso2jstr(iso).slice(0,4);
+    const key='sep:'+rtype+':'+num+':'+faNum(jy);
+    let g=G[key];
+    if(!g){g=G[key]={key,rtype,rname:SPI_RT[rtype],num,iso,origin:(m.origin!=null&&spiCode(row[m.origin]).replace(/\D/g,'')==='2')?'خارجی':'داخلی',
+      wh:m.wh!=null?spiCode(row[m.wh]):'',sup:m.sup!=null?spiCode(row[m.sup]):'',carrier:m.carrier!=null?spiCode(row[m.carrier]):'',
+      lines:[],ship:0,goods:0,errs:[],warns:[]};order.push(key);}
+    const fee=spiN(row[m.fee]), tot=m.total!=null?spiN(row[m.total]):0, ship=m.ship!=null?spiN(row[m.ship]):0;
+    if(m.total!=null&&tot>0&&Math.abs(tot-qty*fee)>Math.max(2,tot*0.0005))g.warns.push('ردیف '+(r+1)+': «کل» ('+tot.toLocaleString('fa-IR')+') با تعداد×فی ('+(qty*fee).toLocaleString('fa-IR')+') نمی‌خواند — تعداد×فی ملاک قرار گرفت');
+    if(m.wh!=null&&spiCode(row[m.wh])!==g.wh)g.warns.push('ردیف '+(r+1)+': کد انبار با ردیف اول این رسید فرق دارد — انبار ردیف اول ملاک است');
+    if(m.sup!=null&&spiCode(row[m.sup])&&spiCode(row[m.sup])!==g.sup)g.warns.push('ردیف '+(r+1)+': کد تامین‌کننده با ردیف اول این رسید فرق دارد');
+    if(!g.carrier&&m.carrier!=null)g.carrier=spiCode(row[m.carrier]);
+    g.lines.push({n:r+1,prod,qty,fee,ship});g.ship+=ship;g.goods+=qty*fee;
+  }
+  const groups=order.map(k=>G[k]);
+  const newProds=new Set(),newSups=new Set(),newCarriers=new Set(),newWh=new Set();
+  groups.forEach(g=>{
+    g.sig=spiSig(g);
+    // ── تکراری؟
+    const ex=X.bykey[g.key]||X.bytitle['خرید سپیدار '+g.num+' — انبار '+g.wh+' — '+g.iso]||null;
+    const exMv=g.rtype==='5'?g.lines.every(l=>X.bykey[g.key+':'+l.prod]||X.bytitle['انتقال سپیدار '+g.num+' — '+l.prod]):false;
+    if(g.rtype==='2'){g.state='skip';g.note='رسید «تولید» خرید نیست — وارد نمی‌شود';return;}
+    if(g.rtype==='5'){g.state=exMv?'dup':'new';}
+    else if(ex){g.exId=ex.id;
+      if(ex.d.sepsig&&ex.d.sepsig!==g.sig){g.state='chg';g.note='در سپیدار تغییر کرده';}
+      else{g.state='dup';g.note=ex.d.sepkey?'قبلاً وارد شده':'قبلاً با ورودِ قدیمی وارد شده';}
+    }else g.state='new';
+    // ── تطبیق کدها
+    g.lines.forEach(l=>{if(!X.prod[l.prod])newProds.add(l.prod);});
+    if(g.rtype==='1'||g.rtype==='3'){
+      if(g.sup&&!X.crm[g.sup])newSups.add(g.sup);
+      if(g.rtype==='1'&&!g.sup)g.warns.push('کد تامین‌کننده ندارد');
+      if(g.ship>0&&g.carrier&&!X.crm[g.carrier])newCarriers.add(g.carrier);
+      if(g.ship>0&&!g.carrier)g.warns.push('کرایه حمل دارد ولی کد حمل‌کننده ندارد — طرف‌حساب کرایه، تامین‌کننده در نظر گرفته می‌شود');
+    }
+    if(g.wh&&!X.wh[g.wh])newWh.add(g.wh);
+    if(!g.wh)g.warns.push('کد انبار ندارد');
+    // ── اجازهٔ ساخت موارد جدید
+    if(g.lines.some(l=>!X.prod[l.prod])&&!can('c','product'))g.errs.push('کالای ناشناخته دارد و اجازهٔ ساخت کالا ندارید');
+    if(((g.sup&&!X.crm[g.sup])||(g.ship>0&&g.carrier&&!X.crm[g.carrier]))&&(g.rtype==='1'||g.rtype==='3')&&!can('c','crm'))g.errs.push('تامین‌کننده/حمل‌کنندهٔ ناشناخته دارد و اجازهٔ ساخت ندارید');
+    if(g.wh&&!X.wh[g.wh]&&!can('c','whouse'))g.errs.push('انبار با کد '+g.wh+' تعریف نشده و اجازهٔ ساخت ندارید');
+    if(g.errs.length&&g.state!=='dup')g.state='err';
+  });
+  return {groups,skipped,X,newProds:[...newProds],newSups:[...newSups],newCarriers:[...newCarriers].filter(c=>!newSups.has(c)),newWh:[...newWh],labels:H.labels,map:m};
+}
+function spiOpen(){
+  if(!can('c','purchinv')){alert('سطح دسترسی شما اجازهٔ ثبت فاکتور خرید را نمی‌دهد');return;}
+  spiState=null;
+  const el=document.getElementById('imp');
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><b style="font-size:14px">🧾 ورود فاکتور خرید از اکسل سپیدار (رسید انبار)</b>
+    <span style="flex:1"></span><span onclick="impClose()" style="cursor:pointer;color:var(--tx2)">✕</span></div>
+  <p style="font-size:12px;color:var(--tx2);line-height:2.1;margin:8px 0">همان فایل اکسلی که از سپیدار خروجی می‌گیری را <b>بدون هیچ تغییری</b> انتخاب کن (xls / xlsx / csv). ستون‌ها از روی عنوانشان شناخته می‌شوند.<br>
+  🧾 رسیدِ نوع «خرید» ← فاکتور خرید: تامین‌کننده از «کد تحویل‌دهنده»، انبار از «کد انبار»، کالا از «کد کالا»، قیمت از «فی». │ 🚚 «کرایه حمل» جدا از قیمت کالا و به‌نام <b>حمل‌کننده</b> ثبت می‌شود و در بهای تمام‌شده سرشکن می‌گردد. │ 🏁 «موجودی اول دوره» ← سند موجودی اول دوره │ ↔️ «انتقال» ← انتقال بدون مبدأ.<br>
+  🔁 هر رسید با «نوع + شماره + سال» شناخته می‌شود؛ <b>فایل را هر چند بار بارگذاری کنی، رسیدِ قبلاً واردشده دوباره ثبت نمی‌شود.</b></p>
+  <div style="padding:7px 10px;border-radius:8px;background:var(--bg3);font-size:12px;margin-bottom:8px">${gBiz()&&recs[gBiz()]?`🏢 همه به کسب‌وکار فعال وصل می‌شوند: <b>${esc(recs[gBiz()].d.title)}</b>`:'⚠️ کسب‌وکار فعالی انتخاب نشده — فاکتورها بدون کسب‌وکار ثبت می‌شوند. بهتر است اول از بالای منو کسب‌وکار را انتخاب کنی.'}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+    <label class="btn sm" style="cursor:pointer">📂 انتخاب فایل سپیدار<input type="file" accept=".xls,.xlsx,.csv" style="display:none" onchange="spiFile(this)"></label>
+    <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--tx2);margin:0"><input type="checkbox" id="spi_upd" style="width:auto" onchange="spiRender()"> رسیدهایی که در سپیدار <b>تغییر کرده‌اند</b> به‌روزرسانی شوند (ردیف‌ها و کرایه جایگزین می‌شود؛ پرداخت‌های ثبت‌شده می‌ماند)</label>
+  </div>
+  <div id="spi_prev"></div>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button class="btn" id="spi_go" onclick="spiCommit()" disabled>ثبت نهایی</button>
+    <button class="btn gh" onclick="impClose()">بستن</button>
+  </div>`;
+  el.classList.add('show');
+}
+window.spiOpen=spiOpen;
+async function spiFile(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;inp.value='';
+  const prev=document.getElementById('spi_prev');prev.innerHTML='<div class="empty">در حال خواندن فایل…</div>';
+  let arr=null;
+  try{
+    if(/\.csv$/i.test(f.name))arr=csvParse(await f.text());
+    else{await loadXLSX();const wb=XLSX.read(new Uint8Array(await f.arrayBuffer()),{type:'array'});
+      // برگه‌ای را بردار که سربرگ رسید انبار دارد
+      for(const nm of wb.SheetNames){const a=XLSX.utils.sheet_to_json(wb.Sheets[nm],{header:1,raw:true,defval:''});if(spiHeader(a)){arr=a;break;}if(!arr)arr=a;}
+    }
+  }catch(e){prev.innerHTML='<div class="empty" style="color:var(--bad)">⚠️ فایل خوانده نشد: '+esc(String(e&&e.message||e))+'</div>';return;}
+  const res=spiBuild(arr||[]);
+  if(res.err){prev.innerHTML='<div class="empty" style="color:var(--bad)">⚠️ '+esc(res.err)+'</div>';document.getElementById('spi_go').disabled=true;return;}
+  spiState=Object.assign(res,{fname:f.name});
+  spiRender();
+}
+window.spiFile=spiFile;
+function spiRender(){
+  const S=spiState;if(!S)return;
+  const upd=!!(document.getElementById('spi_upd')||{}).checked;
+  const F=n=>(+n||0).toLocaleString('fa-IR');
+  const will=S.groups.filter(g=>g.state==='new'||(g.state==='chg'&&upd));
+  const cnt=st=>S.groups.filter(g=>g.state===st).length;
+  const nm=(idx,code,pre)=>idx[code]&&recs[idx[code]]?esc(recs[idx[code]].d.title||code):`<span style="color:var(--warn)">${esc(pre+' '+code)} (جدید)</span>`;
+  const badge=g=>g.state==='new'?'<span class="tag g">🆕 جدید</span>':g.state==='dup'?`<span class="tag">⏭ ${esc(g.note||'تکراری')}</span>`:g.state==='chg'?`<span class="tag y">✏️ ${upd?'به‌روزرسانی می‌شود':'تغییر کرده — رد می‌شود'}</span>`:g.state==='skip'?`<span class="tag">— ${esc(g.note||'')}</span>`:'<span class="tag r">⚠️ ایراد</span>';
+  let h=`<div class="sec" style="font-size:12.5px;line-height:2.2">
+    📄 <b>${esc(S.fname||'')}</b> — ${F(S.groups.length)} رسید، ${F(S.groups.reduce((a,g)=>a+g.lines.length,0))} ردیف کالا<br>
+    <span class="imp-ok">🆕 ${F(cnt('new'))} رسید جدید</span> │ ⏭ ${F(cnt('dup'))} تکراری (رد می‌شود) ${cnt('chg')?`│ <span style="color:var(--warn)">✏️ ${F(cnt('chg'))} تغییرکرده</span>`:''} ${cnt('err')?`│ <span class="imp-bad">⚠️ ${F(cnt('err'))} دارای ایراد</span>`:''} ${cnt('skip')?`│ ${F(cnt('skip'))} نادیده`:''}
+    ${S.newProds.length?`<br>📦 <b style="color:var(--warn)">${F(S.newProds.length)} کالای ناشناخته ساخته می‌شود</b> (کد: ${S.newProds.slice(0,10).map(esc).join('، ')}${S.newProds.length>10?'…':''}) — بعداً نامشان را اصلاح کن`:'<br>📦 همهٔ کالاها با کد پیدا شدند'}
+    ${S.newSups.length?`<br>🏭 <b style="color:var(--warn)">${F(S.newSups.length)} تامین‌کنندهٔ ناشناخته ساخته می‌شود</b> (کد: ${S.newSups.slice(0,10).map(esc).join('، ')})`:''}
+    ${S.newCarriers.length?`<br>🚚 <b style="color:var(--warn)">${F(S.newCarriers.length)} حمل‌کنندهٔ ناشناخته ساخته می‌شود</b> (کد: ${S.newCarriers.slice(0,10).map(esc).join('، ')})`:''}
+    ${S.newWh.length?`<br>🏬 <b style="color:var(--warn)">${F(S.newWh.length)} انبار ناشناخته ساخته می‌شود</b> (کد: ${S.newWh.map(esc).join('، ')})`:''}
+    ${S.skipped.length?`<br><span style="color:var(--tx2)">${F(S.skipped.length)} ردیف ناقص نادیده گرفته شد: ${S.skipped.slice(0,6).map(x=>'ردیف '+F(x.n)+' ('+esc(x.why)+')').join('، ')}${S.skipped.length>6?'…':''}</span>`:''}
+  </div>
+  <div class="tblwrap" style="max-height:340px;overflow:auto"><table style="font-size:12px"><thead><tr><th>وضعیت</th><th>نوع</th><th>شماره</th><th>تاریخ</th><th>تامین‌کننده</th><th>انبار</th><th>ردیف</th><th>جمع کالا</th><th>کرایه حمل</th><th>حمل‌کننده</th></tr></thead><tbody>
+  ${S.groups.slice(0,300).map(g=>`<tr style="${g.state==='dup'||g.state==='skip'?'opacity:.55':''}">
+    <td style="white-space:nowrap">${badge(g)}</td><td>${esc(g.rname)}${g.origin==='خارجی'?' 🌍':''}</td><td><b>${F(+g.num)}</b></td><td dir="ltr">${esc(iso2jstr(g.iso))}</td>
+    <td>${g.sup?nm(S.X.crm,g.sup,'تامین‌کننده'):'—'}</td><td>${g.wh?nm(S.X.wh,g.wh,'انبار'):'—'}</td><td>${F(g.lines.length)}</td>
+    <td>${F(Math.round(g.goods))}</td><td>${g.ship?F(Math.round(g.ship)):'—'}</td><td>${g.ship&&g.carrier?nm(S.X.crm,g.carrier,'حمل‌کننده'):'—'}</td></tr>
+    ${(g.errs.length||g.warns.length)?`<tr><td colspan="10" style="font-size:11px;text-align:right;color:${g.errs.length?'var(--bad)':'var(--warn)'}">${g.errs.concat(g.warns).map(esc).join(' │ ')}</td></tr>`:''}`).join('')}
+  </tbody></table></div>`;
+  document.getElementById('spi_prev').innerHTML=h;
+  const go=document.getElementById('spi_go');go.disabled=!will.length;
+  go.textContent=will.length?'ثبت نهایی '+F(will.length)+' رسید':'چیزی برای ثبت نیست';
+}
+window.spiRender=spiRender;
+function spiCommit(){
+  const S=spiState;if(!S)return;
+  const upd=!!(document.getElementById('spi_upd')||{}).checked;
+  const todo=S.groups.filter(g=>g.state==='new'||(g.state==='chg'&&upd));
+  if(!todo.length)return;
+  const NOW=Date.now(), me=myEmail(), bz=gBiz()&&recs[gBiz()]?[gBiz()]:[];
+  const X=spiIdx(); // تازه — شاید از زمان پیش‌نمایش چیزی عوض شده
+  const add=rec=>{rec.d._by=rec.d._by||me;recs[rec.id]=rec;queue.push(rec.id);return rec.id;};
+  const touch=r=>{r.u=NOW;queue.push(r.id);};
+  const needProd=code=>{if(X.prod[code])return X.prod[code];
+    const d={title:'کالا '+code,sku:code,biz:bz,note:'ساخته‌شده از ورود رسید انبار سپیدار — نام را اصلاح کنید'};
+    X.codeKeys.filter(k=>k!=='sku').forEach(k=>{d[k]=code;});
+    return X.prod[code]=add({id:uid(),e:'product',d,u:NOW});};
+  const needCrm=(code,rel,pre)=>{if(!code)return '';if(X.crm[code])return X.crm[code];
+    return X.crm[code]=add({id:uid(),e:'crm',d:{title:pre+' '+code,rel,kind:'حقوقی',code,note:'ساخته‌شده از ورود رسید انبار سپیدار — نام را اصلاح کنید'},u:NOW});};
+  const needWh=code=>{if(!code)return '';if(X.wh[code])return X.wh[code];
+    const name=WHIMP_NAMES[code]||('انبار '+code);
+    return X.wh[code]=add({id:uid(),e:'whouse',d:{title:name,code,biz:bz,active:'فعال'},u:NOW});};
+  let nNew=0,nUpd=0,nMv=0,nOp=0;
+  todo.forEach(g=>{
+    const whId=needWh(g.wh);
+    if(g.rtype==='5'){ // ↔️ انتقال — هر قلم یک سند، بدون مبدأ
+      g.lines.forEach(l=>{const k=g.key+':'+l.prod;if(X.bykey[k]||X.bytitle['انتقال سپیدار '+g.num+' — '+l.prod])return;
+        add({id:uid(),e:'whmove',d:{title:'انتقال سپیدار '+g.num+' — '+l.prod,sepkey:k,product:[needProd(l.prod)],qty:l.qty,from:[],to:whId?[whId]:[],
+          status:WH_MVST[0],date:{s:g.iso},note:'مبدأ در فایل سپیدار نبود — «از انبار» را تعیین و وضعیت را «تحویل شد» کنید تا روی موجودی اثر کند'},u:NOW});nMv++;});
+      return;
+    }
+    const isOp=g.rtype==='4';
+    const supId=isOp?'':needCrm(g.sup,'تامین‌کننده','تامین‌کننده');
+    const carId=(!isOp&&g.ship>0)?needCrm(g.carrier,'پیمانکار','حمل‌کننده'):'';
+    const costs=(!isOp&&g.ship>0)?[pcostNorm({k:'حمل و نقل',amt:Math.round(g.ship),payee:carId||supId||'',cap:1,note:'از رسید انبار سپیدار'})]:[];
+    const jd=iso2jstr(g.iso);
+    const title=isOp?('موجودی اول دوره — '+((recs[whId]&&recs[whId].d.title)||('انبار '+g.wh))+' (رسید '+g.num+') — '+jd):((g.rtype==='3'?'رسید سایر سپیدار ':'خرید سپیدار ')+g.num+' — '+jd);
+    const note='ورود از اکسل سپیدار — رسید '+g.num+' ('+g.rname+')'+(g.sup?' │ کد تامین‌کننده: '+g.sup:'')+(g.ship?' │ کرایه حمل '+Math.round(g.ship).toLocaleString('fa-IR')+' ریال'+(g.carrier?' (حمل‌کننده '+g.carrier+')':''):'');
+    let pid;
+    if(g.state==='chg'&&g.exId&&recs[g.exId]){ // ✏️ به‌روزرسانی
+      const ex=recs[g.exId];pid=ex.id;
+      pinvLinesOf(pid).forEach(l=>{l.del=true;touch(l);});
+      const oldPd=(ex.d.costs||[]).find(c=>c.k==='حمل و نقل'&&c.pd);
+      if(oldPd&&costs[0])costs[0].pd=1;
+      ex.d=Object.assign({},ex.d,{supplier:supId?[supId]:[],wh:whId?[whId]:[],origin:g.origin,date:{s:g.iso},costs,sepkey:g.key,sepsig:g.sig,note,
+        _log:[...(ex.d._log||[]),{t:NOW,by:me,act:'✏️ به‌روزرسانی از اکسل سپیدار'}]});
+      touch(ex);nUpd++;
+    }else{
+      pid=add({id:uid(),e:'purchinv',d:{title,kind:'فاکتور خرید',biz:bz,supplier:supId?[supId]:[],wh:whId?[whId]:[],
+        status:'ثبت شده',origin:g.origin,cur:'ریال',date:{s:g.iso},ship:0,paid:0,costs,sepkey:g.key,sepsig:g.sig,sepno:g.num,note},u:NOW});
+      if(isOp)nOp++;else nNew++;
+    }
+    g.lines.forEach(l=>{const prid=needProd(l.prod);
+      add({id:uid(),e:'purchline',d:{title:(recs[prid]&&recs[prid].d.title)||l.prod,purchinv:[pid],product:[prid],biz:bz,qty:l.qty,price:Math.round(l.fee),ldisc:0},u:NOW});});
+  });
+  try{_pinvLineIdx=null;}catch(e){}try{_pcapCache=null;}catch(e){}
+  invalidateByE();saveLocal();saveQ();flush();
+  impClose();render();
+  const F=n=>n.toLocaleString('fa-IR');
+  alert('✅ ورود از سپیدار انجام شد:\n'+(nNew?'🧾 '+F(nNew)+' فاکتور خرید جدید\n':'')+(nUpd?'✏️ '+F(nUpd)+' فاکتور به‌روزرسانی شد\n':'')+(nOp?'🏁 '+F(nOp)+' سند موجودی اول دوره\n':'')+(nMv?'↔️ '+F(nMv)+' انتقال\n':'')+'\nرسیدهای تکراری رد شدند.');
+}
+window.spiCommit=spiCommit;
+
 const WHIMP_NAMES={'1':'انبار مرکزی','2':'انبار امانی','3':'انبار اختیاریه','4':'انبار ضایعات','5':'انبار تعمیرات','6':'انبار کارتن باز'};
 function whImpOpen(){
   if(!isAdmin()){alert('این ورود فقط توسط ادمین انجام می‌شود');return;}
@@ -5211,7 +5444,10 @@ function impcenterHTML(){
     <p style="font-size:12px;color:var(--tx2);line-height:2">خروجی‌های اکسل سپیدار مستقیم و بدون تغییر این‌جا بارگذاری می‌شوند. <b>همهٔ اسناد مالی (فاکتور فروش، رسید/خروج انبار، دریافت و پرداخت) فقط در بخش «مدیریت مالی › اسناد حسابداری» ثبت می‌شوند</b> و هیچ رکورد عملیاتی (فاکتور، فروش، خرید، انتقال) نمی‌سازند — تا بعداً در «⚖️ تطبیق عملیات و حسابداری» با ثبت‌های واحدهای عملیاتی مقایسه شوند. رکورد تکراری هرگز دوباره وارد نمی‌شود.</p>
     <label style="font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:6px"><input type="checkbox" id="sepMaster" checked style="width:16px;height:16px">به‌روزرسانی اطلاعات پایه از فایل‌های «طرف حساب» و «الگوی کالا» (مشتری/تأمین‌کننده/کالا — سند مالی نیستند)</label>
     <div id="sepPrev"></div></div>`;
-  if(isAdmin())h+=`<div class="sec" style="border-inline-start:3px solid var(--warn)"><h3>📦 ورود گردش انبار (رسید انبار سپیدار)
+  if(can('c','purchinv'))h+=`<div class="sec" style="border-inline-start:3px solid var(--ok)"><h3>🧾 ورود فاکتور خرید از اکسل سپیدار (رسید انبار)
+    <span style="flex:1"></span><button class="btn sm" onclick="spiOpen()">📂 شروع ورود</button></h3>
+    <p style="font-size:12px;color:var(--tx2);line-height:2">خروجی اکسل «رسید انبار» سپیدار را <b>همان‌طور که هست</b> بارگذاری کن. هر رسیدِ خرید یک فاکتور خرید می‌شود: تامین‌کننده، انبار، کالا و قیمت سر جای خودشان می‌نشینند و کرایه حمل جدا و به‌نام حمل‌کننده ثبت می‌شود. رسیدی که قبلاً وارد شده، با بارگذاری دوباره تکرار نمی‌شود.</p></div>`;
+  if(isAdmin())h+=`<div class="sec" style="border-inline-start:3px solid var(--warn)"><h3>📦 ورود گردش انبار (رسید انبار سپیدار — قالب قدیمی CSV)
     <span style="flex:1"></span><button class="btn gh sm" onclick="whImpFixDupes()" title="کالاهای تکراری که ایمپورت قبلی ساخته را به کالاهای اصلی ادغام می‌کند">🧹 اصلاح کالاهای تکراری</button><button class="btn gh sm" onclick="whImpFixSups()" title="تأمین‌کننده‌های جایگزین ایمپورت را با کد سپیدار به تأمین‌کننده‌های اصلی ادغام و فاکتورها را وصل می‌کند">🏭 اصلاح تأمین‌کننده‌ها</button><button class="btn sm" onclick="whImpOpen()">📂 شروع ورود</button></h3>
     <p style="font-size:12px;color:var(--tx2);line-height:2">فایل CSV آماده‌شدهٔ رسید انبار را وارد می‌کند: فاکتورهای خرید (با سرشکن کرایه حمل در قیمت تمام‌شده)، موجودی اول دوره به تفکیک انبار، و انتقال‌های بین انبار.</p></div>`;
   // 🤖 ورود خودکار از پوشه
