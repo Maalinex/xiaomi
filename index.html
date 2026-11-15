@@ -454,11 +454,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.59</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.60</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.59</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.60</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -5027,13 +5027,21 @@ function cpCodeOf(p){
 }
 function cpAllProds(){const o=[];for(const id in recs){const p=recs[id];if(p&&!p.del&&p.e==='product'&&p.d)o.push(p);}return o;}
 /* کالایی که این کد را در «هر» فیلد متنی‌اش دارد (کد کالا، SKU، مدل، نام…) — بدون کالاهای موقت */
+let _cpIdx=null,_cpIdxT=0;
+function cpIndex(){ // مقادیر نرمال‌شدهٔ همهٔ فیلدهای متنیِ کالاهای اصلی — یک‌بار ساخته می‌شود
+  if(_cpIdx&&Date.now()-_cpIdxT<3000)return _cpIdx;
+  const out=[];cpAllProds().forEach(p=>{if(cpIsTemp(p))return;const vals=[];
+    Object.keys(p.d).forEach(k=>{const v=p.d[k];if(typeof v!=='string'&&typeof v!=='number')return;const n=cpNorm(v);if(n)vals.push(n);});
+    (p.d.sepcodes||[]).forEach(x=>{const n=cpNorm(x);if(n)vals.push(n);});
+    out.push({p,vals});});
+  _cpIdx=out;_cpIdxT=Date.now();return out;
+}
 function cpFindByCode(code,exceptId){
   const c=cpNorm(code);if(!c||c.length<3)return [];
   const exact=[],inText=[];
-  cpAllProds().forEach(p=>{if(p.id===exceptId||cpIsTemp(p))return;
+  cpIndex().forEach(({p,vals})=>{if(p.id===exceptId)return;
     let hitExact=false,hitText=false;
-    Object.keys(p.d).forEach(k=>{const v=p.d[k];if(typeof v!=='string'&&typeof v!=='number')return;
-      const n=cpNorm(v);if(!n)return;if(n===c)hitExact=true;else if(n.includes(c))hitText=true;});
+    for(const n of vals){if(n===c){hitExact=true;break;}if(!hitText&&n.includes(c))hitText=true;}
     if(hitExact)exact.push(p);else if(hitText)inText.push(p);});
   return exact.length?exact:inText;
 }
@@ -5076,13 +5084,13 @@ function cpMerge(tempId,realId,silent){
   else if(code&&cpNorm(r.d.sku)!==code){r.d.sepcodes=[...new Set([...(r.d.sepcodes||[]),code])];}
   r.u=NOW;queue.push(r.id);
   t.del=true;t.u=NOW;queue.push(t.id);
-  try{_fifoCache=null;_pinvLineIdx=null;_invLineIdx=null;_pcapCache=null;_whQtyCache=null;}catch(e){}
+  try{_fifoCache=null;_pinvLineIdx=null;_invLineIdx=null;_pcapCache=null;_whQtyCache=null;_cpIdx=null;}catch(e){}
   if(!silent){invalidateByE();saveLocal();saveQ();flush();render();}
   return n;
 }
 window.cpMergeOne=function(tempId){
-  const sel=document.getElementById('cpsel_'+tempId);const realId=sel&&sel.value;
-  if(!realId){alert('کالای اصلی را انتخاب کن');return;}
+  const sel=document.getElementById('cpsel_'+tempId);const realId=cpResolve(sel&&sel.value);
+  if(!realId){alert('کالای اصلی را از فهرست انتخاب کن (نام یا کدش را تایپ کن و از پیشنهادها بردار)');return;}
   const t=recs[tempId],r=recs[realId];
   if(!confirm('«'+(t&&t.d.title)+'» در «'+(r&&r.d.title)+'» ادغام شود؟\n\nهمهٔ رسیدها/فاکتورهای خرید و اسناد این کالای موقت به کالای اصلی منتقل می‌شوند و کد سپیدار روی کالای اصلی ثبت می‌شود تا ورودهای بعدی خودکار جفت شوند.'))return;
   cpMerge(tempId,realId);
@@ -5100,6 +5108,24 @@ window.cpSetCode=function(pid){
   const v=prompt('کد کالای سپیدار برای «'+(p.d.title||'')+'»:',p.d.sku||'');if(v==null)return;
   p.d.sku=faNum(String(v)).trim().toUpperCase();p.u=Date.now();put(p);
 };
+/* 🐎 v3.60 — یک datalist مشترک برای همهٔ ردیف‌ها (نسخهٔ قبل در هر ردیف کل فهرست کالاها را تکرار می‌کرد:
+   با ۲۵۰۰ کالا و ۳۰۰ ردیف، ۵۷ مگابایت HTML می‌شد و صفحه باز نمی‌شد) */
+function cpLabels(){
+  const S=cpStats();const all=cpAllProds().filter(p=>!cpIsTemp(p));
+  const hungry=new Set(all.filter(p=>(S.sell[p.id]||0)>0&&!(S.buy[p.id]>0)).map(p=>p.id));
+  const sorted=all.slice().sort((a,b)=>(hungry.has(b.id)-hungry.has(a.id))||String(a.d.title||'').localeCompare(String(b.d.title||''),'fa'));
+  const map={},byId={},seen={};
+  sorted.forEach(p=>{let l=String(p.d.title||'—').trim()+(p.d.sku?' ['+p.d.sku+']':'');
+    if(seen[l]){l+=' #'+(++seen[l]);}else seen[l]=1;
+    if(hungry.has(p.id))l='⚠️ '+l;
+    map[l]=p.id;byId[p.id]=l;});
+  window._cpMap=map;window._cpById=byId;
+  return {html:`<datalist id="cp_dl">${sorted.map(p=>`<option value="${esc(byId[p.id])}">`).join('')}</datalist>`,byId,hungryN:hungry.size};
+}
+function cpResolve(v){v=String(v||'').trim();if(!v)return '';const m=window._cpMap||{};if(m[v])return m[v];
+  const k=Object.keys(m).find(x=>x.replace(/^⚠️ /,'')===v.replace(/^⚠️ /,''));return k?m[k]:'';}
+function cpInput(id,suggestId,ph){const L=window._cpById||{};
+  return `<input id="${id}" list="cp_dl" value="${suggestId&&L[suggestId]?esc(L[suggestId]):''}" placeholder="${esc(ph||'🔍 نام یا کد کالای اصلی را تایپ کن…')}" style="max-width:360px;width:100%;font-size:12px">`;}
 function cpOptions(cands,sell){ // فهرست کالاهای اصلی برای انتخاب — پیشنهادها اول، بعد «فروش‌دار بی‌خرید»، بعد بقیه
   const S=sell||cpStats();const all=cpAllProds().filter(p=>!cpIsTemp(p));
   const candIds=new Set(cands.map(c=>c.id));
@@ -5123,20 +5149,24 @@ function costchkHTML(){
       <div class="chip">📉 فروش بیش از خرید: <b style="color:${P.over.length?'var(--warn)':'var(--ok)'}">${F(P.over.length)}</b></div></div></div>`;
   // ۱) کالاهای موقت
   h+=`<div class="sec" style="border-inline-start:3px solid ${P.temps.length?'var(--bad)':'var(--ok)'}"><h3>① کالاهای موقتِ ساخته‌شده از رسید انبار <span style="flex:1"></span>${autoN?`<button class="btn sm" onclick="cpMergeAuto()">🔗 ادغام خودکار ${F(autoN)} مورد قطعی</button>`:''}</h3>`;
+  const LB=P.temps.length||P.noCost.length?cpLabels():{html:''};
+  const PG=150, pg=Math.max(0,+view.cpPg||0), shown=P.temps.slice(pg*PG,(pg+1)*PG);
   if(!P.temps.length)h+=`<div class="empty">✅ همهٔ رسیدها روی کالاهای اصلی نشسته‌اند</div>`;
-  else h+=`<p style="font-size:12px;color:var(--tx2);line-height:2">این کالاها را ورود رسید ساخته چون کد سپیدارشان روی هیچ کالایی نبود. رسیدِ خریدشان روی این کالای موقت است، ولی فروش روی کالای اصلی ثبت شده. کالای اصلی را انتخاب کن و «ادغام» بزن — کد سپیدار روی کالای اصلی ثبت می‌شود تا رسیدهای بعدی خودکار جفت شوند.</p>
+  else h+=LB.html+`<p style="font-size:12px;color:var(--tx2);line-height:2">این کالاها را ورود رسید ساخته چون کد سپیدارشان روی هیچ کالایی نبود. رسیدِ خریدشان روی این کالای موقت است، ولی فروش روی کالای اصلی ثبت شده. کالای اصلی را انتخاب کن و «ادغام» بزن — کد سپیدار روی کالای اصلی ثبت می‌شود تا رسیدهای بعدی خودکار جفت شوند.</p>
     <div class="tblwrap" style="max-height:480px;overflow:auto"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالای موقت</th><th>کد سپیدار</th><th>خرید (رسید)</th><th>فروش</th><th style="text-align:right">کالای اصلی</th><th></th></tr></thead><tbody>
-    ${P.temps.map(x=>`<tr><td style="text-align:right">${esc(x.p.d.title||'—')}</td><td dir="ltr"><b>${esc(x.code||'—')}</b></td><td>${F(x.buy)}</td><td>${F(x.sell)}</td>
-      <td style="text-align:right"><select id="cpsel_${x.p.id}" style="max-width:340px;font-size:12px">${cpOptions(x.cands,P.S)}</select></td>
+    ${shown.map(x=>`<tr><td style="text-align:right">${esc(x.p.d.title||'—')}</td><td dir="ltr"><b>${esc(x.code||'—')}</b></td><td>${F(x.buy)}</td><td>${F(x.sell)}</td>
+      <td style="text-align:right">${cpInput('cpsel_'+x.p.id,x.cands.length===1?x.cands[0].id:'')}${x.cands.length>1?`<div style="font-size:10.5px;color:var(--tx2)">${F(x.cands.length)} کالا این کد را در مشخصاتشان دارند</div>`:''}</td>
       <td><button class="btn sm" onclick="cpMergeOne('${x.p.id}')">🔗 ادغام</button></td></tr>`).join('')}
-    </tbody></table></div>`;
+    </tbody></table></div>
+    ${P.temps.length>PG?`<div class="tools" style="margin-top:6px">${pg>0?`<button class="btn gh sm" onclick="view.cpPg=${pg-1};render()">‹ قبلی</button>`:''}<span style="font-size:12px">${F(pg*PG+1)} تا ${F(Math.min(P.temps.length,(pg+1)*PG))} از ${F(P.temps.length)}</span>${(pg+1)*PG<P.temps.length?`<button class="btn gh sm" onclick="view.cpPg=${pg+1};render()">بعدی ›</button>`:''}</div>`:''}
+    <div style="font-size:11px;color:var(--tx2);margin-top:4px">کالاهایی که با ⚠️ شروع می‌شوند فروش دارند ولی هیچ خریدی ندارند — به احتمال زیاد جفتِ همین کالاهای موقت‌اند.</div>`;
   h+=`</div>`;
   // ۲) فروش بی‌بها
   h+=`<div class="sec" style="border-inline-start:3px solid ${P.noCost.length?'var(--bad)':'var(--ok)'}"><h3>② کالاهای فروخته‌شده بدون هیچ خرید</h3>`;
   if(!P.noCost.length)h+=`<div class="empty">✅ همهٔ کالاهای فروخته‌شده بهای خرید دارند</div>`;
   else h+=`<p style="font-size:12px;color:var(--tx2);line-height:2">این کالاها در فاکتور فروش آمده‌اند ولی نه رسید خرید دارند، نه «قیمت خرید»، نه موجودی اول دوره — بهایشان صفر حساب می‌شود. معمولاً رسیدشان روی یکی از کالاهای موقتِ بخش ① نشسته (آنجا ادغامش کن) یا هنوز رسیدشان از سپیدار وارد نشده. اگر کد سپیدارشان را می‌دانی، «ثبت کد» بزن تا ورود بعدی خودکار جفت شود.</p>
     <div class="tblwrap" style="max-height:420px;overflow:auto"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالا</th><th>کد</th><th>تعداد فروش</th><th>تعداد فاکتور</th><th></th></tr></thead><tbody>
-    ${P.noCost.map(x=>`<tr><td style="text-align:right"><a style="color:var(--ac);cursor:pointer" onclick="go('rec','product','${x.p.id}')">${esc(x.p.d.title||'—')}</a></td><td dir="ltr">${esc(x.p.d.sku||'—')}</td><td>${F(x.sell)}</td><td>${F(x.invs)}</td>
+    ${P.noCost.slice(0,300).map(x=>`<tr><td style="text-align:right"><a style="color:var(--ac);cursor:pointer" onclick="go('rec','product','${x.p.id}')">${esc(x.p.d.title||'—')}</a></td><td dir="ltr">${esc(x.p.d.sku||'—')}</td><td>${F(x.sell)}</td><td>${F(x.invs)}</td>
       <td><button class="btn gh sm" onclick="cpSetCode('${x.p.id}')">🏷 ثبت کد سپیدار</button></td></tr>`).join('')}
     </tbody></table></div>`;
   h+=`</div>`;
@@ -5320,12 +5350,12 @@ function spiRender(){
     ${S.newWh.length?`<br>🏬 <b style="color:var(--warn)">${F(S.newWh.length)} انبار ناشناخته ساخته می‌شود</b> (کد: ${S.newWh.map(esc).join('، ')})`:''}
     ${S.skipped.length?`<br><span style="color:var(--tx2)">${F(S.skipped.length)} ردیف ناقص نادیده گرفته شد: ${S.skipped.slice(0,6).map(x=>'ردیف '+F(x.n)+' ('+esc(x.why)+')').join('، ')}${S.skipped.length>6?'…':''}</span>`:''}
   </div>
+  ${S.newProds.length?cpLabels().html:''}
   ${S.newProds.length?`<div class="sec" style="border:1.5px solid var(--bad)"><b style="font-size:12.5px">🔗 جفت‌کردن کدهای سپیدار با کالاهای سیستم</b>
     <div style="font-size:11.5px;color:var(--tx2);margin:4px 0 6px">کد انتخاب‌شده روی کارت همان کالا ذخیره می‌شود و دفعهٔ بعد خودکار پیدا می‌شود. اگر واقعاً کالای تازه است، «کالای جدید بساز» را بگذار.</div>
     <div class="tblwrap" style="max-height:260px;overflow:auto"><table style="font-size:12px"><thead><tr><th>کد سپیدار</th><th>تعداد در فایل</th><th style="text-align:right">کالای سیستم</th></tr></thead><tbody>
     ${S.newProds.map(c=>{const q=S.groups.reduce((a,g)=>a+g.lines.filter(l=>l.prod===c).reduce((b,l)=>b+l.qty,0),0);
-      return `<tr><td dir="ltr"><b>${esc(c)}</b></td><td>${F(q)}</td><td style="text-align:right"><select onchange="spiState.pmap=spiState.pmap||{};spiState.pmap['${esc(c)}']=this.value" style="max-width:360px;font-size:12px">
-        <option value="">➕ کالای جدید بساز («کالا ${esc(c)}»)</option>${cpOptions([]).replace('<option value="">— کالای اصلی را انتخاب کن —</option>','')}</select></td></tr>`;}).join('')}
+      return `<tr><td dir="ltr"><b>${esc(c)}</b></td><td>${F(q)}</td><td style="text-align:right"><input list="cp_dl" placeholder="خالی = کالای جدید بساز («کالا ${esc(c)}») — یا نام/کد کالای اصلی را تایپ کن" onchange="spiState.pmap=spiState.pmap||{};spiState.pmap['${esc(c)}']=cpResolve(this.value)" style="max-width:380px;width:100%;font-size:12px"></td></tr>`;}).join('')}
     </tbody></table></div></div>`:''}
   <div class="tblwrap" style="max-height:340px;overflow:auto"><table style="font-size:12px"><thead><tr><th>وضعیت</th><th>نوع</th><th>شماره</th><th>تاریخ</th><th>تامین‌کننده</th><th>انبار</th><th>ردیف</th><th>جمع کالا</th><th>کرایه حمل</th><th>حمل‌کننده</th></tr></thead><tbody>
   ${S.groups.slice(0,300).map(g=>`<tr style="${g.state==='dup'||g.state==='skip'?'opacity:.55':''}">
@@ -13709,6 +13739,7 @@ function bizMenuHTML(){
     it('smdash','📈 داشبورد فروش',"go('smdash')",canSee('invoice')&&canView('smdash'))
     +it('invnew','🧾 صدور فاکتور فروش',"invDraft=null;go('invnew')",canSee('invoice')&&can('c','invoice')&&canView('invnew'))
     +it('plreport','💰 سود و زیان فروش',"go('plreport')",canSee('invoice')&&canView('plreport'))
+    +it('costchk','🧮 کنترل بهای تمام‌شده',"go('costchk')",canSee('invoice')&&canSeeCost())
     +it('targetdash','🎯 پایش تارگت فروش',"go('targetdash')",canSee('saletarget')&&canView('targetdash'))
     +invMenuHTML()+ent('sale')+ent('saletarget'));
   // 5️⃣ مدیریت خرید
@@ -13884,6 +13915,8 @@ function wsMenu(g){
       (canView('invnew')?`<div class="nav-i ${view.type==='invnew'&&!_pf?'on':''}" onclick="invDraft=null;window._invPf=0;go('invnew')">🧾 صدور فاکتور فروش</div>`:'');})():'')+
     (canSee('invoice')?`<div class="nav-i ${(view.type==='list'&&view.e==='invoice')?'on':''}" onclick="invGo(INV_KIND_SALE)">🧾 فهرست فاکتورها<span class="c">${invKindCount(INV_KIND_SALE).toLocaleString('fa-IR')}</span></div>`:'')+
     (canSee('invoice')&&canView('dayinv')?`<div class="nav-i ${view.type==='dayinv'?'on':''}" onclick="go('dayinv')">🗓 فاکتورهای روز</div>`:'')+
+    (canSee('invoice')&&canView('plreport')?`<div class="nav-i ${view.type==='plreport'?'on':''}" onclick="go('plreport')">💰 سود و زیان فروش</div>`:'')+
+    (canSee('invoice')&&canSeeCost()?`<div class="nav-i ${view.type==='costchk'?'on':''}" onclick="go('costchk')">🧮 کنترل بهای تمام‌شده</div>`:'')+
     (canSee('lead')&&canView('leaddash')?`<div class="nav-i ${view.type==='leaddash'?'on':''}" onclick="go('leaddash')">📊 گزارش لیدها</div>`:'')+
     '');
   if(g==='CRM و مشتریان')return (
@@ -14679,7 +14712,7 @@ function render(){
     else if(view.type==='taskarch')c.innerHTML=taskarchHTML();
     else if(view.type==='syncfix')c.innerHTML=syncfixHTML();
     else if(view.type==='diag')c.innerHTML=diagHTML();
-    else if(view.type==='costchk')c.innerHTML=costchkHTML();
+    else if(view.type==='costchk'){try{c.innerHTML=costchkHTML();}catch(_e){c.innerHTML='<div class="sec" style="color:var(--bad)">⚠️ خطا در صفحهٔ کنترل بهای تمام‌شده: '+esc(String(_e&&_e.message||_e))+'</div>';}}
     else if(view.type==='backupdash')c.innerHTML=backupdashHTML();
     else if(view.type==='salesdash')c.innerHTML=salesdashHTML();
     else if(view.type==='invnew')c.innerHTML=invnewHTML();
