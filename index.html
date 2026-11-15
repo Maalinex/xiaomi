@@ -454,11 +454,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.61</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.62</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.61</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.62</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -5020,7 +5020,7 @@ let whImpState=null;
    این بخش (۱) کد را در همهٔ فیلدهای کالا جستجو می‌کند، (۲) جفت کالای موقت/اصلی را پیشنهاد می‌دهد،
    (۳) با یک کلیک ادغام می‌کند: همهٔ اسناد به کالای اصلی می‌روند و کد سپیدار روی آن ثبت می‌شود. */
 function cpNorm(x){return faNum(String(x==null?'':x)).replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[‌\s\-_]+/g,'').toUpperCase();}
-function cpIsTemp(p){const n=String((p&&p.d&&p.d.note)||'');return /ورود رسید انبار سپیدار|ایمپورت رسید انبار سپیدار/.test(n)&&/^کالا\s/.test(String(p.d.title||''));}
+function cpIsTemp(p){const n=String((p&&p.d&&p.d.note)||'');return /ورود رسید انبار سپیدار|ایمپورت رسید انبار سپیدار/.test(n);}
 function cpCodeOf(p){
   const keys=[...((E.product.f||[]).filter(f=>f.k!=='sku'&&String(f.n||'').replace(/\s+/g,' ').includes('کد کالا')).map(f=>f.k)),'sku'];
   for(const k of keys){const v=cpNorm(p.d[k]);if(v)return v;}
@@ -5123,6 +5123,30 @@ function cpLabels(){
   window._cpMap=map;window._cpById=byId;
   return {html:`<datalist id="cp_dl">${sorted.map(p=>`<option value="${esc(byId[p.id])}">`).join('')}</datalist>`,byId,hungryN:hungry.size};
 }
+function cpLabelsAll(){ // همهٔ کالاها، با «خرید/فروش» در برچسب — برای ادغام دستی
+  const S=cpStats();const all=cpAllProds().slice().sort((a,b)=>String(a.d.title||'').localeCompare(String(b.d.title||''),'fa'));
+  const map=Object.assign({},window._cpMap||{}),byId={},seen={};
+  all.forEach(p=>{let l=String(p.d.title||'—').trim()+(p.d.sku?' ['+p.d.sku+']':'')+' — خرید '+(S.buy[p.id]||0).toLocaleString('fa-IR')+'، فروش '+(S.sell[p.id]||0).toLocaleString('fa-IR');
+    if(seen[l]){l+=' #'+(++seen[l]);}else seen[l]=1;map[l]=p.id;byId[p.id]=l;});
+  window._cpMap=map;window._cpAllById=byId;
+  return `<datalist id="cp_all">${all.map(p=>`<option value="${esc(byId[p.id])}">`).join('')}</datalist>`;
+}
+window.cpMergeManual=function(srcInp,dstInp){
+  const a=cpResolve((document.getElementById(srcInp)||{}).value), b=cpResolve((document.getElementById(dstInp)||{}).value);
+  if(!a||!b){alert('هر دو کالا را از فهرست پیشنهادها انتخاب کن');return;}
+  if(a===b){alert('دو کالای متفاوت انتخاب کن');return;}
+  const A=recs[a],B=recs[b];
+  if(!confirm('همهٔ اسنادِ «'+(A.d.title||'')+'» (رسیدها، فاکتورهای خرید و فروش، انتقال‌ها…) به «'+(B.d.title||'')+'» منتقل شود و «'+(A.d.title||'')+'» حذف شود؟\n\nپیش از این کار یک پشتیبان بگیر.'))return;
+  const n=cpMerge(a,b);
+  alert('✅ ادغام شد — '+(n||0).toLocaleString('fa-IR')+' سند منتقل شد.');
+};
+window.cpPullInto=function(targetId){ // «خریدهای این کالا روی کالای دیگری نشسته» ← آن کالا را در این کالا ادغام کن
+  const src=cpResolve((document.getElementById('cpsrc_'+targetId)||{}).value);
+  if(!src){alert('کالایی را که رسید خریدش ثبت شده از فهرست انتخاب کن');return;}
+  if(src===targetId){alert('همین کالا را انتخاب کرده‌ای');return;}
+  if(!confirm('رسیدها و اسنادِ «'+(recs[src].d.title||'')+'» به «'+(recs[targetId].d.title||'')+'» منتقل و «'+(recs[src].d.title||'')+'» حذف شود؟'))return;
+  cpMerge(src,targetId);
+};
 function cpResolve(v){v=String(v||'').trim();if(!v)return '';const m=window._cpMap||{};if(m[v])return m[v];
   const k=Object.keys(m).find(x=>x.replace(/^⚠️ /,'')===v.replace(/^⚠️ /,''));return k?m[k]:'';}
 function cpInput(id,suggestId,ph){const L=window._cpById||{};
@@ -5142,7 +5166,7 @@ function costchkHTML(){
   if(!canSeeCost())return '<div class="empty">این بخش فقط برای ادمین و دسترسی «گزارش سود و زیان» است</div>';
   const P=cpPlan();const F=n=>(+n||0).toLocaleString('fa-IR');
   const autoN=P.temps.filter(x=>x.auto).length;
-  let h=`<div class="sec"><h3>🧮 کنترل بهای تمام‌شده</h3>
+  let h=`<div class="tools" style="margin-bottom:6px"><button class="btn gh sm" onclick="document.getElementById('cpm_a').scrollIntoView({behavior:'smooth'})">🔗 ادغام دستی دو کالا</button></div><div class="sec"><h3>🧮 کنترل بهای تمام‌شده</h3>
     <p style="font-size:12.5px;color:var(--tx2);line-height:2.1">بهای هر فروش از رسیدِ خریدِ <b>همان کالا</b> می‌آید. اگر رسید انبار روی یک کالا و فاکتور فروش روی کالای دیگری نشسته باشد، فروش «بی‌بها» می‌شود و سود غلط درمی‌آید. این صفحه همهٔ این موارد را پیدا می‌کند و با یک کلیک درستشان می‌کند.</p>
     <div class="comp">
       <div class="chip">🧩 کالای موقت از ورود رسید: <b style="color:${P.temps.length?'var(--bad)':'var(--ok)'}">${F(P.temps.length)}</b></div>
@@ -5166,11 +5190,23 @@ function costchkHTML(){
   h+=`<div class="sec" style="border-inline-start:3px solid ${P.noCost.length?'var(--bad)':'var(--ok)'}"><h3>② کالاهای فروخته‌شده بدون هیچ خرید</h3>`;
   if(!P.noCost.length)h+=`<div class="empty">✅ همهٔ کالاهای فروخته‌شده بهای خرید دارند</div>`;
   else h+=`<p style="font-size:12px;color:var(--tx2);line-height:2">این کالاها در فاکتور فروش آمده‌اند ولی نه رسید خرید دارند، نه «قیمت خرید»، نه موجودی اول دوره — بهایشان صفر حساب می‌شود. معمولاً رسیدشان روی یکی از کالاهای موقتِ بخش ① نشسته (آنجا ادغامش کن) یا هنوز رسیدشان از سپیدار وارد نشده. اگر کد سپیدارشان را می‌دانی، «ثبت کد» بزن تا ورود بعدی خودکار جفت شود.</p>
-    <div class="tblwrap" style="max-height:420px;overflow:auto"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالا</th><th>کد</th><th>تعداد فروش</th><th>تعداد فاکتور</th><th></th></tr></thead><tbody>
-    ${P.noCost.slice(0,300).map(x=>`<tr><td style="text-align:right"><a style="color:var(--ac);cursor:pointer" onclick="go('rec','product','${x.p.id}')">${esc(x.p.d.title||'—')}</a></td><td dir="ltr">${esc(x.p.d.sku||'—')}</td><td>${F(x.sell)}</td><td>${F(x.invs)}</td>
-      <td><button class="btn gh sm" onclick="cpSetCode('${x.p.id}')">🏷 ثبت کد سپیدار</button></td></tr>`).join('')}
+    ${cpLabelsAll()}
+    <div style="font-size:12px;line-height:2;margin-bottom:6px">👈 اگر رسید خریدِ یکی از این کالاها با نام یا کد دیگری در سیستم ثبت شده، در ستون «رسیدش روی کدام کالاست؟» آن کالا را پیدا کن (تعداد خرید/فروشش کنار نامش هست) و <b>«⬅️ بیاور اینجا»</b> را بزن.</div>
+    <div class="tblwrap" style="max-height:480px;overflow:auto"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالای فروخته‌شده</th><th>کد</th><th>فروش</th><th style="text-align:right">رسیدش روی کدام کالاست؟</th><th></th></tr></thead><tbody>
+    ${P.noCost.slice(0,300).map(x=>`<tr><td style="text-align:right"><a style="color:var(--ac);cursor:pointer" onclick="go('rec','product','${x.p.id}')">${esc(x.p.d.title||'—')}</a></td><td dir="ltr">${esc(x.p.d.sku||'—')}</td><td>${F(x.sell)}</td>
+      <td style="text-align:right"><input id="cpsrc_${x.p.id}" list="cp_all" placeholder="🔍 نام یا کد کالایی که خرید دارد…" style="max-width:380px;width:100%;font-size:12px"></td>
+      <td style="white-space:nowrap"><button class="btn sm" onclick="cpPullInto('${x.p.id}')">⬅️ بیاور اینجا</button> <button class="btn gh sm" onclick="cpSetCode('${x.p.id}')" title="ثبت کد سپیدار روی این کالا برای ورودهای بعدی">🏷</button></td></tr>`).join('')}
     </tbody></table></div>`;
   h+=`</div>`;
+  // ۴) ادغام دستی
+  h+=`<div class="sec" style="border-inline-start:3px solid var(--ac)"><h3>🔗 ادغام دستی دو کالا</h3>
+    <p style="font-size:12px;color:var(--tx2);line-height:2">اگر یک کالا در سیستم دوبار ثبت شده (مثلاً یک‌بار با رسید سپیدار و یک‌بار دستی)، اینجا ادغامشان کن. همهٔ اسنادِ کالای اول (رسید، فاکتور خرید و فروش، انتقال، ضایعات…) به کالای دوم می‌رود و کالای اول حذف می‌شود.</p>
+    ${P.noCost.length?'':cpLabelsAll()}
+    <div style="display:grid;grid-template-columns:1fr auto 1fr auto;gap:8px;align-items:center">
+      <input id="cpm_a" list="cp_all" placeholder="کالای تکراری (حذف می‌شود)…" style="font-size:12px">
+      <span style="font-size:18px">⬅️</span>
+      <input id="cpm_b" list="cp_all" placeholder="کالای اصلی (می‌ماند)…" style="font-size:12px">
+      <button class="btn sm" onclick="cpMergeManual('cpm_a','cpm_b')">🔗 ادغام</button></div></div>`;
   // ۳) فروش بیش از خرید
   if(P.over.length)h+=`<div class="sec" style="border-inline-start:3px solid var(--warn)"><h3>③ فروش بیش از خرید</h3>
     <p style="font-size:12px;color:var(--tx2);line-height:2">برای این کالاها بیشتر از رسیدهای ثبت‌شده فروش خورده؛ مازاد با آخرین بهای خرید حساب می‌شود. معمولاً یعنی رسیدهای قدیمی‌تر یا «موجودی اول دوره» هنوز از سپیدار وارد نشده.</p>
@@ -19045,7 +19081,11 @@ function recHTML(e,id){
   if(e==='saletarget'){try{h+=tgtAwardHTML(r);}catch(_e){}}
   if(e==='hr'){try{h+=hrIdCardHTML(r);}catch(_e){}try{h+=hrWorkHTML(r);}catch(_e){}}
   if(e==='invoice'){try{h+=invTotalsPanel(r);}catch(_e){}try{h+=invCostPanel(r);}catch(_e){}}
-  if(e==='product'){try{h+=kardexHTML(r);}catch(_e){}}
+  if(e==='product'){try{h+=kardexHTML(r);}catch(_e){}
+    if(canSeeCost())h+=`<div class="sec"><h3>🔗 ادغام این کالا با کالای تکراری</h3>${cpLabelsAll()}
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:6px">اگر رسید یا فروشِ همین کالا با نام/کد دیگری ثبت شده، آن کالا را انتخاب کن تا همهٔ اسنادش به همین کالا بیاید.</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="cpsrc_${r.id}" list="cp_all" placeholder="🔍 کالای تکراری…" style="max-width:420px;width:100%;font-size:12px">
+      <button class="btn sm" onclick="cpPullInto('${r.id}')">⬅️ اسنادش را بیاور اینجا</button></div></div>`;}
   if(e==='purchinv'){try{h+=pinvLifePanel(r);}catch(_e){}try{h+=pcostRecUI(r);}catch(_e){}}
   if(e==='lead'){try{h+=leadPanel(r);}catch(_e){}}
   if(e==='invoice'&&r.d.status!=='باطل'){try{
