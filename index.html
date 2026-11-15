@@ -454,11 +454,11 @@ details[data-srsec] > summary:hover{background:var(--bg3,rgba(0,0,0,.06));border
     <button class="btn big" id="l_go" onclick="doLogin()">ورود</button>
     <div class="quote">«آنچه را که نتوان اندازه گرفت، نمی‌توان مدیریت کرد.»<br><span style="font-size:11px">— پیتر دراکر</span></div>
   </div>
-  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.58</span></div>
+  <div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.59</span></div>
 </div>
 
 <div id="app">
-  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.58</span></div></aside>
+  <aside id="side"><div class="logo"><span class="lgo" style="width:26px;height:26px;border-radius:8px;font-size:14px;margin:0">X</span> XIAOMI</div><nav id="nav"></nav><div class="credit"><span class="cr-ic">🏛️</span> معماری و طراحی: <b>علی خلج</b><br><span style="opacity:.6;font-size:10px;display:block;margin-top:3px">نسخه 3.59</span></div></aside>
   <div id="main">
     <div id="top">
       <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
@@ -5013,6 +5013,143 @@ function sepfinHTML(){
 
 /* ═══════════ 📦 ورود گردش انبار (رسید انبار سپیدار — CSV آماده‌شده) ═══════════ */
 let whImpState=null;
+/* ═══ 🧮 v3.59 — کنترل بهای تمام‌شده: هر فروش باید به همان کالایی برسد که رسید انبارش خورده ═══
+   ریشهٔ خطا: وقتی کد کالای سپیدار روی کارت کالای اصلی نبود، ورود رسید یک «کالای موقت» (مثل «کالا XI1896»)
+   می‌ساخت. خرید روی کالای موقت می‌نشست و فروش روی کالای اصلی ← فروش بی‌بها، و سود غلط.
+   این بخش (۱) کد را در همهٔ فیلدهای کالا جستجو می‌کند، (۲) جفت کالای موقت/اصلی را پیشنهاد می‌دهد،
+   (۳) با یک کلیک ادغام می‌کند: همهٔ اسناد به کالای اصلی می‌روند و کد سپیدار روی آن ثبت می‌شود. */
+function cpNorm(x){return faNum(String(x==null?'':x)).replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[‌\s\-_]+/g,'').toUpperCase();}
+function cpIsTemp(p){const n=String((p&&p.d&&p.d.note)||'');return /ورود رسید انبار سپیدار|ایمپورت رسید انبار سپیدار/.test(n)&&/^کالا\s/.test(String(p.d.title||''));}
+function cpCodeOf(p){
+  const keys=[...((E.product.f||[]).filter(f=>f.k!=='sku'&&String(f.n||'').replace(/\s+/g,' ').includes('کد کالا')).map(f=>f.k)),'sku'];
+  for(const k of keys){const v=cpNorm(p.d[k]);if(v)return v;}
+  const m=String(p.d.title||'').match(/^کالا\s+(\S+)/);return m?cpNorm(m[1]):'';
+}
+function cpAllProds(){const o=[];for(const id in recs){const p=recs[id];if(p&&!p.del&&p.e==='product'&&p.d)o.push(p);}return o;}
+/* کالایی که این کد را در «هر» فیلد متنی‌اش دارد (کد کالا، SKU، مدل، نام…) — بدون کالاهای موقت */
+function cpFindByCode(code,exceptId){
+  const c=cpNorm(code);if(!c||c.length<3)return [];
+  const exact=[],inText=[];
+  cpAllProds().forEach(p=>{if(p.id===exceptId||cpIsTemp(p))return;
+    let hitExact=false,hitText=false;
+    Object.keys(p.d).forEach(k=>{const v=p.d[k];if(typeof v!=='string'&&typeof v!=='number')return;
+      const n=cpNorm(v);if(!n)return;if(n===c)hitExact=true;else if(n.includes(c))hitText=true;});
+    if(hitExact)exact.push(p);else if(hitText)inText.push(p);});
+  return exact.length?exact:inText;
+}
+function cpStats(){ // خرید/فروش هر کالا (مستقل از کسب‌وکار فعال)
+  const buy={},sell={},sellInv={};
+  for(const id in recs){const l=recs[id];if(!l||l.del||!l.d)continue;
+    const pid=(l.d.product&&l.d.product[0])||'';if(!pid)continue;
+    if(l.e==='purchline'){const inv=recs[(l.d.purchinv&&l.d.purchinv[0])||''];if(!inv||inv.del||inv.d.status==='باطل'||inv.d.status==='پیش‌نویس'||inv.d.kind==='پیش‌فاکتور خرید')continue;buy[pid]=(buy[pid]||0)+(+l.d.qty||0);}
+    if(l.e==='invline'){const inv=recs[(l.d.invoice&&l.d.invoice[0])||''];if(!inv||inv.del||inv.d.status==='باطل'||inv.d.status==='پیش‌نویس'||inv.d.kind==='پیش‌فاکتور')continue;sell[pid]=(sell[pid]||0)+(+l.d.qty||0);(sellInv[pid]||(sellInv[pid]=new Set())).add(inv.id);}
+  }
+  return {buy,sell,sellInv};
+}
+function cpPlan(){
+  const S=cpStats();const all=cpAllProds();
+  const temps=all.filter(cpIsTemp).map(p=>{
+    const code=cpCodeOf(p);const cands=cpFindByCode(code,p.id);
+    return {p,code,buy:S.buy[p.id]||0,sell:S.sell[p.id]||0,cands,auto:cands.length===1?cands[0]:null};
+  });
+  // فروش‌های بی‌بها: کالایی که فروخته شده ولی هیچ خرید/رسید یا «قیمت خرید» ندارد
+  const noCost=all.filter(p=>!cpIsTemp(p)&&(S.sell[p.id]||0)>0&&!(S.buy[p.id]>0)&&!((+p.d.buy||0)>0)&&!((+p.d.stock0||0)>0))
+    .map(p=>({p,sell:S.sell[p.id],invs:(S.sellInv[p.id]?S.sellInv[p.id].size:0)}))
+    .sort((a,b)=>b.sell-a.sell);
+  // فروش بیش از خرید
+  const over=all.filter(p=>!cpIsTemp(p)&&(S.buy[p.id]||0)>0&&(S.sell[p.id]||0)>((S.buy[p.id]||0)+(+p.d.stock0||0)))
+    .map(p=>({p,buy:S.buy[p.id],sell:S.sell[p.id],stock0:+p.d.stock0||0}));
+  return {temps,noCost,over,S};
+}
+/* ادغام کالای موقت در کالای اصلی: همهٔ ارجاع‌ها منتقل، کد روی کالای اصلی، کالای موقت حذف */
+function cpMerge(tempId,realId,silent){
+  const t=recs[tempId],r=recs[realId];if(!t||!r||t.del||r.del||t.id===r.id)return 0;
+  const NOW=Date.now();let n=0;
+  const relMap=[];Object.entries(E).forEach(([e2,def])=>(def.f||[]).forEach(f=>{if(f.t===REL&&f.r==='product')relMap.push([e2,f.k]);}));
+  const byEnt={};relMap.forEach(([e2,k])=>{(byEnt[e2]||(byEnt[e2]=[])).push(k);});
+  for(const id in recs){const x=recs[id];if(!x||x.del||!x.d||!byEnt[x.e])continue;
+    let ch=false;byEnt[x.e].forEach(k=>{const ids=relIds(x,k);if(ids.includes(tempId)){x.d[k]=[...new Set(ids.map(y=>y===tempId?realId:y))];ch=true;}});
+    if(x.e==='purchline'&&ch&&/^کالا\s/.test(String(x.d.title||'')))x.d.title=r.d.title||x.d.title;
+    if(ch){x.u=NOW;queue.push(x.id);n++;}}
+  const code=cpCodeOf(t);
+  if(code&&!cpNorm(r.d.sku)){r.d.sku=code;}
+  else if(code&&cpNorm(r.d.sku)!==code){r.d.sepcodes=[...new Set([...(r.d.sepcodes||[]),code])];}
+  r.u=NOW;queue.push(r.id);
+  t.del=true;t.u=NOW;queue.push(t.id);
+  try{_fifoCache=null;_pinvLineIdx=null;_invLineIdx=null;_pcapCache=null;_whQtyCache=null;}catch(e){}
+  if(!silent){invalidateByE();saveLocal();saveQ();flush();render();}
+  return n;
+}
+window.cpMergeOne=function(tempId){
+  const sel=document.getElementById('cpsel_'+tempId);const realId=sel&&sel.value;
+  if(!realId){alert('کالای اصلی را انتخاب کن');return;}
+  const t=recs[tempId],r=recs[realId];
+  if(!confirm('«'+(t&&t.d.title)+'» در «'+(r&&r.d.title)+'» ادغام شود؟\n\nهمهٔ رسیدها/فاکتورهای خرید و اسناد این کالای موقت به کالای اصلی منتقل می‌شوند و کد سپیدار روی کالای اصلی ثبت می‌شود تا ورودهای بعدی خودکار جفت شوند.'))return;
+  cpMerge(tempId,realId);
+};
+window.cpMergeAuto=function(){
+  const P=cpPlan();const todo=P.temps.filter(x=>x.auto);
+  if(!todo.length){alert('جفتِ قطعی برای ادغام خودکار پیدا نشد — موارد را دستی انتخاب کن');return;}
+  if(!confirm(todo.length.toLocaleString('fa-IR')+' کالای موقت با کالای اصلیِ هم‌کد پیدا شد. همه ادغام شوند؟\n\nپیش از این کار یک پشتیبان بگیر.'))return;
+  let n=0;todo.forEach(x=>{n+=cpMerge(x.p.id,x.auto.id,true);});
+  invalidateByE();saveLocal();saveQ();flush();render();
+  alert('✅ '+todo.length.toLocaleString('fa-IR')+' کالا ادغام شد ('+n.toLocaleString('fa-IR')+' سند منتقل شد).');
+};
+window.cpSetCode=function(pid){
+  const p=recs[pid];if(!p)return;
+  const v=prompt('کد کالای سپیدار برای «'+(p.d.title||'')+'»:',p.d.sku||'');if(v==null)return;
+  p.d.sku=faNum(String(v)).trim().toUpperCase();p.u=Date.now();put(p);
+};
+function cpOptions(cands,sell){ // فهرست کالاهای اصلی برای انتخاب — پیشنهادها اول، بعد «فروش‌دار بی‌خرید»، بعد بقیه
+  const S=sell||cpStats();const all=cpAllProds().filter(p=>!cpIsTemp(p));
+  const candIds=new Set(cands.map(c=>c.id));
+  const hungry=all.filter(p=>!candIds.has(p.id)&&(S.sell[p.id]||0)>0&&!(S.buy[p.id]>0));
+  const rest=all.filter(p=>!candIds.has(p.id)&&!hungry.includes(p)).sort((a,b)=>String(a.d.title||'').localeCompare(String(b.d.title||''),'fa'));
+  const lab=p=>esc((p.d.title||'—')+(p.d.sku?' ['+p.d.sku+']':''));
+  return `<option value="">— کالای اصلی را انتخاب کن —</option>`
+    +(cands.length?`<optgroup label="✅ پیشنهاد (کد در مشخصات کالا پیدا شد)">${cands.map(p=>`<option value="${p.id}" ${cands.length===1?'selected':''}>${lab(p)}</option>`).join('')}</optgroup>`:'')
+    +(hungry.length?`<optgroup label="⚠️ فروش دارند ولی هیچ خریدی ندارند">${hungry.map(p=>`<option value="${p.id}">${lab(p)} — فروش ${(S.sell[p.id]||0).toLocaleString('fa-IR')}</option>`).join('')}</optgroup>`:'')
+    +`<optgroup label="همهٔ کالاها">${rest.map(p=>`<option value="${p.id}">${lab(p)}</option>`).join('')}</optgroup>`;
+}
+function costchkHTML(){
+  if(!canSeeCost())return '<div class="empty">این بخش فقط برای ادمین و دسترسی «گزارش سود و زیان» است</div>';
+  const P=cpPlan();const F=n=>(+n||0).toLocaleString('fa-IR');
+  const autoN=P.temps.filter(x=>x.auto).length;
+  let h=`<div class="sec"><h3>🧮 کنترل بهای تمام‌شده</h3>
+    <p style="font-size:12.5px;color:var(--tx2);line-height:2.1">بهای هر فروش از رسیدِ خریدِ <b>همان کالا</b> می‌آید. اگر رسید انبار روی یک کالا و فاکتور فروش روی کالای دیگری نشسته باشد، فروش «بی‌بها» می‌شود و سود غلط درمی‌آید. این صفحه همهٔ این موارد را پیدا می‌کند و با یک کلیک درستشان می‌کند.</p>
+    <div class="comp">
+      <div class="chip">🧩 کالای موقت از ورود رسید: <b style="color:${P.temps.length?'var(--bad)':'var(--ok)'}">${F(P.temps.length)}</b></div>
+      <div class="chip">⚠️ کالای فروخته‌شدهٔ بی‌بها: <b style="color:${P.noCost.length?'var(--bad)':'var(--ok)'}">${F(P.noCost.length)}</b></div>
+      <div class="chip">📉 فروش بیش از خرید: <b style="color:${P.over.length?'var(--warn)':'var(--ok)'}">${F(P.over.length)}</b></div></div></div>`;
+  // ۱) کالاهای موقت
+  h+=`<div class="sec" style="border-inline-start:3px solid ${P.temps.length?'var(--bad)':'var(--ok)'}"><h3>① کالاهای موقتِ ساخته‌شده از رسید انبار <span style="flex:1"></span>${autoN?`<button class="btn sm" onclick="cpMergeAuto()">🔗 ادغام خودکار ${F(autoN)} مورد قطعی</button>`:''}</h3>`;
+  if(!P.temps.length)h+=`<div class="empty">✅ همهٔ رسیدها روی کالاهای اصلی نشسته‌اند</div>`;
+  else h+=`<p style="font-size:12px;color:var(--tx2);line-height:2">این کالاها را ورود رسید ساخته چون کد سپیدارشان روی هیچ کالایی نبود. رسیدِ خریدشان روی این کالای موقت است، ولی فروش روی کالای اصلی ثبت شده. کالای اصلی را انتخاب کن و «ادغام» بزن — کد سپیدار روی کالای اصلی ثبت می‌شود تا رسیدهای بعدی خودکار جفت شوند.</p>
+    <div class="tblwrap" style="max-height:480px;overflow:auto"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالای موقت</th><th>کد سپیدار</th><th>خرید (رسید)</th><th>فروش</th><th style="text-align:right">کالای اصلی</th><th></th></tr></thead><tbody>
+    ${P.temps.map(x=>`<tr><td style="text-align:right">${esc(x.p.d.title||'—')}</td><td dir="ltr"><b>${esc(x.code||'—')}</b></td><td>${F(x.buy)}</td><td>${F(x.sell)}</td>
+      <td style="text-align:right"><select id="cpsel_${x.p.id}" style="max-width:340px;font-size:12px">${cpOptions(x.cands,P.S)}</select></td>
+      <td><button class="btn sm" onclick="cpMergeOne('${x.p.id}')">🔗 ادغام</button></td></tr>`).join('')}
+    </tbody></table></div>`;
+  h+=`</div>`;
+  // ۲) فروش بی‌بها
+  h+=`<div class="sec" style="border-inline-start:3px solid ${P.noCost.length?'var(--bad)':'var(--ok)'}"><h3>② کالاهای فروخته‌شده بدون هیچ خرید</h3>`;
+  if(!P.noCost.length)h+=`<div class="empty">✅ همهٔ کالاهای فروخته‌شده بهای خرید دارند</div>`;
+  else h+=`<p style="font-size:12px;color:var(--tx2);line-height:2">این کالاها در فاکتور فروش آمده‌اند ولی نه رسید خرید دارند، نه «قیمت خرید»، نه موجودی اول دوره — بهایشان صفر حساب می‌شود. معمولاً رسیدشان روی یکی از کالاهای موقتِ بخش ① نشسته (آنجا ادغامش کن) یا هنوز رسیدشان از سپیدار وارد نشده. اگر کد سپیدارشان را می‌دانی، «ثبت کد» بزن تا ورود بعدی خودکار جفت شود.</p>
+    <div class="tblwrap" style="max-height:420px;overflow:auto"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالا</th><th>کد</th><th>تعداد فروش</th><th>تعداد فاکتور</th><th></th></tr></thead><tbody>
+    ${P.noCost.map(x=>`<tr><td style="text-align:right"><a style="color:var(--ac);cursor:pointer" onclick="go('rec','product','${x.p.id}')">${esc(x.p.d.title||'—')}</a></td><td dir="ltr">${esc(x.p.d.sku||'—')}</td><td>${F(x.sell)}</td><td>${F(x.invs)}</td>
+      <td><button class="btn gh sm" onclick="cpSetCode('${x.p.id}')">🏷 ثبت کد سپیدار</button></td></tr>`).join('')}
+    </tbody></table></div>`;
+  h+=`</div>`;
+  // ۳) فروش بیش از خرید
+  if(P.over.length)h+=`<div class="sec" style="border-inline-start:3px solid var(--warn)"><h3>③ فروش بیش از خرید</h3>
+    <p style="font-size:12px;color:var(--tx2);line-height:2">برای این کالاها بیشتر از رسیدهای ثبت‌شده فروش خورده؛ مازاد با آخرین بهای خرید حساب می‌شود. معمولاً یعنی رسیدهای قدیمی‌تر یا «موجودی اول دوره» هنوز از سپیدار وارد نشده.</p>
+    <div class="tblwrap"><table style="font-size:12px"><thead><tr><th style="text-align:right">کالا</th><th>خرید</th><th>اول دوره</th><th>فروش</th><th>مازاد</th></tr></thead><tbody>
+    ${P.over.map(x=>`<tr><td style="text-align:right">${esc(x.p.d.title||'—')}</td><td>${F(x.buy)}</td><td>${F(x.stock0)}</td><td>${F(x.sell)}</td><td style="color:var(--warn);font-weight:700">${F(x.sell-x.buy-x.stock0)}</td></tr>`).join('')}
+    </tbody></table></div></div>`;
+  return h;
+}
+window.costchkHTML=costchkHTML;
+
 /* ═══ 🧾 v3.57 — ورود مستقیم «رسید انبار» از اکسل خام سپیدار (بدون آماده‌سازی دستی) ═══
    ستون‌ها با «عنوان ستون» شناخته می‌شوند نه با جایگاه — جابه‌جایی ستون‌ها در خروجی سپیدار مشکلی نمی‌سازد.
    هر رسید = یک سند؛ کلید یکتا = نوع رسید + شماره + سال مالی → بارگذاری دوباره هرگز تکراری نمی‌سازد.
@@ -5047,7 +5184,11 @@ function spiHeader(arr){ // ردیف سربرگ را پیدا و ستون‌ها
 }
 function spiIdx(){ // نمایه‌های تطبیق کد
   const codeKeys=[...((E.product.f||[]).filter(f=>f.k!=='sku'&&String(f.n||'').replace(/\s+/g,' ').includes('کد کالا')).map(f=>f.k)),'sku'];
-  const prod={};Object.values(recs).forEach(p=>{if(!p||p.del||p.e!=='product'||!p.d)return;codeKeys.forEach(kk=>{const k=faNum(String(p.d[kk]||'')).trim().toUpperCase();if(k)prod[k]=prod[k]||p.id;});});
+  const prod={};Object.values(recs).forEach(p=>{if(!p||p.del||p.e!=='product'||!p.d)return;
+    const tmp=cpIsTemp(p);
+    const put1=k=>{if(!k)return;if(!prod[k]||(cpIsTemp(recs[prod[k]])&&!tmp))prod[k]=p.id;}; // کالای اصلی بر کالای موقت مقدم است
+    codeKeys.forEach(kk=>put1(faNum(String(p.d[kk]||'')).trim().toUpperCase()));
+    (p.d.sepcodes||[]).forEach(c=>put1(faNum(String(c)).trim().toUpperCase()));});
   const crm={};Object.values(recs).forEach(c=>{if(!c||c.del||c.e!=='crm'||!c.d)return;const k=faNum(String(c.d.code||'')).trim();if(k)crm[k]=crm[k]||c.id;});
   const wh={};Object.values(recs).forEach(w=>{if(!w||w.del||w.e!=='whouse'||!w.d)return;const k=faNum(String(w.d.code||'')).trim();if(k)wh[k]=wh[k]||w.id;});
   const bykey={},bytitle={};
@@ -5102,7 +5243,11 @@ function spiBuild(arr){
       else{g.state='dup';g.note=ex.d.sepkey?'قبلاً وارد شده':'قبلاً با ورودِ قدیمی وارد شده';}
     }else g.state='new';
     // ── تطبیق کدها
-    g.lines.forEach(l=>{if(!X.prod[l.prod])newProds.add(l.prod);});
+    g.lines.forEach(l=>{
+      if(X.prod[l.prod]&&!cpIsTemp(recs[X.prod[l.prod]]))return;
+      const c=cpFindByCode(l.prod); // کد در مشخصات کالا (مدل، نام، فیلدهای دیگر)
+      if(c.length===1){X.prod[l.prod]=c[0].id;(X.adopt||(X.adopt={}))[l.prod]=c[0].id;return;}
+      if(!X.prod[l.prod])newProds.add(l.prod);});
     if(g.rtype==='1'||g.rtype==='3'){
       if(g.sup&&!X.crm[g.sup])newSups.add(g.sup);
       if(g.rtype==='1'&&!g.sup)g.warns.push('کد تامین‌کننده ندارد');
@@ -5169,12 +5314,19 @@ function spiRender(){
   let h=`<div class="sec" style="font-size:12.5px;line-height:2.2">
     📄 <b>${esc(S.fname||'')}</b> — ${F(S.groups.length)} رسید، ${F(S.groups.reduce((a,g)=>a+g.lines.length,0))} ردیف کالا<br>
     <span class="imp-ok">🆕 ${F(cnt('new'))} رسید جدید</span> │ ⏭ ${F(cnt('dup'))} تکراری (رد می‌شود) ${cnt('chg')?`│ <span style="color:var(--warn)">✏️ ${F(cnt('chg'))} تغییرکرده</span>`:''} ${cnt('err')?`│ <span class="imp-bad">⚠️ ${F(cnt('err'))} دارای ایراد</span>`:''} ${cnt('skip')?`│ ${F(cnt('skip'))} نادیده`:''}
-    ${S.newProds.length?`<br>📦 <b style="color:var(--warn)">${F(S.newProds.length)} کالای ناشناخته ساخته می‌شود</b> (کد: ${S.newProds.slice(0,10).map(esc).join('، ')}${S.newProds.length>10?'…':''}) — بعداً نامشان را اصلاح کن`:'<br>📦 همهٔ کالاها با کد پیدا شدند'}
+    ${S.newProds.length?`<br>📦 <b style="color:var(--bad)">${F(S.newProds.length)} کد کالا روی هیچ کالایی نیست</b> — پایین، برای هر کد کالای اصلی را انتخاب کن تا خرید روی همان کالایی بنشیند که فروشش را می‌زنی:`:'<br>📦 همهٔ کالاها با کد پیدا شدند'}
     ${S.newSups.length?`<br>🏭 <b style="color:var(--warn)">${F(S.newSups.length)} تامین‌کنندهٔ ناشناخته ساخته می‌شود</b> (کد: ${S.newSups.slice(0,10).map(esc).join('، ')})`:''}
     ${S.newCarriers.length?`<br>🚚 <b style="color:var(--warn)">${F(S.newCarriers.length)} حمل‌کنندهٔ ناشناخته ساخته می‌شود</b> (کد: ${S.newCarriers.slice(0,10).map(esc).join('، ')})`:''}
     ${S.newWh.length?`<br>🏬 <b style="color:var(--warn)">${F(S.newWh.length)} انبار ناشناخته ساخته می‌شود</b> (کد: ${S.newWh.map(esc).join('، ')})`:''}
     ${S.skipped.length?`<br><span style="color:var(--tx2)">${F(S.skipped.length)} ردیف ناقص نادیده گرفته شد: ${S.skipped.slice(0,6).map(x=>'ردیف '+F(x.n)+' ('+esc(x.why)+')').join('، ')}${S.skipped.length>6?'…':''}</span>`:''}
   </div>
+  ${S.newProds.length?`<div class="sec" style="border:1.5px solid var(--bad)"><b style="font-size:12.5px">🔗 جفت‌کردن کدهای سپیدار با کالاهای سیستم</b>
+    <div style="font-size:11.5px;color:var(--tx2);margin:4px 0 6px">کد انتخاب‌شده روی کارت همان کالا ذخیره می‌شود و دفعهٔ بعد خودکار پیدا می‌شود. اگر واقعاً کالای تازه است، «کالای جدید بساز» را بگذار.</div>
+    <div class="tblwrap" style="max-height:260px;overflow:auto"><table style="font-size:12px"><thead><tr><th>کد سپیدار</th><th>تعداد در فایل</th><th style="text-align:right">کالای سیستم</th></tr></thead><tbody>
+    ${S.newProds.map(c=>{const q=S.groups.reduce((a,g)=>a+g.lines.filter(l=>l.prod===c).reduce((b,l)=>b+l.qty,0),0);
+      return `<tr><td dir="ltr"><b>${esc(c)}</b></td><td>${F(q)}</td><td style="text-align:right"><select onchange="spiState.pmap=spiState.pmap||{};spiState.pmap['${esc(c)}']=this.value" style="max-width:360px;font-size:12px">
+        <option value="">➕ کالای جدید بساز («کالا ${esc(c)}»)</option>${cpOptions([]).replace('<option value="">— کالای اصلی را انتخاب کن —</option>','')}</select></td></tr>`;}).join('')}
+    </tbody></table></div></div>`:''}
   <div class="tblwrap" style="max-height:340px;overflow:auto"><table style="font-size:12px"><thead><tr><th>وضعیت</th><th>نوع</th><th>شماره</th><th>تاریخ</th><th>تامین‌کننده</th><th>انبار</th><th>ردیف</th><th>جمع کالا</th><th>کرایه حمل</th><th>حمل‌کننده</th></tr></thead><tbody>
   ${S.groups.slice(0,300).map(g=>`<tr style="${g.state==='dup'||g.state==='skip'?'opacity:.55':''}">
     <td style="white-space:nowrap">${badge(g)}</td><td>${esc(g.rname)}${g.origin==='خارجی'?' 🌍':''}</td><td><b>${F(+g.num)}</b></td><td dir="ltr">${esc(iso2jstr(g.iso))}</td>
@@ -5196,6 +5348,11 @@ function spiCommit(){
   const X=spiIdx(); // تازه — شاید از زمان پیش‌نمایش چیزی عوض شده
   const add=rec=>{rec.d._by=rec.d._by||me;recs[rec.id]=rec;queue.push(rec.id);return rec.id;};
   const touch=r=>{r.u=NOW;queue.push(r.id);};
+  const pmap=S.pmap||{};
+  const tagCode=(pid,code)=>{const p=recs[pid];if(!p)return;const c=faNum(String(code)).trim().toUpperCase();
+    if(!cpNorm(p.d.sku))p.d.sku=c;else if(cpNorm(p.d.sku)!==cpNorm(c))p.d.sepcodes=[...new Set([...(p.d.sepcodes||[]),c])];else return;
+    p.u=NOW;queue.push(p.id);};
+  Object.entries(Object.assign({},(S.X&&S.X.adopt)||{},pmap)).forEach(([code,pid])=>{if(pid&&recs[pid]){X.prod[code]=pid;tagCode(pid,code);}});
   const needProd=code=>{if(X.prod[code])return X.prod[code];
     const d={title:'کالا '+code,sku:code,biz:bz,note:'ساخته‌شده از ورود رسید انبار سپیدار — نام را اصلاح کنید'};
     X.codeKeys.filter(k=>k!=='sku').forEach(k=>{d[k]=code;});
@@ -5227,16 +5384,16 @@ function spiCommit(){
       pinvLinesOf(pid).forEach(l=>{l.del=true;touch(l);});
       const oldPd=(ex.d.costs||[]).find(c=>c.k==='حمل و نقل'&&c.pd);
       if(oldPd&&costs[0])costs[0].pd=1;
-      ex.d=Object.assign({},ex.d,{supplier:supId?[supId]:[],wh:whId?[whId]:[],origin:g.origin,date:{s:g.iso},costs,sepkey:g.key,sepsig:g.sig,note,
+      ex.d=Object.assign({},ex.d,{supplier:supId?[supId]:[],wh:whId?[whId]:[],origin:g.origin,date:{s:g.iso},costs,cshipLine:1,sepkey:g.key,sepsig:g.sig,note,
         _log:[...(ex.d._log||[]),{t:NOW,by:me,act:'✏️ به‌روزرسانی از اکسل سپیدار'}]});
       touch(ex);nUpd++;
     }else{
       pid=add({id:uid(),e:'purchinv',d:{title,kind:'فاکتور خرید',biz:bz,supplier:supId?[supId]:[],wh:whId?[whId]:[],
-        status:'ثبت شده',origin:g.origin,cur:'ریال',date:{s:g.iso},ship:0,paid:0,costs,sepkey:g.key,sepsig:g.sig,sepno:g.num,note},u:NOW});
+        status:'ثبت شده',origin:g.origin,cur:'ریال',date:{s:g.iso},ship:0,paid:0,costs,cshipLine:1,sepkey:g.key,sepsig:g.sig,sepno:g.num,note},u:NOW});
       if(isOp)nOp++;else nNew++;
     }
     g.lines.forEach(l=>{const prid=needProd(l.prod);
-      add({id:uid(),e:'purchline',d:{title:(recs[prid]&&recs[prid].d.title)||l.prod,purchinv:[pid],product:[prid],biz:bz,qty:l.qty,price:Math.round(l.fee),ldisc:0},u:NOW});});
+      add({id:uid(),e:'purchline',d:{title:(recs[prid]&&recs[prid].d.title)||l.prod,purchinv:[pid],product:[prid],biz:bz,qty:l.qty,price:Math.round(l.fee),ldisc:0,cship:Math.round(l.ship||0)},u:NOW});});
   });
   try{_pinvLineIdx=null;}catch(e){}try{_pcapCache=null;}catch(e){}
   invalidateByE();saveLocal();saveQ();flush();
@@ -5372,7 +5529,7 @@ function whImpFixDupes(){ // 🧹 ادغام کالاهای تکراریِ سا�
   if(!isAdmin()){alert('فقط ادمین');return;}
   const codeKeys=[...((E.product.f||[]).filter(f=>f.k!=='sku'&&String(f.n||'').replace(/\s+/g,' ').includes('کد کالا')).map(f=>f.k)),'sku'];
   const codeOf=p=>{for(const kk of codeKeys){const v=faNum(String(p.d[kk]||'')).trim().toUpperCase();if(v)return v;}return '';};
-  const isImp=p=>String(p.d.note||'').includes('ایمپورت رسید انبار سپیدار');
+  const isImp=p=>/ایمپورت رسید انبار سپیدار|ورود رسید انبار سپیدار/.test(String(p.d.note||''));
   const g={};byE('product').forEach(p=>{const c=codeOf(p);if(c)(g[c]=g[c]||[]).push(p);});
   const groups=Object.values(g).filter(a=>a.length>1&&a.some(isImp)&&a.some(p=>!isImp(p)));
   if(!groups.length){alert('کالای تکراریِ ناشی از ایمپورت پیدا نشد ✔');return;}
@@ -5445,7 +5602,7 @@ function impcenterHTML(){
     <label style="font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:6px"><input type="checkbox" id="sepMaster" checked style="width:16px;height:16px">به‌روزرسانی اطلاعات پایه از فایل‌های «طرف حساب» و «الگوی کالا» (مشتری/تأمین‌کننده/کالا — سند مالی نیستند)</label>
     <div id="sepPrev"></div></div>`;
   if(can('c','purchinv'))h+=`<div class="sec" style="border-inline-start:3px solid var(--ok)"><h3>🧾 ورود فاکتور خرید از اکسل سپیدار (رسید انبار)
-    <span style="flex:1"></span><button class="btn sm" onclick="spiOpen()">📂 شروع ورود</button></h3>
+    <span style="flex:1"></span><button class="btn gh sm" onclick="go('costchk')">🧮 کنترل بهای تمام‌شده</button><button class="btn sm" onclick="spiOpen()">📂 شروع ورود</button></h3>
     <p style="font-size:12px;color:var(--tx2);line-height:2">خروجی اکسل «رسید انبار» سپیدار را <b>همان‌طور که هست</b> بارگذاری کن. هر رسیدِ خرید یک فاکتور خرید می‌شود: تامین‌کننده، انبار، کالا و قیمت سر جای خودشان می‌نشینند و کرایه حمل جدا و به‌نام حمل‌کننده ثبت می‌شود. رسیدی که قبلاً وارد شده، با بارگذاری دوباره تکرار نمی‌شود.</p></div>`;
   if(isAdmin())h+=`<div class="sec" style="border-inline-start:3px solid var(--warn)"><h3>📦 ورود گردش انبار (رسید انبار سپیدار — قالب قدیمی CSV)
     <span style="flex:1"></span><button class="btn gh sm" onclick="whImpFixDupes()" title="کالاهای تکراری که ایمپورت قبلی ساخته را به کالاهای اصلی ادغام می‌کند">🧹 اصلاح کالاهای تکراری</button><button class="btn gh sm" onclick="whImpFixSups()" title="تأمین‌کننده‌های جایگزین ایمپورت را با کد سپیدار به تأمین‌کننده‌های اصلی ادغام و فاکتورها را وصل می‌کند">🏭 اصلاح تأمین‌کننده‌ها</button><button class="btn sm" onclick="whImpOpen()">📂 شروع ورود</button></h3>
@@ -9310,13 +9467,18 @@ function pcapShare(inv,l){
   if(!_pcapCache)_pcapCache={};
   let m=_pcapCache[inv.id];
   if(!m){
-    let cap=0,tot=0;
+    let cap=0,tot=0,lship=0;
     try{cap=pcostCapSum(inv);}catch(e){}
-    try{pinvLinesOf(inv.id).forEach(x=>{tot+=pinvLineAmt(x);});}catch(e){}
-    m=_pcapCache[inv.id]={cap,tot};
+    try{pinvLinesOf(inv.id).forEach(x=>{tot+=pinvLineAmt(x);if(inv.d.cshipLine)lship+=(+x.d.cship||0);});}catch(e){}
+    // 🚚 v3.59: رسید سپیدار کرایهٔ هر ردیف را خودش سرشکن کرده — همان عدد ملاک است؛ فقط هزینه‌های اضافهٔ بعدی سرشکن می‌شوند
+    m=_pcapCache[inv.id]={cap,tot,lship,rest:Math.max(0,cap-lship)};
+  }
+  let la=0;try{la=pinvLineAmt(l);}catch(e){}
+  if(inv.d.cshipLine){
+    const own=Math.min(+l.d.cship||0,m.cap*(m.lship?(+l.d.cship||0)/m.lship:0)||0); // اگر ردیف کرایه از جدول هزینه حذف شده باشد، بیشتر از آن سرشکن نشود
+    return own+(m.rest&&m.tot?m.rest*(la/m.tot):0);
   }
   if(!m.cap||!m.tot)return 0;
-  let la=0;try{la=pinvLineAmt(l);}catch(e){}
   return m.cap*(la/m.tot);
 }
 /* ───────── ویرایشگر ردیف‌های هزینه ───────── */
@@ -11296,7 +11458,7 @@ function invCostPanel(r){
         <td>${q.toLocaleString('fa-IR')}</td><td>${F(x.amt)}</td><td>${q?F(x.cost/q):'—'}</td><td>${F(x.cost)}</td>
         <td style="font-weight:700;color:${g<0?'var(--bad)':'var(--ok)'}">${F(g)}</td></tr>`;}).join('')}
     </tbody></table></div>
-    <p style="font-size:10.5px;color:var(--tx2);margin-top:6px">بها از فاکتورهای خرید/رسیدهای انبار به روش FIFO (اولین خرید، اولین فروش) و با سهم کرایه حمل و هزینه‌های سرشکن‌شده حساب می‌شود.${c.unknown?' ⚠️ برای ردیف‌های «بدون بهای خرید»، هیچ خرید یا قیمت خریدی ثبت نشده و بها صفر فرض شده — سود واقعی کمتر است.':''}</p></div>`;
+    <p style="font-size:10.5px;color:var(--tx2);margin-top:6px">بها از فاکتورهای خرید/رسیدهای انبار به روش FIFO (اولین خرید، اولین فروش) و با سهم کرایه حمل و هزینه‌های سرشکن‌شده حساب می‌شود.${c.unknown?' ⚠️ برای ردیف‌های «بدون بهای خرید»، هیچ خرید یا قیمت خریدی روی همین کالا ثبت نشده و بها صفر فرض شده — سود واقعی کمتر است. <a style="color:var(--ac);cursor:pointer" onclick="go(\'costchk\')">🧮 کنترل و اصلاح</a>':''}</p></div>`;
 }
 function invCostOf(pid){const p=recs[pid];if(!p)return 0;try{const f=fifoCalc(p);if(f.avg>0)return f.avg;}catch(e){}return +p.d.buy||0;}
 /* 🏛 درصد ارزش افزوده فاکتور رسمی به تفکیک سال شمسی — در «اطلاعات پایه» تنظیم می‌شود */
@@ -12778,8 +12940,15 @@ function plCalc(biz,from,to){
   const f=dnorm(from||''), t=dnorm(to||'');
   const invs=byE('invoice').filter(v=>{
     if(v.d.kind==='پیش‌فاکتور'||v.d.status==='باطل')return false;
-    if(biz&&!relIds(v,'biz').includes(biz))return false;
-    const d=dnorm(v.d.date);if(f&&(!d||d<f))return false;if(t&&(!d||d>t))return false;return true;});
+    if(biz){const vb=relIds(v,'biz');
+      if(vb.length){if(!vb.includes(biz))return false;}
+      else{ // فاکتورِ بدون کسب‌وکار: از ردیف‌ها/مشتری استنتاج کن؛ اگر هیچ ردپایی نبود، مشترک حساب شود
+        let inf=[];try{inf=_bizOfRec(v);}catch(e){}
+        if(!inf.length)invLinesOf(v.id).forEach(l=>{const pid=relIds(l,'product')[0];const p=pid&&recs[pid];if(p)inf=inf.concat(relIds(p,'biz'));});
+        if(inf.length&&!inf.includes(biz))return false;}}
+    const d=String(ds(v.d.date)||'').slice(0,10);
+    const ff=f?String(dNorm(view.plFrom||'')||f).slice(0,10):'', tt=t?String(dNorm(view.plTo||'')||t).slice(0,10):'';
+    if(ff&&(!d||d<ff))return false;if(tt&&(!d||d>tt))return false;return true;});
   let rev=0,cogs=0,disc=0,tax=0,ship=0,unknown=0,short=0;const byProd={},byInv=[];
   invs.forEach(v=>{const c=invCalc(v);rev+=c.base;disc+=c.disc;tax+=c.tax;ship+=c.ship;
     const ic=invCogs(v);cogs+=ic.cogs;unknown+=ic.unknown;short+=ic.short;
@@ -12819,10 +12988,11 @@ function plreportHTML(){
     ${card('٪ حاشیه سود',r.margin.toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪',r.margin<0)}
     ${card('🧾 تعداد فاکتور',r.count.toLocaleString('fa-IR'))}
   </div>
+  ${(r.unknown||r.short)?`<div class="tools" style="margin:8px 0 0"><button class="btn sm" onclick="go('costchk')">🧮 کنترل و اصلاح بهای تمام‌شده</button></div>`:''}
   ${(r.unknown||r.short)?`<div style="background:rgba(202,80,16,.1);border:1px solid rgba(202,80,16,.35);border-radius:10px;padding:9px 12px;font-size:12px;line-height:2;margin:8px 0">
     ${r.unknown?`⚠️ <b>${r.unknown.toLocaleString('fa-IR')}</b> ردیف فروش کالایی دارد که هیچ خرید/رسید انبار یا «قیمت خرید»ی برایش ثبت نشده — بهای آن صفر حساب شده و سود بیشتر از واقع نشان داده می‌شود.<br>`:''}
     ${r.short?`⚠️ <b>${r.short.toLocaleString('fa-IR')}</b> عدد بیش از خریدهای ثبت‌شده فروخته شده — برای این مقدار، آخرین بهای خرید ملاک قرار گرفت. (رسیدهای خرید قدیمی‌تر یا موجودی اول دوره را وارد کن تا دقیق شود.)`:''}</div>`:''}
-  <div class="sec"><h3>🧾 بهای تمام‌شده و سود به تفکیک فاکتور <span style="flex:1"></span><button class="btn gh sm" onclick="plInvCsv()">⬇️ خروجی</button></h3>
+  <div class="sec"><h3>🧾 بهای تمام‌شده و سود به تفکیک فاکتور <span style="flex:1"></span><button class="btn gh sm" onclick="go('costchk')">🧮 کنترل بها</button><button class="btn gh sm" onclick="plInvCsv()">⬇️ خروجی</button></h3>
   ${r.byInv.length?`<div class="tblwrap" style="max-height:420px;overflow:auto"><table><thead><tr><th style="text-align:right">فاکتور</th><th>مشتری</th><th>تاریخ</th><th>فروش خالص</th><th>بهای تمام‌شده</th><th>سود</th><th>٪ حاشیه</th></tr></thead><tbody>
     ${r.byInv.slice().sort((a,b)=>String(b.d).localeCompare(String(a.d))).slice(0,500).map(x=>`<tr style="cursor:pointer" onclick="go('rec','invoice','${x.id}')"><td style="text-align:right;color:var(--ac)">${esc(x.t)}${x.unknown?' <span title="ردیفِ بدون بهای خرید دارد">⚠️</span>':''}</td><td>${esc((x.cu&&recs[x.cu]&&recs[x.cu].d.title)||'—')}</td><td dir="ltr">${x.d?esc(iso2jstr(String(x.d).slice(0,10))):'—'}</td><td>${fmtN(Math.round(x.rev))}</td><td>${fmtN(Math.round(x.cogs))}</td>
       <td style="font-weight:700;color:${x.gp<0?'var(--bad)':'var(--ok)'}">${fmtN(Math.round(x.gp))}</td><td>${x.rev>0?(x.gp/x.rev*100).toLocaleString('fa-IR',{maximumFractionDigits:1})+'٪':'—'}</td></tr>`).join('')}
@@ -14386,6 +14556,7 @@ function render(){
     view.type==='taskarch'?'🗄 بایگانی تسک‌ها':
     view.type==='syncfix'?'⛔ اسناد ارسال‌نشده به سرور':
     view.type==='diag'?'🩺 بررسی اتصال و سینک':
+    view.type==='costchk'?'🧮 کنترل بهای تمام‌شده':
     view.type==='invhealth'?'🩺 سلامت فاکتورها':
     view.type==='docno'?'🔢 بررسی و اصلاح شمارهٔ اسناد':
     view.type==='backupdash'?'💾 پشتیبان‌گیری و بازیابی':
@@ -14508,6 +14679,7 @@ function render(){
     else if(view.type==='taskarch')c.innerHTML=taskarchHTML();
     else if(view.type==='syncfix')c.innerHTML=syncfixHTML();
     else if(view.type==='diag')c.innerHTML=diagHTML();
+    else if(view.type==='costchk')c.innerHTML=costchkHTML();
     else if(view.type==='backupdash')c.innerHTML=backupdashHTML();
     else if(view.type==='salesdash')c.innerHTML=salesdashHTML();
     else if(view.type==='invnew')c.innerHTML=invnewHTML();
